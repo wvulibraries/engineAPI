@@ -1,0 +1,14 @@
+fileList::getAttribute()
+
+Description
+    public string fileList::getAttribute(array $attPairs)
+
+Parameters
+    attPairs
+Return Values
+    
+Examples
+    
+Notes
+   
+See Also

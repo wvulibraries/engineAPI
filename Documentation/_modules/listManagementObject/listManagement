@@ -1,0 +1,20 @@
+listManagement::__construct()
+
+Description
+    listManagement::__construct(object $engine, string $table)
+    Creates a new listManagement object.
+
+Parameters
+    engine
+	The engine object previously created by the user.
+
+    table
+	A valid MySQL table name.
+
+Examples
+
+    <?php
+	...
+	$listObj = new listManagement($engine, "subjects");
+	...
+    ?>

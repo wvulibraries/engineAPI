@@ -1,0 +1,16 @@
+emod_msww()
+
+Description
+    string emod_msww(string $attPairs [, object $engine = NULL])
+
+Parameters
+    attPairs
+    engine
+
+Return Values
+    
+Examples
+    
+Notes
+   
+See Also

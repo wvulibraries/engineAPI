@@ -1,0 +1,75 @@
+listManagement::addField()
+
+Description
+    public void listManagement::addField(mixed $field [, string $label = NULL [, bool $dupes = FALSE [, bool $blank = FALSE [, bool $email = FALSE [, bool $disabled = FALSE [, string $size = "40" [, string $type = "text" [, array $options = NULL [, bool $readonly = FALSE [, mixed $value = NULL [, string $matchOn = NULL [,  $validate = NULL]]]]]]]]]]]])
+    Adds a field, according to the parameters passed to the function, to the class variable, $this->fields[].
+
+Parameters
+    field
+        This is either an array or a string.
+    label
+	This is a valid string associated with the specified field.  Default NULL.
+    dupes
+	Boolean TRUE or FALSE.  Default FALSE.
+    blank
+	Boolean TRUE or FALSE.  Default FALSE.
+    email
+	Boolean TRUE or FALSE.  Default FALSE.
+    disabled
+	Boolean TRUE or FALSE.  Default FALSE.
+    size
+	String indicating a field's size.  Default 40.
+    type
+	String indicating a field's type.  Default "text."
+    options
+	An array containing a field's options.  Default NULL.
+    readonly
+	Boolean TRUE or FALSE.  Default FALSE.
+    value
+	Mixed data type.  String, int, or other valid types.  Default NULL.
+    matchOn
+	Default NULL.
+    validate
+	Default NULL.
+
+Return Values
+    Returns boolean value of TRUE unless $field['field'] hasn't previously been set, in which case the function returns a value of FALSE.
+
+Examples
+    Example #1
+	<?php
+	    ...
+	    $listObj->addField($options);
+	    ...
+	?>
+
+    Example #2
+	<?php
+	    ...
+	    $listObj->addField("firstName","First Name",TRUE);
+	    ...
+	?>
+    
+    Example #3
+	<?php
+	    ...
+	    $listObj->addField("active","Active",TRUE,FALSE,FALSE,FALSE,40,"select",$activeOptions);
+	    ...
+	?>
+
+    Example #4
+	<?php
+	    ...
+	    $listObj->addField('<a href="'.$_SERVER['PHP_SELF'].'?action=editAccess&amp;user={userName}">Edit</a>',"Access",FALSE,FALSE,FALSE,FALSE,0,"plainText");
+	    ...
+	?>
+
+Notes
+    Determine exact use of matchOn and validate.
+
+See Also
+    listManagement::removeField()
+    listManagement::buildFieldListInsert()
+    listManagement::buildFieldValueInsert()
+    listManagement::disableAllFields()
+    listManagement::disableField()

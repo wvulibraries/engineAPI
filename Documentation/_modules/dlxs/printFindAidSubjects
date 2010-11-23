@@ -1,0 +1,20 @@
+dlxs::printFindAidSubjects()
+
+Description
+    public string dlxs::printFindAidSubjects([string $element = NULL])
+    This function returns markup to display a list of Finding Aid subjects.
+
+Parameters
+    element
+    	A string containing the name of the containing element in xml.
+
+Return Values
+	A string containing the markup of the list returned.
+    
+Examples
+	{dlxs var="faElementSubjects" name="//FullTextResults/Results/DocContent/RegionContent/ead/archdesc/descgrp[@type='admin']/controlaccess"}
+    
+Notes
+   
+See Also
+	dlxs::printFindAidElement()

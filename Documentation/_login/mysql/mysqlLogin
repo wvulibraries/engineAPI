@@ -1,0 +1,18 @@
+mysqlLogin()
+
+Description
+    bool mysqlLogin(string $username, string $password, object $engine)
+    Checks a username and password in a mySQL database.  If the pair exists, sets $_SESSION['username'] to $username and $_SESSION['authType'] to "mysql".
+
+Parameters
+    username
+	String value containing a username.
+
+    password
+	String value containing user's password.
+
+    engine
+	The engine object.
+
+Return Values
+    Returns boolean value, indicating success or failure.

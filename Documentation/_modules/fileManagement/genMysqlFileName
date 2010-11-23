@@ -1,0 +1,18 @@
+fileHandler::genMysqlFileName()
+
+Description
+    public array fileHandler::genMysqlFileName(string $table, array $fields, string $ID [, bool $updateDB = TRUE])
+
+Parameters
+    table
+    fields
+    ID
+    updateDB
+
+Return Values
+    
+Examples
+
+Notes
+
+See Also

@@ -1,0 +1,19 @@
+search::createSearchArray()
+
+Description
+    private array search::createSearchArray(void)
+    Concatenates elements of POST variables, $this->engine->cleanPost['RAW']['searchString'] and $this->engine->cleanPost['MYSQL']['bool'], passed from the 
+    calling script into a variable, $keywords.  $keywords is finally converted to an array by calling search::searchStringToArray().
+
+Return Values
+    Returns an array of keywords.
+
+Examples
+    <?php
+	...
+	$this->searchArray = $this->createSearchArray();
+	...
+    ?>
+
+See Also
+    search::submit()

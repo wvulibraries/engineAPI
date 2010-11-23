@@ -1,0 +1,24 @@
+dlxs::genSortForm()
+
+Description
+    public string dlxs::genSortForm(string $xml)
+	Generates the appropriate markup for a drop down menu form.
+	
+Parameters
+    xml
+    	An xml string containing the $xml->SortOptionsMenu element.
+
+Return Values
+    A string containing the markup used to create a form for the purpose of sorting results.
+
+Examples
+	<?
+	...
+	print $dlxs->genSortForm($xml);
+	...
+	?>
+
+Notes
+
+See Also
+	dlxs::genReference()

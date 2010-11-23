@@ -1,0 +1,26 @@
+search::addSearchType()
+
+Description
+    Sets class array variable, $this->searchTypes[], to the value of $attPairs.
+    public null search::addSearchType(string $attPairs)
+
+Parameters
+    attPairs
+	An array containing name/value pairs.
+
+Examples
+    <?php
+	...
+	$searchObj = new search($engine);
+	$searchObj->relevanceSearch = TRUE;
+	$type = array();
+	$type['name']  = "keyword";
+	$type['label'] = "Keyword";
+	$searchObj->addSearchType($type);
+	unset($type);
+	...
+    ?>
+
+See Also
+    search::addToSearchType()
+

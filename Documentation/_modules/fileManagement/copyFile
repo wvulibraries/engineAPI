@@ -1,0 +1,16 @@
+fileHandler::copyFile()
+
+Description
+    public mixed fileHandler::copyFile(string $sourceFile, string $destFile)
+
+Parameters
+    sourceFile
+    destFile
+
+Return Values
+    
+Examples
+
+Notes
+
+See Also

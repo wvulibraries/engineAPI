@@ -1,0 +1,13 @@
+buildECMSArray()
+
+Description
+    array buildECMSArray(mixed $array)
+	If the parameter is an array, returns a string containing a string representation of all the array elements in the same order, with the string 
+	stored in $engineVars['delim'] between each element.
+	
+Parameters
+    array
+		A variable of any type may be passed to the function.  The function handles array and non-array types accordingly.
+		
+Return Values
+    Returns a string if the parameter passed to the function is an array.  Returns the original parameter otherwise.

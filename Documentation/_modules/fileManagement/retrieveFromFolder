@@ -1,0 +1,16 @@
+fileHandler::retrieveFromFolder()
+
+Description
+    public mixed fileHandler::retrieveFromFolder(string $name, string $location)
+
+Parameters
+    name
+    location
+
+Return Values
+    
+Examples
+
+Notes
+
+See Also

@@ -1,0 +1,16 @@
+engineCMS::handleMatch()
+
+Description
+    private mixed engineCMS::handleMatch(array $attPairs)
+
+Parameters
+    attPairs
+
+Return Values
+    Mixed value -- depends upon parameter passed to the function.
+
+Examples
+    
+Notes
+   
+See Also

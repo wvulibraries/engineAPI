@@ -1,0 +1,15 @@
+dlxs::getDefaultSort()
+
+Description
+    private string dlxs::getDefaultSort(object $xml)
+
+Parameters
+    xml
+
+Return Values
+    
+Examples
+    
+Notes
+   
+See Also

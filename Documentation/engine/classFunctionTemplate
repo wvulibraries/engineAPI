@@ -1,0 +1,1 @@
+public void CachingIterator::hasNext(void)

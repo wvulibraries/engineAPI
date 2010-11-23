@@ -1,0 +1,8 @@
+rss::__construct()
+
+Description
+    rss::__construct(string $type = "rss2.0")
+    The constructor for rss.  Sets the RSS version and assigns a template file to the class template variable.
+Parameters
+    type
+      A string value containing the RSS version to use.

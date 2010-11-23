@@ -1,0 +1,25 @@
+listManagement::buildFieldValueInsert()
+
+Description
+    private string listManagement::buildFieldValueInsert()
+    Creates a valid MySQL update string, iterating through $this->fields, adding values "''".$this->engine->cleanPost['MYSQL'][$I]["field"]."_insert"]."'" to 
+    the local variable, $temp.
+
+Return Values
+    Returns a string containing the elements of $this->engine->cleanPost['MYSQL'][$I["field"]."_insert"], comma delimited.
+
+Examples
+    <?php
+	...
+	if ($this->updateInsert === FALSE) {
+	    $sql = sprintf("INSERT INTO %s (%s) VALUES(%s)",
+		$this->engine->openDB->escape($this->table),
+		$this->buildFieldListInsert(),
+		$this->buildFieldValueInsert(),
+	    );
+	}
+	...
+    ?>
+
+See Also
+    listManagement::buildFieldListInsert()

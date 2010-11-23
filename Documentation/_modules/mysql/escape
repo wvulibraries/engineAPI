@@ -1,0 +1,28 @@
+engineDB::escape()
+
+Description
+    public string engineDB::escape(string $string)
+    Escapes special characters in $string for use in a SQL statement.
+
+Parameters
+    string
+	The string that is to be escaped.
+
+Return Values
+    Returns special character escaped string value.
+
+Examples
+    <?php
+	...
+	$sql = sprintf("INSERT INTO %s (name) VALUES('%s')",
+	    $engine->openDB->escape($table),
+	    $engine->cleanPost['MYSQL']['newListItem']
+	    );
+
+	$engine->openDB->sanitize = FALSE;
+	$sqlResult = $engine->openDB->query($sql);
+	...
+    ?>
+
+See Also
+    engineDB::testConnection()

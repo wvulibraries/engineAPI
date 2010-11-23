@@ -1,0 +1,16 @@
+fileHandler::dbInsert()
+
+Description
+    public mixed fileHandler::dbInsert(string $table, array $fields)
+
+Parameters
+    table
+    fields
+
+Return Values
+    
+Examples
+
+Notes
+
+See Also

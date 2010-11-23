@@ -1,0 +1,25 @@
+naturalSortCmp()
+
+Description
+    int naturalSortCmp(array $a, array $b)
+    Sort function called by naturalSort().
+
+Parameters
+    a
+	The first array value to evaluate.
+    b
+	The second array value to evaluate.
+
+Return Values
+    Value is an integer.  Returns < 0 if the first parameter is less than the second parameter; >  0 if the first parameter is greater than the second 
+    parameter, and 0 if they are equal.
+
+Examples
+    <?php
+	...
+	usort($array, "naturalSortCmp");
+	...
+    ?>
+
+See Also
+    naturalSort()

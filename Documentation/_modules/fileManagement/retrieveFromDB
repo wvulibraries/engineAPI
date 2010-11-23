@@ -1,0 +1,16 @@
+fileHandler::retrieveFromDB()
+
+Description
+    public mixed fileHandler::retrieveFromDB(string $name, string $location)
+
+Parameters
+    name
+    location
+
+Return Values
+    
+Examples
+
+Notes
+
+See Also

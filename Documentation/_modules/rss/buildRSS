@@ -1,0 +1,15 @@
+rss::buildRSS()
+
+Description
+    public string rss::buildRSS([bool $html = FALSE])
+
+Parameters
+    html
+	
+Return Values
+    
+Examples
+    
+Notes
+   
+See Also

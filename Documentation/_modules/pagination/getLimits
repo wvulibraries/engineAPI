@@ -1,0 +1,7 @@
+pagination::getLimits()
+
+Description
+    public array pagination::getLimits(void)
+
+Return Values
+    Returns an array containing a lower and higher limit.

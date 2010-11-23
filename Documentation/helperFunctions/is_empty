@@ -1,0 +1,39 @@
+is_empty()
+
+Description
+    bool is_empty(mixed $v)
+    Performs a number of tests upon the parameter, $v, to determine whether it is empty.
+	
+Parameters
+    v
+		A variable, $var, of any type may be passed to the function.
+		
+Return Values
+    Returns a boolean value.  The value is TRUE if the variable meets the EngineCMS definitions for an empty variable in the Notes section.  The value is otherwise FALSE.
+	
+Examples
+	<?php
+		...
+		if (isset($attPairs['select']) && !is_empty($attPairs['select'])) {
+			$whereClause .= "WHERE ";
+			$selectArray  = explode(",",$attPairs['select']);
+			foreach ($selectArray as $item) {
+				$whereClause .= (($whereClause != "WHERE ")?" OR ":"").$attPairs['valuecol']."='".$item."'";
+			}
+		...
+	?>
+
+Notes
+	EngineCMS defines an empty variable as one that:
+	1. Returns FALSE when passed to isset();
+	2. returns TRUE when passed to the EngineCMS function, isnull();
+	3. is identical to the boolean value FALSE;
+	4. is an array which is empty;
+	5. after being trim()'ed, contains the string value "0" OR is of integer type and is equal to 0;
+	6. or, after being trim()'ed, passes any of the previous criteria.
+	In all of the above cases, is_empty returns boolean value TRUE, indicating that the variable is empty.
+   
+	Also view http://us3.php.net/manual/en/function.empty.php for a description of PHP's empty() function.
+	
+See Also
+	isnull()

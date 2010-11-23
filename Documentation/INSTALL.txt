@@ -1,0 +1,22 @@
+Installing EngineAPI is not difficult, but there are some configuration settings that must be set in order for it to work properly.
+
+First of all, you will need to decide where you are going to put it. Although not a requirement, it is highly recommended that EngineAPI be located outside of the web server's document root. Copy the following directories to your designated EngineAPI directory which we will now call EngineAPIRoot:
+	- engine
+	- filelistings
+	- Licenses
+	- phpmailer
+	- template
+	
+Within the Support Files folder, there is a folder called engineIncludes. This folder MUST be within the web server's document root. Make sure you write down the path to this directory, you'll need it when you are configuring EngineAPI.
+
+Also in the Support Files is a file called engineCMS.sql. This is the file used to configure the EngineAPI database. Currently only two tables are being used. The "log" table is used to maintain access logs and the "users" table is only used when the login type is set to "mysql". We'll get to the login type later.
+
+Now that you have all your files copied to the server, we can start the configuration process.
+
+Open the default configuration file (EngineAPIRoot/engine/config/default.php). This file contains most of the global EngineAPI variables. They are stored in an array called $engineVars. Many have default values which may or may not be valid for your configuration. Please take your time and verify that these variables are defined correctly for your server.
+
+In your engineIncludes directory, there are several PHP files that need to be configured as well. At the top of each file, you will notice an $engineDir variable. This is needed because these files are not part of the EngineAPI core. They must therefore initialize EngineAPI just like your future web applications. The $engineDir variable needs to be set to the full EngineAPIRoot/engine directory path.
+
+The last thing that needs to be configured is the login type. You can find that variable at the top of the login.php file located in the engineIncludes directory. This is not located here because it is possible that your applications could use multiple login pages and each different page could have a different login type.
+
+It is also possible to use multiple configurations. Simply create a new file in the EngineAPIRoot/engine/config directory. Then in your web application, when you declare EngineAPI, you use the name of your configuration file as a parameter. For example, if you create a second configuration file called development.php, you would simply make a declaration that looks like $engine = new EngineCMS("development"). Note that default.php is always loaded, so if values are the same, the variable can be left out of devalopment.php completely. Conversely, if the value is going to be different, development.php MUST also declare the variable to override the default.php value.

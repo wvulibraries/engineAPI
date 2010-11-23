@@ -1,0 +1,16 @@
+rss::builtTemplate()
+
+Description
+    private string rss::builtTemplate(string $file)
+
+Parameters
+    file
+
+Return Values
+    
+Examples
+    
+Notes
+   The name of this function may be a misnomer.  Should possibly be buildTemplate.
+
+See Also

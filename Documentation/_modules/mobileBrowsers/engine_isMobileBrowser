@@ -1,0 +1,8 @@
+engine_isMobileBrowser()
+
+Description
+    bool engine_isMobileBrowser()
+    Using preg_match, searches a list of mobile browser strings within $_SERVER['HTTP_USER_AGENT'] for a single instance of a mobile browser's string.
+
+Return Values
+    Returns a boolean TRUE or FALSE depending on whether or not a mobile browser string exists within the list.

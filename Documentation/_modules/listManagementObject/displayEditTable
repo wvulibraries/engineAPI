@@ -1,0 +1,29 @@
+listManagement::displayEditTable()
+
+Description
+    public string listManagement::displayEditTable([bool $addGet = TRUE [, bool $debug = FALSE]])
+    Creates a string, $output, which contains the appropriate data and markup for a table containing editable text fields.
+
+Parameters
+    addGet
+	Boolean value.  If set to TRUE, sets $queryString = "?".$_SERVER['QUERY_STRING']
+    debug
+	Boolean value.  If set to TRUE, displays debugging information where specified.
+
+Return Values
+    When successful, a string variable containing the markup to display an editable table.  Otherwise, calls webHelper_errorMsg().
+
+Examples
+    <?php
+	...
+    ?>
+    <section>
+        <header><h1>Edit Links</h1></header>
+        <?= $listObj->displayEditTable(); ?>
+    </section>
+    <?php
+	...
+    ?>
+
+See Also
+    listManagement::displayInsertForm()

@@ -1,0 +1,20 @@
+naturalSort()
+
+Description
+    array naturalSort(array $array [, string $col = NULL [, bool $ignoreSymbols = TRUE [, bool $ignoreCase = TRUE]]])
+
+Parameters
+    array
+	The array to be sorted.
+    col
+	The column in a multidimensional array.
+    ignoreSymbols
+	BOOL, default is TRUE.  If TRUE, ignores all symbols in the string while sorting.
+    ignoreCase
+	BOOL, default is TRUE.  If TRUE, sorts ignoring case.
+
+Return Values
+    Returns an array which contains modifications made to the original $array variable passed to the function.
+
+See Also
+    naturalSortCmp()

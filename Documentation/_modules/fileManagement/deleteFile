@@ -1,0 +1,15 @@
+fileHandler::deleteFile()
+
+Description
+    public mixed fileHandler::deleteFile(string $fileName)
+
+Parameters
+    fileName
+
+Return Values
+    
+Examples
+
+Notes
+
+See Also

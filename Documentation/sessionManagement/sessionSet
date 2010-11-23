@@ -1,0 +1,16 @@
+sessionSet()
+
+Description
+    bool sessionSet(string $variable, mixed $value)
+
+Parameters
+    variable
+    value
+
+Return Values
+    
+Examples
+    
+Notes
+   
+See Also

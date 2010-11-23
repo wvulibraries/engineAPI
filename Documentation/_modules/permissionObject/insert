@@ -1,0 +1,15 @@
+permissionObject::insert()
+
+Description
+    public bool permissionObject::insert(string $function)
+
+Parameters
+    function
+
+Return Values
+    
+Examples
+    
+Notes
+   
+See Also

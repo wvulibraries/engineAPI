@@ -1,0 +1,15 @@
+fileHandler::checkAllowedExtensions()
+
+Description
+    private mixed fileHandler::checkAllowedExtensions(string $fileName)
+
+Parameters
+    fileName
+
+Return Values
+    
+Examples
+
+Notes
+
+See Also

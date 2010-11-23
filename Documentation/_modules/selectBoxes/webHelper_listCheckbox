@@ -1,0 +1,16 @@
+webHelper_listCheckbox()
+
+Description
+    string webHelper_listCheckbox(string $attPairs [, object $engine = NULL])
+
+Parameters
+    attPairs
+    engine
+
+Return Values
+    
+Examples
+    
+Notes
+   
+See Also

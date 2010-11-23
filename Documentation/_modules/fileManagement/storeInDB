@@ -1,0 +1,17 @@
+fileHandler::storeInDB()
+
+Description
+    private mixed fileHandler::storeInDB(array $files, string $table, array $fields)
+
+Parameters
+    files
+    table
+    fields
+
+Return Values
+    
+Examples
+
+Notes
+
+See Also

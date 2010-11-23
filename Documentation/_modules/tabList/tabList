@@ -1,0 +1,14 @@
+tabList::__construct()
+
+Description
+    tabList::__construct(object $engine, string $table)
+    The constructor performs an initial check that $engine is an instance of the EngineCMS class; assigns values to the tabList object's class variables.
+
+Parameters
+    engine
+	The engine object.
+    table
+	String value containing a valid database table name.
+
+See Also
+    tabList::buildList()

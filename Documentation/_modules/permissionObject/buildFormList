@@ -1,0 +1,15 @@
+permissionObject::buildFormChecklist()
+
+Description
+    public string permissionObject::buildFormChecklist(string $permissions)
+
+Parameters
+    permissions
+
+Return Values
+    
+Examples
+    
+Notes
+   
+See Also

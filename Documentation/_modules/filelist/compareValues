@@ -1,0 +1,16 @@
+fileList::compareValues()
+
+Description
+    private int fileList::compareValues(array $a, array $b)
+
+Parameters
+    a
+    b
+
+Return Values
+    
+Examples
+    
+Notes
+   
+See Also
