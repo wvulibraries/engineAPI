@@ -1,0 +1,11 @@
+checkOUs()
+
+Description
+    mixed checkOUs(array $ous)
+    Checks that the value stored in $ous exists in the array of user OUs.
+
+Parameters
+    ous
+
+Return Values
+    Returns a boolean value of TRUE or FALSE.  Returns NULL if the local variable $userou is not currently set.  Default return value is FALSE.

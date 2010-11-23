@@ -1,0 +1,22 @@
+search::createTable()
+
+Description
+    public string search::createTable(string $table)
+
+Parameters
+    table
+	A string value containing a valid database table name.
+
+Return Values
+    There is no return value if the function executes successfully.  If the function encounters an error it is displayed by webHelper_errorMsg().
+
+Examples
+    <?php
+	$s = new search($engine);
+	...
+	$output = $s->createTable("tradReserves");
+	if($output !== TRUE) {
+	    print $output;
+	}
+	...
+    ?>

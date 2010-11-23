@@ -1,0 +1,15 @@
+sessionEnd()
+
+Description
+    bool sessionEnd(object $engine)
+
+Parameters
+    engine
+
+Return Values
+    
+Examples
+    
+Notes
+   
+See Also

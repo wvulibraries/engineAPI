@@ -1,0 +1,19 @@
+dlxs::buildTemplate()
+
+Description
+    private array dlxs::buildTemplate(string $file)
+    Takes a template file as input and converts it into an array with each line of the file being an element in the array.
+
+Parameters
+    file
+    	A file containing markup.
+
+Return Values
+    An array containing each line of the template.
+
+Examples
+
+Notes
+	This function supports looping with the {dlxs repeat="start"} and {dlxs repeat="end"} tags. This can be useful if your data is repeated several times.
+   
+See Also

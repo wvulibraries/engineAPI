@@ -1,0 +1,22 @@
+stats::__construct()
+
+Description
+    stats::__construct(int $smon, int $sday, int $syear, int $shour, int $emon, int $eday, int $eyear, int $ehour)
+
+Parameters
+    smon
+    sday
+    syear
+    shour
+    emon
+    eday
+    eyear
+    ehour
+
+Return Values
+    
+Examples
+    
+Notes
+   
+See Also

@@ -1,0 +1,16 @@
+validateEmailAddr()
+
+Description
+    validateEmailAddr(string $email [, bool $internal = FALSE])
+
+Parameters
+    email
+    internal
+
+Return Values
+    
+Examples
+    
+Notes
+   
+See Also

@@ -1,0 +1,15 @@
+dlxs::getDefaultContactLink()
+
+Description
+    private string dlxs::getDefaultContactLink(object $xml)
+
+Parameters
+    xml
+
+Return Values
+    
+Examples
+    
+Notes
+   
+See Also

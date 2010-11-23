@@ -1,0 +1,15 @@
+sessionCheckCSRF()
+
+Description
+    bool sessionCheckCSRF(string $CSRF)
+
+Parameters
+    CSRF
+    
+Return Values
+    
+Examples
+    
+Notes
+   
+See Also

@@ -1,0 +1,16 @@
+fileHandler::displayFile()
+
+Description
+    public void fileHandler::displayFile(string $file [, string $display = NULL])
+
+Parameters
+    file
+    display
+
+Return Values
+    
+Examples
+
+Notes
+
+See Also

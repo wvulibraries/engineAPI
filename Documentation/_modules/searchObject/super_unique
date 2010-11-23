@@ -1,0 +1,10 @@
+search::super_unique()
+
+Description
+    private array search::super_unique(array $array)
+
+Parameters
+    array
+
+Return Values
+

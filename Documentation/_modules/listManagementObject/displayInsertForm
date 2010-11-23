@@ -1,0 +1,28 @@
+listManagement::displayInsertForm()
+
+Description
+    public string listManagement::displayInsertForm([bool $addGet = TRUE])
+    Creates a string, $output, containing the class's appropriately processed data and markup, and returns it.
+
+Parameters
+    addGet
+	Boolean value.  If set to TRUE, sets $queryString = "?".$_SERVER['QUERY_STRING'].  $queryString is inserted into $output at the point where the 
+	form's action is defined.
+
+Return Values
+    When successful, a string variable containing the markup to display the specified form.  Otherwise, calls webHelper_errorMsg().
+
+Examples
+    <?php
+	...
+    ?>
+    <section>
+        <header><h1>New Link</h1></header>
+        <?= $listObj->displayInsertForm(); ?>
+    </section>
+    <?php
+	...
+    ?>
+
+See Also
+    listManagement::displayEditTable()

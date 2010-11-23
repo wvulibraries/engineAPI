@@ -1,0 +1,18 @@
+dateDropDown()
+
+Description
+    string dateDropDown(array $attPairs [, object $engine = NULL])
+    Builds the appropriate markup for displaying a drop-down pre-populated date form.
+
+Parameters
+    attPairs
+	An array containing attribute pairs, $attPairs['formname'], $attPairs['separator'], $attPairs['monthdformat'], $attPairs['startyear'], $attPairs
+	['endyear'], $attPairs['defaultyear'], $attPairs['setdate'].
+    engine
+	The engine object.
+
+Return Values
+    Returns a string value containing the proper markup and data to build the drop-down date menu.
+
+See Also
+    timeDropDown()

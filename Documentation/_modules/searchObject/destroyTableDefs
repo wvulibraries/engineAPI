@@ -1,0 +1,18 @@
+search::destroyTableDefs()
+
+Description
+    private void search::destroyTableDefs(void)
+    Unsets and re-initializes class variables, $this->fields and $this->links.  Also sets class variables, $this->whereClause and $this->orderBy, to NULL.
+
+Examples
+    <?php
+	...
+	$thisTable = array();
+	$thisTable['name'] = $this->tempTablePrefix.$table;
+	$thistable['fields'] = $this->fields;
+	$thisTable['links'] = $this->links;
+
+	$this->tables[] = $thisTable;
+	$this->destroyTableDefs();
+	...
+    ?>

@@ -1,0 +1,16 @@
+fileHandler::storeInFolder()
+
+Description
+    private mixed fileHandler::storeInFolder(array $files, string $location)
+
+Parameters
+    files
+    location
+
+Return Values
+    
+Examples
+
+Notes
+
+See Also

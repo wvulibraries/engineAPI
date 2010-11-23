@@ -1,0 +1,15 @@
+fileHandler::getMimeType()
+
+Description
+    private string fileHandler::getMimeType(string $file_path)
+
+Parameters
+    file_path
+
+Return Values
+    
+Examples
+
+Notes
+
+See Also

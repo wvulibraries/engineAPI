@@ -1,0 +1,15 @@
+dlxs::getDefaultContactText()
+
+Description
+    private string dlxs::getDefaultContactText(object $xml)
+
+Parameters
+    xml
+
+Return Values
+    
+Examples
+    
+Notes
+   
+See Also

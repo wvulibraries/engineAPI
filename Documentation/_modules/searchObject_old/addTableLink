@@ -1,0 +1,31 @@
+search::addTableLink()
+
+Description
+    public null search::addTableLink(string $tableID_1, string $fieldName_1, string $tableID_2, string $fieldName_2)
+    
+
+Parameters
+    tableID_1
+	String variable.
+
+    fieldName_1
+	String variable.
+
+    tableID_2
+	String variable.
+
+    fieldName_2
+	String variable.
+
+Examples
+    <?php
+	...
+    	// Add Links
+	// addTableLink( tableID_1, fieldName_1, tableID_2, fieldName_2 )
+	$searchObj->addTableLink($tableID['traditionalReserves'],"fileType",$tableID['configFileTypes'],"ID");
+	$searchObj->addTableLink($tableID['traditionalReserves'],"ownerTypeID",$tableID['ownerTypes'],"ID");
+	...
+    ?>
+    
+See Also
+    search::addTableField()

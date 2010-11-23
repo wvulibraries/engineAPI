@@ -1,0 +1,18 @@
+accessControl_ad_auth()
+
+Description
+    bool accessControl_ad_auth(string $value [, bool $state = FALSE])
+    Calls ADcheckLoginStatus() initially.  If its return value is FALSE, accessControl_ad_auth() returns FALSE in turn.  The function otherwise performs a 
+    number of boolean tests on $username and $state, their combined boolean values determining whether the function will return TRUE or FALSE.
+
+Parameters
+    value
+	This variable isn't currently used.
+    state
+	A boolean value.  Default value is FALSE.
+
+Return Values
+    Returns a boolean TRUE or FALSE value, depending on the success or failure of boolean tests.  Default return value is FALSE.
+  
+See Also
+   ADcheckLoginStatus()

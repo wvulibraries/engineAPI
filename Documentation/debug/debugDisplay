@@ -1,0 +1,41 @@
+debugDisplay()
+
+Description
+    string debugDisplay(string $file, string $type [, int $count = 1 [, string $message="Debug Message" [, mixed $array = NULL [, bool $return = FALSE]]]])
+    
+Parameters
+    file
+	Not implemented.
+
+    type
+	Not implemented.
+
+    count
+	Corresponds to a message level.
+
+    message
+	A string containing the message itself.
+
+    array
+	Some information, such as session information, is stored as an array.
+
+    return
+	Boolean value.
+
+Return Values
+    A string containing pertinent output data.
+
+Examples
+    <?php
+	...
+	$username = sessionGet("username");
+	
+	if (debugNeeded("access")) {
+		debugDisplay("access","Username",1,"Logged in as User: $username",NULL);
+	}
+	...
+    ?>
+    
+See Also
+    debugBuild()
+    debugNeeded()

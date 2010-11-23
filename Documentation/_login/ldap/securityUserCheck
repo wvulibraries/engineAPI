@@ -1,0 +1,26 @@
+securityUserCheck()
+
+Description
+    bool securityUserCheck(string $username, string $password, string $type, resource $ldapConn, string $ldapDomain)
+	Wrapper function for ldap_bind() with additional initial is_null() checks on $username and $password.
+	
+Parameters
+    username
+		String value containing a username.
+    password
+		String value containing a password.
+    type
+		
+    ldapConn
+		An LDAP link identifier.
+    ldapDomain
+		The name of the LDAP domain.
+
+Return Values
+     Returns TRUE on success or FALSE on failure. 
+	 
+Examples
+    
+See Also
+	securityOUCheck()
+	securityGroupCheck()

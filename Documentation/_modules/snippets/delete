@@ -1,0 +1,15 @@
+Snippets::delete()
+
+Description
+    Snippets::delete($id)
+
+Parameters
+    id
+    
+Return Values
+    
+Examples
+    
+Notes
+   
+See Also

@@ -1,0 +1,17 @@
+fileHandler::uploadForm()
+
+Description
+    public string fileHandler::uploadForm(string $name [, bool $multiple = FALSE [ , array $hiddenFields = NULL]])
+
+Parameters
+    name
+    multiple
+    hiddenFields
+
+Return Values
+    
+Examples
+
+Notes
+
+See Also

@@ -1,0 +1,15 @@
+sessionGet()
+
+Description
+    mixed sessionGet(string $variable)
+
+Parameters
+    variable
+    
+Return Values
+    
+Examples
+    
+Notes
+   
+See Also

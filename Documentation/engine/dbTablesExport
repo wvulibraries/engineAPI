@@ -1,0 +1,29 @@
+engineCMS::dbTablesExport()
+
+Description
+    public array engineCMS::dbTablesExport()
+    Returns the original dbTables array from the old EngineCMS.
+
+Parameters
+    
+Return Values
+    Returns an array containing the values of $this->dbTables
+
+Examples
+
+    <?php
+
+	global $engine
+
+	$dbTables = $engine->dbTablesExport();
+
+	if(isset($engine->cleanPost['MYSQL']['deleteDB']) && isset($engine->cleanPost['MYSQL']['id'])) {
+	    $sql = sprintf("DELETE FROM %s WHERE ID=%s", $dbTables['databases']['prod'], $engine->cleanPost['MYSQL']['id']);
+	    $engine->openDB->sanitize = FALSE;
+	    $sqlResult = $engine->openDB->query($sql);
+	}
+    ?>
+    
+Notes
+   
+See Also
