@@ -9,6 +9,9 @@ include("header.php");
 $year  = (isset($engine->cleanGet['MYSQL']['y']))?$engine->cleanGet['MYSQL']['y']:date("Y");
 $month = (isset($engine->cleanGet['MYSQL']['m']))?$engine->cleanGet['MYSQL']['m']:date("m");
 
+$sqlSiteYearMonth  = is_empty(sessionGet("engineStatsSite")) ? NULL : "site='".sessionGet("engineStatsSite")."' AND ";
+$sqlSiteYearMonth .= "year='".$year."' AND month='".$month."'";
+
 $monthStart = strtotime($year."-".$month."-01");
 $monthEnd   = strtotime('-1 second',strtotime('+1 month',$monthStart));
 
@@ -23,10 +26,9 @@ $numHours = $numDays * 24;
 
 
 
-$sql = sprintf("SELECT SUM(mobilevisits) AS totalMobileVisits, SUM(nonmobilevisits) AS totalNonmobileVisits, SUM(mobilehits) AS totalMobileHits, SUM(nonmobilehits) AS totalNonmobileHits, COUNT(resource) AS totalPages, MAX(mobilehits) AS maxMobileHits, MAX(nonmobilehits) AS maxNonmobileHits FROM %s WHERE year='%s' AND month='%s'",
+$sql = sprintf("SELECT SUM(mobilevisits) AS totalMobileVisits, SUM(nonmobilevisits) AS totalNonmobileVisits, SUM(mobilehits) AS totalMobileHits, SUM(nonmobilehits) AS totalNonmobileHits, COUNT(resource) AS totalPages, MAX(mobilehits) AS maxMobileHits, MAX(nonmobilehits) AS maxNonmobileHits FROM %s WHERE %s",
 	$engineDB->escape("logHits"),
-	$engineDB->escape($year),
-	$engineDB->escape($month)
+	$sqlSiteYearMonth
 	);
 $engineDB->sanitize = FALSE;
 $sqlResult          = $engineDB->query($sql);
@@ -50,10 +52,9 @@ $maxMobileHitsPerDay    = 0;
 $maxNonmobileHitsPerDay = 0;
 $maxPages               = 0;
 
-$sql = sprintf("SELECT SUM(mobilevisits) AS mobilevisits, SUM(nonmobilevisits) AS nonmobilevisits, SUM(mobilehits) AS mobilehits, SUM(nonmobilehits) AS nonmobilehits, COUNT(resource) AS pages FROM %s WHERE year='%s' AND month='%s' GROUP BY day",
+$sql = sprintf("SELECT SUM(mobilevisits) AS mobilevisits, SUM(nonmobilevisits) AS nonmobilevisits, SUM(mobilehits) AS mobilehits, SUM(nonmobilehits) AS nonmobilehits, COUNT(resource) AS pages FROM %s WHERE %s GROUP BY day",
 	$engineDB->escape("logHits"),
-	$engineDB->escape($year),
-	$engineDB->escape($month)
+	$sqlSiteYearMonth
 	);
 $engineDB->sanitize = FALSE;
 $sqlResult          = $engineDB->query($sql);
@@ -193,37 +194,44 @@ if ($sqlResult['result']) {
 		$hits   = array();
 		$pages  = array();
 		
+		for ($i=1; $i <= $numDays; $i++) {
+			$visits[$i]          = 0;
+			$hits[$i]            = 0;
+			$pages[$i]           = 0;
+			$mobilehits[$i]      = 0;
+			$nonmobilehits[$i]   = 0;
+			$mobilevisits[$i]    = 0;
+			$nonmobilevisits[$i] = 0;
+		}
+
 		$totalVisits = 0;
 		$totalHits   = 0;
 		$totalPages  = 0;
 		
-		for ($i=1; $i <= $numDays; $i++) {
 			
-			$sql = sprintf("SELECT SUM(mobilevisits) AS mobilevisits, SUM(nonmobilevisits) AS nonmobilevisits, SUM(mobilehits) AS mobilehits, SUM(nonmobilehits) AS nonmobilehits, COUNT(resource) AS pages FROM %s WHERE year='%s' AND month='%s' AND day='%s'",
-				$engineDB->escape("logHits"),
-				$engineDB->escape($year),
-				$engineDB->escape($month),
-				$engineDB->escape($i)
-				);
-			$engineDB->sanitize = FALSE;
-			$sqlResult          = $engineDB->query($sql);
-			
-			if ($sqlResult['result']) {
-				$row = mysql_fetch_array($sqlResult['result'], MYSQL_ASSOC);
+		$sql = sprintf("SELECT day, SUM(mobilevisits) AS mobilevisits, SUM(nonmobilevisits) AS nonmobilevisits, SUM(mobilehits) AS mobilehits, SUM(nonmobilehits) AS nonmobilehits, COUNT(resource) AS pages FROM %s WHERE %s GROUP BY day",
+			$engineDB->escape("logHits"),
+			$sqlSiteYearMonth
+			);
+		$engineDB->sanitize = FALSE;
+		$sqlResult          = $engineDB->query($sql);
+		
+		if ($sqlResult['result']) {
+			while ($row = mysql_fetch_array($sqlResult['result'], MYSQL_ASSOC)) {
 				
-				$mobilehits[$i]    = $row['mobilehits'];
-				$nonmobilehits[$i] = $row['nonmobilehits'];
-				$hits[$i] = $mobilehits[$i] + $nonmobilehits[$i];
+				$mobilehits[$row['day']]    = $row['mobilehits'];
+				$nonmobilehits[$row['day']] = $row['nonmobilehits'];
+				$hits[$row['day']] = $mobilehits[$row['day']] + $nonmobilehits[$row['day']];
 
-				$mobilevisits[$i]    = $row['mobilevisits'];
-				$nonmobilevisits[$i] = $row['nonmobilevisits'];
-				$visits[$i] = $mobilevisits[$i] + $nonmobilevisits[$i];
+				$mobilevisits[$row['day']]    = $row['mobilevisits'];
+				$nonmobilevisits[$row['day']] = $row['nonmobilevisits'];
+				$visits[$row['day']] = $mobilevisits[$row['day']] + $nonmobilevisits[$row['day']];
 
-				$totalHits   += $hits[$i];
-				$totalVisits += $visits[$i];
-				$totalPages  += $pages[$i]  = $row['pages'];
+				$totalHits   += $hits[$row['day']];
+				$totalVisits += $visits[$row['day']];
+				$totalPages  += $pages[$row['day']]  = $row['pages'];
+
 			}
-			
 		}
 		
 		for ($i=1; $i <= $numDays; $i++) {
@@ -288,30 +296,32 @@ if ($sqlResult['result']) {
 		$nonmobileHits = array();
 		$pages         = array();
 		
+		for ($i=0; $i < 24; $i++) {
+			$mobileHits[$i]    = 0;
+			$nonmobileHits[$i] = 0;
+			$pages[$i]         = 0;
+		}
+
 		$totalMobileHits    = 0;
 		$totalNonmobileHits = 0;
 		$totalPages         = 0;
 		
-		for ($i=0; $i < 24; $i++) {
 			
-			$sql = sprintf("SELECT SUM(mobilehits) AS totalMobileHits, SUM(nonmobilehits) AS totalNonmobileHits, COUNT(resource) AS totalPages FROM %s WHERE year='%s' AND month='%s' AND hour='%s'",
-				$engineDB->escape("logHits"),
-				$engineDB->escape($year),
-				$engineDB->escape($month),
-				$engineDB->escape($i)
-				);
-			$engineDB->sanitize = FALSE;
-			$sqlResult          = $engineDB->query($sql);
+		$sql = sprintf("SELECT hour, SUM(mobilehits) AS totalMobileHits, SUM(nonmobilehits) AS totalNonmobileHits, COUNT(resource) AS totalPages FROM %s WHERE %s GROUP BY hour",
+			$engineDB->escape("logHits"),
+			$sqlSiteYearMonth
+			);
+		$engineDB->sanitize = FALSE;
+		$sqlResult          = $engineDB->query($sql);
+		
+		if ($sqlResult['result']) {
+			while ($row = mysql_fetch_array($sqlResult['result'], MYSQL_ASSOC)) {
 			
-			if ($sqlResult['result']) {
-				$row = mysql_fetch_array($sqlResult['result'], MYSQL_ASSOC);
-				
-				$totalMobileHits    += $mobileHits[$i]    = $row['totalMobileHits'];
-				$totalNonmobileHits += $nonmobileHits[$i] = $row['totalNonmobileHits'];
-				$totalPages         += $pages[$i]         = $row['totalPages'];
-				
+				$totalMobileHits    += $mobileHits[$row['hour']]    = $row['totalMobileHits'];
+				$totalNonmobileHits += $nonmobileHits[$row['hour']] = $row['totalNonmobileHits'];
+				$totalPages         += $pages[$row['hour']]         = $row['totalPages'];
+			
 			}
-			
 		}
 		
 		for ($i=0; $i < 24; $i++) {
@@ -346,10 +356,9 @@ if ($sqlResult['result']) {
 
 
 <?
-$sql = sprintf("SELECT SUM(mobilehits) AS totalMobileHits, SUM(nonmobilehits) AS totalNonmobileHits, COUNT(DISTINCT url) AS totalURLs FROM %s WHERE year='%s' AND month='%s'",
+$sql = sprintf("SELECT SUM(mobilehits) AS totalMobileHits, SUM(nonmobilehits) AS totalNonmobileHits, COUNT(DISTINCT url) AS totalURLs FROM %s WHERE %s",
 	$engineDB->escape("logURLs"),
-	$engineDB->escape($year),
-	$engineDB->escape($month)
+	$sqlSiteYearMonth
 	);
 $engineDB->sanitize = FALSE;
 $sqlResult          = $engineDB->query($sql);
@@ -379,10 +388,9 @@ $totalURLs = $row['totalURLs'];
 	</thead>
 	<tbody>
 		<?
-		$sql = sprintf("SELECT SUM(mobilehits) AS mobilehits, SUM(nonmobilehits) AS nonmobilehits, url FROM %s WHERE year='%s' AND month='%s' GROUP BY url ORDER BY SUM(mobilehits+nonmobilehits) DESC LIMIT 10",
+		$sql = sprintf("SELECT SUM(mobilehits) AS mobilehits, SUM(nonmobilehits) AS nonmobilehits, url FROM %s WHERE %s GROUP BY url ORDER BY SUM(mobilehits+nonmobilehits) DESC LIMIT 10",
 			$engineDB->escape("logURLs"),
-			$engineDB->escape($year),
-			$engineDB->escape($month)
+			$sqlSiteYearMonth
 			);
 		$engineDB->sanitize = FALSE;
 		$sqlResult          = $engineDB->query($sql);
@@ -416,10 +424,9 @@ $totalURLs = $row['totalURLs'];
 
 
 <?
-$sql = sprintf("SELECT SUM(mobilehits) AS totalMobileHits, SUM(nonmobilehits) AS totalNonmobileHits, COUNT(DISTINCT url) AS totalURLs FROM %s WHERE year='%s' AND month='%s' AND referrer='NULL'",
+$sql = sprintf("SELECT SUM(mobilehits) AS totalMobileHits, SUM(nonmobilehits) AS totalNonmobileHits, COUNT(DISTINCT url) AS totalURLs FROM %s WHERE %s AND referrer='NULL'",
 	$engineDB->escape("logURLs"),
-	$engineDB->escape($year),
-	$engineDB->escape($month)
+	$sqlSiteYearMonth
 	);
 $engineDB->sanitize = FALSE;
 $sqlResult          = $engineDB->query($sql);
@@ -449,10 +456,9 @@ $totalURLs = $row['totalURLs'];
 	</thead>
 	<tbody>
 		<?
-		$sql = sprintf("SELECT SUM(mobilehits) AS mobilehits, SUM(nonmobilehits) AS nonmobilehits, url FROM %s WHERE year='%s' AND month='%s' AND referrer='NULL' GROUP BY url ORDER BY SUM(mobilehits+nonmobilehits) DESC LIMIT 10",
+		$sql = sprintf("SELECT SUM(mobilehits) AS mobilehits, SUM(nonmobilehits) AS nonmobilehits, url FROM %s WHERE %s AND referrer='NULL' GROUP BY url ORDER BY SUM(mobilehits+nonmobilehits) DESC LIMIT 10",
 			$engineDB->escape("logURLs"),
-			$engineDB->escape($year),
-			$engineDB->escape($month)
+			$sqlSiteYearMonth
 			);
 		$engineDB->sanitize = FALSE;
 		$sqlResult          = $engineDB->query($sql);
@@ -486,10 +492,9 @@ $totalURLs = $row['totalURLs'];
 
 
 <?
-$sql = sprintf("SELECT SUM(mobilehits) AS totalMobileHits, SUM(nonmobilehits) AS totalNonmobileHits, COUNT(DISTINCT referrer) AS totalURLs FROM %s WHERE year='%s' AND month='%s' AND referrer!='NULL'",
+$sql = sprintf("SELECT SUM(mobilehits) AS totalMobileHits, SUM(nonmobilehits) AS totalNonmobileHits, COUNT(DISTINCT referrer) AS totalURLs FROM %s WHERE %s AND referrer!='NULL'",
 	$engineDB->escape("logURLs"),
-	$engineDB->escape($year),
-	$engineDB->escape($month)
+	$sqlSiteYearMonth
 	);
 $engineDB->sanitize = FALSE;
 $sqlResult          = $engineDB->query($sql);
@@ -519,10 +524,9 @@ $totalURLs = $row['totalURLs'];
 	</thead>
 	<tbody>
 		<?
-		$sql = sprintf("SELECT SUM(mobilehits) AS mobilehits, SUM(nonmobilehits) AS nonmobilehits, referrer FROM %s WHERE year='%s' AND month='%s' AND referrer!='NULL' GROUP BY referrer ORDER BY SUM(mobilehits+nonmobilehits) DESC LIMIT 10",
+		$sql = sprintf("SELECT SUM(mobilehits) AS mobilehits, SUM(nonmobilehits) AS nonmobilehits, referrer FROM %s WHERE %s AND referrer!='NULL' GROUP BY referrer ORDER BY SUM(mobilehits+nonmobilehits) DESC LIMIT 10",
 			$engineDB->escape("logURLs"),
-			$engineDB->escape($year),
-			$engineDB->escape($month)
+			$sqlSiteYearMonth
 			);
 		$engineDB->sanitize = FALSE;
 		$sqlResult          = $engineDB->query($sql);
@@ -552,10 +556,9 @@ $totalURLs = $row['totalURLs'];
 $output     = array();
 $totalCount = 0;
 
-$sql = sprintf("SELECT browser, nonHuman, SUM(onCampusCount) AS onCampusCount, SUM(offCampusCount) AS offCampusCount, (SUM(onCampusCount)+SUM(offCampusCount)) AS total FROM %s WHERE year='%s' AND month='%s' GROUP BY browser ORDER BY total DESC",
+$sql = sprintf("SELECT browser, nonHuman, SUM(onCampusCount) AS onCampusCount, SUM(offCampusCount) AS offCampusCount, (SUM(onCampusCount)+SUM(offCampusCount)) AS total FROM %s WHERE %s GROUP BY browser ORDER BY total DESC",
 	$engineDB->escape("logBrowsers"),
-	$engineDB->escape($year),
-	$engineDB->escape($month)
+	$sqlSiteYearMonth
 	);
 $engineDB->sanitize = FALSE;
 $sqlResult          = $engineDB->query($sql);
@@ -631,10 +634,9 @@ if ($sqlResult['result']) {
 $output     = array();
 $totalCount = 0;
 
-$sql = sprintf("SELECT os, nonHuman, SUM(onCampusCount) AS onCampusCount, SUM(offCampusCount) AS offCampusCount, (SUM(onCampusCount)+SUM(offCampusCount)) AS total FROM %s WHERE year='%s' AND month='%s' GROUP BY os ORDER BY total DESC",
+$sql = sprintf("SELECT os, nonHuman, SUM(onCampusCount) AS onCampusCount, SUM(offCampusCount) AS offCampusCount, (SUM(onCampusCount)+SUM(offCampusCount)) AS total FROM %s WHERE %s GROUP BY os ORDER BY total DESC",
 	$engineDB->escape("logBrowsers"),
-	$engineDB->escape($year),
-	$engineDB->escape($month)
+	$sqlSiteYearMonth
 	);
 $engineDB->sanitize = FALSE;
 $sqlResult          = $engineDB->query($sql);

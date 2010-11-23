@@ -4,6 +4,18 @@ $time = $time[1] + $time[0];
 $start = $time;
 
 include("header.php");
+
+// $sql = sprintf("UPDATE log SET site='www.libraries.wvu.edu' WHERE MOD(ID,10)='0'");
+// $engineDB->sanitize = FALSE;
+// $sqlResult          = $engineDB->query($sql);
+// exit;
+// $sql = sprintf("UPDATE log SET site='www.libraries.wvu.edu' WHERE MOD(ID,5)='0'");
+// $engineDB->sanitize = FALSE;
+// $sqlResult          = $engineDB->query($sql);
+// $sql = sprintf("UPDATE log SET site='www.libraries.wvu.edu' WHERE site IS NULL");
+// $engineDB->sanitize = FALSE;
+// $sqlResult          = $engineDB->query($sql);
+// exit;
 ?>
 
 <!-- Page Content Goes Below This Line -->
@@ -50,8 +62,8 @@ include("header.php");
 				);
 			$engineDB->sanitize = FALSE;
 			$sqlResult          = $engineDB->query($sql);
-			
-			if ($sqlResult['result']) {
+
+			if ($sqlResult['affectedRows'] > 0) {
 				$row = mysql_fetch_array($sqlResult['result'], MYSQL_ASSOC);
 				$minTime = $row['minTime'];
 			}
@@ -61,19 +73,25 @@ include("header.php");
 		$monthEnd   = strtotime('-1 second',strtotime('+1 month',$monthStart));
 
 		while ($monthEnd >= $minTime) { 
-			
 			$year  = date('Y',$monthStart);
 			$month = date('m',$monthStart);
 			
+			// Debugging
+			// print $year."-".$month."<br>";
+			// ob_flush();
+
 			if ($year == date("Y") && $month == date("m")) {
 				$numDays = date("d"); // if current month, use "today" as number of days in month
 			}
 			else {
 				$numDays = date('t',$monthStart);
 			}
+
+			$siteSql = is_empty(sessionGet("engineStatsSite")) ? NULL : "site='".sessionGet("engineStatsSite")."' AND";
 			
-			$sql = sprintf("SELECT SUM(mobilevisits) AS mobilevisits, SUM(nonmobilevisits) AS nonmobilevisits, SUM(mobilehits) AS mobilehits, SUM(nonmobilehits) AS nonmobilehits, COUNT(resource) AS pages FROM %s WHERE year='%s' AND month='%s'",
+			$sql = sprintf("SELECT SUM(mobilevisits) AS mobilevisits, SUM(nonmobilevisits) AS nonmobilevisits, SUM(mobilehits) AS mobilehits, SUM(nonmobilehits) AS nonmobilehits, COUNT(resource) AS pages FROM %s WHERE %s year='%s' AND month='%s'",
 				$engineDB->escape("logHits"),
+				$siteSql,
 				$engineDB->escape($year),
 				$engineDB->escape($month)
 				);

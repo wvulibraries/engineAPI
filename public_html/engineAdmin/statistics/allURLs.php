@@ -12,10 +12,13 @@ include("header.php");
 $year  = (isset($engine->cleanGet['MYSQL']['y'])&&!is_empty($engine->cleanGet['MYSQL']['y']))?$engine->cleanGet['MYSQL']['y']:NULL;
 $month = (isset($engine->cleanGet['MYSQL']['m'])&&!is_empty($engine->cleanGet['MYSQL']['m']))?$engine->cleanGet['MYSQL']['m']:NULL;
 
+$sqlSite = is_empty(sessionGet("engineStatsSite")) ? NULL : "WHERE site='".sessionGet("engineStatsSite")."'";
+
 if (isnull($year) || isnull($month)) {
 
-	$sql = sprintf("SELECT year,month FROM %s ORDER BY year ASC, month ASC LIMIT 1",
-		$engineDB->escape("logHits")
+	$sql = sprintf("SELECT year,month FROM %s %s ORDER BY year ASC, month ASC LIMIT 1",
+		$engineDB->escape("logHits"),
+		$sqlSite
 		);
 	$engineDB->sanitize = FALSE;
 	$sqlResult          = $engineDB->query($sql);
@@ -27,8 +30,9 @@ if (isnull($year) || isnull($month)) {
 		$minMonth = $row['month'];
 	}
 	
-	$sql = sprintf("SELECT year,month FROM %s ORDER BY year DESC, month DESC LIMIT 1",
-		$engineDB->escape("logHits")
+	$sql = sprintf("SELECT year,month FROM %s %s ORDER BY year DESC, month DESC LIMIT 1",
+		$engineDB->escape("logHits"),
+		$sqlSite
 		);
 	$engineDB->sanitize = FALSE;
 	$sqlResult          = $engineDB->query($sql);
@@ -55,9 +59,11 @@ else {
 
 }
 
+$sqlSite = is_empty(sessionGet("engineStatsSite")) ? NULL : "site='".sessionGet("engineStatsSite")."' AND ";
 
-$sql = sprintf("SELECT SUM(mobilehits) AS totalMobileHits, SUM(nonmobilehits) AS totalNonmobileHits, COUNT(DISTINCT url) AS totalURLs FROM %s WHERE UNIX_TIMESTAMP(CONCAT(year,'-',month,'-01 00:00:00'))>='%s' AND UNIX_TIMESTAMP(CONCAT(year,'-',month,'-01 00:00:00'))<'%s'",
+$sql = sprintf("SELECT SUM(mobilehits) AS totalMobileHits, SUM(nonmobilehits) AS totalNonmobileHits, COUNT(DISTINCT url) AS totalURLs FROM %s WHERE %s UNIX_TIMESTAMP(CONCAT(year,'-',month,'-01 00:00:00'))>='%s' AND UNIX_TIMESTAMP(CONCAT(year,'-',month,'-01 00:00:00'))<'%s'",
 	$engineDB->escape("logURLs"),
+	$sqlSite,
 	$engineDB->escape($monthStart),
 	$engineDB->escape($monthEnd)
 	);
@@ -89,8 +95,9 @@ $totalURLs = $row['totalURLs'];
 	</thead>
 	<tbody>
 		<?
-		$sql = sprintf("SELECT SUM(mobilehits) AS mobilehits, SUM(nonmobilehits) AS nonmobilehits, url FROM %s WHERE UNIX_TIMESTAMP(CONCAT(year,'-',month,'-01 00:00:00'))>='%s' AND UNIX_TIMESTAMP(CONCAT(year,'-',month,'-01 00:00:00'))<'%s' GROUP BY url ORDER BY SUM(mobilehits+nonmobilehits) DESC",
+		$sql = sprintf("SELECT SUM(mobilehits) AS mobilehits, SUM(nonmobilehits) AS nonmobilehits, url FROM %s WHERE %s UNIX_TIMESTAMP(CONCAT(year,'-',month,'-01 00:00:00'))>='%s' AND UNIX_TIMESTAMP(CONCAT(year,'-',month,'-01 00:00:00'))<'%s' GROUP BY url ORDER BY SUM(mobilehits+nonmobilehits) DESC",
 			$engineDB->escape("logURLs"),
+			$sqlSite,
 			$engineDB->escape($monthStart),
 			$engineDB->escape($monthEnd)
 			);
@@ -100,11 +107,9 @@ $totalURLs = $row['totalURLs'];
 		if ($sqlResult['result']) {
 			for ($i=1; $row=mysql_fetch_array($sqlResult['result'], MYSQL_ASSOC); $i++) {
 				
-				if ($row['url'] == "NULL") {
+				$url = $row['url'];
+				if ($url == "NULL") {
 					$url = "/";
-				}
-				else {
-					$url = $row['url'];
 				}
 
 				print "<tr>";

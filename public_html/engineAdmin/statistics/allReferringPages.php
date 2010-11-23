@@ -13,10 +13,13 @@ $year  = (isset($engine->cleanGet['MYSQL']['y'])&&!is_empty($engine->cleanGet['M
 $month = (isset($engine->cleanGet['MYSQL']['m'])&&!is_empty($engine->cleanGet['MYSQL']['m']))?$engine->cleanGet['MYSQL']['m']:NULL;
 $page  = (isset($engine->cleanGet['MYSQL']['p'])&&!is_empty($engine->cleanGet['MYSQL']['p']))?$engine->cleanGet['MYSQL']['p']:NULL;
 
+$sqlSite = is_empty(sessionGet("engineStatsSite")) ? NULL : "WHERE site='".sessionGet("engineStatsSite")."'";
+
 if (isnull($year) || isnull($month)) {
 
-	$sql = sprintf("SELECT year,month FROM %s ORDER BY year ASC, month ASC LIMIT 1",
-		$engineDB->escape("logHits")
+	$sql = sprintf("SELECT year,month FROM %s %s ORDER BY year ASC, month ASC LIMIT 1",
+		$engineDB->escape("logHits"),
+		$sqlSite
 		);
 	$engineDB->sanitize = FALSE;
 	$sqlResult          = $engineDB->query($sql);
@@ -28,8 +31,9 @@ if (isnull($year) || isnull($month)) {
 		$minMonth = $row['month'];
 	}
 	
-	$sql = sprintf("SELECT year,month FROM %s ORDER BY year DESC, month DESC LIMIT 1",
-		$engineDB->escape("logHits")
+	$sql = sprintf("SELECT year,month FROM %s %s ORDER BY year DESC, month DESC LIMIT 1",
+		$engineDB->escape("logHits"),
+		$sqlSite
 		);
 	$engineDB->sanitize = FALSE;
 	$sqlResult          = $engineDB->query($sql);
@@ -57,10 +61,12 @@ else {
 }
 
 $sqlPage = !isnull($page)?("AND url='".$page."'"):NULL;
+$sqlSite = is_empty(sessionGet("engineStatsSite")) ? NULL : "site='".sessionGet("engineStatsSite")."' AND ";
 
 
-$sql = sprintf("SELECT SUM(mobilehits) AS totalMobileHits, SUM(nonmobilehits) AS totalNonmobileHits, COUNT(DISTINCT referrer) AS totalURLs FROM %s WHERE UNIX_TIMESTAMP(CONCAT(year,'-',month,'-01 00:00:00'))>='%s' AND UNIX_TIMESTAMP(CONCAT(year,'-',month,'-01 00:00:00'))<'%s' AND referrer!='NULL' %s",
+$sql = sprintf("SELECT SUM(mobilehits) AS totalMobileHits, SUM(nonmobilehits) AS totalNonmobileHits, COUNT(DISTINCT referrer) AS totalURLs FROM %s WHERE %s UNIX_TIMESTAMP(CONCAT(year,'-',month,'-01 00:00:00'))>='%s' AND UNIX_TIMESTAMP(CONCAT(year,'-',month,'-01 00:00:00'))<'%s' AND referrer!='NULL' %s",
 	$engineDB->escape("logURLs"),
+	$sqlSite,
 	$engineDB->escape($monthStart),
 	$engineDB->escape($monthEnd),
 	$sqlPage
@@ -93,8 +99,9 @@ $totalURLs = $row['totalURLs'];
 	</thead>
 	<tbody>
 		<?
-		$sql = sprintf("SELECT SUM(mobilehits) AS mobilehits, SUM(nonmobilehits) AS nonmobilehits, referrer FROM %s WHERE UNIX_TIMESTAMP(CONCAT(year,'-',month,'-01 00:00:00'))>='%s' AND UNIX_TIMESTAMP(CONCAT(year,'-',month,'-01 00:00:00'))<'%s' AND referrer!='NULL' %s GROUP BY referrer ORDER BY SUM(mobilehits+nonmobilehits) DESC",
+		$sql = sprintf("SELECT SUM(mobilehits) AS mobilehits, SUM(nonmobilehits) AS nonmobilehits, referrer FROM %s WHERE %s UNIX_TIMESTAMP(CONCAT(year,'-',month,'-01 00:00:00'))>='%s' AND UNIX_TIMESTAMP(CONCAT(year,'-',month,'-01 00:00:00'))<'%s' AND referrer!='NULL' %s GROUP BY referrer ORDER BY SUM(mobilehits+nonmobilehits) DESC",
 			$engineDB->escape("logURLs"),
+			$sqlSite,
 			$engineDB->escape($monthStart),
 			$engineDB->escape($monthEnd),
 			$sqlPage

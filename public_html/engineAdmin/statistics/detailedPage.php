@@ -10,10 +10,13 @@ $year  = (isset($engine->cleanGet['MYSQL']['y'])&&!is_empty($engine->cleanGet['M
 $month = (isset($engine->cleanGet['MYSQL']['m'])&&!is_empty($engine->cleanGet['MYSQL']['m']))?$engine->cleanGet['MYSQL']['m']:NULL;
 $page  = (isset($engine->cleanGet['MYSQL']['p'])&&!is_empty($engine->cleanGet['MYSQL']['p']))?$engine->cleanGet['MYSQL']['p']:NULL;
 
+$sqlSite = is_empty(sessionGet("engineStatsSite")) ? NULL : "WHERE site='".sessionGet("engineStatsSite")."'";
+
 if (isnull($year) || isnull($month)) {
 
-	$sql = sprintf("SELECT year,month FROM %s ORDER BY year ASC, month ASC LIMIT 1",
-		$engineDB->escape("logHits")
+	$sql = sprintf("SELECT year,month FROM %s %s ORDER BY year ASC, month ASC LIMIT 1",
+		$engineDB->escape("logHits"),
+		$sqlSite
 		);
 	$engineDB->sanitize = FALSE;
 	$sqlResult          = $engineDB->query($sql);
@@ -25,8 +28,9 @@ if (isnull($year) || isnull($month)) {
 		$minMonth = $row['month'];
 	}
 	
-	$sql = sprintf("SELECT year,month FROM %s ORDER BY year DESC, month DESC LIMIT 1",
-		$engineDB->escape("logHits")
+	$sql = sprintf("SELECT year,month FROM %s %s ORDER BY year DESC, month DESC LIMIT 1",
+		$engineDB->escape("logHits"),
+		$sqlSite
 		);
 	$engineDB->sanitize = FALSE;
 	$sqlResult          = $engineDB->query($sql);
@@ -76,9 +80,12 @@ else {
 
 $numHours = $numDays * 24;
 
+$sqlSite = is_empty(sessionGet("engineStatsSite")) ? NULL : "site='".sessionGet("engineStatsSite")."' AND ";
 
-$sql = sprintf("SELECT SUM(mobilevisits) AS totalMobileVisits, SUM(nonmobilevisits) AS totalNonmobileVisits, SUM(mobilehits) AS totalMobileHits, SUM(nonmobilehits) AS totalNonmobileHits, MAX(mobilehits) AS maxMobileHits, MAX(nonmobilehits) AS maxNonmobileHits FROM %s WHERE UNIX_TIMESTAMP(CONCAT(year,'-',month,'-',day,' 00:00:00'))>='%s' AND UNIX_TIMESTAMP(CONCAT(year,IF(month<10,CONCAT('0',month),month),IF(day<10,CONCAT('0',day),day)))<'%s' AND resource='%s'",
+
+$sql = sprintf("SELECT SUM(mobilevisits) AS totalMobileVisits, SUM(nonmobilevisits) AS totalNonmobileVisits, SUM(mobilehits) AS totalMobileHits, SUM(nonmobilehits) AS totalNonmobileHits, MAX(mobilehits) AS maxMobileHits, MAX(nonmobilehits) AS maxNonmobileHits FROM %s WHERE %s UNIX_TIMESTAMP(CONCAT(year,'-',month,'-',day,' 00:00:00'))>='%s' AND UNIX_TIMESTAMP(CONCAT(year,IF(month<10,CONCAT('0',month),month),IF(day<10,CONCAT('0',day),day)))<'%s' AND resource='%s'",
 	$engineDB->escape("logHits"),
+	$sqlSite,
 	$engineDB->escape($monthStart),
 	$engineDB->escape($monthEnd),
 	$engineDB->escape($page)
@@ -103,8 +110,9 @@ $maxNonmobileVisits     = 0;
 $maxMobileHitsPerDay    = 0;
 $maxNonmobileHitsPerDay = 0;
 
-$sql = sprintf("SELECT SUM(mobilevisits) AS mobilevisits, SUM(nonmobilevisits) AS nonmobilevisits, SUM(mobilehits) AS mobilehits, SUM(nonmobilehits) AS nonmobilehits FROM %s WHERE UNIX_TIMESTAMP(CONCAT(year,'-',month,'-',day,' 00:00:00'))>='%s' AND UNIX_TIMESTAMP(CONCAT(year,IF(month<10,CONCAT('0',month),month),IF(day<10,CONCAT('0',day),day)))<'%s' AND resource='%s' GROUP BY day",
+$sql = sprintf("SELECT SUM(mobilevisits) AS mobilevisits, SUM(nonmobilevisits) AS nonmobilevisits, SUM(mobilehits) AS mobilehits, SUM(nonmobilehits) AS nonmobilehits FROM %s WHERE %s UNIX_TIMESTAMP(CONCAT(year,'-',month,'-',day,' 00:00:00'))>='%s' AND UNIX_TIMESTAMP(CONCAT(year,IF(month<10,CONCAT('0',month),month),IF(day<10,CONCAT('0',day),day)))<'%s' AND resource='%s' GROUP BY day",
 	$engineDB->escape("logHits"),
+	$sqlSite,
 	$engineDB->escape($monthStart),
 	$engineDB->escape($monthEnd),
 	$engineDB->escape($page)
@@ -230,39 +238,50 @@ if ($sqlResult['result']) {
 	</thead>
 	<tbody>
 		<?
-		$visits = array();
-		$hits   = array();
+		$visits          = array();
+		$hits            = array();
+		$mobilehits      = array();
+		$nonmobilehits   = array();
+		$mobilevisits    = array();
+		$nonmobilevisits = array();
+		
+		for ($i=1; $i <= $maxNumDays; $i++) {
+			$hits[$i]            = 0;
+			$mobilehits[$i]      = 0;
+			$nonmobilehits[$i]   = 0;
+			$visits[$i]          = 0;
+			$mobilevisits[$i]    = 0;
+			$nonmobilevisits[$i] = 0;
+		}
 		
 		$totalVisits = 0;
 		$totalHits   = 0;
 		
-		for ($i=1; $i <= $maxNumDays; $i++) {
+		$sql = sprintf("SELECT day, SUM(mobilevisits) AS mobilevisits, SUM(nonmobilevisits) AS nonmobilevisits, SUM(mobilehits) AS mobilehits, SUM(nonmobilehits) AS nonmobilehits FROM %s WHERE %s UNIX_TIMESTAMP(CONCAT(year,IF(month<10,CONCAT('0',month),month),IF(day<10,CONCAT('0',day),day)))>='%s' AND UNIX_TIMESTAMP(CONCAT(year,IF(month<10,CONCAT('0',month),month),IF(day<10,CONCAT('0',day),day)))<'%s' AND resource='%s' GROUP BY day",
+			$engineDB->escape("logHits"),
+			$sqlSite,
+			$engineDB->escape($monthStart),
+			$engineDB->escape($monthEnd),
+			$engineDB->escape($page)
+			);
+		$engineDB->sanitize = FALSE;
+		$sqlResult          = $engineDB->query($sql);
+		
+		if ($sqlResult['result']) {
+			while ($row = mysql_fetch_array($sqlResult['result'], MYSQL_ASSOC)) {
 			
-			$sql = sprintf("SELECT SUM(mobilevisits) AS mobilevisits, SUM(nonmobilevisits) AS nonmobilevisits, SUM(mobilehits) AS mobilehits, SUM(nonmobilehits) AS nonmobilehits FROM %s WHERE UNIX_TIMESTAMP(CONCAT(year,IF(month<10,CONCAT('0',month),month),IF(day<10,CONCAT('0',day),day)))>='%s' AND UNIX_TIMESTAMP(CONCAT(year,IF(month<10,CONCAT('0',month),month),IF(day<10,CONCAT('0',day),day)))<'%s' AND day='%s' AND resource='%s'",
-				$engineDB->escape("logHits"),
-				$engineDB->escape($monthStart),
-				$engineDB->escape($monthEnd),
-				$engineDB->escape($i),
-				$engineDB->escape($page)
-				);
-			$engineDB->sanitize = FALSE;
-			$sqlResult          = $engineDB->query($sql);
-			
-			if ($sqlResult['result']) {
-				$row = mysql_fetch_array($sqlResult['result'], MYSQL_ASSOC);
-				
-				$mobilehits[$i]    = $row['mobilehits'];
-				$nonmobilehits[$i] = $row['nonmobilehits'];
-				$hits[$i] = $mobilehits[$i] + $nonmobilehits[$i];
+				$mobilehits[$row['day']]    = $row['mobilehits'];
+				$nonmobilehits[$row['day']] = $row['nonmobilehits'];
+				$hits[$row['day']] = $mobilehits[$row['day']] + $nonmobilehits[$row['day']];
 
-				$mobilevisits[$i]    = $row['mobilevisits'];
-				$nonmobilevisits[$i] = $row['nonmobilevisits'];
-				$visits[$i] = $mobilevisits[$i] + $nonmobilevisits[$i];
+				$mobilevisits[$row['day']]    = $row['mobilevisits'];
+				$nonmobilevisits[$row['day']] = $row['nonmobilevisits'];
+				$visits[$row['day']] = $mobilevisits[$row['day']] + $nonmobilevisits[$row['day']];
 
-				$totalHits   += $hits[$i];
-				$totalVisits += $visits[$i];
+				$totalHits   += $hits[$row['day']];
+				$totalVisits += $visits[$row['day']];
+
 			}
-			
 		}
 		
 		for ($i=1; $i <= $maxNumDays; $i++) {
@@ -319,31 +338,32 @@ if ($sqlResult['result']) {
 		$mobileHits    = array();
 		$nonmobileHits = array();
 		
+		for ($i=0; $i < 24; $i++) {
+			$mobileHits[$i]    = 0;
+			$nonmobileHits[$i] = 0;
+		}
+		
 		$totalMobileHits    = 0;
 		$totalNonmobileHits = 0;
 		
-		for ($i=0; $i < 24; $i++) {
 			
-			$sql = sprintf("SELECT SUM(mobilehits) AS totalMobileHits, SUM(nonmobilehits) AS totalNonmobileHits FROM %s WHERE UNIX_TIMESTAMP(CONCAT(year,IF(month<10,CONCAT('0',month),month),IF(day<10,CONCAT('0',day),day)))>='%s' AND UNIX_TIMESTAMP(CONCAT(year,IF(month<10,CONCAT('0',month),month),IF(day<10,CONCAT('0',day),day)))<'%s' AND hour='%s' AND resource='%s'",
-				$engineDB->escape("logHits"),
-				$engineDB->escape($monthStart),
-				$engineDB->escape($monthEnd),
-				$engineDB->escape($i),
-				$engineDB->escape($page)
-				);
-			$engineDB->sanitize = FALSE;
-			$sqlResult          = $engineDB->query($sql);
-			
-			if ($sqlResult['result']) {
-				$row = mysql_fetch_array($sqlResult['result'], MYSQL_ASSOC);
-				
-				$totalMobileHits    += $mobileHits[$i]    = $row['totalMobileHits'];
-				$totalNonmobileHits += $nonmobileHits[$i] = $row['totalNonmobileHits'];
-				
-			}
-			
-		}
+		$sql = sprintf("SELECT hour, SUM(mobilehits) AS totalMobileHits, SUM(nonmobilehits) AS totalNonmobileHits FROM %s WHERE %s UNIX_TIMESTAMP(CONCAT(year,IF(month<10,CONCAT('0',month),month),IF(day<10,CONCAT('0',day),day)))>='%s' AND UNIX_TIMESTAMP(CONCAT(year,IF(month<10,CONCAT('0',month),month),IF(day<10,CONCAT('0',day),day)))<'%s' AND resource='%s' GROUP BY hour",
+			$engineDB->escape("logHits"),
+			$sqlSite,
+			$engineDB->escape($monthStart),
+			$engineDB->escape($monthEnd),
+			$engineDB->escape($page)
+			);
+		$engineDB->sanitize = FALSE;
+		$sqlResult          = $engineDB->query($sql);
 		
+		if ($sqlResult['result']) {
+			while ($row = mysql_fetch_array($sqlResult['result'], MYSQL_ASSOC)) {
+				$totalMobileHits    += $mobileHits[$row['hour']]    += $row['totalMobileHits'];
+				$totalNonmobileHits += $nonmobileHits[$row['hour']] += $row['totalNonmobileHits'];
+			}			
+		}
+					
 		for ($i=0; $i < 24; $i++) {
 			
 			$mobileHits[$i]    = is_empty($mobileHits[$i])    ? 0 : $mobileHits[$i];
@@ -371,8 +391,9 @@ if ($sqlResult['result']) {
 
 
 <?
-$sql = sprintf("SELECT SUM(mobilehits) AS totalMobileHits, SUM(nonmobilehits) AS totalNonmobileHits, COUNT(DISTINCT referrer) AS totalURLs FROM %s WHERE UNIX_TIMESTAMP(CONCAT(year,IF(month<10,CONCAT('0',month),month),'01'))>='%s' AND UNIX_TIMESTAMP(CONCAT(year,IF(month<10,CONCAT('0',month),month),'01'))<'%s' AND referrer!='NULL' AND url='%s'",
+$sql = sprintf("SELECT SUM(mobilehits) AS totalMobileHits, SUM(nonmobilehits) AS totalNonmobileHits, COUNT(DISTINCT referrer) AS totalURLs FROM %s WHERE %s UNIX_TIMESTAMP(CONCAT(year,IF(month<10,CONCAT('0',month),month),'01'))>='%s' AND UNIX_TIMESTAMP(CONCAT(year,IF(month<10,CONCAT('0',month),month),'01'))<'%s' AND referrer!='NULL' AND url='%s'",
 	$engineDB->escape("logURLs"),
+	$sqlSite,
 	$engineDB->escape($monthStart),
 	$engineDB->escape($monthEnd),
 	$engineDB->escape($page)
@@ -405,8 +426,9 @@ $totalURLs = $row['totalURLs'];
 	</thead>
 	<tbody>
 		<?
-		$sql = sprintf("SELECT SUM(mobilehits) AS mobilehits, SUM(nonmobilehits) AS nonmobilehits, referrer FROM %s WHERE UNIX_TIMESTAMP(CONCAT(year,IF(month<10,CONCAT('0',month),month),'01'))>='%s' AND UNIX_TIMESTAMP(CONCAT(year,IF(month<10,CONCAT('0',month),month),'01'))<'%s' AND referrer!='NULL' AND url='%s' GROUP BY referrer ORDER BY SUM(mobilehits+nonmobilehits) DESC LIMIT 10",
+		$sql = sprintf("SELECT SUM(mobilehits) AS mobilehits, SUM(nonmobilehits) AS nonmobilehits, referrer FROM %s WHERE %s UNIX_TIMESTAMP(CONCAT(year,IF(month<10,CONCAT('0',month),month),'01'))>='%s' AND UNIX_TIMESTAMP(CONCAT(year,IF(month<10,CONCAT('0',month),month),'01'))<'%s' AND referrer!='NULL' AND url='%s' GROUP BY referrer ORDER BY SUM(mobilehits+nonmobilehits) DESC LIMIT 10",
 			$engineDB->escape("logURLs"),
+			$sqlSite,
 			$engineDB->escape($monthStart),
 			$engineDB->escape($monthEnd),
 			$engineDB->escape($page)
@@ -439,8 +461,9 @@ $totalURLs = $row['totalURLs'];
 $output     = array();
 $totalCount = 0;
 
-$sql = sprintf("SELECT browser, nonHuman, SUM(onCampusCount) AS onCampusCount, SUM(offCampusCount) AS offCampusCount, (SUM(onCampusCount)+SUM(offCampusCount)) AS total FROM %s WHERE UNIX_TIMESTAMP(CONCAT(year,IF(month<10,CONCAT('0',month),month),'01'))>='%s' AND UNIX_TIMESTAMP(CONCAT(year,IF(month<10,CONCAT('0',month),month),'01'))<'%s' AND resource='%s' GROUP BY browser ORDER BY total DESC",
+$sql = sprintf("SELECT browser, nonHuman, SUM(onCampusCount) AS onCampusCount, SUM(offCampusCount) AS offCampusCount, (SUM(onCampusCount)+SUM(offCampusCount)) AS total FROM %s WHERE %s UNIX_TIMESTAMP(CONCAT(year,IF(month<10,CONCAT('0',month),month),'01'))>='%s' AND UNIX_TIMESTAMP(CONCAT(year,IF(month<10,CONCAT('0',month),month),'01'))<'%s' AND resource='%s' GROUP BY browser ORDER BY total DESC",
 	$engineDB->escape("logBrowsers"),
+	$sqlSite,
 	$engineDB->escape($monthStart),
 	$engineDB->escape($monthEnd),
 	$engineDB->escape($page)
@@ -519,8 +542,9 @@ if ($sqlResult['result']) {
 $output     = array();
 $totalCount = 0;
 
-$sql = sprintf("SELECT os, nonHuman, SUM(onCampusCount) AS onCampusCount, SUM(offCampusCount) AS offCampusCount, (SUM(onCampusCount)+SUM(offCampusCount)) AS total FROM %s WHERE UNIX_TIMESTAMP(CONCAT(year,IF(month<10,CONCAT('0',month),month),'01'))>='%s' AND UNIX_TIMESTAMP(CONCAT(year,IF(month<10,CONCAT('0',month),month),'01'))<'%s' AND resource='%s' GROUP BY os ORDER BY total DESC",
+$sql = sprintf("SELECT os, nonHuman, SUM(onCampusCount) AS onCampusCount, SUM(offCampusCount) AS offCampusCount, (SUM(onCampusCount)+SUM(offCampusCount)) AS total FROM %s WHERE %s UNIX_TIMESTAMP(CONCAT(year,IF(month<10,CONCAT('0',month),month),'01'))>='%s' AND UNIX_TIMESTAMP(CONCAT(year,IF(month<10,CONCAT('0',month),month),'01'))<'%s' AND resource='%s' GROUP BY os ORDER BY total DESC",
 	$engineDB->escape("logBrowsers"),
+	$sqlSite,
 	$engineDB->escape($monthStart),
 	$engineDB->escape($monthEnd),
 	$engineDB->escape($page)
