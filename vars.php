@@ -1,25 +1,5 @@
 <?php
 
-/*
-//URLS
-$engineVars = NULL;
-$engineVars = array();
-$engineVars['WVULSERVER']  = "http://systemsdev.lib.wvu.edu";
-$engineVars['CSSURL']      = $engineVars['WVULSERVER'] ."/css";
-$engineVars['JAVAURL']     = $engineVars['WVULSERVER'] ."/javascript";
-$engineVars['WEBROOT']     = $engineVars['WVULSERVER'] ."/mike";
-$engineVars['loginPage']   = $engineVars['WEBROOT'] ."/login.php";
-$engineVars['logoutPage']  = $engineVars['WEBROOT'] ."/logout.php"; 
-
-//Directories
-$engineVars['rootPHPDir']   = "/home/library/phpincludes/test";
-$engineVars['tempDir']      = $engineVars['rootPHPDir'] ."/template";
-$engineVars['documentRoot'] = "/home/library/library_home";
-$engineVars['fileListings'] = $engineVars['rootPHPDir'] ."/filelistings";
-$engineVars['emailInclude'] = $engineVars['rootPHPDir'] ."/phpmailer/phpmailer-fe.php";
-$engineVars['webHelper']    = $engineVars['rootPHPDir'] ."/engine/webHelper";
-*/
- 
 //URLS
 $engineVars = array();
 $engineVars['WVULSERVER'] = "http://systemsdev.lib.wvu.edu";
@@ -49,8 +29,8 @@ $engineVars['onCampus'][] = "72.50.128-191.*";
 $engineVars['mysql']['server']   = "localhost";
 $engineVars['mysql']['port']     = "3306";
 //User with permissions to engineCMS database
-$engineVars['mysql']['username'] = "systems";
-$engineVars['mysql']['password'] = "Te\$t1234";
+$engineVars['mysql']['username'] = "dbusername";
+$engineVars['mysql']['password'] = "dbpassword";
 
 //Active Directory (ldap?) Information
 // WVU Libraries Staff
