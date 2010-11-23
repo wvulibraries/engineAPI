@@ -1,0 +1,16 @@
+Snippets::display()
+
+Description
+    public string Snippets::display($id, $field)
+
+Parameters
+    id
+    field
+
+Return Values
+    
+Examples
+    
+Notes
+   
+See Also

@@ -1,0 +1,17 @@
+dlxs::buildQueryString()
+
+Description
+    private string dlxs::buildQueryString()
+    This function reads the global url variables received and creates a properly formatted query string.
+
+Parameters
+	None.
+
+Return Values
+    A string containing a properly formatted query string.
+
+Examples
+    
+Notes
+   
+See Also

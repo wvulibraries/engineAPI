@@ -1,0 +1,15 @@
+listManagement::disableField()
+
+Description
+    public bool listManagement::disableField(string $field)
+    Sets $this->fields[$disable]['disabled'] = TRUE
+
+Parameters
+    field
+	A string indicating the name of the field to be disabled.
+
+Return Values
+    Boolean TRUE or FALSE value.  Returns TRUE if the value of $field can be found in either $this->fields or $this->hiddenFields.  Otherwise returns FALSE.
+
+See Also
+    listManagement::disableAllFields()

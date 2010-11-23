@@ -1,0 +1,11 @@
+mailSender::sendEmail()
+
+Description
+    public mixed mailSender::sendEmail()
+	Uses the PHP Mailer class to send an e-mail message.
+
+Return Values
+    Returns boolean value TRUE upon success.  Returns a string with an error message.
+
+Notes
+	Uses the mailSender class variables to send the current e-mail.

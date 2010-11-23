@@ -1,0 +1,24 @@
+webHelper_successMsg()
+
+Description
+    string webHelper_successMsg(string $message)
+    Builds a success message with the proper markup for display.
+
+Parameters
+    message
+        A string value containing the text of the success message.
+
+Return Values
+    Returns a string value containing the success message with the appropriate markup.
+    
+Examples
+    <?php
+	...
+	if(empty($output)) {
+	    $output = webHelper_successMsg("Database successfully updated.");
+	}
+	...
+    ?>
+
+See Also
+    webHelper_errorMsg()

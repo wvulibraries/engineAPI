@@ -1,0 +1,15 @@
+fileHandler::returnMIMEType()
+
+Description
+    private string fileHandler::returnMIMEType(string $filename)
+
+Parameters
+    filename
+
+Return Values
+    
+Examples
+
+Notes
+
+See Also

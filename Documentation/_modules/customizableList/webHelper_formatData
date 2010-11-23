@@ -1,0 +1,15 @@
+webHelper_formatData()
+
+Description
+    array webHelper_formatData(array $data)
+
+Parameters
+    data
+
+Return Values
+    
+Examples
+    
+Notes
+   
+See Also

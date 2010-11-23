@@ -1,0 +1,30 @@
+internalEmail()
+
+Description
+    internalEmail(string $email)
+	Checks whether $engineVars['internalEmails'] contains $email.
+
+Parameters
+    email
+		String variable containing an e-mail message.
+		
+Return Values
+    Returns TRUE upon success.  FALSE otherwise.
+	
+Examples
+	<?php
+		...
+		if(filter_var($email, FILTER_VALIDATE_EMAIL)) {
+			if($internal) {
+				if (internalEmail($email)) {
+					return(TRUE);
+				}
+				return(FALSE);
+			}
+			return(TRUE);
+		}
+		...
+	?>
+
+See Also
+	mailSender::sendEmailBulk()

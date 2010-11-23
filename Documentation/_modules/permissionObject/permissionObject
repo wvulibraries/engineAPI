@@ -1,0 +1,16 @@
+permissionObject::__construct()
+
+Description
+    permissionObject::__construct(string $table, object $engine)
+
+Parameters
+    table
+    engine
+
+Return Values
+    
+Examples
+    
+Notes
+   
+See Also

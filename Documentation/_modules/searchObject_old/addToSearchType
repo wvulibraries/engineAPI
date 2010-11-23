@@ -1,0 +1,24 @@
+search::addToSearchType()
+
+Description
+    public void search::addToSearchType(string $searchType, string $tableID)
+    Checks whether or not $this->tablesUsed[$searchType] is set.  If not, creates the same as an array.  Checks array for the existence
+    of $tableID.  If it doesn't, adds a table and, if necessary, linked tables.
+Parameters
+    searchType
+	String variable specifying search type.
+
+    tableID
+	A string naming a table ID.
+
+Examples
+    <?php
+	...
+	$searchObj->addToSearchType("keyword",$tableID['instructors']);
+	$searchObj->addToSearchType("class",$tableID['classes']);
+	$searchObj->addToSearchType("instructor",$tableID['instructors']);
+	...
+    ?>
+   
+See Also
+    search::addSearchType()

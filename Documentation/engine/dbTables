@@ -1,0 +1,28 @@
+engineCMS::dbTables()
+
+Description
+    public mixed engineCMS::dbTables(string $action [, string $state = "prod" [, string $value = NULL]])
+    Adds elements to the internal dbTables array.
+
+Parameters
+    action
+	
+    state
+	Optional parameter with the DB's status.  Default value is "prod."
+    value
+	Optional parameter.  Default value is NULL.
+
+Return Values
+    TRUE, FALSE or the value stored in $this->dbTables[$action][$state]
+
+Examples
+
+    <?php
+	...
+	$engine->dbTables("accessPlainText", "prod", "accessPlainText");
+	...
+    ?>
+
+Notes
+   
+See Also

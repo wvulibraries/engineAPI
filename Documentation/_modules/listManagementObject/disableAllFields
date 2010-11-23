@@ -1,0 +1,18 @@
+listManagement::disableAllFields()
+
+Description
+    public bool listManagement::disableAllFields(void)
+    Iterates through each element of $this->fields and $this->disableField, and applies $this->disableField() on each.
+    
+Return Values
+    Returns TRUE upon completion.
+
+Examples
+    <?php
+	...
+	$listObj->disableAllFields();
+	...
+    ?>
+
+See Also
+    listManagement::disableField()

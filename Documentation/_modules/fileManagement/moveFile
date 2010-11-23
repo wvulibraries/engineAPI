@@ -1,0 +1,16 @@
+fileHandler::moveFile()
+
+Description
+    public mixed fileHandler::moveFile(string $oldFileName, string $newFileName)
+
+Parameters
+    oldFileName
+    newFileName
+
+Return Values
+    
+Examples
+
+Notes
+
+See Also

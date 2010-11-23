@@ -1,0 +1,13 @@
+tempDate()
+
+Description
+    string tempDate(array $attPairs)
+    Returns a string formatted according to the given format string using the given integer $attPairs['time'] or the current time if no timestamp is given.  
+    Defaults to current time if no time is provided.
+
+Parameters
+    attPairs
+    An array containing attribute pairs, $attPairs['time'] and $attPairs['format'].
+    
+Return Values
+    Returns a string value containing a formatted local time/date.

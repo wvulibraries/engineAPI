@@ -1,0 +1,43 @@
+htmlSanitize()
+
+Description
+    array htmlSanitize(array $var [, $quotes = ENT_QUOTES [, string $charset = "UTF-8" [, bool $doubleEncode = TRUE]]])
+    This function extends PHP's htmlentities() by accepting an array of string values rather than a single string value.
+	
+Parameters
+	var
+		An array containing applicable string elements to convert to HTML entities.
+		
+	quotes
+		Defines what will be done with 'single' and "double" quotes. It takes on one of three constants with the default being ENT_QUOTES.
+		ENT_COMPAT  	Will convert double-quotes and leave single-quotes alone.
+		ENT_QUOTES 		Will convert both double and single quotes.
+		ENT_NOQUOTES 	Will leave both double and single quotes unconverted.
+		
+	charset
+		Defines character set used in conversion. Presently, EngineCMS uses the UTF-8 character set as the default.  See Notes for link to other character sets.
+		
+	doubleEncode
+		If doubleEncode is set to FALSE PHP will not encode existing HTML entities.  The default is to convert everything.
+Return Values
+    Returns the original array, $var, with the applicable characters converted to HTML entities in each of the array's elements.
+	
+Examples
+	<?php
+		...
+		// Sets up a clean clean HTTP_REFERER
+		if (isset($_SERVER['HTTP_REFERER'])) {
+			$_SERVER['HTTP_REFERER'] = htmlSanitize($_SERVER['HTTP_REFERER']);
+		}
+		
+		if (isset($_SERVER['QUERY_STRING'])) {
+			$_SERVER['QUERY_STRING'] = htmlSanitize($_SERVER['QUERY_STRING']);
+		}
+		...
+	?>
+	
+Notes
+	http://us.php.net/manual/en/function.htmlentities.php describes the htmlentities() function.  A list of PHP supported character sets is included on the page.
+
+See Also
+	dbSanitize()

@@ -1,0 +1,402 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<object>
+
+	<name>addField</name>
+	<extends></extends>
+	<memberOf>listManagement</memberOf>
+	<visibility>public</visibility>
+		
+	<description>Adds a field, according to the parameters passed to the function, to the class variable, $this->fields[].</description>
+	
+	<parameters>
+		<parameter>
+			<name>field</name>
+			<type>mixed</type>
+			<description>Either an array or string is accepted. If the value is an array, any function parameters can also be defined. Any elements contained in the array will override the rest of the parameters listed. If the value is a string, it represents the field name.</description>
+			<optional>FALSE</optional>
+			<defaultValue></defaultValue>
+			<expectedValues>
+				<value>
+					<name></name>
+					<description></description>
+				</value>
+			</expectedValues>
+		</parameter>
+
+		<parameter>
+			<name>label</name>
+			<type>string</type>
+			<description>Friendly version of the field name to be used as a label.</description>
+			<optional>TRUE</optional>
+			<defaultValue>NULL</defaultValue>
+			<expectedValues>
+				<value>
+					<name></name>
+					<description></description>
+				</value>
+			</expectedValues>
+		</parameter>
+
+		<parameter>
+			<name>dupes</name>
+			<type>bool</type>
+			<description>Allows the use of duplicate values in the database.</description>
+			<optional>TRUE</optional>
+			<defaultValue>FALSE</defaultValue>
+			<expectedValues>
+				<value>
+					<name></name>
+					<description></description>
+				</value>
+			</expectedValues>
+		</parameter>
+
+		<parameter>
+			<name>blank</name>
+			<type>bool</type>
+			<description></description>
+			<optional>TRUE</optional>
+			<defaultValue>FALSE</defaultValue>
+			<expectedValues>
+				<value>
+					<name></name>
+					<description></description>
+				</value>
+			</expectedValues>
+		</parameter>
+
+		<parameter>
+			<name>email</name>
+			<type>bool</type>
+			<description>Describes whether the vlue should be an email address.</description>
+			<optional>TRUE</optional>
+			<defaultValue>FALSE</defaultValue>
+			<expectedValues>
+				<value>
+					<name></name>
+					<description></description>
+				</value>
+			</expectedValues>
+		</parameter>
+
+		<parameter>
+			<name>disabled</name>
+			<type>bool</type>
+			<description>Describes whether to disable the field when displayed.</description>
+			<optional>TRUE</optional>
+			<defaultValue>FALSE</defaultValue>
+			<expectedValues>
+				<value>
+					<name></name>
+					<description></description>
+				</value>
+			</expectedValues>
+		</parameter>
+
+		<parameter>
+			<name>size</name>
+			<type>string</type>
+			<description>The field's size when displayed.</description>
+			<optional>TRUE</optional>
+			<defaultValue>40</defaultValue>
+			<expectedValues>
+				<value>
+					<name></name>
+					<description></description>
+				</value>
+			</expectedValues>
+		</parameter>
+
+		<parameter>
+			<name>type</name>
+			<type>string</type>
+			<description>Type of field to display.</description>
+			<optional>TRUE</optional>
+			<defaultValue>text</defaultValue>
+			<expectedValues>
+				<value>
+					<name>text</name>
+					<description>An input form field of text type.</description>
+				</value>
+				<value>
+					<name>select</name>
+					<description>A dropdown select box.</description>
+				</value>
+				<value>
+					<name>plainText</name>
+					<description>Plain text instead of a form element.</description>
+				</value>
+				<value>
+					<name>hidden</name>
+					<description>A hidden input form field.</description>
+				</value>
+				<value>
+					<name>radio</name>
+					<description>A radio option.</description>
+				</value>
+				<value>
+					<name>date</name>
+					<description>An input field of type text. When clicked, it envokes a date picker.</description>
+				</value>
+				<value>
+					<name>textarea</name>
+					<description>A textarea input form field.</description>
+				</value>
+				<value>
+					<name>wysiwyg</name>
+					<description>A wysiwyg ("what you see is what you get") canvas element.</description>
+				</value>
+				<value>
+					<name>yesNoText</name>
+					<description>An input field of type text. Values of "1", TRUE, or "TRUE" in a database are displayed as "Yes". Values of "0", FALSE, or "FALSE" in a database are displayed as "No".</description>
+				</value>
+				<value>
+					<name>multiselect</name>
+					<description></description>
+				</value>
+			</expectedValues>
+		</parameter>
+
+		<parameter>
+			<name>options</name>
+			<type>array</type>
+			<description>An array containing a field's options.</description>
+			<optional>TRUE</optional>
+			<defaultValue>NULL</defaultValue>
+			<expectedValues>
+				<value>
+					<name>label</name>
+					<description>Used only when type is "select".</description>
+				</value>
+				<value>
+					<name>value</name>
+					<description>Used only when type is "select".</description>
+				</value>
+				<value>
+					<name>selected</name>
+					<description>Used only when type is "select".</description>
+				</value>
+				<value>
+					<name>width</name>
+					<description>Used only when type is "textarea".</description>
+				</value>
+				<value>
+					<name>height</name>
+					<description>Used only when type is "textarea".</description>
+				</value>
+				<value>
+					<name>valueTable</name>
+					<description>Used only when type is "multiselect".</description>
+				</value>
+				<value>
+					<name>valueDisplayID</name>
+					<description>Used only when type is "multiselect".</description>
+				</value>
+				<value>
+					<name>valueDisplayField</name>
+					<description>Used only when type is "multiselect".</description>
+				</value>
+				<value>
+					<name>select</name>
+					<description>Used only when type is "multiselect".</description>
+				</value>
+				<value>
+					<name>orderBy</name>
+					<description>Used only when type is "multiselect".</description>
+				</value>
+				<value>
+					<name>linkTable</name>
+					<description>Used only when type is "multiselect".</description>
+				</value>
+				<value>
+					<name>linkValueField</name>
+					<description>Used only when type is "multiselect".</description>
+				</value>
+				<value>
+					<name>linkObjectField</name>
+					<description>Used only when type is "multiselect".</description>
+				</value>
+			</expectedValues>
+		</parameter>
+
+		<parameter>
+			<name>readonly</name>
+			<type>bool</type>
+			<description>Describes whether to display the field as readonly.</description>
+			<optional>TRUE</optional>
+			<defaultValue>FALSE</defaultValue>
+			<expectedValues>
+				<value>
+					<name></name>
+					<description></description>
+				</value>
+			</expectedValues>
+		</parameter>
+
+		<parameter>
+			<name>value</name>
+			<type>mixed</type>
+			<description>The actual data to be displayed in the field. Primarily used when the form is redisplayed after an error.</description>
+			<optional>TRUE</optional>
+			<defaultValue>NULL</defaultValue>
+			<expectedValues>
+				<value>
+					<name></name>
+					<description></description>
+				</value>
+			</expectedValues>
+		</parameter>
+
+		<parameter>
+			<name>matchOn</name>
+			<type>array</type>
+			<description>An array containing matching information. If the value in your database table is a foreign key to data in another database table, the information contained here will map it to display the meaningful value instead of the foreign key id.</description>
+			<optional>TRUE</optional>
+			<defaultValue>NULL</defaultValue>
+			<expectedValues>
+				<value>
+					<name>table</name>
+					<description>The name of the database table to lookup.</description>
+				</value>
+				<value>
+					<name>key</name>
+					<description>The primary key of the database table.</description>
+				</value>
+				<value>
+					<name>field</name>
+					<description>The field from which to pull the value.</description>
+				</value>
+			</expectedValues>
+		</parameter>
+
+		<parameter>
+			<name>validate</name>
+			<type></type>
+			<description>Describes a validation method.</description>
+			<optional>TRUE</optional>
+			<defaultValue>NULL</defaultValue>
+			<expectedValues>
+				<value>
+					<name>url</name>
+					<description>The value must be a valid URL.</description>
+				</value>
+				<value>
+					<name>email</name>
+					<description>The value must be a valid email address.</description>
+				</value>
+				<value>
+					<name>phone</name>
+					<description>The value must be a valid phone number.</description>
+				</value>
+				<value>
+					<name>ipaddr</name>
+					<description>The value must be a valid IP address.</description>
+				</value>
+				<value>
+					<name>integer</name>
+					<description>The value must be a valid integer.</description>
+				</value>
+				<value>
+					<name>integerSpaces</name>
+					<description>The value must be a valid integer, also allows spaces.</description>
+				</value>
+				<value>
+					<name>alphaNumeric</name>
+					<description>The value must be a valid letter or number, also allows spaces.</description>
+				</value>
+				<value>
+					<name>alphaNumericNoSpaces</name>
+					<description>The value must be a valid letter or number.</description>
+				</value>
+				<value>
+					<name>alpha</name>
+					<description>The value must be a valid letter, also allows spaces.</description>
+				</value>
+				<value>
+					<name>alphaNoSpaces</name>
+					<description>The value must be a valid letter.</description>
+				</value>
+				<value>
+					<name>noSpaces</name>
+					<description>The value may be any string, as long as is does not contain spaces.</description>
+				</value>
+				<value>
+					<name>noSpecialChars</name>
+					<description>The value may be any string, as long as is does not contain any special characters.</description>
+				</value>
+				<value>
+					<name>Any regular expression.</name>
+					<description>You can also supply your own regular expression to validate the field against.</description>
+				</value>
+			</expectedValues>
+		</parameter>
+	</parameters>
+
+	<return>
+		<type>bool</type>
+		<description>Returns boolean value of TRUE unless $field['field'] hasn't previously been set, in which case the function returns a value of FALSE.</description>
+	</return>
+
+	<examples>
+		<example>
+			<name>Example #1</name>
+			<code>
+				$listObj->addField("firstName", "First Name", TRUE);
+			</code>
+			<description>This creates a text field called "firstName" labelled "First Name". It allows duplicates.</description>
+		</example>
+		<example>
+			<name>Example #2</name>
+			<code>
+				$options['field'] = "name";
+				$options['label'] = "Name";
+				$listObj->addField($options);
+			</code>
+			<description>This creates a field called "name" labelled "Name".</description>
+		</example>
+		<example>
+			<name>Example #3</name>
+			<code>
+				$options['field'] = "os";
+				$options['label'] = "Operating System";
+				$options['type']  = "select";
+				$options['dupes'] = TRUE;
+
+				$sql = sprintf("SELECT * FROM %s ORDER BY name",
+					$engine->openDB->escape("operatingSystems")
+					);
+				$engine->openDB->sanitize = FALSE;
+				$sqlResult                = $engine->openDB->query($sql);
+
+				while ($row = mysql_fetch_array($sqlResult['result'], MYSQL_BOTH)) {
+					$tmp['value'] = $row[0];
+					$tmp['label'] = $row['name'];
+					$options['options'][]  = $tmp;
+				}
+
+				$listObj->addField($options);
+			</code>
+			<description>This creates a select box with values that are contained in the $options array.</description>
+		</example>
+		<example>
+			<name>Example #4</name>
+			<code>
+				$listObj->addField("userName", "Username");
+				$listObj->addField('&lt;a href="index.php?user={userName}"&gt;Edit&lt;/a&gt;', "Access", FALSE, FALSE, FALSE, FALSE, 0, "plainText");
+			</code>
+			<description>This creates a plain text link that says "Edit" with a label of "Access". The {} can be used to pull a value from another predefined field.</description>
+		</example>
+	</examples>
+
+	<notes></notes>
+
+	<seeAlso>
+		listManagement::removeField()
+		listManagement::buildFieldListInsert()
+		listManagement::buildFieldValueInsert()
+		listManagement::disableAllFields()
+		listManagement::disableField()
+	</seeAlso>
+
+</object>

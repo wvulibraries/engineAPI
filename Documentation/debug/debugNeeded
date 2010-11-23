@@ -1,0 +1,25 @@
+debugNeeded()
+
+Description
+    bool debugNeeded(string $file)
+    
+Parameters
+    file
+        String to be used as index in $DEBUG[]
+
+Return Values
+    Returns boolean value of TRUE or FALSE.
+
+Examples
+    // Setup debugging
+    debugBuild($this);
+    if (debugNeeded("includes")) {
+	debugDisplay("includes","\$cleanPost",1,"Contents of the \$cleanPost array.",$this->cleanPost);
+    }
+    if (debugNeeded("includes")) {
+	debugDisplay("includes","\$cleanGet",1,"Contents of the \$cleanGet array.",$this->cleanGet);
+    }
+   
+See Also
+  debugBuild()
+  debugDisplay()

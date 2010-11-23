@@ -1,0 +1,15 @@
+webHelper_insertData()
+
+Description
+    string webHelper_insertData(string $template, array $vars)
+
+Parameters
+    template
+    vars
+Return Values
+    
+Examples
+    
+Notes
+   
+See Also

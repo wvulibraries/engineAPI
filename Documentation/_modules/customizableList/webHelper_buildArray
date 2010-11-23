@@ -1,0 +1,15 @@
+webHelper_buildArray()
+
+Description
+    array webHelper_buildArray(string $template)
+
+Parameters
+    template
+
+Return Values
+    
+Examples
+    
+Notes
+   
+See Also

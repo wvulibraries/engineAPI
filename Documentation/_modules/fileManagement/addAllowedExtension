@@ -1,0 +1,15 @@
+fileHandler::addAllowedExtension()
+
+Description
+    public bool fileHandler::addAllowedExtension(string $extension)
+
+Parameters
+    extension
+
+Return Values
+    
+Examples
+
+Notes
+
+See Also

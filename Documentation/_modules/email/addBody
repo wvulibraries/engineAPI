@@ -1,0 +1,17 @@
+mailSender::addBody()
+
+Description
+    public void mailSender::addBody(string $body)
+	Sets $this->body to the value of the parameter, $body.
+Parameters
+    body
+		The text of the message body.
+
+See Also
+    mailSender::addAttachment()
+	mailSender::addBCC()
+    mailSender::addCC()
+    mailSender::addRecipient()
+    mailSender::addReplyTo()
+	mailSender::addSender()
+	mailSender::addSubject()

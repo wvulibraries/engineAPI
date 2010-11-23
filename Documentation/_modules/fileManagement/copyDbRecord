@@ -1,0 +1,18 @@
+fileHandler::copyDbRecord()
+
+Description
+    public mixed fileHandler::copyDbRecord(string $oldTable, string $newTable, array $fields [, bool $mysqlFileName = TRUE])
+
+Parameters
+    oldTable
+    newTable
+    fields
+    mysqlFileName
+
+Return Values
+    
+Examples
+
+Notes
+
+See Also

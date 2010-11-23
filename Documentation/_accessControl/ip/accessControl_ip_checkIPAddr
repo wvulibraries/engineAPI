@@ -1,0 +1,15 @@
+accessControl_ip_checkIPAddr()
+
+Description
+    mixed accessControl_ip_checkIPAddr(string $value [, bool $state = FALSE])
+    Compares an IP address, $value, to a range of IP addresses in an access control list.
+
+Parameters
+    value
+	The IP address to check.
+
+    state
+	The state of the IP address and whether or not to deny it.  Default value is FALSE.
+
+Return Values
+    The state of the IP address passed to the function.  Returned as a boolean value.  Returns null if none of the function's test conditions is met.

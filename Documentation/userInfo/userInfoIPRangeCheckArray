@@ -1,0 +1,16 @@
+userInfoIPRangeCheckArray()
+
+Description
+    userInfoIPRangeCheckArray(string $ipRanges [, string $checkIP = NULL])
+
+Parameters
+    ipRanges
+    checkIP
+
+Return Values
+    
+Examples
+    
+Notes
+   
+See Also
