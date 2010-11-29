@@ -142,7 +142,7 @@ class EngineCMS {
 		
 		// Startup engines database connection
 		global $engineDB;
-		$engineDB = new engineDB($engineVars['mysql']['username'],$engineVars['mysql']['password'],$engineVars['mysql']['server'],$engineVars['mysql']['port'],$engineVars['logDB']);
+		$engineDB = new engineDB($engineVars['mysql']['username'],$engineVars['mysql']['password'],$engineVars['mysql']['server'],$engineVars['mysql']['port'],$engineVars['logDB'],FALSE);
 		
 		// Start up the logging
 		if ($engineVars['log']) {
@@ -524,12 +524,11 @@ class EngineCMS {
 	private function engineLog($type="access",$function=NULL,$message=NULL) {
 
 		global $engineVars;
+		global $engineDB;
 
-		if (!$engineVars['log']) {
+		if (!$engineVars['log'] || $engineDB->status === FALSE) {
 			return(FALSE);
 		}
-
-		global $engineDB;
 
 		// setup the variables
 		$date      = time();

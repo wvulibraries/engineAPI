@@ -8,6 +8,7 @@ class engineDB {
 	private $database = NULL;
 	private $server   = NULL;
 	private $port     = NULL;
+	private $die      = TRUE; // If set to FALSE, we will not die when a database cannot be connected too.
 	
 	public $status    = FALSE; // If the connection to the database succeeds this is set to TRUE
 	
@@ -17,19 +18,18 @@ class engineDB {
 	//private $server     = "localhost";
 	//private $serverPort = "3306";
 	
-	function __construct($user,$passwd,$server,$port,$db) {
+	function __construct($user,$passwd,$server,$port,$db,$die=TRUE) {
 		
 		$this->username = $user;
 		$this->password = $passwd;
 		$this->database = $db;
 		$this->server   = $server;
 		$this->port     = $port;
+		$this->die      = $die;
 		
 		// Check that we have a Username, Password, and Database provided
 		if (isset($user) && isset($passwd) && isset($db)) {
 			$this->connect();
-			
-
 		}
 	}
 	
@@ -181,7 +181,8 @@ class engineDB {
 	}
 	
 	private function connect() {
-		$this->dbLink = mysql_connect($this->server.":".$this->port,$this->username,$this->password) or die("mysql.php dbLink connect");
+		$this->dbLink = @mysql_connect($this->server.":".$this->port,$this->username,$this->password) or $this->connectFailed();
+		//or die("mysql.php dbLink connect");
 		
 		// Ensure we got connected
 		// Select the Database
@@ -190,10 +191,19 @@ class engineDB {
 			return(TRUE);
 		}
 		else {
-			die("MYSQL Error, Connecting");
+			$this->connectFailed();
+			//die("MYSQL Error, Connecting");
 		}
 		
 		return(FALSE);
+	}
+	
+	public function connectFailed() {
+		if ($this->die === FALSE) {
+			return(FALSE);
+		}
+		
+		die("MYSQL Error, Connecting ...");
 	}
 }
 
