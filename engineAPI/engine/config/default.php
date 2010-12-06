@@ -111,6 +111,9 @@ $engineVars['logDB'] = "engineCMS";
 // Turns access controls lists on and off
 $engineVars['accessExistsTest'] = TRUE;
 
+//Default table for MySQL authentication
+$engineVars['mysqlAuthTable'] = "users";
+
 //Explode & Implode string delimiter
 $engineVars['delim'] = "%|%engineCMSDelim%|%";
 

@@ -6,8 +6,14 @@ $loginFunctions['mysql'] = "mysqlLogin";
 function mysqlLogin($username,$password,$engine) { 
 	
 	global $engineDB;
+	global $engineVars;
+
+	if (!isset($engineVars['mysqlAuthTable'])) {
+		$engineVars['mysqlAuthTable'] = "users";
+	}
 	
-	$sql = sprintf("SELECT * FROM users WHERE username='%s' AND password='%s'",
+	$sql = sprintf("SELECT * FROM %s WHERE username='%s' AND password='%s'",
+		$engineDB->escape($engineVars['mysqlAuthTable']),
 		$engineDB->escape($username),
 		$engineDB->escape(md5($password))
 		);
@@ -15,7 +21,7 @@ function mysqlLogin($username,$password,$engine) {
 	$engineDB->sanitize = FALSE;			
 	$sqlResult = $engineDB->query($sql);
 	
-	if (mysql_num_rows($sqlResult['result']) == 0) {
+	if (!$sqlResult['result'] || mysql_num_rows($sqlResult['result']) == 0) {
 		return(FALSE);
 	}
 	
