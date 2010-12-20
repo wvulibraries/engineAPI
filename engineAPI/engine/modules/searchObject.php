@@ -43,13 +43,28 @@ class search {
 		$fromClause   = NULL;
 		$selectClause = NULL;
 		$fieldNames   = array();
+		$from         = array();
 		
+
 		if (is_array($this->links)) {
 			foreach ($this->links as $link) {
-				$fromClause .= isnull($fromClause)?$link['table1']:"";
-				$fromClause .= " LEFT JOIN ".$link['table2'];
-				$fromClause .= isset($link['table2alias'])?" AS ".$link['table2alias']:"";
-				$fromClause .= " ON ".(isset($link['table2alias'])?$link['table2alias']:$link['table2']).".".$link['field2']."=".$link['table1'].".".$link['field1'];
+				if (is_empty($from)) {
+					$from[$link['table1']][] = $link['table1'];
+				}
+				$from[$link['table2']][] = $link['table2'].".".$link['field2']."=".$link['table1'].".".$link['field1'];
+			}
+		}
+
+		foreach ($from as $tName => $fields) {
+			if (isnull($fromClause)) {
+				$fromClause .= $tName;
+			}
+			else {
+				$fromClause .= " LEFT JOIN ".$tName." ON (";
+				foreach ($fields as $key => $value) {
+					$fromClause .= (($key!=0)?" AND ":"").$value;
+				}
+				$fromClause .= ")";
 			}
 		}
 
@@ -146,6 +161,7 @@ class search {
 		$this->links  = array();
 
 		$this->whereClause = NULL;
+		$this->orderBy     = NULL;
 
 	}
 
@@ -167,6 +183,9 @@ class search {
 		$fieldNames = array();
 		foreach ($this->tables as $table) {
 			foreach ($table['fields'] as $field) {
+				if (isset($field['search']) && $field['search'] === FALSE) {
+					continue;
+				}
 				$fieldNames[$table['name']][] = $field['fieldName'];
 			}
 			
@@ -271,10 +290,10 @@ class search {
 
 							}
 							
-							$value = nl2br(htmlSanitize($result[$field['fieldName']]));
+							$value = $result[$field['fieldName']];
 							foreach ($this->searchArray as $keyword) {
 								if (!array_key_exists(strtolower($keyword),$this->boolOperands)) {
-									$value = kwic(trim($keyword,"+-*"),$value);
+									$value = kwic(htmlSanitize(trim($keyword,"+-*")),$value);
 								}
 							}
 							$output .= $value;
@@ -560,6 +579,7 @@ class search {
 		
 		$output = NULL;
 		$bool   = isset($this->engine->cleanPost['HTML']['bool'])?$this->engine->cleanPost['HTML']['bool']:array();
+		$type   = isset($this->engine->cleanPost['HTML']['searchTypes'])?$this->engine->cleanPost['HTML']['searchTypes']:array();
 		$search = isset($this->engine->cleanPost['HTML']['searchString'])?$this->engine->cleanPost['HTML']['searchString']:array();
 		
 		
@@ -582,6 +602,21 @@ class search {
 				$output .= '<option value="and"'.($bool[$i]=='and'?' selected':'').'>AND</option>';
 				$output .= '<option value="or"'.($bool[$i]=='or'?' selected':'').'>OR</option>';
 				$output .= '<option value="not"'.($bool[$i]=='not'?' selected':'').'>NOT</option>';
+				$output .= '</select>';
+			}
+			$output .= '</td>';
+			
+			$output .= '<td>';
+			if (!empty($this->searchTypes)) {
+				$output .= '<select name="searchTypes[]">';
+				foreach ($this->searchTypes as $searchType) {
+					if (isset($type[$i]) && $type[$i]==$searchType['name']) {
+						$output .= '<option value="'.$searchType['name'].'" selected>'.$searchType['label'].'</option>';
+					}
+					else {
+						$output .= '<option value="'.$searchType['name'].'">'.$searchType['label'].'</option>';
+					}
+				}
 				$output .= '</select>';
 			}
 			$output .= '</td>';
