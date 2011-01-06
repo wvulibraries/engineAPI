@@ -95,7 +95,7 @@ class Snippet {
 				alert(txt);
 			}
 		</script>
-		<?
+		<?php
 		
 		$output = "";
 		
