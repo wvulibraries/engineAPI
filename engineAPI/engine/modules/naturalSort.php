@@ -1,4 +1,4 @@
-<?
+<?php
 /* $array         = Array to be sorted
  * $col           = The column in a multi dimensional array.
  * $ignoreSymbols = BOOL, default to TRUE. If True, ignores all symbols in the string while sorting

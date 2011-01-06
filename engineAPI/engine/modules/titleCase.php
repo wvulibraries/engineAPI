@@ -1,4 +1,4 @@
-<?
+<?php
 /*
 Plugin Name: Title Case
 Plugin URI: http://nanovivid.com/stuff/wordpress/title-case/

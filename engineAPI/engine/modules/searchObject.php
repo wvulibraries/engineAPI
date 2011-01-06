@@ -1,4 +1,4 @@
-<?
+<?php
 class search {
 	
 	private $engine         = NULL;

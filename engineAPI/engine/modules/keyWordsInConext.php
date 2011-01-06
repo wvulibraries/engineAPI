@@ -1,4 +1,4 @@
-<?
+<?php
 //Key Words in Context
 // Highlights $str1 in $str2
 //
