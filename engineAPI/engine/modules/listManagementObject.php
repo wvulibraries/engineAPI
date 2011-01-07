@@ -69,7 +69,7 @@ class listManagement {
 	
 	can also be used for textareas. height and width are valid options, and expect integers. 
 	*/
-	public function addField($field,$label=NULL,$dupes=FALSE,$blank=FALSE,$email=FALSE,$disabled=FALSE,$size="40",$type="text",$options=NULL,$readonly=FALSE,$value=NULL,$matchOn=NULL,$validate=NULL) {
+	public function addField($field,$label=NULL,$dupes=FALSE,$blank=FALSE,$email=FALSE,$disabled=FALSE,$size="40",$type="text",$options=NULL,$readonly=FALSE,$value=NULL,$matchOn=NULL,$validate=NULL,$original=FALSE) {
 		
 		if (is_array($field)) {
 			
@@ -89,6 +89,7 @@ class listManagement {
 			$value    = (isset($field['value']))?$field['value']:$value;
 			$matchOn  = (isset($field['matchOn']))?$field['matchOn']:$matchOn;
 			$validate = (isset($field['validate']))?$field['validate']:$validate;
+			$original = (isset($field['original']))?$field['original']:$original;
 			$field    = $field['field'];
 		}
 
@@ -115,7 +116,8 @@ class listManagement {
 			'readonly' => $readonly,
 			'value'    => $value,
 			'matchOn'  => $matchOn,
-			'validate' => $validate
+			'validate' => $validate,
+			'original' => $original
 			);
 
 		if ($type == "hidden") {
@@ -227,6 +229,10 @@ class listManagement {
 			$output .= "<td>";
 			if ($I['type'] == "text" || $I['type'] == "date") {
 				
+				if ($I['original'] === TRUE && isset($I['value'])) {
+					$output .= '<input type="hidden" name="original_'.$I['field'].'_insert" value="'.(htmlentities($I['value'])).'" />';
+				}
+				
 				$value = ($error === TRUE)?$this->engine->cleanPost['HTML'][$I['field'].'_insert']:"";
 				if (is_empty($value) && !isnull($I['value'])) {
 					$value = htmlentities($I['value']);
@@ -242,6 +248,10 @@ class listManagement {
 				$output .= " />";
 			}
 			else if ($I['type'] == "select") {
+				
+				if ($I['original'] === TRUE && isset($I['value'])) {
+					$output .= '<input type="hidden" name="original_'.$I['field'].'_insert" value="'.(htmlentities($I['value'])).'" />';
+				}
 				
 				$output .= "<select name=\"".$I['field']."_insert\"";
 				$output .= ($I['readonly'] === TRUE)?" readonly ":"";
@@ -260,6 +270,11 @@ class listManagement {
 				$output .= "</select>";
 			}
 			else if ($I['type'] == "textarea") {
+				
+				if ($I['original'] === TRUE && isset($I['value'])) {
+					$output .= '<input type="hidden" name="original_'.$I['field'].'_insert" value="'.(htmlentities($I['value'])).'" />';
+				}
+				
 				$output .= "<textarea name=\"".$I['field']."_insert\"";
 				if (isset($I['options']['width'])) {
 					$output .= " cols=\"".(htmlSanitize($I['options']['width']))."\"";
