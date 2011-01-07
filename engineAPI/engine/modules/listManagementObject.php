@@ -508,6 +508,10 @@ class listManagement {
 						}
 					}
 					
+					if ($this->fields[$I]['original'] === TRUE && isset($value)) {
+						$output .= '<input type="hidden" name="original_'.$this->fields[$I]['field'].'_'.$row[0].'" value="'.(htmlentities($I['value'])).'" />';
+					}
+					
 					$output .= "<input type=\"text\" size=\"".$this->fields[$I]['size']."\" name=\"".$this->fields[$I]['field']."_".$row[0]."\" id=\"".$this->fields[$I]['field']."_".$row[0]."\" class=\"".$this->fields[$I]['field']."";
 					$output .= "\" value=\"".htmlentities($value)."\" ";
 					$output .= ($this->fields[$I]['disabled'] === TRUE)?" disabled ":"";
@@ -544,12 +548,20 @@ class listManagement {
 						$row[$this->fields[$I]['field']] = "";
 					}
 					
+					if ($this->fields[$I]['original'] === TRUE && isset($I['value'])) {
+						$output .= '<input type="hidden" name="original_'.$this->fields[$I]['field'].'_'.$row[0].'" value="'.(htmlentities($value)).'" />';
+					}
+					
 					$output .= "<input type=\"text\" size=\"".$this->fields[$I]['size']."\" name=\"".$this->fields[$I]['field']."_".$row[0]."\" id=\"".$this->fields[$I]['field']."_".$row[0]."\" class=\"".$this->fields[$I]['field']." date_input\" value=\"".(!is_empty($row[$this->fields[$I]['field']])?htmlentities(date("m/d/Y",$row[$this->fields[$I]['field']])):"")."\" ";
 					$output .= ($this->fields[$I]['disabled'] === TRUE)?" disabled ":"";
 					$output .= ($this->fields[$I]['readonly'] === TRUE)?" readonly ":"";
 					$output .= "/>";
 				}
 				else if ($this->fields[$I]['type'] == "select") {
+
+					if ($this->fields[$I]['original'] === TRUE && isset($value)) {
+						$output .= '<input type="hidden" name="original_'.$this->fields[$I]['field'].'_'.$row[0].'" value="'.(htmlentities($value)).'" />';
+					}
 
 					$output .= "<select name=\"".$this->fields[$I]['field']."_".$row[0]."\"";
 					$output .= ($this->fields[$I]['disabled'] === TRUE)?" disabled ":"";
@@ -589,7 +601,14 @@ class listManagement {
 					$output .= $tempField;
 				}
 				else if ($this->fields[$I]['type'] == "textarea") {
+					
+					
 					$value = $row[$this->fields[$I]['field']];
+					
+					if ($this->fields[$I]['original'] === TRUE && isset($value)) {
+						$output .= '<input type="hidden" name="original_'.$this->fields[$I]['field'].'_'.$row[0].'" value="'.(htmlentities($value)).'" />';
+					}
+					
 					if (!isnull($this->fields[$I]['matchOn'])) {
 						$sql = "SELECT ".$this->engine->openDB->escape($this->fields[$I]['matchOn']['field'])." FROM ".$this->engine->openDB->escape($this->fields[$I]['matchOn']['table'])." WHERE ".$this->engine->openDB->escape($this->fields[$I]['matchOn']['key'])."='".$this->engine->openDB->escape($row[$this->fields[$I]['field']])."'";
 						
