@@ -29,6 +29,9 @@ class listManagement {
 	public $updateButtonText = "Update";
 	public $insertButtonText = "Insert";
 	
+	public $debug           = FALSE; // If set to TRUE, will display SQL errors. MUST BE SET TO FALSE FOR 
+									 // Production
+	
 	function __construct($engine,$table) {
 		
 		if (!($engine instanceof EngineCMS)) {
@@ -391,7 +394,7 @@ class listManagement {
 				);
 		}
 
-		if ($debug === TRUE) {
+		if ($this->debug === TRUE) {
 			print "SQL: ".$sql."<br />";
 		}
 
@@ -399,8 +402,9 @@ class listManagement {
 		$sqlResult = $this->engine->openDB->query($sql);
 
 		if (!$sqlResult['result']) {
-			if ($debug === TRUE) {
-				print "SQL Error: ".$sqlResult['error']."<br />";
+			if ($this->debug === TRUE) {
+				$output .= webHelper_errorMsg($sqlResult['error']."<br />");
+				$output .= webHelper_errorMsg($sqlResult['query']."<br />");
 			}
 			//return webHelper_errorMsg("Error fetching list for Edit table.");
 			return webHelper_errorMsg("SQL Error");
@@ -805,6 +809,10 @@ class listManagement {
 		
 		if (!$sqlResult['result']) {
 			$output .= webHelper_errorMsg("Insert Error: ");
+			if ($this->debug === TRUE) {
+				$output .= webHelper_errorMsg($sqlResult['error']."<br />");
+				$output .= webHelper_errorMsg($sqlResult['query']."<br />");
+			}
 			
 		}
 		else {
@@ -859,7 +867,11 @@ class listManagement {
 							$sqlResult                = $this->engine->openDB->query($sql);
 							
 							if (!$sqlResult['result']) {
-								$output .= webHelper_errorMsg("MultiSelect Insert Error: ".$sqlResult['error']);
+								$output .= webHelper_errorMsg("MultiSelect Insert Error: <br />");
+								if ($this->debug === TRUE) {
+									$output .= webHelper_errorMsg($sqlResult['error']."<br />");
+									$output .= webHelper_errorMsg($sqlResult['query']."<br />");
+								}
 							}
 						}
 					}
@@ -900,7 +912,11 @@ class listManagement {
 				$sqlResult = $this->engine->openDB->query($sql);
 
 				if (!$sqlResult['result']) {
-					$output .= webHelper_errorMsg("Delete Error.");
+					$output .= webHelper_errorMsg("Delete Error. <br />");
+					if ($this->debug === TRUE) {
+						$output .= webHelper_errorMsg($sqlResult['error']."<br />");
+						$output .= webHelper_errorMsg($sqlResult['query']."<br />");
+					}
 					$error["error"]   = TRUE;
 				}
 
@@ -915,7 +931,11 @@ class listManagement {
 		$sqlResult = $this->engine->openDB->query($sql);
 
 		if (!$sqlResult['result']) {
-			$output .= webHelper_errorMsg("Error fetching table entries");
+			$output .= webHelper_errorMsg("Error fetching table entries. <br />");
+			if ($this->debug === TRUE) {
+				$output .= webHelper_errorMsg($sqlResult['error']."<br />");
+				$output .= webHelper_errorMsg($sqlResult['query']."<br />");
+			}
 			$error["error"]   = TRUE;
 			//$sqlResult['error']
 		}
@@ -1033,9 +1053,13 @@ class listManagement {
 			$sqlResult2 = $this->engine->openDB->query($sql);
 
 			if (!$sqlResult2['result']) {
-				$output .= webHelper_errorMsg("Update Error.");
+				$output .= webHelper_errorMsg("Update Error.<br />");
+				if ($this->debug === TRUE) {
+					$output .= webHelper_errorMsg($sqlResult['error']."<br />");
+					$output .= webHelper_errorMsg($sqlResult['query']."<br />");
+				}
 				$error["error"]   = TRUE;
-				//$output .= $sql;
+				
 			}
 
 		}
