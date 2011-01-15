@@ -186,14 +186,14 @@ class Snippet {
 				snippetInfoArray[ID][id] = \"true\";
 				$.cookie(id, \"true\");
 				var img = document.getElementById(id+\"_img\");
-				img.src=\"/images/minus.gif\";
+				img.src=\"".$engineVars['imgListRetractedIcon']."\";
 			}
 			else { 
 				$('#'+id+'').hide('slow');
 				snippetInfoArray[ID][id] = \"false\";
 				$.cookie(id, \"false\");
 				var img = document.getElementById(id+\"_img\");
-				img.src=\"/images/plus.gif\";
+				img.src=\"".$engineVars['imgListExpandedIcon']."\";
 			}
 		}
 		</script>
