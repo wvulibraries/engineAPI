@@ -212,7 +212,7 @@ class listManagement {
 			$output .= '<input type="hidden" name="'.$I['field'].'_insert" value="'.htmlentities($I['value']).'" />';
 		}
 		
-		$output .= "<table class=\".engineListInsertTable\">";
+		$output .= "<table class=\"engineListInsertTable\">";
 		foreach ($this->fields as $I) {
 			
 			if ($I['type'] == "plainText" || $I['type'] == "radio") {
