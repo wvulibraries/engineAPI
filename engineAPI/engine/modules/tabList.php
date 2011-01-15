@@ -25,10 +25,15 @@ class tabList {
 			unset($this->engine->cleanGet['HTML']['currentTabItem']);
 		}		
 		$queryString = array();
-		foreach ($this->engine->cleanGet['HTML'] as $I=>$V) {
-			$queryString[] = "$I=$V";
+		if (isset($this->engine->cleanGet['HTML'])) {
+			foreach ($this->engine->cleanGet['HTML'] as $I=>$V) {
+				$queryString[] = "$I=$V";
+			}
+			$queryString = implode("&amp;",$queryString);
 		}
-		$queryString = implode("&amp;",$queryString);
+		else {
+			$queryString = "";
+		}
 		
 		$output = "<ul class=\"tabList\">";
 		$count = 0;
