@@ -49,6 +49,8 @@ $engineVars['tiny_mce_JS']     = $engineVars['engineInc'] ."/wysiwyg/tiny_mce.js
 $engineVars['imgDeleteIcon']        = $engineVars['engineInc'] ."/images/minusIcon.gif";
 $engineVars['imgListRetractedIcon'] = $engineVars['engineInc'] ."/images/arrowRight.gif";
 $engineVars['imgListExpandedIcon']  = $engineVars['engineInc'] ."/images/arrowDown.gif";
+$engineVars['imgPlusSign']          = $engineVars['engineInc'] ."/images/plug.gif";
+$engineVars['imgMinusSign']         = $engineVars['engineInc'] ."/images/minus.gif";
 
 //Directories
 // The EngineAPI directories should be OUTSIDE of your document root and
