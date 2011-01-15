@@ -1211,6 +1211,11 @@ class listManagement {
 				$error .= webHelper_errorMsg("Entry, ".htmlentities($data).", not a valid Email Address.");
 			}
 		}
+		else if ($validate == "internalEmail") {
+			if (!validateEmailAddr($data,TRUE)) {
+				$error .= webHelper_errorMsg("Entry, ".htmlentities($data).", not a valid Email Address.");
+			}
+		}
 		else if ($validate == "phone") {
 			if (!validPhoneNumber($data)) {
 				$error .= webHelper_errorMsg("Entry, ".htmlentities($data).", not a valid Phone.");
