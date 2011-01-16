@@ -14,8 +14,10 @@ class tableObject {
 	
 	public $class           = NULL; // CSS Class for the table
 	public $id              = NULL; // CSS ID for the Table
-	                                // If you have more than 1 table on a page, ID is highly recommended. Many items will prefix
+	                                // If you have more than 1 table on a page, ID is highly recommended. 
+									// Many items will prefix
 	                                // id to other classes/IDs if it is available 
+	public $classTD         = FALSE; // Prints the column number as a class on each TD in the Table
 	public $title           = NULL; // HTML5 Title Attribute
 	public $summary         = NULL; // Table Summary, required for accessibility. Will print an error if not provided
 	public $summaryErrorMsg = TRUE; // if no summary is provided, print a reminder message
@@ -144,7 +146,7 @@ class tableObject {
 		}
 		
 		$output .= "<table";
-		$output .= ($this->id)?' id="'.$this->id.'""':"";
+		$output .= ($this->id)?' id="'.$this->id.'"':"";
 		
 		$output .= ' class="tableObject';
 		$output .= ($this->sortable === TRUE)?" sortable":"";
@@ -229,7 +231,10 @@ class tableObject {
 				
 				$output .= "<td";
 				if (!isnull($this->groupBy) && $colCount == $this->groupBy) {
-					$output .= ' class="'.$stripeGroupBy.' groupByCell"';
+					$output .= ' class="'.(($this->classTD === TRUE)?"td".$colCount." ":"").''.$stripeGroupBy.' groupByCell"';
+				}
+				else if ($this->classTD === TRUE) {
+					$output .= ' class="td'.$colCount.'"';
 				}
 				$output .= ">";
 				if ($colCount++ != $this->groupBy || isnull($this->groupBy) || ($colCount != $this->groupBy && isset($this->groupBy) && $V != $prevGroupBy)) {
@@ -256,10 +261,12 @@ class tableObject {
 				if ($this->numberRows === TRUE) {
 					$output .= "<td></td>";
 				}
+				$colCount = 0;
 				foreach ($this->colFooters as $I=>$V) {
-					$output .= '<td id="'.(($this->id)?$this->id:"").'_footer_'.$V.'">';
+					$output .= '<td id="'.(($this->id)?$this->id:"").'_footer_'.$V.'" '.(($this->classTD === TRUE)?'class="td'.$colCount.'" ':"").'>';
 					$output .= $V;
 					$output .= "</td>";
+					$colCount++;
 				}
 			}
 			$output .= "</tr>";
