@@ -605,6 +605,10 @@ class EngineCMS {
 				//engine Replacements	
 				$line = preg_replace_callback("/\{engine\s+(.+?)\}/",array( &$this, 'engineMatches'),$line);
 
+				if ($engineVars['replaceDoubleQuotes'] === TRUE) {
+					$line = preg_replace_callback('/(<[^"]+=)("{2})([^>]+>)/',array( &$this, 'engineDQMatches'),$line);
+				}
+
 				//module Replacements
 				foreach ($this->moduleTemplateEngine as $plugin) {
 					if(isset($plugin['pattern']) && isset($plugin['function'])) {
@@ -635,6 +639,7 @@ class EngineCMS {
 		return($content);
 	}
 	
+	
 	private function engineVarMatches($matches) {
 		global $engineVars;
 		
@@ -662,6 +667,13 @@ class EngineCMS {
 		// All Lowercase 
 		// Title Case (cap first letter of each word)
 
+	}
+	
+	private function engineDQMatches($matches) {
+		global $engineVars;
+		
+		$output = $matches[1].'"'.$engineVars['replaceDQCharacter'].'"'.$matches[3];
+		return($output);
 	}
 
 	private function engineMatches($matches) {

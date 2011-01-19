@@ -104,6 +104,9 @@ $engineVars['rss2.0'] = $engineVars['rssDir'] ."/rss20.xml";
 
 //Behavior
 $engineVars['stripCarriageReturns'] = FALSE;
+$engineVars['replaceDoubleQuotes']  = TRUE; // if engine sees "" in attributes, replaces it 
+									    	//with "~" where ~ is replaceDQCharacter
+$engineVars['replaceDQCharacter']   = "~"; // any string
 
 //Logging
 $engineVars['log']   = TRUE;
