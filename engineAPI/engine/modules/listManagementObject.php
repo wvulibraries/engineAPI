@@ -513,7 +513,7 @@ class listManagement {
 					}
 					
 					if ($this->fields[$I]['original'] === TRUE && isset($value)) {
-						$output .= '<input type="hidden" name="original_'.$this->fields[$I]['field'].'_'.$row[0].'" value="'.(htmlentities($I['value'])).'" />';
+						$output .= '<input type="hidden" name="original_'.$this->fields[$I]['field'].'_'.$row[0].'" value="'.(htmlentities($value)).'" />';
 					}
 					
 					$output .= "<input type=\"text\" size=\"".$this->fields[$I]['size']."\" name=\"".$this->fields[$I]['field']."_".$row[0]."\" id=\"".$this->fields[$I]['field']."_".$row[0]."\" class=\"".$this->fields[$I]['field']."";
