@@ -15,6 +15,8 @@ class engineDB {
 	public $sanitize   = TRUE;
 	public $queryArray = TRUE;
 	
+	private $transArray = array(); // array of transaction queries 
+	
 	//private $server     = "localhost";
 	//private $serverPort = "3306";
 	
@@ -145,6 +147,146 @@ class engineDB {
 		
 		$this->sanitize = TRUE;
 		return(($result)?$result:$resultArray);
+	}
+	
+	// $actions:
+	// 		query
+	//		run
+	//
+	// Usage: Add queries
+	//		  run (provide table name)
+	//        evaluate what happened.
+	public function transaction($action, $query=NULL) {
+		
+		if ($action == "query") {
+			if (isnull($query)) {
+				return FALSE;
+			}
+			$this->transArray[] = $query;
+		}
+		if ($action == "run") {
+			
+			if (isnull($query)) {
+				return FALSE;
+			}
+			
+			// need to have something to work with
+			if (count($this->transArray) < 1) {
+				return FALSE;
+			}
+			
+			// Begin the transaction
+			$result = $this->transBegin($query);
+			if ($result === FALSE) {
+				return FALSE;
+			}
+			
+			foreach ($this->transArray as $I=>$V) {
+				$this->sanitize = FALSE;
+				$sqlResult      = $this->query($V);
+				
+				if (!$sqlResult['result']) {
+					$this->transRollback();
+					$this->transEnd();
+					return FALSE;
+				}
+				
+			}
+			
+			$result = $this->transCommit();
+			if ($result === FALSE) {
+				return FALSE;
+			}	
+			
+			$result = $this->transEnd();
+			if ($result === FALSE) {
+				return FALSE;
+			}
+		}
+		
+		return TRUE;
+		
+	}
+	
+	// If autocommit is TRUE we don't turn it off
+	public function transBegin($table=NULL, $autocommit=FALSE) {
+		
+		if (isnull($table)) {
+			return FALSE;
+		}
+		
+		// check to make sure the table is innodb
+		$sql = sprintf("SHOW TABLE STATUS LIKE '%s'",
+			$this->escape($table));
+
+		$this->sanitize = FALSE;
+		$sqlResult      = $this->query($sql);
+		$row            = mysql_fetch_array($sqlResult['result'],  MYSQL_ASSOC);
+		if ($row['Engine'] != "InnoDB") {
+			return FALSE;
+		}
+		
+		
+		if ($autocommit == FALSE) {
+			$sql = sprintf("SET AUTOCOMMIT=0");
+			$this->sanitize = FALSE;
+			$sqlResult      = $this->query($sql);
+		
+			if (!$sqlResult['result']) {
+				return FALSE;
+			}
+		}
+		
+		$sql = sprintf("START TRANSACTION");
+		$this->sanitize = FALSE;
+		$sqlResult      = $this->query($sql);
+		
+		if (!$sqlResult['result']) {
+			return FALSE;
+		}
+		
+		return TRUE;
+		
+	}
+	
+	// If autocommit is TRUE we don't turn it back on ... 
+	// No reason to call this function if transBegin was called with TRUE
+	public function transEnd($autocommit=FALSE) {
+		if ($autocommit == FALSE) {
+			$sql = sprintf("SET AUTOCOMMIT=1");
+			$this->sanitize = FALSE;
+			$sqlResult      = $this->query($sql);
+		
+			if (!$sqlResult['result']) {
+				return FALSE;
+			}
+		}
+		
+		return TRUE;
+	}
+	
+	public function transRollback() {
+		$sql = sprintf("ROLLBACK");
+		$this->sanitize = FALSE;
+		$sqlResult      = $this->query($sql);
+		
+		if (!$sqlResult['result']) {
+			return FALSE;
+		}
+		
+		return TRUE;
+	}
+	
+	public function transCommit() {
+		$sql = sprintf("COMMIT");
+		$this->sanitize = FALSE;
+		$sqlResult      = $this->query($sql);
+		
+		if (!$sqlResult['result']) {
+			return FALSE;
+		}
+		
+		return TRUE;
 	}
 	
 	// returns an multidimensional array of the results, suitable for sorting
