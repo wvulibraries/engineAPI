@@ -709,7 +709,7 @@ class fileHandler {
 		
 	}
 	
-	private function getMimeType($file_path) {
+	public function getMimeType($file_path) {
 		
 		$mtype = '';
 		
