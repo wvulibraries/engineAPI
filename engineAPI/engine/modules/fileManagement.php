@@ -711,26 +711,27 @@ class fileHandler {
 	
 	public function getMimeType($file_path) {
 		
-		$mtype = '';
+		$mimeType = '';
 		
-		if (function_exists('finfo_file')){
-			$finfo = finfo_open(FILEINFO_MIME);
-			$mtype = finfo_file($finfo, $file_path);
-			finfo_close($finfo);  
-		}
-		else if (function_exists('mime_content_type')){
-			$mtype = mime_content_type($file_path);
-		}
-		else {
-	  		$mtype = $this->returnMIMEType($file_path);
+		try{
+			if(!class_exists('finfo')) throw new Exception("finfo class unavailable!");
+			$mimeFile = (version_compare(PHP_VERSION, '5.3', '>=')) ? NULL : $engineVars['fileManagement']['mimeFile'];
+			$fileInfo = finfo_open(FILEINFO_MIME, mimeFile);			
+			if(is_object($fileInfo)) $mimeType = $finfo->file($file_path);
+			else throw new Exception("Unable to open FileInfo database!");
+		}catch(Exception $e){		
+			try{
+				if(!function_exists('mime_content_type')) throw new Exception("mime_content_type() unavailable!");
+				$mimeType = mime_content_type($file_path);
+			}catch(Exception $e){
+				$mimeType = $this->returnMIMEType($file_path);
+			}
 		}
 		
-		if ($mtype == ''){
-			$mtype = "application/force-download";
-		}
+		// Is this needed?
+		if($mimeType == '') $mimeType = "application/force-download";
 		
-		return $mtype;
-		
+		return $mimeType;		
 	}
 	
 	private function returnMIMEType($filename) {
