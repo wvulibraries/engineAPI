@@ -710,13 +710,13 @@ class fileHandler {
 	}
 	
 	public function getMimeType($file_path) {
-		
+		global $engineVars;
 		$mimeType = '';
 		
 		try{
 			if(!class_exists('finfo')) throw new Exception("finfo class unavailable!");
-			$mimeFile = (version_compare(PHP_VERSION, '5.3', '>=')) ? NULL : $engineVars['magicMimeFile'];
-			$fileInfo = finfo_open(FILEINFO_MIME, mimeFile);			
+			$fileInfo = @finfo_open(FILEINFO_MIME);
+			if(!$fileInfo and isset($engineVars['magicMimeFile'])) $fileInfo = finfo_open(FILEINFO_MIME, $engineVars['magicMimeFile']);
 			if(is_object($fileInfo)) $mimeType = $finfo->file($file_path);
 			else throw new Exception("Unable to open FileInfo database!");
 		}catch(Exception $e){		
