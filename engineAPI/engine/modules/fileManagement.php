@@ -740,7 +740,7 @@ class fileHandler {
 		
 		if (!isset($fileSuffix[1])) {
 			return "unknown";
-		}W
+		}
 
 		switch (strtolower($fileSuffix[1])) {
 			case "js":
