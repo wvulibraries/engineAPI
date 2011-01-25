@@ -715,7 +715,7 @@ class fileHandler {
 		
 		try{
 			if(!class_exists('finfo')) throw new Exception("finfo class unavailable!");
-			$mimeFile = (version_compare(PHP_VERSION, '5.3', '>=')) ? NULL : $engineVars['fileManagement']['mimeFile'];
+			$mimeFile = (version_compare(PHP_VERSION, '5.3', '>=')) ? NULL : $engineVars['magicMimeFile'];
 			$fileInfo = finfo_open(FILEINFO_MIME, mimeFile);			
 			if(is_object($fileInfo)) $mimeType = $finfo->file($file_path);
 			else throw new Exception("Unable to open FileInfo database!");
@@ -740,7 +740,7 @@ class fileHandler {
 		
 		if (!isset($fileSuffix[1])) {
 			return "unknown";
-		}
+		}W
 
 		switch (strtolower($fileSuffix[1])) {
 			case "js":
