@@ -1,6 +1,6 @@
 <?php
 
-$engineDir = "/Path/To/phpincludes/engineAPI/engine";
+$engineDir = "/home/library/phpincludes/engineAPI/engine";
 include($engineDir ."/engine.php");
 $engine = new EngineCMS();
 
@@ -18,9 +18,14 @@ if(isset($_SESSION)) {
 <?php
 if ($termed) {
 
+	$logoutRedirect = $engineVars['WEBROOT'];
+	if (isset($engine->cleanGet['HTML']['redirect'])) {
+		$logoutRedirect = $engine->cleanGet['HTML']['redirect'];
+	}
+
 	if (!debugNeeded("logout")) {
 		global $engineVars;
-		header("Location: ".$engineVars['WEBROOT'] );
+		header("Location: ".$logoutRedirect );
 	}
 
 }
