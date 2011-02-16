@@ -15,7 +15,15 @@ $authFail  = FALSE; // Authorization to the current resource .. we may end up no
 $loginFail = FALSE; // Login Success/Failure
 
 if (isset($engine->cleanGet['HTML']['page'])) {
-	$page = $engine->cleanGet['HTML']['page']; //$_GET['page'];
+	$page = $engine->cleanGet['HTML']['page']; 
+	if (isset($engine->cleanGet['HTML']['qs'])) {
+		$qs = urldecode($engine->cleanGet['HTML']['qs']);
+		$qs = preg_replace('/&amp;amp;/','&',$qs);
+		$qs = preg_replace('/&amp;/','&',$qs);
+	}
+	else {
+		$qs = "";
+	}
 }
 
 //Login processing:
@@ -36,7 +44,7 @@ if (isset($engine->cleanPost['HTML']['loginSubmit'])) {
 					debugDisplay("login","\$_SESSION",1,"Contents of the \$_SESSION array.",$_SESSION);
 				}
 				else if (isset($page)) {
-					header("Location: ".$page );
+					header("Location: ".$page."?".$qs );
 				}
 				else {
 					header("Location: ".$engineVars['WEBROOT'] );
@@ -79,7 +87,7 @@ if(isset($page)) {
 }
 ?>
 
-<form name="loginForm" action="<?= $_SERVER['PHP_SELF']?><?php if(isset($page)){ echo "?page=".$page; } ?>" method="post">
+<form name="loginForm" action="<?= $_SERVER['PHP_SELF']?><?php if(isset($page)){ echo "?page=".$page; if(isset($qs)) { echo "&qs=".(urlencode($qs)); } } ?>" method="post">
 	{engine name="insertCSRF"}
 	
 	<table>
