@@ -373,7 +373,7 @@ class listManagement {
 		}
 		
 		//Build "ORDER BY"
-		if (isnull($this->orderBy) && $this->fields[0]['type'] != "plainText" ) {
+		if (isnull($this->orderBy) && isset($this->fields[0]['type']) && $this->fields[0]['type'] != "plainText" ) {
 			$this->orderBy = "ORDER BY ".$this->engine->openDB->escape($this->fields[0]['field']);
 		}
 		else if (!isnull($this->orderBy)) {
@@ -1055,8 +1055,8 @@ class listManagement {
 			if (!$sqlResult2['result']) {
 				$output .= webHelper_errorMsg("Update Error.<br />");
 				if ($this->debug === TRUE) {
-					$output .= webHelper_errorMsg($sqlResult['error']."<br />");
-					$output .= webHelper_errorMsg($sqlResult['query']."<br />");
+					$output .= webHelper_errorMsg($sqlResult2['error']."<br />");
+					$output .= webHelper_errorMsg($sqlResult2['query']."<br />");
 				}
 				$error["error"]   = TRUE;
 				
