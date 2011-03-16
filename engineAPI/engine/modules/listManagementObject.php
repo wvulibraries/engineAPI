@@ -260,15 +260,17 @@ class listManagement {
 				$output .= ($I['readonly'] === TRUE)?" readonly ":"";
 				$output .= ($I['disabled'] === TRUE)?" disabled ":"";
 				$output .= ">";
-				foreach ($I['options'] as $option) {
-					
-					$output .= "<option value=\"".htmlentities($option['value'])."\"";
-					
-					//Handle if the form is being reposted after a failed submit attempt
-					$output .= ($error === TRUE && $this->engine->cleanPost['HTML'][$I['field'].'_insert'] == $option['value'])?" selected":"";
-					$output .= ($error === FALSE && isset($option['selected']) && $option['selected'] === TRUE)?" selected":"";
+				if (isset($I['options'])) {
+					foreach ($I['options'] as $option) {
+						
+						$output .= "<option value=\"".htmlentities($option['value'])."\"";
+						
+						//Handle if the form is being reposted after a failed submit attempt
+						$output .= ($error === TRUE && $this->engine->cleanPost['HTML'][$I['field'].'_insert'] == $option['value'])?" selected":"";
+						$output .= ($error === FALSE && isset($option['selected']) && $option['selected'] === TRUE)?" selected":"";
 
-					$output .= ">".htmlentities($option['label'])."</option>";
+						$output .= ">".htmlentities($option['label'])."</option>";
+					}
 				}
 				$output .= "</select>";
 			}
@@ -571,11 +573,13 @@ class listManagement {
 					$output .= ($this->fields[$I]['disabled'] === TRUE)?" disabled ":"";
 					$output .= ($this->fields[$I]['readonly'] === TRUE)?" readonly ":"";
 					$output .= ">";
-					foreach ($this->fields[$I]['options'] as $option) {
+					if (isset($this->fields[$I]['options'])) {
+						foreach ($this->fields[$I]['options'] as $option) {
 
-						$output .= "<option value=\"".htmlsanitize($option['value'])."\"";
-						$output .= ($row[$this->fields[$I]['field']] == $option['value'])?" selected":"";
-						$output .= ">".htmlsanitize($option['label'])."</option>";
+							$output .= "<option value=\"".htmlsanitize($option['value'])."\"";
+							$output .= ($row[$this->fields[$I]['field']] == $option['value'])?" selected":"";
+							$output .= ">".htmlsanitize($option['label'])."</option>";
+						}
 					}
 					$output .= "</select>";
 				}
@@ -634,7 +638,7 @@ class listManagement {
 					$output .= htmlentities($value);
 					$output .= "</textarea>";
 				}
-				else if ($I['type'] == "multiselect") {
+				else if ($this->fields[$I]['type'] == "multiselect") {
 
 					$output .= webhelper_errorMsg("Multi Select type not supported in table edit");
 				}
