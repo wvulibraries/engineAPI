@@ -781,7 +781,10 @@ class listManagement {
 				}
 			}
 			
-			$this->engine->cleanPost['MYSQL'][$I['field'].'_insert'] = stripCarriageReturns($this->engine->cleanPost['MYSQL'][$I['field'].'_insert']);
+			// Multiselect doesn't have a _insert variable
+			if ($I['type'] != "multiselect") {
+				$this->engine->cleanPost['MYSQL'][$I['field'].'_insert'] = stripCarriageReturns($this->engine->cleanPost['MYSQL'][$I['field'].'_insert']);
+			}
 		}
 		
 		if (!is_empty($error)) {
