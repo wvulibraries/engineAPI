@@ -26,6 +26,8 @@ class listManagement {
 	public  $sql            = NULL; // Used in the edit table, custom sql instead of the default
 	public  $submitName     = NULL; // Name of the submit button, override the default
 	
+	public $primaryKey      = "ID"; // The field name of the primary key
+	
 	public $updateButtonText = "Update";
 	public $insertButtonText = "Insert";
 	
@@ -888,9 +890,10 @@ class listManagement {
 		}
 
 		if ($this->dragOrdering === TRUE) {
-			$sql = sprintf("UPDATE %s SET position=%s WHERE ID=%s",
+			$sql = sprintf("UPDATE %s SET position=%s WHERE %s=%s",
 				$this->engine->openDB->escape($this->table),
 				((int)$sqlResult['id'] - 1),
+				$this->primaryKey,
 				$sqlResult['id']
 			);
 			$this->engine->openDB->sanitize = FALSE;
@@ -910,8 +913,9 @@ class listManagement {
 		if (isset($this->engine->cleanPost['MYSQL']['delete'])) {
 			foreach($this->engine->cleanPost['MYSQL']['delete'] as $value) {
 
-				$sql = sprintf("DELETE FROM %s WHERE ID=%s",
+				$sql = sprintf("DELETE FROM %s WHERE %s=%s",
 					$this->engine->openDB->escape($this->table),
+					$this->primaryKey,
 					$this->engine->openDB->escape($value)
 					);
 
@@ -1008,6 +1012,7 @@ class listManagement {
 					$tempPT = (isset($this->engine->cleanPost['MYSQL'][$this->updateInsertID."_insert"]))?$this->engine->cleanPost['MYSQL'][$this->updateInsertID."_insert"]:NULL;
 					
 					$this->updateInsert   = TRUE;
+					// Suspect -- $this->primaryKey ???
 					$this->updateInsertID = "ID";
 					$this->engine->cleanPost['MYSQL'][$this->updateInsertID."_insert"] = $row[0];			
 							
@@ -1050,9 +1055,10 @@ class listManagement {
 			
 			}
 
-			$sql = sprintf("UPDATE %s SET %s WHERE ID='%s'",
+			$sql = sprintf("UPDATE %s SET %s WHERE %s='%s'",
 				$this->engine->openDB->escape($this->table),
 				$this->buildUpdateString($row[0]),
+				$this->primaryKey,
 				$row[0]
 				);
 
