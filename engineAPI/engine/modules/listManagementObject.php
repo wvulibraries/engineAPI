@@ -795,8 +795,10 @@ class listManagement {
 			
 			// Change dates into unix time stamps
 			if ($I['type'] == "date") {
-				list($m,$d,$y) = explode("/",$this->engine->cleanPost['MYSQL'][$I['field'].'_insert']);
-				$this->engine->cleanPost['MYSQL'][$I['field'].'_insert'] = mktime(0,0,0,$m,$d,$y);
+				if (!is_empty($this->engine->cleanPost['MYSQL'][$I['field'].'_insert'])) {
+					list($m,$d,$y) = explode("/",$this->engine->cleanPost['MYSQL'][$I['field'].'_insert']);
+					$this->engine->cleanPost['MYSQL'][$I['field'].'_insert'] = mktime(0,0,0,$m,$d,$y);
+				}
 			}
 			
 			// Multiselect doesn't have a _insert variable
