@@ -34,6 +34,22 @@ class listManagement {
 	public $debug           = FALSE; // If set to TRUE, will display SQL errors. MUST BE SET TO FALSE FOR 
 									 // Production
 	
+	public $validateTypes   = array();
+	$validateTypes[]        = "alpha";
+	$validateTypes[]        = "alphaNoSpaces";
+	$validateTypes[]        = "alphaNumeric";
+	$validateTypes[]        = "alphaNumericNoSpaces";
+	$validateTypes[]        = "date";
+	$validateTypes[]        = "email";
+	$validateTypes[]        = "ipaddr";
+	$validateTypes[]        = "integer";
+	$validateTypes[]        = "integerSpaces";
+	$validateTypes[]        = "internalEmail";
+	$validateTypes[]        = "noSpaces";
+	$validateTypes[]        = "noSpecialChars";
+	$validateTypes[]        = "phone";
+	$validateTypes[]        = "url";
+	
 	function __construct($engine,$table) {
 		
 		if (!($engine instanceof EngineCMS)) {
@@ -728,12 +744,6 @@ class listManagement {
 				}
 			}
 			
-			// Change dates into unix time stamps
-			if ($I['type'] == "date") {
-				list($m,$d,$y) = explode("/",$this->engine->cleanPost['MYSQL'][$I['field'].'_insert']);
-				$this->engine->cleanPost['MYSQL'][$I['field'].'_insert'] = mktime(0,0,0,$m,$d,$y);
-			}
-			
 			//Do the Email Check
 			//check if the current field should have a valid email address
 			if ($I["email"] === TRUE) {
@@ -781,6 +791,12 @@ class listManagement {
 						continue;
 					}
 				}
+			}
+			
+			// Change dates into unix time stamps
+			if ($I['type'] == "date") {
+				list($m,$d,$y) = explode("/",$this->engine->cleanPost['MYSQL'][$I['field'].'_insert']);
+				$this->engine->cleanPost['MYSQL'][$I['field'].'_insert'] = mktime(0,0,0,$m,$d,$y);
 			}
 			
 			// Multiselect doesn't have a _insert variable
@@ -1269,36 +1285,40 @@ class listManagement {
 
 			switch($validate) {
 				case "integer":
-				$regexp = "/^[0-9]+$/";
-				break;
+					$regexp = "/^[0-9]+$/";
+					break;
 
 				case "integerSpaces":
-				$regexp = "/^[0-9\ ]+$/";
-				break;
+					$regexp = "/^[0-9\ ]+$/";
+					break;
 
 				case "alphaNumeric":
-				$regexp = "/^[a-zA-Z0-9\-\_\ ]+$/";
-				break;
+					$regexp = "/^[a-zA-Z0-9\-\_\ ]+$/";
+					break;
 
 				case "alphaNumericNoSpaces":
-				$regexp = "/^[a-zA-Z0-9\-\_]+$/";
-				break;
+					$regexp = "/^[a-zA-Z0-9\-\_]+$/";
+					break;
 
 				case "alpha":
-				$regexp = "/^[a-zA-Z\ ]+$/";
+					$regexp = "/^[a-zA-Z\ ]+$/";
+					break;
+				
+				case "alphaNoSpaces":
+					$regexp = "/^[a-zA-Z]+$/";
+					break;
+
+				case "noSpaces":
+					$regexp = "/^[^\ ]+$/";
+					break;
+
+				case "noSpecialChars":
+					$regexp = "/^[^\W]+$/";
 				break;
 
-				case "alphaNoSpaces";
-				$regexp = "/^[a-zA-Z]+$/";
-				break;
-
-				case "noSpaces";
-				$regexp = "/^[^\ ]+$/";
-				break;
-
-				case "noSpecialChars";
-				$regexp = "/^[^\W]+$/";
-				break;
+				case "date":
+					$regexp = "/^\d\d\/\d\d\/\d\d\d\d$/";
+					break;
 
 				default:
 				break;
