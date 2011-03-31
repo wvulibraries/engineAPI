@@ -735,6 +735,7 @@ class EngineCMS {
 			    $output = $engineVars['fileList']->getAttribute($attPairs);
 				break;
 			case "insertCSRF":
+			case "crsf":
 			    $output = sessionInsertCSRF();
 				break;
 			case "email":
