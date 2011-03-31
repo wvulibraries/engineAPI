@@ -34,21 +34,7 @@ class listManagement {
 	public $debug           = FALSE; // If set to TRUE, will display SQL errors. MUST BE SET TO FALSE FOR 
 									 // Production
 	
-	public $validateTypes   = array();
-	$validateTypes[]        = "alpha";
-	$validateTypes[]        = "alphaNoSpaces";
-	$validateTypes[]        = "alphaNumeric";
-	$validateTypes[]        = "alphaNumericNoSpaces";
-	$validateTypes[]        = "date";
-	$validateTypes[]        = "email";
-	$validateTypes[]        = "ipaddr";
-	$validateTypes[]        = "integer";
-	$validateTypes[]        = "integerSpaces";
-	$validateTypes[]        = "internalEmail";
-	$validateTypes[]        = "noSpaces";
-	$validateTypes[]        = "noSpecialChars";
-	$validateTypes[]        = "phone";
-	$validateTypes[]        = "url";
+	public $validateTypes   = array("alpha","alphaNoSpaces","alphaNumeric","alphaNumericNoSpaces","date","email","ipaddr","integer","integerSpaces","internalEmail","noSpaces","noSpecialChars","phone","url");
 	
 	function __construct($engine,$table) {
 		
@@ -568,20 +554,24 @@ class listManagement {
 				}
 				else if ($this->fields[$I]['type'] == "date") {
 					
-					if ($row[$this->fields[$I]['field']] == "0") {
-						$row[$this->fields[$I]['field']] = "";
+					$value = $row[$this->fields[$I]['field']];
+					
+					if ($value == "0") {
+						$value = "";
 					}
 					
-					if ($this->fields[$I]['original'] === TRUE && isset($I['value'])) {
+					if ($this->fields[$I]['original'] === TRUE && isset($value)) {
 						$output .= '<input type="hidden" name="original_'.$this->fields[$I]['field'].'_'.$row[0].'" value="'.(htmlentities($value)).'" />';
 					}
 					
-					$output .= "<input type=\"text\" size=\"".$this->fields[$I]['size']."\" name=\"".$this->fields[$I]['field']."_".$row[0]."\" id=\"".$this->fields[$I]['field']."_".$row[0]."\" class=\"".$this->fields[$I]['field']." date_input\" value=\"".(!is_empty($row[$this->fields[$I]['field']])?htmlentities(date("m/d/Y",$row[$this->fields[$I]['field']])):"")."\" ";
+					$output .= "<input type=\"text\" size=\"".$this->fields[$I]['size']."\" name=\"".$this->fields[$I]['field']."_".$row[0]."\" id=\"".$this->fields[$I]['field']."_".$row[0]."\" class=\"".$this->fields[$I]['field']." date_input\" value=\"".(!is_empty($value)?htmlentities(date("m/d/Y",$value)):"")."\" ";
 					$output .= ($this->fields[$I]['disabled'] === TRUE)?" disabled ":"";
 					$output .= ($this->fields[$I]['readonly'] === TRUE)?" readonly ":"";
 					$output .= "/>";
 				}
 				else if ($this->fields[$I]['type'] == "select") {
+
+					$value = $row[$this->fields[$I]['field']];
 
 					if ($this->fields[$I]['original'] === TRUE && isset($value)) {
 						$output .= '<input type="hidden" name="original_'.$this->fields[$I]['field'].'_'.$row[0].'" value="'.(htmlentities($value)).'" />';
@@ -1031,7 +1021,9 @@ class listManagement {
 					
 					$this->updateInsert   = TRUE;
 					// Suspect -- $this->primaryKey ???
-					$this->updateInsertID = "ID";
+					// $this->updateInsertID = $this->primaryKey;
+					$this->updateInsertID = (isset($this->updateInsertID))?$this->updateInsertID:$this->primaryKey;
+					
 					$this->engine->cleanPost['MYSQL'][$this->updateInsertID."_insert"] = $row[0];			
 							
 					// perform a dupe check. Continue to the next row in the database if there is a dupe in that field. 
