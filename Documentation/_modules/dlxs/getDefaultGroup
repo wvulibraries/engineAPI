@@ -1,0 +1,15 @@
+dlxs::getDefaultGroup()
+
+Description
+    private string dlxs::getDefaultGroup(object $xml)
+
+Parameters
+    xml
+
+Return Values
+    
+Examples
+    
+Notes
+   
+See Also

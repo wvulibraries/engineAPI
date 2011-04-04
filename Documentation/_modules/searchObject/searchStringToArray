@@ -1,0 +1,35 @@
+search::searchStringToArray()
+
+Description
+    private array search::searchStringToArray(string $searchStr)
+
+Parameters
+    searchStr
+    A string value to convert to an array.
+
+Return Values
+    An array, $keywords, created from the string, $searchStr.
+
+Examples
+    <?php
+	...
+	$keywords = array();
+	$fullSearchStr = NULL;
+	for($i = 0; $i < $this->searchRows; $i++) {
+	    if(!isset($searchString[$i]) || is_empty($searchString[$i])) {
+		continue;
+	    }
+	
+            if(isset($bool[$i]) && !is_empty($bool[$i])) {
+	        $fullSearchStr .= " " . $bool[$i];
+	    }
+
+ 	    $fullSearchStr .= " " . $searchString[$i] . "";
+	}
+	
+	$keywords = $this->searchStringToArray($fullSearchStr);
+	...
+    ?>
+
+See Also
+    search::createSearchArray()

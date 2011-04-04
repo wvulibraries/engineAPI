@@ -1,0 +1,41 @@
+engineCMS::eTemplate()
+
+Description
+    public bool engineCMS::eTemplate(string $func, string $value)
+    1. Loads file for a given template name.
+    2. Includes the header or footer markup stored in a PHP file for a given template.
+
+Parameters
+    func
+	Either "load" or "include"
+    value
+	A valid template name
+
+Return Values
+    Returns TRUE if the function executes successfully.  Returns FALSE if func or value parameters are invalid.
+
+Examples
+    
+    Example #1
+	<?php
+	    ...
+            $engine->eTemplate("load","systems");
+	    ...
+	?>
+
+    Example #2
+	<?php
+	    ...
+	    $engine->eTemplate("include","header");
+	    ...
+	?>
+	    OR
+	<?php
+	    ...
+	    $engine->eTemplate("include","footer");
+	    ...
+	?>
+
+Notes
+   
+See Also

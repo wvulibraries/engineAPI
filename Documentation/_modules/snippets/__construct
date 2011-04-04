@@ -1,0 +1,16 @@
+Snippets::__construct()
+
+Description
+    Snippets::__construct(object $engine, string $table)
+
+Parameters
+    engine
+    table
+
+Return Values
+    
+Examples
+
+Notes
+
+See Also

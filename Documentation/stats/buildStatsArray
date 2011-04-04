@@ -1,0 +1,16 @@
+stats::buildStatsArray()
+
+Description
+    stats::buildStatsArray(array $results)
+
+Parameters
+    results
+
+Return Values
+    TRUE or FALSE
+
+Examples
+    
+Notes
+   
+See Also

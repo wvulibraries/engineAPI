@@ -1,0 +1,15 @@
+dlxs::getDefaultTitle()
+
+Description
+    private string dlxs::getDefaultTitle(object $xml)
+
+Parameters
+    xml
+
+Return Values
+    
+Examples
+    
+Notes
+   
+See Also

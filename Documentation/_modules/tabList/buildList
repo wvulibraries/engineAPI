@@ -1,0 +1,16 @@
+tabList::buildList()
+
+Description
+    public string tabList::buildList(array $range, string $current)
+
+Parameters
+    range
+        
+    current
+        
+
+Return Values
+    Returns a string containing data and markup.
+
+See Also
+    tabList::__construct()

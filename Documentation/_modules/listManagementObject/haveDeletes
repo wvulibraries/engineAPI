@@ -1,0 +1,15 @@
+listManagement::haveDeletes()
+
+Description
+    public mixed listManagement::haveDeletes(void)
+    Checks whether or not $this->engine->cleanPost['MYSQL']['delete'] is set.  Returns an array, $deleteIDs, if the previous variable is set.
+
+Return Values
+    Either returns an array, $deleteIDs, if $this->engine->cleanPost['MYSQL']['delete'] is set.  Otherwise returns boolean value of FALSE.
+    
+Examples
+    <?php
+	...
+	$deletes = $itemListObj->haveDeletes();
+	...
+    ?>

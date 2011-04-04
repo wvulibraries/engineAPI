@@ -1,0 +1,16 @@
+permissionObject::checkPermissions()
+
+Description
+    public bool permissionObject::checkPermissions(int $number, int $permission)
+
+Parameters
+    number
+    permission
+
+Return Values
+    
+Examples
+    
+Notes
+   
+See Also

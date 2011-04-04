@@ -1,0 +1,15 @@
+fileHandler::validate()
+
+Description
+    private mixed fileHandler::validate(array &$files)
+
+Parameters
+    files
+
+Return Values
+    
+Examples
+
+Notes
+
+See Also

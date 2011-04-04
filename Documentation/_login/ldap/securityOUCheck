@@ -1,0 +1,25 @@
+securityOUCheck()
+
+Description
+    bool securityOUCheck(string $ou [, string $userOU = NULL])
+	Determines whether the first parameter, $ou, is equal to the second, $userOU.  If a second parameter is not specified, the first 	
+	parameter is tested against the data of the session variable, $_SESSION['ou'].
+
+Parameters
+    ou
+		The OU(s) to search.
+    userOU
+		The OU to which to compare the first parameter, $ou.
+
+Return Values
+    Returns a boolean value of TRUE or FALSE.  Returns TRUE if $ou is equal to $userOU.
+	
+Examples
+    
+Notes
+   OU should be either a string or an array. If an array, assume nested OUs. [0] is parent down to [n] child.  If the value of $userOU passed to the 
+   function is NULL $userOU is set to the value of $_SESSION['ou'].
+   
+See Also
+	securityUserCheck()
+	securityGroupCheck()

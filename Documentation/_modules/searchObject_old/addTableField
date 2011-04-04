@@ -1,0 +1,31 @@
+search::addTableField()
+
+Description
+    public null search::addTableField(string $tableID, string $fieldName [, string $label = NULL [, string $alias = NULL]])
+    Adds an entry to $this->fields
+
+Parameters
+    tableID
+        A string specifying the table's ID.
+
+    fieldName
+	A string containing a field name.
+
+    label
+	An optional variable containing the string for a label.
+
+    alias
+	Another optional string variable specifying an alias.
+
+Examples
+    <?php
+	...
+	// Add Fields
+	// addTableField( tableID, fieldName, label, alias )
+	$searchObj->addTableField($tableID['traditionalReserves'],"ID");
+	$searchObj->addTableField($tableID['traditionalReserves'],"displayName","Name");
+	...
+    ?>
+
+See Also
+    search::addTableLink()

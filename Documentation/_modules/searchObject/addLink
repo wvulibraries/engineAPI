@@ -1,0 +1,25 @@
+search::addLink()
+
+Description
+    public void search::addLink(array $attPairs)
+
+Parameters
+    attPairs
+    An array containing a name/value pair.
+
+Examples
+    <?php
+	$s = new search($engine);
+        $s->relevanceSearch = TRUE;
+	$link = array();
+	$link['table1'] = $engine->dbTables("traditionalReserves");
+	$link['field1'] = "ID";
+	$link['table2'] = $engine->dbTables("traditionalReservesLocations");
+	$link['field2'] = "trID";
+	$s->addLink($link);
+	unset($link);
+	...
+    ?>
+
+See Also
+    search::addField()

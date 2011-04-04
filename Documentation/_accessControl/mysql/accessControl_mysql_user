@@ -1,0 +1,19 @@
+accessControl_mysql_user()
+
+Description
+    mixed accessControl_mysql_user(string $value [, $state = FALSE])
+    Performs an internal check to determine the auth type and state for a given user, $value and $state, respectively.
+
+Parameters
+    value
+	A valid user name.
+
+    state
+	Default state for a given user if a value is not passed to the function.
+
+Return Values
+    Returns a boolean value, determined by a set of logical test conditions.  Returns null if none of the function's test conditions is met.
+
+See Also
+    accessControl_ip_checkIPAddr()
+    accessControl_mysql_auth()

@@ -1,0 +1,14 @@
+sessionSetCSRF()
+
+Description
+    bool sessionSetCSRF()
+
+Parameters
+    
+Return Values
+    
+Examples
+    
+Notes
+   
+See Also

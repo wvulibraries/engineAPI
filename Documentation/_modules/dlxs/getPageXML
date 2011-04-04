@@ -1,0 +1,20 @@
+dlxs::getPageXML()
+
+Description
+    public string dlxs::getPageXML([string $url = NULL])
+    Generates xml markup based on $url.
+
+Parameters
+    url
+    	A string value containing an internet address. The url isused to generate xml.
+    
+Return Values
+	A string containing the xml markup of the page returned.
+
+Examples
+    
+Notes
+   
+See Also
+	dlxs::getRemoteXML()
+	dlxs::getBackLink()

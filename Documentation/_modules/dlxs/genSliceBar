@@ -1,0 +1,27 @@
+dlxs::genSliceBar()
+
+Description
+    public string dlxs::genSliceBar(object $xml, string $file)
+    Takes xml values and places them into a template.
+
+Parameters
+    xml
+    	An xml file containing the start, end, and total values in the form of $xml->SliceSummary->Start, $xml->SliceSummary->End, and$xml->SliceSummary->Total respectively.
+    file
+    	A file containing markup.
+
+Return Values
+    A string in the format of the template file with start, end, and total values placed into it.
+
+Examples
+    <?
+    ...
+    print $dlxs->genSliceBar($xml,"/path/to/template.php");
+    ...
+    ?>
+
+Notes
+	This function makes use of the dlxs::buildTemplate() function, therefore looping is possible if desired.
+   
+See Also
+	dlxs::buildTemplate()

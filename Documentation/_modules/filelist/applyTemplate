@@ -1,0 +1,15 @@
+fileList::applyTemplate()
+
+Description
+    public mixed fileList::applyTemplate([string $template = NULL])
+
+Parameters
+    template
+
+Return Values
+    
+Examples
+    
+Notes
+    
+See Also

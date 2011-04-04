@@ -1,0 +1,16 @@
+Snippets::insertSnippetList()
+
+Description
+    public string Snippets::insertSnippetList([string $class = "we_snippetList",] [string $type = "ul"])
+
+Parameters
+    class
+    snippet
+
+Return Values
+    
+Examples
+    
+Notes
+   
+See Also

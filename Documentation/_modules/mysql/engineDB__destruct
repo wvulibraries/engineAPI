@@ -1,0 +1,8 @@
+engineDB::__destruct()
+
+Description
+    engineDB::__destruct()
+    engineDB's destructor.  Closes the open database link.
+
+See Also
+    engineDB::__construct()

@@ -1,0 +1,18 @@
+fileHandler::store()
+
+Description
+    public mixed fileHandler::store(string $type, array $files, string $location [, array $fields = NULL])
+
+Parameters
+    type
+    files
+    location
+    fields
+
+Return Values
+    
+Examples
+
+Notes
+
+See Also

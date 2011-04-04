@@ -1,0 +1,22 @@
+dlxs::findAidTags2Markup()
+
+Description
+    private string dlxs::findAidTags2Markup(string $str)
+	Replaces [] bracket style tags with corresponding HTML tags.
+	
+Parameters
+    str
+		A string containing tags to be substituted.
+		
+Return Values
+    Returns string data stored in $str after preg_replace has been called.
+	
+Examples
+    <?
+    ...
+    $output = $this->findAidTags2Markup($output);
+    ...
+    ?>
+    
+See Also
+	dlxs::replaceFindAidTags()

@@ -1,0 +1,25 @@
+webHelper_errorMsg()
+
+Description
+    string webHelper_errorMsg(string $error)
+    Builds an error message with the proper markup for display.
+
+Parameters
+    error
+        A string value containing the text of the error message.
+
+Return Values
+    Returns a string value containing the error message with the appropriate markup.
+    
+Examples
+    <?php
+	...
+	// Check for duplicates
+	if (webHelper_listDupeCheck($engine->cleanPost['MYSQL']['newListItem'],$table,$engine)) {
+	    return webHelper_errorMsg("Entry, ".$engine->cleanPost['HTML']['newListItem'].", already in database.");
+	}
+	...
+    ?>
+
+See Also
+    webHelper_successMsg()

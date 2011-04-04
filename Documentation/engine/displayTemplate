@@ -1,0 +1,16 @@
+engineCMS::displayTemplate()
+
+Description
+    public mixed engineCMS::displayTemplate(string $content)
+    
+    
+Parameters
+    content
+
+Return Values
+    
+Examples
+    
+Notes
+   
+See Also

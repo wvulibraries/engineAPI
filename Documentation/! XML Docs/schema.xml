@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<object>
+
+	<name></name>
+	<extends></extends>
+	<memberOf></memberOf>
+	<visibility></visibility>
+		
+	<description></description>
+	
+	<parameters>
+		<parameter>
+			<name></name>
+			<type></type>
+			<description></description>
+			<optional></optional>
+			<defaultValue></defaultValue>
+			<expectedValues>
+				<value>
+					<name></name>
+					<description></description>
+				</value>
+			</expectedValues>
+		</parameter>
+	</parameters>
+
+	<return>
+		<type></type>
+		<description></description>
+	</return>
+
+	<examples>
+		<example>
+			<name></name>
+			<code></code>
+			<description></description>
+		</example>
+	</examples>
+
+	<notes></notes>
+
+	<seeAlso></seeAlso>
+
+</object>

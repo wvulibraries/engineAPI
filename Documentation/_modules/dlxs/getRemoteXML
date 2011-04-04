@@ -1,0 +1,15 @@
+dlxs::getRemoteXML()
+
+Description
+    private object dlxs::getRemoteXML(string $url)
+
+Parameters
+    url
+
+Return Values
+    
+Examples
+    
+Notes
+   
+See Also

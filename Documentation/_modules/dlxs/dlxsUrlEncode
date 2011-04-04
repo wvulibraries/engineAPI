@@ -1,0 +1,19 @@
+dlxs::dlxsUrlEncode()
+
+Description
+    private string dlxs::dlxsUrlEncode(string $url)
+    This function takes a url as input and outputs an encoded url.
+
+Parameters
+    url
+    	A web accessible url.
+
+Return Values
+	An encoded url string.
+    
+Examples
+    
+Notes
+   Some dlxs urls have spaces already encoded. This function will decode them before encoding to ensure they are not double encoded.
+
+See Also

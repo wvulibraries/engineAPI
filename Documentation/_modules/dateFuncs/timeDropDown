@@ -1,0 +1,18 @@
+timeDropDown()
+
+Description
+    string timeDropDown(array $attPairs [, object $engine = NULL])
+    Builds the appropriate markup for displaying a drop-down pre-populated time form.
+
+Parameters
+    attPairs
+	An array containing attribute pairs, $attPairs['formname'], $attPairs['separator'], $attPairs['hourformat'], $attPairs['mininterval'], $attPairs
+	['settime'].
+    engine
+	The engine object.
+
+Return Values
+    Returns a string value containing the proper markup and data to build the drop-down time menu.
+
+See Also
+    dateDropDown

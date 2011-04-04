@@ -1,0 +1,18 @@
+fileHandler::retrieve()
+
+Description
+    public mixed fileHandler::retrieve(string $type, string $name, string $location [, array $fields = NULL])
+
+Parameters
+    type
+    name
+    location
+    fields
+
+Return Values
+    
+Examples
+
+Notes
+
+See Also

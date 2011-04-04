@@ -1,0 +1,37 @@
+mailSender::performBulkSend()
+
+Description
+    private mixed mailSender::performBulkSend(string $sendID, array $dbInfo)
+	Executes an external PHP script to send e-mails.
+
+Parameters
+    sendID
+		The send ID associated with an e-mail message.
+    dbInfo
+		Necessary database information.
+
+Return Values
+    Returns the last line from the result of the command called by exec().  In the case of performBulkSend, exec() calls PHP externally to execute 	
+	another PHP script.
+
+Examples
+	<?php
+		...
+		$dbInfo['database'] = isset($dbInfo['database'])?$dbInfo['database']:NULL;
+		$dbInfo['username'] = isset($dbInfo['username'])?$dbInfo['username']:$engineVars['mysql']['username'];
+		$dbInfo['password'] = isset($dbInfo['password'])?$dbInfo['password']:$engineVars['mysql']['password'];
+		$dbInfo['server']   = isset($dbInfo['server'])?$dbInfo['server']:$engineVars['mysql']['server'];
+		$dbInfo['port']     = isset($dbInfo['port'])?$dbInfo['port']:$engineVars['mysql']['port'];
+				
+		// Send emails that have given sendID
+		$result = $this->performBulkSend($sendID,$dbInfo);
+		...
+	?>
+
+Notes
+	Currently, exec() is called as such: return exec("php /home/ereserves/public_html/engineIncludes/emailSendBulk.php -id=$sendID 
+	-d=".$dbInfo['database']." -t=".$dbInfo['table']." -u=".$dbInfo['username']." -p=".$dbInfo['password']." -s=".$dbInfo['server']." 
+	-P=".$dbInfo['port']." -f=".$dbInfo['fileTable']." >/dev/null &");
+
+See Also
+	mailSender::sendEmailBulk()

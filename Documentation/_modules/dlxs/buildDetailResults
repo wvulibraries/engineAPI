@@ -1,0 +1,27 @@
+dlxs::buildDetailResults()
+
+Description
+    public string dlxs::buildDetailResults(object $xml [, string $file = NULL])
+    Takes xml values and places them into a template.
+
+Parameters
+    xml
+    	An xml file containing the values of each of the elements contained in the template file.
+    file
+    	A template file containing markup.
+
+Return Values
+    A string in the format of the template file with all of the values placed into it.
+    
+Examples
+    <?
+    ...
+    print $dlxs->buildDetailResults($xml,"/path/to/template.php");
+    ...
+    ?>
+
+Notes
+	This function makes use of the dlxs::buildTemplate() function, therefore looping is possible if desired.
+   
+See Also
+	dlxs::buildTemplate()
