@@ -3,6 +3,9 @@
 // MultiSelect with Window
 // For this to work it requires engineSelectBoxes.js to be included
 function emod_msww($attPairs,$engine=null) {
+	
+	$engine = EngineAPI::singleton();
+	
 	global $engineVars;
 	$dbTables = $engine->dbTablesExport();
 	
@@ -66,6 +69,8 @@ function emod_msww($attPairs,$engine=null) {
 
 function webHelper_listSelect($attPairs,$engine=null) {
 	
+	$engine = EngineAPI::singleton();
+	
 	global $engineVars;
 	$dbTables = $engine->dbTablesExport();
 		
@@ -118,6 +123,9 @@ function webHelper_listSelect($attPairs,$engine=null) {
 }
 
 function webHelper_listCheckbox($attPairs,$engine=null) {
+	
+	$engine = EngineAPI::singleton();
+	
 	global $engineVars;
 	
 	$dbTables = $engine->dbTablesExport();

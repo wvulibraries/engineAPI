@@ -124,7 +124,9 @@ class dlxs {
 	
 	public $noThumbURL = "/images/noThumbNail.gif";
 	
-	function __construct($url,$class,$collection,$engine) {
+	function __construct($url,$class,$collection) {
+		
+		$engine = EngineAPI::singleton();
 		
 		$this->cleanGet  = $engine->cleanGet;
 		$this->cleanPost = $engine->cleanPost;

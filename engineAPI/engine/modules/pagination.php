@@ -15,7 +15,9 @@ class pagination {
 	
 	private $cleanGet = NULL;
 	
-	function __construct($total,$engine) {
+	function __construct($total) {
+		
+		$engine = EngineAPI::singleton();
 		
 		$this->cleanGet = $engine->cleanGet;
 		

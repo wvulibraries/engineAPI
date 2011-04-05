@@ -36,14 +36,11 @@ class listManagement {
 	
 	public $validateTypes   = array("alpha","alphaNoSpaces","alphaNumeric","alphaNumericNoSpaces","date","email","ipaddr","integer","integerSpaces","internalEmail","noSpaces","noSpecialChars","phone","url");
 	
-	function __construct($engine,$table) {
-		
-		if (!($engine instanceof EngineCMS)) {
-			return(FALSE);
-		}
+	function __construct($table) {
 		
 		$this->table  = $table;
-		$this->engine = $engine;
+		$this->engine = EngineAPI::singleton();
+	
 	}
 	
 	function __destruct() {

@@ -19,7 +19,9 @@ function sessionStart() {
 }
 
 // This should only be called when doing a log off. 
-function sessionEnd($engine) {
+function sessionEnd() {
+	
+	$engine = EngineAPI::singleton();
 	
 	if (isset($engine->cleanGet["MYSQL"]["csrf"]) && sessionCheckCSRF($engine->cleanGet["MYSQL"]["csrf"])) {
 		$_SESSION = array();

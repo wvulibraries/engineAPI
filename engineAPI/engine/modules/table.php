@@ -31,13 +31,9 @@ class tableObject {
 	public $groupBy         = NULL; // if groupby is not null, the array of rows will be examined and grouped by this column
 	                                // this is the index number of the column, starting with 0
 
-	function __construct($engine,$type=NULL) {
+	function __construct($type=NULL) {
 
-		if (!($engine instanceof EngineCMS)) {
-			return(FALSE);
-		}
-
-		$this->engine = $engine;
+		$this->engine = EngineAPI::singleton();
 		
 		if (!isnull($type)) {
 			if ($type != "array" && $type != "mysql") {

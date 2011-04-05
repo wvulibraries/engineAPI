@@ -50,8 +50,9 @@ class Snippet {
 	public $snippetURL        = "/snippet.php?id=";
 	public $snippetPublicURL  = "/snippetPublic.php?id=";
 	
-	function __construct($engine,$table,$field=NULL) {
-		$this->engine    = $engine;
+	function __construct($table,$field=NULL) {
+		$this->engine    = EngineAPI::singleton();
+		
 		$this->table     = $this->engine->openDB->escape($table);
 		$this->field     = $this->engine->openDB->escape($field);
 		

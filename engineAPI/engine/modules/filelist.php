@@ -14,9 +14,9 @@ class fileList {
 	
 	private $engine      = NULL;
 	
-	function __construct($directory,$engine) {
+	function __construct($directory) {
 		
-		$this->engine = &$engine;
+		$this->engine = EngineAPI::singleton();
 		
 		global $engineVars;
 		

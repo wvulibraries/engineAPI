@@ -3,8 +3,10 @@
 global $loginFunctions;
 $loginFunctions['ldap'] = "ldapLogin";
 
-function ldapLogin($username,$password,$engine) { 
+function ldapLogin($username,$password,$engine=NULL) { 
 
+	$engine = EngineAPI::singleton();
+	
 	global $engineVars;
 	$domain = $engine->localVars("domain");
 

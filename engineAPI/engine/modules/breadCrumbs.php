@@ -1,6 +1,8 @@
 <?php
 
-function breadCrumbs($attPairs,$engine) {
+function breadCrumbs($attPairs,$engine=null) {
+	
+	$engine = EngineAPI::singleton();
 	
 	global $engineVars;
 	

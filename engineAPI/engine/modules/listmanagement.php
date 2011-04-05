@@ -2,6 +2,8 @@
 
 //$_GET['type'] needs documented
 function webHelper_listAdd($attPairs,$engine=null) {
+	
+	$engine = EngineAPI::singleton();
 		
 	$queryString = "";
 	if (!empty($attPairs['addget']) && $attPairs['addget'] == "true") {
@@ -24,6 +26,8 @@ function webHelper_listAdd($attPairs,$engine=null) {
 }
 
 function webHelper_listInsert($table,$label,$engine,$emailCheck=FALSE) {
+	
+	$engine = EngineAPI::singleton();
 		
 	if (empty($engine->cleanPost['MYSQL']['newListItem'])) {
 		return webHelper_errorMsg($label ." was left blank.");
@@ -62,6 +66,8 @@ function webHelper_listInsert($table,$label,$engine,$emailCheck=FALSE) {
 }
 
 function webHelper_listEditList($attPairs,$engine=null) {
+	
+	$engine = EngineAPI::singleton();
 	
 	$dbTables = $engine->dbTablesExport();
 		
@@ -112,6 +118,8 @@ function webHelper_listEditList($attPairs,$engine=null) {
 }
 
 function webHelper_listUpdate($table,$engine,$emailCheck=FALSE) {
+	
+	$engine = EngineAPI::singleton();
 	
 	$dbTables = $engine->dbTablesExport();
 	
@@ -209,6 +217,8 @@ function webHelper_listUpdate($table,$engine,$emailCheck=FALSE) {
 
 
 function webHelper_listDupeCheck($new,$table,$engine) {
+	
+	$engine = EngineAPI::singleton();
 	
 	$sql = sprintf("SELECT * FROM %s WHERE name='%s'",
 		$engine->openDB->escape($table),

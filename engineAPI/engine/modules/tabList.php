@@ -5,14 +5,10 @@ class tabList {
 	private $engine       = NULL;
 	private $table        = NULL;
 
-	function __construct($engine,$table) {
-		
-		if (!($engine instanceof EngineCMS)) {
-			return(FALSE);
-		}
-		
+	function __construct($table) {
+
 		$this->table  = $table;
-		$this->engine = $engine;
+		$this->engine = EngineAPI::singleton();
 		
 	}
 	

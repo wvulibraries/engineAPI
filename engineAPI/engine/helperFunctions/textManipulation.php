@@ -1,4 +1,52 @@
 <?php
+
+// Returns a string with, space delimited, with $wordCount number of words.
+// 
+// Can be used from {engine } function call, with attributes 'str' & 'wordCount'
+function wordSubStr($str,$wordCount=NULL) {
+	
+	if (is_array($str)) {
+		$wordCount = $str['wordCount'];
+		$str = $str['str'];
+	}
+	
+	$str = explode(" ",$str);
+	$str = array_slice($str,0,$wordCount);
+	$str = join(' ',$str);
+	
+	return($str);
+}
+
+//Key Words in Context
+// Highlights $str1 in $str2
+//
+// $str1 = search term
+// $str2 = compair with string
+function kwic($str1,$str2) {
+	
+	$kwicLen = strlen($str1);
+
+	$kwicArray = array();
+	$pos       = 0;
+	$count     = 0;
+
+	while($pos !== FALSE) {
+		$pos = stripos($str2,$str1,$pos);
+		if($pos !== FALSE) {
+			$kwicArray[$count]['kwic'] = substr($str2,$pos,$kwicLen);
+			$kwicArray[$count++]['pos']  = $pos;
+			$pos++;
+		}
+	}
+
+	for($I=count($kwicArray)-1;$I>=0;$I--) {
+		$kwic = '<span class="kwic">'.$kwicArray[$I]['kwic'].'</span>';
+		$str2 = substr_replace($str2,$kwic,$kwicArray[$I]['pos'],$kwicLen);
+	}
+		
+	return($str2);
+}
+
 /*
 Plugin Name: Title Case
 Plugin URI: http://nanovivid.com/stuff/wordpress/title-case/

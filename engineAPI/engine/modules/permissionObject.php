@@ -12,9 +12,9 @@ class permissionObject {
 	private $engine    = NULL;
 	private $permsList = array();
 	
-	function __construct($table,$engine) {
+	function __construct($table) {
 		$this->table  = $table;
-		$this->engine = $engine;
+		$this->engine = EngineAPI::singleton();
 		
 		$sql = sprintf("SELECT value FROM %s ORDER BY value + 0",$this->engine->openDB->escape($this->table));
 		$this->engine->openDB->sanitize = FALSE;

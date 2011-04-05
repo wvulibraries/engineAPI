@@ -1,10 +1,12 @@
 <?php
 
 global $engineDir;
-// Load all the base engine Modules
-include_once($engineDir."/includes.php");
 
-class EngineCMS {
+$engineVars = array();
+
+class EngineAPI {
+	
+	private static $instance; // Hold an instance of this object, for use as Singleton
 	
 	private $localVars        = array();
 	public  $template         = ""; // $engineVars['currentTemplate'];
@@ -41,8 +43,7 @@ class EngineCMS {
 	private $displayTemplateOff     = FALSE;
 	
 	
-	
-	function __construct($site="default") {
+	private function __construct($site="default") {
 		global $engineDir;
 		
 		ob_start(array(&$this, 'displayTemplate'));
@@ -53,6 +54,24 @@ class EngineCMS {
 		if ($site != "default") {
 			require_once($engineDir."/config/".$site.".php");
 		}
+		
+		//Load Access Control Modules
+		$hfDirHandle = @opendir($engineVars['helperFunctions']) or die("Unable to open ".$engineVars['helperFunctions']);
+		while (false !== ($file = readdir($hfDirHandle))) {
+			// Check to make sure that it isn't a hidden file and that it is a PHP file
+			if ($file != "." && $file != ".." && $file) {
+				$fileChunks = array_reverse(explode(".", $file));
+				$ext= $fileChunks[0];
+				if ($ext == "php") {
+					require_once($engineVars['helperFunctions']."/".$file);
+				}
+			}
+		}
+		
+		require_once($engineDir."/sessionManagement.php");
+		require_once($engineDir."/debug.php");
+		require_once($engineDir."/stats.php");
+		require_once($engineDir."/userInfo.php");
 		
 		// Setup Current Working Directory
 		$this->cwd = getcwd();
@@ -215,6 +234,15 @@ class EngineCMS {
 //		$output .= "</pre>";
 		//print $output;
 		ob_flush();
+	}
+	
+	public static function singleton($site="default") {
+		if (!isset(self::$instance)) {
+            $c = __CLASS__;
+            self::$instance = new $c($site);
+        }
+
+        return self::$instance;
 	}
 	
 	/*
@@ -499,7 +527,7 @@ class EngineCMS {
 	
 	public function login($loginType) {
 		if (isset($this->loginFunctions[$loginType])) {
-			if($this->loginFunctions[$loginType]($this->cleanPost['RAW']['username'],$this->cleanPost['RAW']['password'],$this)) {
+			if($this->loginFunctions[$loginType]($this->cleanPost['RAW']['username'],$this->cleanPost['RAW']['password'])) {
 				return(TRUE);
 			}
 		}
@@ -718,7 +746,7 @@ class EngineCMS {
 		switch($attPairs['name']) {
 			case "include":
 			//$output = "Begin recurseInsert<br />";
-			    $output = recurseInsert($attPairs['file'],$attPairs['type'],$this);
+			    $output = recurseInsert($attPairs['file'],$attPairs['type']);
 			//$output .= "End recurseInsert<br />";
 				break;
 			case "date":
@@ -728,7 +756,7 @@ class EngineCMS {
 			    $output = sessionGet($attPairs['var']);
 				break;
 			case "filelist":
-			    $output = filelist($attPairs['dir'],$attPairs['temp'],$this);
+			    $output = filelist($attPairs['dir'],$attPairs['temp']);
 				break;
 			case "filetemplate":
 			    global $engineVars;
@@ -745,7 +773,7 @@ class EngineCMS {
 			    $output = sessionInsertCSRF(FALSE);
 			    break;
 			case "function":
-			    $output = $attPairs['function']($attPairs,$this);
+			    $output = $attPairs['function']($attPairs);
 				break;
 			default:
 			    $output = "Error: name function '".$attPairs['name']."' not found.";

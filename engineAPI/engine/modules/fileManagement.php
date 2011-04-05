@@ -10,9 +10,9 @@ class fileHandler {
 	public $basePath = NULL;
 	
 	
-	function __construct($engine) {
+	function __construct() {
 		
-		$this->engine = $engine;
+		$this->engine = EngineAPI::singleton();
 		
 	}
 	

@@ -5,11 +5,24 @@ $moduleFunctions = array();
 $engineDB        = NULL;
 $DEBUG           = NULL;
  
+// If set to TRUE engine will attempt to use the current server variables
+// set in php. If it finds that they are not set, or this is set to false, it will use
+// the hard-coded alternative. 
+//
+// Note: Server variables are NOT set on the commandline
+$serverVars = TRUE;
+
+if (!isset($_SERVER['SERVER_NAME']) || !isset($_SERVER['DOCUMENT_ROOT']) || empty($_SERVER['SERVER_NAME']) || empty($_SERVER['DOCUMENT_ROOT'])) {
+	
+	$serverVars = FALSE;
+	
+}
+
 //URLS
 global $engineVars;
 
 // Your domain
-$engineVars['server']     = "my.domain.com";
+$engineVars['server']     = ($serverVars === TRUE)?$_SERVER['SERVER_NAME']:"my.domain.com";
 
 // stick your protocol in front ... 'http' or 'https' or 'ftp' or whatever
 $engineVars['WVULSERVER'] = "http://".$engineVars['server'];
@@ -60,16 +73,16 @@ $engineVars['imgMinusSign']         = $engineVars['engineInc'] ."/images/minus.g
 //expected to be based in this directory. WVU likes to consider each 
 //website/domain to be a "user" on the system and drops everything in 
 ///home/domain
-$engineVars['baseRoot']      = "/home/ereserves";
+$engineVars['baseRoot']      = "/home/library";
 
 // EngineAPI's base directory. ALl of engine's directories will be contained here
-$engineVars['rootPHPDir']    = $engineVars['baseRoot'] ."/phpincludes/engineAPI";
+$engineVars['rootPHPDir']    = $engineVars['baseRoot'] ."/phpincludes/engine";
 
 // Where the engine templates are stored
 $engineVars['tempDir']       = $engineVars['rootPHPDir'] ."/template";
 
 // The directory that corrisponds to $engineVars['WEBROOT'], defined above
-$engineVars['documentRoot']  = $engineVars['baseRoot'] ."/public_html";
+$engineVars['documentRoot']  = ($serverVars === TRUE)?$_SERVER['DOCUMENT_ROOT']:$engineVars['baseRoot'] ."/library";
 
 // File listings. XML files that contain metadata about files so what 
 // they can be stored without a mysql database.
@@ -79,13 +92,16 @@ $engineVars['fileListings']  = $engineVars['rootPHPDir'] ."/filelistings";
 $engineVars['emailInclude']  = $engineVars['rootPHPDir'] ."/phpmailer/phpmailer-fe.php";
 
 // Engine Modules directory
-$engineVars['modules']       = $engineVars['rootPHPDir'] ."/engine/modules";
+$engineVars['modules']       = $engineVars['rootPHPDir'] ."/engineAPI/modules";
 
 // Access Control Modules
-$engineVars['accessModules'] = $engineVars['rootPHPDir'] ."/engine/accessControl";
+$engineVars['accessModules'] = $engineVars['rootPHPDir'] ."/engineAPI/accessControl";
+
+// Helper Function Modules
+$engineVars['helperFunctions'] = $engineVars['rootPHPDir'] ."/engineAPI/helperFunctions";
 
 // Login Modules
-$engineVars['loginModules']  = $engineVars['rootPHPDir'] ."/engine/login";
+$engineVars['loginModules']  = $engineVars['rootPHPDir'] ."/engineAPI/login";
 
 // RSS Templates
 $engineVars['rssDir']        = $engineVars['tempDir'] ."/rss";
@@ -142,8 +158,8 @@ $engineVars['onCampus'][] = "192.168.171.1";
 $engineVars['mysql']['server']   = "localhost";
 $engineVars['mysql']['port']     = "3306";
 //User with permissions to engineCMS database
-$engineVars['mysql']['username'] = "dbUsername";
-$engineVars['mysql']['password'] = "dbPassword";
+$engineVars['mysql']['username'] = "systems";
+$engineVars['mysql']['password'] = "Te\$t1234";
 
 //Active Directory (ldap?) Information
 // As many active directories/ldaps can be defined as needed here. 

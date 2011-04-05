@@ -23,6 +23,8 @@ function tempDate($attPairs) {
 // setdate : unix time stamp to set the dropdown too
 function dateDropDown($attPairs,$engine=null) {
 	
+	$engine = EngineAPI::singleton();
+	
 	$monArray = array("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"); 
 	$monthArray = array("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December");
 	$mArray = array("1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12");
@@ -135,6 +137,8 @@ function dateDropDown($attPairs,$engine=null) {
 // mininterval : How the minutes are spaced. Default is "1" (01,02,03,...) - "15" would be (00,15,30,45)
 // settime : unix time stamp to set the dropdown too
 function timeDropDown($attPairs,$engine=null) {
+	
+	$engine = EngineAPI::singleton();
 	
 	$localtime = localtime(time(), true);
 	$chour     = $localtime['tm_hour'];

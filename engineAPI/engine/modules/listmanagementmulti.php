@@ -2,6 +2,8 @@
 
 function webHelper_listMultiAdd($attPairs,$engine=null) {
 	
+	$engine = EngineAPI::singleton();
+	
 	$queryString = "";
 	if (!empty($attPairs['addget']) && $attPairs['addget'] == "true") {
 		foreach ($engine->cleanGet['HTML'] as $var=>$val) {
@@ -36,6 +38,8 @@ function webHelper_listMultiAdd($attPairs,$engine=null) {
 }
 
 function webHelper_listMultiInsert($table,$label,$cols,$engine=null) {
+	
+	$engine = EngineAPI::singleton();
 		
 	if (empty($engine->cleanPost['MYSQL'][$cols[1]["table"]])) {
 		return webHelper_errorMsg($cols[1]["label"] ." was left blank.");
@@ -80,6 +84,9 @@ function webHelper_listMultiInsert($table,$label,$cols,$engine=null) {
 }
 
 function webHelper_listMultiColInsert($cols,$engine=null) {
+	
+	$engine = EngineAPI::singleton();
+	
 	$temp = array();
 	foreach ($cols as $I) {
 		$temp[] = $I["table"];
@@ -91,6 +98,8 @@ function webHelper_listMultiColInsert($cols,$engine=null) {
 
 function webHelper_listMultiValInsert($cols,$engine=null) {
 	
+	$engine = EngineAPI::singleton();
+	
 	$temp = array();
 	foreach ($cols as $I) {
 		$temp[] = "'".$engine->cleanPost['MYSQL'][$I["table"]]."'";
@@ -101,6 +110,8 @@ function webHelper_listMultiValInsert($cols,$engine=null) {
 }
 
 function webHelper_listMultiEditList($attPairs,$engine=null) {
+	
+	$engine = EngineAPI::singleton();
 	
 	$dbTables = $engine->dbTablesExport();
 	
@@ -164,6 +175,8 @@ function webHelper_listMultiEditList($attPairs,$engine=null) {
 }
 
 function webHelper_listMultiUpdate($table,$cols,$engine=null) {
+	
+	$engine = EngineAPI::singleton();
 
 	$dbTables = $engine->dbTablesExport();
 	
@@ -251,6 +264,8 @@ function webHelper_listMultiUpdate($table,$cols,$engine=null) {
 
 function webHelper_listMulticolUpdate($cols,$row,$engine=null) {
 	
+	$engine = EngineAPI::singleton();
+	
 	$temp = array();
 	foreach ($cols as $I) {
 		$temp[] = $engine->openDB->escape($I["table"])."='".$engine->cleanPost['MYSQL'][$I["table"]."_".$row]."'";
@@ -261,6 +276,8 @@ function webHelper_listMulticolUpdate($cols,$row,$engine=null) {
 }
 
 function webHelper_listMultiDupeCheck($new,$table,$col,$engine=null) {
+	
+	$engine = EngineAPI::singleton();
 	
 	$sql = sprintf("SELECT * FROM %s WHERE %s='%s'",
 		$engine->openDB->escape($table),

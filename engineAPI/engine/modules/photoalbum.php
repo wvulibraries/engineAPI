@@ -19,7 +19,7 @@ class photoAlbum {
 	
 	private $photos = array();
 	
-	function __construct($engine,$directory=NULL) {
+	function __construct($directory=NULL) {
 		
 		if (!($engine instanceof EngineCMS)) {
 			return(FALSE);
@@ -33,7 +33,7 @@ class photoAlbum {
 		
 		include_once($engineVars['phpthumb']);
 		
-		$this->engine      = $engine;
+		$this->engine      = EngineAPI::singleton();
 		$this->dir         = $directory;
 	}
 	

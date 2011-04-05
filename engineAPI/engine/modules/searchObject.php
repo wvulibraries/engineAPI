@@ -16,13 +16,9 @@ class search {
 	public $relevanceSearch = TRUE;
 	
 	
-	function __construct($engine) {
+	function __construct() {
 		
-		if (!($engine instanceof EngineCMS)) {
-			return(FALSE);
-		}
-		
-		$this->engine   = $engine;
+		$this->engine   = EngineAPI::singleton();
 		$this->boolOperands = array('or'  => '',
 									'and' => '+',
 									'not' => '-');

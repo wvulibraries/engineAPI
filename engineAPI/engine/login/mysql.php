@@ -3,10 +3,12 @@
 global $loginFunctions;
 $loginFunctions['mysql'] = "mysqlLogin";
 
-function mysqlLogin($username,$password,$engine) { 
+function mysqlLogin($username,$password,$engine=NULL) { 
 	
 	global $engineDB;
 	global $engineVars;
+
+	$engine = EngineAPI::singleton();
 
 	if (!isset($engineVars['mysqlAuthTable'])) {
 		$engineVars['mysqlAuthTable'] = "users";

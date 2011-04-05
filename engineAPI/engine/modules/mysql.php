@@ -12,7 +12,7 @@ class engineDB {
 	
 	public $status    = FALSE; // If the connection to the database succeeds this is set to TRUE
 	
-	public $sanitize   = TRUE;
+	public $sanitize   = FALSE;
 	public $queryArray = TRUE;
 	
 	private $transArray = array(); // array of transaction queries 
@@ -95,7 +95,7 @@ class engineDB {
 	// $array{id} = id of last insert if insert query, otherwise FALSE
 	// $array{query} = query that was sent
 	
-	// $this->sanitize is reset to TRUE after executing
+	// $this->sanitize is reset to FALSE after executing
 	function query($query) {
 		
 		$this->testConnection(TRUE);
@@ -145,7 +145,7 @@ class engineDB {
 		}
 		
 		
-		$this->sanitize = TRUE;
+		// $this->sanitize = TRUE;
 		return(($result)?$result:$resultArray);
 	}
 	

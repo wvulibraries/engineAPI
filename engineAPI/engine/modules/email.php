@@ -55,7 +55,7 @@ class mailSender {
 
 	public function __construct($engine=NULL) {
 		
-		$this->engine = $engine;
+		$this->engine = EngineAPI::singleton();
 		
 	}
 	
