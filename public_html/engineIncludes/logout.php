@@ -1,8 +1,8 @@
 <?php
 
-$engineDir = "/home/library/phpincludes/engineAPI/engine";
+$engineDir = "/home/library/phpincludes/engine/engineAPI";
 include($engineDir ."/engine.php");
-$engine = new EngineCMS();
+$engine = EngineAPI::singleton();
 
 if(isset($_SESSION)) {
 	
@@ -10,7 +10,7 @@ if(isset($_SESSION)) {
 		debugDisplay("logout","\$_SESSION",1,"Contents of the \$_SESSION array.",$_SESSION);
 	}
 
-	$termed = sessionEnd($engine);
+	$termed = sessionEnd();
 }
 
 ?>

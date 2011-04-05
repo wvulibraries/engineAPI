@@ -1,10 +1,11 @@
 <?php
 
 $loginType = "mysql";
+#$loginType = "ldap";
 
-$engineDir = "/Path/To/phpincludes/engineAPI/engine";
+$engineDir = "/home/library/phpincludes/engine/engineAPI";
 include($engineDir ."/engine.php");
-$engine = new EngineCMS();
+$engine = EngineAPI::singleton();
 
 $localVars['pageTitle'] = "Login Page";
 
