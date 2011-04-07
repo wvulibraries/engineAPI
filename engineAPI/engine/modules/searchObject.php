@@ -261,14 +261,34 @@ class search {
 				if ($result['engineSearchModule_tableName'] == $table['name']) {
 					foreach ($table['fields'] as $field) {
 
-						if (!isset($field['display']) || $field['display'] !== TRUE || is_empty($result[$field['fieldName']])) {
+						if (!isset($field['display']) || $field['display'] === FALSE) {
 							continue;
 						}
 
-						if (isset($result[$field['fieldName']])) {
+						if (!isset($result[$field['fieldName']]) || is_empty($result[$field['fieldName']])) {
+							continue;
+						}
+						
+						$value = $result[$field['fieldName']];
+						$relevant = FALSE;
+						foreach ($this->searchArray as $keyword) {
+							if (!array_key_exists(strtolower($keyword),$this->boolOperands)) {
+								
+								$newValue = kwic(htmlSanitize(trim($keyword,"+-*")),$value);
+								
+								if ($newValue != $value) {
+									$value = $newValue;
+									$relevant = TRUE;
+								}
+
+							}
+						}
+
+						if ($field['display'] === TRUE || (strtolower($field['display']) == 'relevant' && $relevant === TRUE)) {
+
 							$output .= "<tr>";
-							$output .= "<td>".$field['label']."</td>";
-							$output .= "<td>";
+							$output .= "<td class=\"searchResult_label\">".$field['label']."</td>";
+							$output .= "<td class=\"searchResult_value\">";
 
 							if (isset($field['link'])) {
 
@@ -286,12 +306,6 @@ class search {
 
 							}
 							
-							$value = $result[$field['fieldName']];
-							foreach ($this->searchArray as $keyword) {
-								if (!array_key_exists(strtolower($keyword),$this->boolOperands)) {
-									$value = kwic(htmlSanitize(trim($keyword,"+-*")),$value);
-								}
-							}
 							$output .= $value;
 							
 							if (isset($field['link'])) {
@@ -300,11 +314,13 @@ class search {
 
 							$output .= "</td>";
 							$output .= "</tr>";
+
 						}
+
 					}
 					
 					// separate results
-					$output .=  "<tr><td>&nbsp;</td><td>&nbsp;</td></tr>";
+					$output .=  "<tr><td class=\"searchResult_empty\">&nbsp;</td><td class=\"searchResult_empty\">&nbsp;</td></tr>";
 
 				}
 			}
