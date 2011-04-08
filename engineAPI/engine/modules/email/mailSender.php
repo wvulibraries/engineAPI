@@ -1,44 +1,5 @@
 <?php
 
-function validateEmailAddr($email,$internal=FALSE) {
-
-	if(filter_var($email, FILTER_VALIDATE_EMAIL)) {
-		if($internal) {
-			if (internalEmail($email)) {
-				return(TRUE);
-			}
-			return(FALSE);
-		}
-	    return(TRUE);
-	}
-
-	return(FALSE);
-}
-
-function internalEmail($email) {
-	global $engineVars;
-
-	foreach ($engineVars['internalEmails'] as $key => $regex) {
-		if(preg_match($regex,$email)) {
-			return(TRUE);
-		}	
-	}
-
-	return(FALSE);
-}
-
-function obfuscateEmail($attPairs) {
-
-	$email = $attPairs['email'];
-
-	$output = "";
-	for ($i=0; $i<strlen($email); $i++){
-		$output .= "&#" . ord($email[$i]) . ";";
-	}
-
-	return($output);
-}
-
 class mailSender {
 
 	private $from       = NULL;
@@ -262,4 +223,5 @@ class mailSender {
 	}
 
 }
+
 ?>

@@ -1,74 +1,5 @@
 <?php
 
-$GLOBALS['dlxsObject'] = "FOO";
-
-global $moduleFunctions;
-$moduleFunctions['dlxs']['pattern']  = "/\{dlxs\s+(.+?)\}/";
-$moduleFunctions['dlxs']['function'] = "dlxsDisplayTemplate";
-
-function dlxsDisplayTemplate($matches) {
-
-	// This handles the case where the global hasn't been defined
-	// returns the pattern, plus the matches.
-	if ($GLOBALS['dlxsObject'] == "FOO") {
-		return("{dlxs ".$matches[1]."}");
-	}
-
-	$dlxs = &$GLOBALS['dlxsObject'];
-	
-	$backtrace = debug_backtrace();
-	$debug     = $backtrace[1]['function'];
-	
-	$attPairs  = split("\" ",$matches[1]);
-
-	foreach ($attPairs as $pair) {
-		if (empty($pair)) {
-			continue;
-		}
-		list($attribute,$value) = split("=",$pair,2);
-		$temp[$attribute] = str_replace("\"","",$value);
-	}
-
-	$attPairs = $temp;
-
-	$output = "Error: in dlxs.php";
-	
-	switch($attPairs['var']) {
-		case "collTitle":
-		    $output = $dlxs->defaults['title'];
-			break;
-		case "collGroup":
-		    $output = $dlxs->defaults['group'];
-			break;
-		case "contactLink":
-	    	$output = $dlxs->defaults['contactLink'];
-		    break;
-		case "contactText":
-		    $output = $dlxs->defaults['contactText'];
-		    break;
-		case "pageBar":
-		    $output = $dlxs->pageBar;
-		    break;
-		case "sliceBar":
-		    $output = $dlxs->sliceBar;
-		    break;
-		case "findAidLeftNav":
-		    $output = $dlxs->genFindAidLeftNav();
-		    break;
-		case "faElement":
-		    $output = $dlxs->printFindAidElement($attPairs);
-			break;
-		case "faElementSubjects":
-		    $output = $dlxs->printFindAidSubjects($attPairs['name']);
-		    break;
-		default:
-		    $output = "Error: name function '".$attPairs['var']."' not found. Function: '$debug'";
-	}
-	
-	return($output);
-	
-}
-
 class dlxs {
 	
 	public $viewType = NULL; // this needs to be set to private after display.php is cleaned up
@@ -124,6 +55,10 @@ class dlxs {
 	
 	public $noThumbURL = "/images/noThumbNail.gif";
 	
+	// Template Stuff
+	$pattern = "/\{dlxs\s+(.+?)\}/";
+	$function = "dlxs::templateMatches":
+	
 	function __construct($url,$class,$collection) {
 		
 		$engine = EngineAPI::singleton();
@@ -151,6 +86,48 @@ class dlxs {
 		$this->defaults['contactText'] = $this->getDefaultContactText($xml);
 		$this->defaults['group']       = $this->getDefaultGroup($xml);
 		
+	}
+	
+	public static function templateMatches($matches) {
+		$engine   = EngineAPI::singleton();
+		$dlxs      = $engine->retTempObj("dlxs");
+		$attPairs = attPairs($matches[1]);
+		
+		$output = "Error: in dlxs.php";
+
+		switch($attPairs['var']) {
+			case "collTitle":
+			    $output = $dlxs->defaults['title'];
+				break;
+			case "collGroup":
+			    $output = $dlxs->defaults['group'];
+				break;
+			case "contactLink":
+		    	$output = $dlxs->defaults['contactLink'];
+			    break;
+			case "contactText":
+			    $output = $dlxs->defaults['contactText'];
+			    break;
+			case "pageBar":
+			    $output = $dlxs->pageBar;
+			    break;
+			case "sliceBar":
+			    $output = $dlxs->sliceBar;
+			    break;
+			case "findAidLeftNav":
+			    $output = $dlxs->genFindAidLeftNav();
+			    break;
+			case "faElement":
+			    $output = $dlxs->printFindAidElement($attPairs);
+				break;
+			case "faElementSubjects":
+			    $output = $dlxs->printFindAidSubjects($attPairs['name']);
+			    break;
+			default:
+			    $output = "Error: name function '".$attPairs['var']."' not found. Function: '$debug'";
+		}
+
+		return($output);
 	}
 	
 	public function addSearchLink($abbr=null) {

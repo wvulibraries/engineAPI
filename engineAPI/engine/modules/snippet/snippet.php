@@ -1,40 +1,5 @@
 <?php
 
-$GLOBALS['snippetObject'] = "FOO";
-
-global $moduleFunctions;
-$moduleFunctions['snippet']['pattern']  = "/\{snippet\s+(.+?)\}/";
-$moduleFunctions['snippet']['function'] = "snippetDisplayTemplate";
-
-function snippetDisplayTemplate($matches) {
-	
-	if ($GLOBALS['snippetObject'] == "FOO") {
-		return("{snippet ".$matches[1]."}");
-	}
-	
-	$snippet = &$GLOBALS['snippetObject'];
-	
-	$attPairs  = split("\" ",$matches[1]);
-
-	foreach ($attPairs as $pair) {
-		if (empty($pair)) {
-			continue;
-		}
-		list($attribute,$value) = split("=",$pair,2);
-		$temp[$attribute] = str_replace("\"","",$value);
-	}
-	
-	$attPairs = $temp;
-	
-	$output = "Error in snippet.php";
-	
-	if (isset($attPairs['id']) && isset($attPairs['field'])) {
-		$output = $snippet->display($attPairs['id'],$attPairs['field']);
-	}
-	
-	return($output);
-}
-
 class Snippet {
 	
 	private $engine           = NULL;
@@ -49,6 +14,9 @@ class Snippet {
 	public $textResetButton   = "Reset";
 	public $snippetURL        = "/snippet.php?id=";
 	public $snippetPublicURL  = "/snippetPublic.php?id=";
+	
+	public $pattern           = "/\{snippet\s+(.+?)\}/";
+	public $function          = "Snippet::templateMatches";
 	
 	function __construct($table,$field=NULL) {
 		$this->engine    = EngineAPI::singleton();
@@ -65,7 +33,21 @@ class Snippet {
 	function __destruct() {
 	}
 	
+	public static function templateMatches($matches) {
 
+		$engine   = EngineAPI::singleton();
+		$snippet  = $engine->retTempObj("breadCrumbs");
+		$attPairs = attPairs($matches[1]);
+
+		$output   = "Error in snippet.php";
+
+		if (isset($attPairs['id']) && isset($attPairs['field'])) {
+			$output = $snippet->display($attPairs['id'],$attPairs['field']);
+		}
+
+		return($output);
+
+	}
 	
 	/* valid Types:
 	 ol = ordered List

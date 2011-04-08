@@ -156,17 +156,4 @@ class fileList {
 	
 }
 
-function filelist($dir,$template,$engine) {
-	
-	global $engineVars;
-	
-	$engineVars['fileList'] = new fileList($dir,$engine);
-	
-	$output = $engineVars['fileList']->applyTemplate($engine->template."/".$template);
-	
-	$engineVars['fileList'] = NULL;
-	
-	return($output);
-}
-
 ?>

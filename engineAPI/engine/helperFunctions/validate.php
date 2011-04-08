@@ -47,4 +47,10 @@ function validURL($url) {
 	
 }
 
+function validateEmailAddr($email,$internal=FALSE) {
+	return(email::validate($email,$internal));
+}	
+
+
+
 ?>

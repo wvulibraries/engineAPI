@@ -1,5 +1,20 @@
 <?php
 
+// return attribute pairs
+function attPairs($attpairs) {
+	$attPairs  = split("\" ",$attpairs);
+
+	foreach ($attPairs as $pair) {
+		if (empty($pair)) {
+			continue;
+		}
+		list($attribute,$value) = split("=",$pair,2);
+		$temp[$attribute] = str_replace("\"","",$value);
+	}
+
+	return($temp);
+}
+
 //Check for Performance
 // Engine is no longer used as a parameter. left for backwards compatibility
 function recurseInsert($file,$type="php",$engine=NULL) {

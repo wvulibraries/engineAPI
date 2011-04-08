@@ -15,6 +15,8 @@ class EngineAPI {
 	
 	private $DEBUG            = array();
 	
+	public $errorStack        = array();
+	
 	// Cleaned up $_GET and _$POST variables with HTML and MySQL sanitized values
 	public $cleanGet  = array();
 	public $cleanPost = array();
@@ -34,6 +36,9 @@ class EngineAPI {
 	private $dbPort     = "";
 	private $dbTables   = array();
 	public  $openDB   = NULL;
+	
+	// Module Stuffs
+	private $availableModules       = array();
 	
 	//Module Template Mathes and function calls for displayTemplate()
 	private $moduleTemplateEngine   = array();
@@ -109,21 +114,33 @@ class EngineAPI {
 			$this->accessExistsTest = $engineVars['accessExistsTest'];
 		}
 		
-		//Load Modules (previous 'web helpers')
+		// Define the AutoLoader
+		spl_autoload_register(array($this, 'autoloader'));
+		
+		// Get modules ready for Autoloader (previously loaded modules). Load the "onLoad.php" files
+		// for each module
 		$modules_dirHandle = @opendir($engineVars['modules']) or die("Unable to open ".$engineVars['modules']);
-		while (false !== ($file = readdir($modules_dirHandle))) {
-			// Check to make sure that it isn't a hidden file and that it is a PHP file
-			if ($file != "." && $file != ".." && $file) {
-				$fileChunks = array_reverse(explode(".", $file));
-				$ext= $fileChunks[0];
-				if ($ext == "php") {
-					include_once($engineVars['modules']."/".$file);
+		while (false !== ($dir = readdir($modules_dirHandle))) {
+			// Check to make sure that it isn't a hidden file and that the file is a directory
+			if ($dir != "." && $dir != ".." && is_dir($engineVars['modules']."/".$dir) === TRUE) {
+				$singleMod_dirHandle = @opendir($engineVars['modules']."/".$dir) or die("Unable to open ".$engineVars['modules']);
+				while (false !== ($file = readdir($singleMod_dirHandle))) {
+					if ($file != "." && $file != ".." && $file) {
+						
+						if ($file == "onLoad.php") {
+							include_once($engineVars['modules']."/".$dir."/".$file);
+						}
+						else {
+							$fileChunks = array_reverse(explode(".", $file));
+							$ext= $fileChunks[0];
+							if ($ext == "php") {
+								$this->availableModules[$fileChunks[1]] = $engineVars['modules']."/".$dir."/".$file;
+							}
+						}
+
+					}
 				}
 			}
-		}
-		
-		foreach ($moduleFunctions as $module => $info) {
-			$this->moduleTemplateEngine[$module] = $info;
 		}
 		
 		//Load Login Functions 
@@ -243,6 +260,23 @@ class EngineAPI {
         }
 
         return self::$instance;
+	}
+	
+	
+	// Define Template Object Pattern
+	public function defTempPattern($pattern,$function,$object) {
+		
+		$class = get_class($object);
+
+		$this->moduleTemplateEngine[$class]['pattern']  = $pattern;
+		$this->moduleTemplateEngine[$class]['function'] = $function;
+		$this->moduleTemplateEngine[$class]['object']   = $object;
+		
+	}
+	
+	// Retrieve Template Object
+	public function retTempObj($className) {
+		return($this->moduleTemplateEngine[$className]['object']);
 	}
 	
 	/*
@@ -538,6 +572,21 @@ class EngineAPI {
 	#Private Functions
 	######################################################################
 
+	private function autoloader($className) {
+		
+		if (!class_exists($className, FALSE)) {
+
+			if (!file_exists($this->availableModules[$className])) {
+				return(FALSE);
+			}
+
+			require_once($this->availableModules[$className]);
+			return(TRUE);
+		}
+		
+		return;
+	}
+
 	private function getHTTP_REFERERServer($referer) {
 		
 		$server = NULL;
@@ -636,7 +685,18 @@ class EngineAPI {
 				if ($engineVars['replaceDoubleQuotes'] === TRUE) {
 					$line = preg_replace_callback('/(<[^"]+=)("{2})([^>]+>)/',array( &$this, 'engineDQMatches'),$line);
 				}
-
+				
+				// Check to see if the pattern matches the "standard" for
+				// module templates. If so, see if the module is loaded. 
+				// If no, try to load the module and create a temporary 
+				// instance of it to get the replacement pattern and function
+				preg_match("/\{(.+?)\s(.+?)\}/",$line,$matches);
+				if (isset($matches[1]) && !is_empty($matches[1])) {
+					if (!class_exists($matches[1], FALSE)) {
+						$temp = @new $matches[1]();
+					}
+				}
+				
 				//module Replacements
 				foreach ($this->moduleTemplateEngine as $plugin) {
 					if(isset($plugin['pattern']) && isset($plugin['function'])) {
@@ -644,7 +704,7 @@ class EngineAPI {
 						$line = preg_replace_callback($plugin['pattern'],$plugin['function'],$line);
 					}
 				}
-
+				
 				//add a line break, \n, after <br /> ... makes the source a touch prettier. 
 				$line = str_replace("<br />","<br />\n",$line);
 			}
@@ -748,9 +808,6 @@ class EngineAPI {
 			//$output = "Begin recurseInsert<br />";
 			    $output = recurseInsert($attPairs['file'],$attPairs['type']);
 			//$output .= "End recurseInsert<br />";
-				break;
-			case "date":
-			    $output = tempDate($attPairs);
 				break;
 			case "session":
 			    $output = sessionGet($attPairs['var']);

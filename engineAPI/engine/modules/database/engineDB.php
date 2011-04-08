@@ -73,7 +73,7 @@ class engineDB {
 			$string = "NULL";
 		}
 		else if (is_bool($string)) {   
-	        $var = ($var) ? 1 : 0;
+	        $var = ($string) ? 1 : 0;
 	    }
 	
 		return(mysql_real_escape_string($string,$this->dbLink));

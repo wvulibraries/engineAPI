@@ -111,4 +111,16 @@ function nv_title_skip_dotted($matches) {
     return preg_match('/[[:alpha:]] [.] [[:alpha:]]/x', $matches[0]) ? $matches[0] : ucfirst($matches[0]);
 }
 
+function obfuscateEmail($attPairs) {
+
+	$email = $attPairs['email'];
+
+	$output = "";
+	for ($i=0; $i<strlen($email); $i++){
+		$output .= "&#" . ord($email[$i]) . ";";
+	}
+
+	return($output);
+}
+
 ?>
