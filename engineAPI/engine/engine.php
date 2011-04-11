@@ -1,7 +1,5 @@
 <?php
 
-global $engineDir;
-
 $engineVars = array();
 
 class EngineAPI {
@@ -49,7 +47,7 @@ class EngineAPI {
 	
 	
 	private function __construct($site="default") {
-		global $engineDir;
+		$engineDir = dirname(__FILE__);
 		
 		ob_start(array(&$this, 'displayTemplate'));
 		
