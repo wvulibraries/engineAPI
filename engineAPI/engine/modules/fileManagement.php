@@ -334,7 +334,7 @@ class fileHandler {
 		
 		// Grab the values from the oldTable that will be inserted in the newTable
 		foreach (array_keys($oldTableFields) as $I) {
-			$vals[] = "'".$row[$I]."'";
+			$vals[] = "'".dbSanitize($row[$I])."'";
 		}
 		$insertFieldVals = implode(",",$vals);
 			
