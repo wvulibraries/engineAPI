@@ -162,7 +162,7 @@ class EngineAPI {
 		sessionStart();
 		
 		// Sets up a clean PHP_SELF variable to use. 
-		$phpself             = array_pop(explode("/",$_SERVER['SCRIPT_FILENAME']));
+		$phpself             = basename($_SERVER['SCRIPT_FILENAME']);
 		$_SERVER['PHP_SELF'] = substr($_SERVER['PHP_SELF'], 0, strpos($_SERVER['PHP_SELF'],$phpself)).$phpself;
 		
 		// Sets up a clean clean HTTP_REFERER
