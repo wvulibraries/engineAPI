@@ -2,51 +2,56 @@
 
 class errorHandle {
 
-	private $engine = null;
+	private $engine     = null;
+	
+	// Defines the element that gets used when a message output is returned. 
+	// defaults to "<p>" and "</p>" ... should be the element without the 
+	// great/less thans. 
+	public static $spanElement = "p";
 
 	function __construct() {
 		$this->engine = EngineAPI::singleton();
 	}
 
-	public static function errorMsg($message, $p=TRUE) {
+	public static function errorMsg($message) {
 		
 		$engine  = EngineAPI::singleton();
 		
 		self::errorStack("error",$message);
 		
-		$output  = ($p === TRUE)?"<p ":"<span ";
-		$output .= 'class="errorMessage">';
+		$output  = "<".self::$spanElement;
+		$output .= ' class="errorMessage">';
 		$output .= $message;
-		$output .= ($p === TRUE)?"</p>":"</span>";
+		$output .= "</".self::$spanElement.">";
 		
 		return($output);
 	}
 
-	public static function successMsg($message, $p=TRUE) {
+	public static function successMsg($message) {
 		
 		$engine = EngineAPI::singleton();
 		
 		self::errorStack("success",$message);
 		
-		$output  = ($p === TRUE)?"<p ":"<span ";
-		$output .= 'class="successMessage">';
+		$output  = "<".self::$spanElement;
+		$output .= ' class="successMessage">';
 		$output .= $message;
-		$output .= ($p === TRUE)?"</p>":"</span>";
+		$output .= "</".self::$spanElement.">";
 		
 		return($output);
 		
 	}
 
-	public static function warningMsg($message, $p=TRUE) {
+	public static function warningMsg($message) {
 		
 		$engine = EngineAPI::singleton();
 		
 		self::errorStack("warning",$message);
 		
-		$output  = ($p === TRUE)?"<p ":"<span ";
-		$output .= 'class="warningMessage">';
+		$output  = "<".self::$spanElement;
+		$output .= ' class="warningMessage">';
 		$output .= $message;
-		$output .= ($p === TRUE)?"</p>":"</span>";
+		$output .= "</".self::$spanElement.">";
 		
 		return($output);
 	}
