@@ -72,7 +72,6 @@ class EngineAPI {
 		}
 		
 		require_once($engineDir."/sessionManagement.php");
-		require_once($engineDir."/debug.php");
 		require_once($engineDir."/stats.php");
 		require_once($engineDir."/userInfo.php");
 		
@@ -225,19 +224,6 @@ class EngineAPI {
 				$this->cleanGet['RAW'][$cleanKey]   = $value;
 			}
 			unset($_GET);
-		}
-		
-
-		
-		// Setup debugging
-		debugBuild($this);
-		
-		if (debugNeeded("includes")) {
-			debugDisplay("includes","\$cleanPost",1,"Contents of the \$cleanPost array.",$this->cleanPost);
-		}
-
-		if (debugNeeded("includes")) {
-			debugDisplay("includes","\$cleanGet",1,"Contents of the \$cleanGet array.",$this->cleanGet);
 		}
 		
 	}
@@ -630,10 +616,6 @@ class EngineAPI {
 
 		$engineDB->sanitize = FALSE;			
 		$results = $engineDB->query($query);
-
-		if (debugNeeded("log")) {
-			debugDisplay("log","\$results",1,"Contents of the \$results array.",$results);
-		}
 
 		return(TRUE);
 	}

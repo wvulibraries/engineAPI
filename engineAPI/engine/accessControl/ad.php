@@ -19,10 +19,6 @@ function accessControl_ad_user($value,$state=FALSE) {
 	
 	$username = sessionGet("username");
 	
-	if (debugNeeded("access")) {
-		debugDisplay("access","Username",1,"Logged in as User: $username",NULL);
-	}
-	
 	if ($value == $username && $state === TRUE) {
 		return(TRUE);
 	}
@@ -41,10 +37,6 @@ function accessControl_ad_auth($value,$state=FALSE) {
 	}
 
 	$username = sessionGet("username");
-	
-	if (debugNeeded("access")) {
-		debugDisplay("access","accessControl_ad_auth",2,"Username: '$username'",NULL);
-	}
 	
 	if ($username === FALSE && $state === TRUE) {
 		return(FALSE);
@@ -109,11 +101,6 @@ function ADcheckLoginStatus() {
 	}
 	
 	if(!sessionGet("username")) {
-		
-		if (debugNeeded("access")) {
-			debugDisplay("access","Access Chain",2,"Not Logged In",NULL);
-		}
-		
 		return(FALSE);
 	}
 }
