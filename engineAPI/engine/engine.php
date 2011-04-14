@@ -586,12 +586,12 @@ class EngineAPI {
 			// catch it from this eval block. 
 
 			eval("
-				class $class_name {
+				class $className {
 					function __construct() {
-						throw new Exception('Class $class_name not found', 1001);
+						throw new Exception('Class $className not found', 1001);
 					}
 					static function __callstatic(\$m, \$args) {
-						throw new Exception('Class $class_name not found', 1001);
+						throw new Exception('Class $className not found', 1001);
 					}
 					function x_notaclass_x(){}
 				}
@@ -706,7 +706,7 @@ class EngineAPI {
 				if (isset($matches[1]) && !is_empty($matches[1])) {
 					if (!class_exists($matches[1], FALSE)) {
 						try {
-							$temp = @new $matches[1]();
+							$temp = new $matches[1]();
 						}
 						catch (Exception $e) {
 							// do nothing
