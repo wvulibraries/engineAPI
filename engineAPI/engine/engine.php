@@ -37,6 +37,7 @@ class EngineAPI {
 	
 	// Module Stuffs
 	private $availableModules       = array();
+	public  $library                = array();
 	
 	//Module Template Mathes and function calls for displayTemplate()
 	private $moduleTemplateEngine   = array();
@@ -560,12 +561,43 @@ class EngineAPI {
 		
 		if (!class_exists($className, FALSE)) {
 
-			if (!file_exists($this->availableModules[$className])) {
-				return(FALSE);
+			if (isset($this->availableModules[$className]) && file_exists($this->availableModules[$className])) {
+	
+				require_once($this->availableModules[$className]);
+				return(TRUE);
+			}
+			
+			$filename = NULL;
+			foreach ($this->library as $I=>$V) {
+				if (file_exists($V."/".$className.".php")) {
+					$filename = $V."/".$className.".php";
+				}
+				else if (file_exists($V."/".$className.".class.php")) {
+					$filename = $V."/".$className.".class.php";
+				}
+			}
+			
+			if (!isnull($filename)) {
+				require_once($filename);
+				return(TRUE);
 			}
 
-			require_once($this->availableModules[$className]);
-			return(TRUE);
+			// Can't throw exceptions in php 5.2 from an autoloader, but you can 
+			// catch it from this eval block. 
+
+			eval("
+				class $class_name {
+					function __construct() {
+						throw new Exception('Class $class_name not found', 1001);
+					}
+					static function __callstatic(\$m, \$args) {
+						throw new Exception('Class $class_name not found', 1001);
+					}
+					function x_notaclass_x(){}
+				}
+				");
+
+			return(FALSE);
 		}
 		
 		return;
@@ -670,10 +702,15 @@ class EngineAPI {
 				// module templates. If so, see if the module is loaded. 
 				// If no, try to load the module and create a temporary 
 				// instance of it to get the replacement pattern and function
-				preg_match("/\{(.+?)\s(.+?)\}/",$line,$matches);
+				preg_match("/\{(.+?)(\s(.+?))?\}/",$line,$matches);
 				if (isset($matches[1]) && !is_empty($matches[1])) {
 					if (!class_exists($matches[1], FALSE)) {
-						$temp = @new $matches[1]();
+						try {
+							$temp = @new $matches[1]();
+						}
+						catch (Exception $e) {
+							// do nothing
+						}
 					}
 				}
 				
