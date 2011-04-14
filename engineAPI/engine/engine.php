@@ -705,8 +705,9 @@ class EngineAPI {
 				preg_match("/\{(.+?)(\s(.+?))?\}/",$line,$matches);
 				if (isset($matches[1]) && !is_empty($matches[1])) {
 					if (!class_exists($matches[1], FALSE)) {
+						$className = preg_replace("/[^a-zA-Z0-9]/", "", $matches[1]);
 						try {
-							$temp = new $matches[1]();
+							$temp = new $className();
 						}
 						catch (Exception $e) {
 							// do nothing
