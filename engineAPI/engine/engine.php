@@ -838,7 +838,7 @@ class EngineAPI {
 			    $output = $engineVars['fileList']->getAttribute($attPairs);
 				break;
 			case "insertCSRF":
-			case "crsf":
+			case "csrf":
 			    $output = sessionInsertCSRF();
 				break;
 			case "email":
