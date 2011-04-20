@@ -559,6 +559,12 @@ class EngineAPI {
 
 	private function autoloader($className) {
 		
+		$fh = fopen("/tmp/modules.txt","a");
+		fwrite($fh,"\n\n=====Autoloader Begin =========\n\n");
+		fwrite($fh,$className);
+		fwrite($fh,"\n\n=====Autoloader END =========\n\n");
+		fclose($fh);
+		
 		if (!class_exists($className, FALSE)) {
 
 			if (isset($this->availableModules[$className]) && file_exists($this->availableModules[$className])) {
@@ -584,6 +590,11 @@ class EngineAPI {
 
 			// Can't throw exceptions in php 5.2 from an autoloader, but you can 
 			// catch it from this eval block. 
+
+			if (preg_match('/^[^a-zA-Z_\x7f-\xff]/',$className)) {
+				eval("throw new Exception('Class $className not found', 1001);");
+				return(FALSE);
+			}
 
 			eval("
 				class $className {
@@ -702,15 +713,18 @@ class EngineAPI {
 				// module templates. If so, see if the module is loaded. 
 				// If no, try to load the module and create a temporary 
 				// instance of it to get the replacement pattern and function
-				preg_match("/\{(.+?)(\s(.+?))?\}/",$line,$matches);
+				preg_match_all("/\{(.+?)(\s(.+?))?\}/",$line,$matches);
+			
 				if (isset($matches[1]) && !is_empty($matches[1])) {
-					if (!class_exists($matches[1], FALSE)) {
-						$className = preg_replace("/[^a-zA-Z0-9]/", "", $matches[1]);
-						try {
-							$temp = new $className();
-						}
-						catch (Exception $e) {
-							// do nothing
+					foreach ($matches[1] as $I=>$className) {
+						if (!class_exists($className, FALSE)) {
+							$className = preg_replace("/[^a-zA-Z0-9]/", "", $className);
+							try {
+								$temp = new $className();
+							}
+							catch (Exception $e) {
+								// do nothing
+							}
 						}
 					}
 				}
