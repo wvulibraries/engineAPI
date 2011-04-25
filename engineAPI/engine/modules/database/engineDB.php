@@ -1,25 +1,83 @@
 <?php
 
 class engineDB {
-	
+
+    /**
+     * MySQL connection resource
+     * @var resource
+     */
 	public $dbLink   = NULL;
+
+    /**
+     * MySQL connection username
+     * @var string
+     */
 	private $username = NULL;
+
+    /**
+     * MySQL connection password
+     * @var string
+     */
 	private $password = NULL;
+
+    /**
+     * MySQL database name
+     * @var string
+     */
 	private $database = NULL;
+
+    /**
+     * MySQL connection hostname
+     * @var string
+     */
 	private $server   = NULL;
+
+    /**
+     * MySQL connection port number
+     * @var int
+     */
 	private $port     = NULL;
-	private $die      = TRUE; // If set to FALSE, we will not die when a database cannot be connected too.
-	
-	public $status    = FALSE; // If the connection to the database succeeds this is set to TRUE
-	
+
+    /**
+     * If set to FALSE, we will not die when a database cannot be connected too.
+     * @var bool
+     * @see $this->connectFailed()
+     */
+	private $die      = TRUE;
+
+	/**
+     * If the connection to the database succeeds this is set to TRUE
+     * @var bool
+     */
+	public $status    = FALSE;
+
+	/**
+     * [Deprecated] Set false before running queries
+     * @var bool
+     */
 	public $sanitize   = FALSE;
+
+    /**
+     * Return query operations as a result array
+     * @var bool
+     */
 	public $queryArray = TRUE;
-	
+    
+	/**
+     * Transaction query queue
+     * @var array
+     */
 	private $transArray = array(); // array of transaction queries 
 	
-	//private $server     = "localhost";
-	//private $serverPort = "3306";
-	
+    /**
+     * Class constructor
+     * @param string $user    - The username to connect with
+     * @param string $passwd  - The password to connect with
+     * @param string $server  - The server to connect to
+     * @param int $port       - The server port to connect to
+     * @param string $db      - The default scheme to use for this connection
+     * @param bool $die       - True to treat connection errors as fetal
+     */
 	function __construct($user,$passwd,$server,$port,$db,$die=TRUE) {
 		
 		$this->username = $user;
@@ -34,19 +92,22 @@ class engineDB {
 			$this->connect();
 		}
 	}
-	
+
+    /**
+     * Class destructor (Close the MySQL connection)
+     * @return void
+     */
 	function __destruct() {
 		if ($this->status == TRUE) {
 			@mysql_close($this->dbLink);
 		}
 	}
 	
-	/* 
-	 *
-	 * PUBLIC FUNCTIONS 
-	 *
-	 */
-	
+    /**
+     * Select a new scheme to interact with
+     * @param string $db
+     * @return bool
+     */
 	function select_db($db) {
 		
 		$this->testConnection(TRUE);
@@ -63,7 +124,12 @@ class engineDB {
 		
 		return(FALSE);
 	}
-	
+
+    /**
+     * Escape a given string so it is suitable for use in a SQL statement
+     * @param string $string
+     * @return string
+     */
 	function escape($string) {
 		
 		$this->testConnection(TRUE);
@@ -79,23 +145,24 @@ class engineDB {
 		return(mysql_real_escape_string($string,$this->dbLink));
 	}
 	
-	// inserts returns:
-	// FALSE on failute
-	// ID on insert
-	// TRUE on UPDATE, DELETE, DROP
-	// resource on SELECT, SHOW, DESCRIBE, EXPLAIN and other statements returning resultset
-
-	// If $this->queryArray == TRUE an array is returned with the following structure
-	// 
-	// $array{result} = what would be returned if arrayReturn == False
-	// $array{affectedRows}
-	// $array{errorNumber} = FALSE, unless defined
-	// $array{error} = FALSE, unless defined
-	// $array{info} = results of mysql_info
-	// $array{id} = id of last insert if insert query, otherwise FALSE
-	// $array{query} = query that was sent
-	
-	// $this->sanitize is reset to FALSE after executing
+    /**
+     * Performs a given SQL query against the selected database
+     * @param string $query
+     * @return array|bool|int|resource
+     *
+     * If $this->queryArray is true, then an array is returned with the following elements:
+     *  + result       what would be returned if arrayReturn == False
+     *  + affectedRows Number of affected rows (for UPDATE,DELETE)
+     *  + errorNumber  Any error number produced
+     *  + error        Any error message produced
+     *  + info         Results of mysql_info()
+     *  + id           Results of insert_if()
+     *  + query        The original SQL query that was used
+     * Else the return depends on the SQL query performed:
+     *  + INSERT - int (insert id)
+     *  + UPDATE/DELETE/DROP - bool (success)
+     *  + SELECT/SHOW/DESCRIBE/EXPLAIN - resource
+     */
 	function query($query) {
 		
 		$this->testConnection(TRUE);
@@ -149,13 +216,16 @@ class engineDB {
 		return(($result)?$result:$resultArray);
 	}
 	
-	// $actions:
-	// 		query
-	//		run
-	//
-	// Usage: Add queries
-	//		  run (provide table name)
-	//        evaluate what happened.
+
+    /**
+     * Add queries to the transaction queue
+     * Available actions:
+     *   + add - Add query to queue
+     *   + run - Evaluate what happened
+     * @param string $action
+     * @param string $query
+     * @return bool
+     */
 	public function transaction($action, $query=NULL) {
 		
 		if ($action == "query") {
@@ -208,7 +278,15 @@ class engineDB {
 		
 	}
 	
-	// If autocommit is TRUE we don't turn it off
+    /**
+     * Starts a new transaction
+     *
+     * If autocommit is TRUE we don't turn it off
+     *
+     * @param string $table
+     * @param bool $autocommit
+     * @return bool
+     */
 	public function transBegin($table=NULL, $autocommit=FALSE) {
 		
 		if (isnull($table)) {
@@ -249,8 +327,15 @@ class engineDB {
 		
 	}
 	
-	// If autocommit is TRUE we don't turn it back on ... 
-	// No reason to call this function if transBegin was called with TRUE
+    /**
+     * Ends the transaction
+     *
+     * If autocommit is TRUE we don't turn it back on ...
+     * No reason to call this function if transBegin was called with TRUE
+     *
+     * @param bool $autocommit
+     * @return bool
+     */
 	public function transEnd($autocommit=FALSE) {
 		if ($autocommit == FALSE) {
 			$sql = sprintf("SET AUTOCOMMIT=1");
@@ -264,7 +349,11 @@ class engineDB {
 		
 		return TRUE;
 	}
-	
+
+    /**
+     * Rolls back (cancels) the transaction
+     * @return bool
+     */
 	public function transRollback() {
 		$sql = sprintf("ROLLBACK");
 		$this->sanitize = FALSE;
@@ -276,7 +365,11 @@ class engineDB {
 		
 		return TRUE;
 	}
-	
+
+    /**
+     * Commits (saves) the transaction to the database
+     * @return bool
+     */
 	public function transCommit() {
 		$sql = sprintf("COMMIT");
 		$this->sanitize = FALSE;
@@ -289,7 +382,11 @@ class engineDB {
 		return TRUE;
 	}
 	
-	// returns an multidimensional array of the results, suitable for sorting
+    /**
+     * This method takes a MySQL resource and converts it to a multidimensionalD array
+     * @param  $result
+     * @return array
+     */
 	function makeArray($result) {
 		$return = array();
 		while ($row = mysql_fetch_row($result)) {
@@ -297,7 +394,12 @@ class engineDB {
 		}
 		return($return);
 	}
-	
+
+    /**
+     * This method prints debug info to the screen.
+     * Info printed includes: username,password,database name,sanitize state,quaryArray state
+     * @return void
+     */
 	function test() {
 		print "<h3>engineDB Object Information</h3>";
 		print "username: $this->username<br />";
@@ -306,7 +408,12 @@ class engineDB {
 		print "sanitize: ".(($this->sanitize)?"TRUE":"FALSE")."<br />";
 		print "quaryArray: ".(($this->queryArray)?"TRUE":"FALSE")."<br />";
 	}
-	
+
+    /**
+     * Returns true if there is an active database connection
+     * @param bool $reconnect Set TRUE to attempt reconnect
+     * @return bool
+     */
 	public function testConnection($reconnect=FALSE) {
 		if ($this->dbLink && !@mysql_ping($this->dbLink)) {
 			
@@ -321,7 +428,11 @@ class engineDB {
 		
 		return(TRUE);
 	}
-	
+
+    /**
+     * Connect to the specified MySQL database
+     * @return bool
+     */
 	private function connect() {
 		$this->dbLink = @mysql_connect($this->server.":".$this->port,$this->username,$this->password) or $this->connectFailed();
 		//or die("mysql.php dbLink connect");
@@ -339,7 +450,12 @@ class engineDB {
 		
 		return(FALSE);
 	}
-	
+
+    /**
+     * Handle failed database connection attempts
+     * @return bool
+     * @see $this->die
+     */
 	public function connectFailed() {
 		if ($this->die === FALSE) {
 			return(FALSE);
