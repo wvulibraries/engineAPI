@@ -249,7 +249,7 @@ class listManagement {
 				$output .= ' size="'.$I['size'].'"';
 				$output .= ($I['type'] == "date")?" class=\"date_input\"":"";
 				//Handle if the form is being reposted after a failed submit attempt
-				$output .= " value=\"".$value."\""; 
+				$output .= " value=\"".(($I['type']=="date")?htmlentities(date("m/d/Y",$value)):$value)."\""; 
 				$output .= ($I['readonly'] === TRUE)?" readonly ":"";
 				$output .= ($I['disabled'] === TRUE)?" disabled ":"";
 				$output .= " />";
@@ -1161,13 +1161,13 @@ class listManagement {
 				}
 			}
 			
-			$temp[] = $this->engine->openDB->escape($I["field"])."='".$this->engine->cleanPost['MYSQL'][$I["field"]."_".$row]."'";
+			$temp[] = "`".$this->engine->openDB->escape($I["field"])."`='".$this->engine->cleanPost['MYSQL'][$I["field"]."_".$row]."'";
 		}
 		foreach ($this->hiddenFields as $I) {
 			if($I['disabled'] === TRUE) {
 				continue;
 			}
-			$temp[] = $this->engine->openDB->escape($I["field"])."='".$this->engine->cleanPost['MYSQL'][$I["field"]."_".$row]."'";
+			$temp[] = "`".$this->engine->openDB->escape($I["field"])."`='".$this->engine->cleanPost['MYSQL'][$I["field"]."_".$row]."'";
 		}
 		$output = implode(",",$temp);
 		return($output);
@@ -1185,13 +1185,13 @@ class listManagement {
 				continue;
 			}
 			
-			$temp[] = $this->engine->openDB->escape($I["field"])."='".$this->engine->cleanPost['MYSQL'][$I["field"]."_insert"]."'";
+			$temp[] = "`".$this->engine->openDB->escape($I["field"])."`='".$this->engine->cleanPost['MYSQL'][$I["field"]."_insert"]."'";
 		}
 		foreach ($this->hiddenFields as $I) {
 			if($I['disabled'] === TRUE) {
 				continue;
 			}
-			$temp[] = $this->engine->openDB->escape($I["field"])."='".$this->engine->cleanPost['MYSQL'][$I["field"]."_insert"]."'";
+			$temp[] = "`".$this->engine->openDB->escape($I["field"])."`='".$this->engine->cleanPost['MYSQL'][$I["field"]."_insert"]."'";
 		}
 		$output = implode(",",$temp);
 		return($output);
@@ -1207,7 +1207,7 @@ class listManagement {
 			if ($I['type'] == "plainText" || $I['type'] == "radio" || $I['type'] == "multiselect") {
 				continue;
 			}
-			$temp[] = $I["field"];
+			$temp[] = "`".$I["field"]."`";
 		}
 		foreach ($this->hiddenFields as $I) {
 			if($I['disabled'] === TRUE) {
