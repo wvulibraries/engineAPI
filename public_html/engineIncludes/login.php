@@ -9,7 +9,7 @@ $engine = EngineAPI::singleton();
 
 if($engineVars['forceSSLLogin'] === TRUE && is_empty($_SERVER['HTTPS'])) {
 	$engineVars['loginPage'] = str_replace("http://","https://",$engineVars['loginPage']);
-	header("Location: ".$engineVars['loginPage']);
+	header("Location: ".$engineVars['loginPage']."?".$_SERVER['QUERY_STRING']);
 	exit;
 }
 
