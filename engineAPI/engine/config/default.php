@@ -25,7 +25,8 @@ global $engineVars;
 $engineVars['server']     = ($serverVars === TRUE)?$_SERVER['SERVER_NAME']:"my.domain.com";
 
 // stick your protocol in front ... 'http' or 'https' or 'ftp' or whatever
-$engineVars['WVULSERVER'] = "http://".$engineVars['server'];
+// Trying to be a little smarter about http and https
+$engineVars['WVULSERVER'] = "http".((!empty($_SERVER['HTTPS']))?"s":"")."://".$engineVars['server'];
 
 // If your engine applications don't use your apache document root as its 
 // document root. Setting this is important for recursion and redirection. 
@@ -123,6 +124,8 @@ $engineVars['stripCarriageReturns'] = FALSE;
 $engineVars['replaceDoubleQuotes']  = TRUE; // if engine sees "" in attributes, replaces it 
 									    	//with "~" where ~ is replaceDQCharacter
 $engineVars['replaceDQCharacter']   = "~"; // any string
+$engineVars['forceSSLLogin']        = TRUE; // If set to TRUE, the Login page redirects to the https:// login
+											// page defined above
 
 //Logging
 $engineVars['log']   = TRUE;

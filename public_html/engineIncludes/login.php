@@ -7,6 +7,12 @@ $engineDir = "/home/library/phpincludes/engine/engineAPI";
 include($engineDir ."/engine.php");
 $engine = EngineAPI::singleton();
 
+if($engineVars['forceSSLLogin'] === TRUE && is_empty($_SERVER['HTTPS'])) {
+	$engineVars['loginPage'] = str_replace("http://","https://",$engineVars['loginPage']);
+	header("Location: ".$engineVars['loginPage']);
+	exit;
+}
+
 $localVars['pageTitle'] = "Login Page";
 
 // Domain for ldap login
