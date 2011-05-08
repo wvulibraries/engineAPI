@@ -9,6 +9,7 @@ class listManagement {
 	private $dateInputs    = FALSE;
 	private $wysiwygInputs = FALSE;
 	private $multiSelect   = FALSE;
+	private $database      = NULL;  // database object. defaults to $engine->openDB;
 	
 	public  $orderBy      = NULL;  // Custom sort for the edit table
 	public  $numberRows   = FALSE; // Rows are numbered on the far left
@@ -36,10 +37,17 @@ class listManagement {
 	
 	public $validateTypes   = array("alpha","alphaNoSpaces","alphaNumeric","alphaNumericNoSpaces","date","email","ipaddr","integer","integerSpaces","internalEmail","noSpaces","noSpecialChars","phone","url");
 	
-	function __construct($table) {
+	function __construct($table,$database=NULL) {
 		
 		$this->table  = $table;
 		$this->engine = EngineAPI::singleton();
+	
+		if (isnull($database)) {
+			$this->database = $this->database;
+		}
+		else if (!isnull($database) && is_object($database) && get_class($database) == "engineDB") {
+			$this->database = $database;
+		}
 	
 	}
 	
@@ -377,10 +385,10 @@ class listManagement {
 		
 		//Build "ORDER BY"
 		if (isnull($this->orderBy) && isset($this->fields[0]['type']) && $this->fields[0]['type'] != "plainText" ) {
-			$this->orderBy = "ORDER BY ".$this->engine->openDB->escape($this->fields[0]['field']);
+			$this->orderBy = "ORDER BY ".$this->database->escape($this->fields[0]['field']);
 		}
 		else if (!isnull($this->orderBy)) {
-			$this->orderBy = $this->engine->openDB->escape($this->orderBy);
+			$this->orderBy = $this->database->escape($this->orderBy);
 		}
 		else {
 			$this->orderBy = "";
@@ -391,7 +399,7 @@ class listManagement {
 		}
 		else {
 			$sql = sprintf("SELECT * FROM %s %s %s",
-				$this->engine->openDB->escape($this->table),
+				$this->database->escape($this->table),
 				$this->whereClause,
 				$this->orderBy
 				);
@@ -401,8 +409,8 @@ class listManagement {
 			print "SQL: ".$sql."<br />";
 		}
 
-		$this->engine->openDB->sanitize = FALSE;
-		$sqlResult = $this->engine->openDB->query($sql);
+		$this->database->sanitize = FALSE;
+		$sqlResult = $this->database->query($sql);
 
 		if (!$sqlResult['result']) {
 			if ($this->debug === TRUE) {
@@ -432,7 +440,7 @@ class listManagement {
 		$output .= "\n<!-- engine Instruction break -->".'<!-- engine Instruction displayTemplateOff -->'."\n<!-- engine Instruction break -->";
 		$output .= "<form action=\"".$_SERVER['PHP_SELF']."".$queryString."\" method=\"post\" onsubmit=\"return listObjDeleteConfirm(this);\">";
 		$output .= sessionInsertCSRF();
-		$output .= "<table border=\"0\" cellpadding=\"1\" cellspacing=\"0\" id=\"".$this->engine->openDB->escape($this->table)."_table\"";
+		$output .= "<table border=\"0\" cellpadding=\"1\" cellspacing=\"0\" id=\"".$this->database->escape($this->table)."_table\"";
 		
 		$output .= " class=\"engineListDisplayTable";
 		if ($this->sortable === TRUE) {
@@ -504,10 +512,10 @@ class listManagement {
 					
 					$value = $row[$this->fields[$I]['field']];
 					if (!isnull($this->fields[$I]['matchOn'])) {
-						$sql = "SELECT ".$this->engine->openDB->escape($this->fields[$I]['matchOn']['field'])." FROM ".$this->engine->openDB->escape($this->fields[$I]['matchOn']['table'])." WHERE ".$this->engine->openDB->escape($this->fields[$I]['matchOn']['key'])."='".$this->engine->openDB->escape($row[$this->fields[$I]['field']])."'";
+						$sql = "SELECT ".$this->database->escape($this->fields[$I]['matchOn']['field'])." FROM ".$this->database->escape($this->fields[$I]['matchOn']['table'])." WHERE ".$this->database->escape($this->fields[$I]['matchOn']['key'])."='".$this->database->escape($row[$this->fields[$I]['field']])."'";
 						
-						$this->engine->openDB->sanitize = FALSE;
-						$matchOnSqlResult               = $this->engine->openDB->query($sql);
+						$this->database->sanitize = FALSE;
+						$matchOnSqlResult               = $this->database->query($sql);
 						$matchOnValueResult             = mysql_fetch_array($matchOnSqlResult['result'], MYSQL_BOTH);
 						
 						if (isset($this->fields[$I]['matchOn']['field'])) {
@@ -623,10 +631,10 @@ class listManagement {
 					}
 					
 					if (!isnull($this->fields[$I]['matchOn'])) {
-						$sql = "SELECT ".$this->engine->openDB->escape($this->fields[$I]['matchOn']['field'])." FROM ".$this->engine->openDB->escape($this->fields[$I]['matchOn']['table'])." WHERE ".$this->engine->openDB->escape($this->fields[$I]['matchOn']['key'])."='".$this->engine->openDB->escape($row[$this->fields[$I]['field']])."'";
+						$sql = "SELECT ".$this->database->escape($this->fields[$I]['matchOn']['field'])." FROM ".$this->database->escape($this->fields[$I]['matchOn']['table'])." WHERE ".$this->database->escape($this->fields[$I]['matchOn']['key'])."='".$this->database->escape($row[$this->fields[$I]['field']])."'";
 						
-						$this->engine->openDB->sanitize = FALSE;
-						$matchOnSqlResult               = $this->engine->openDB->query($sql);
+						$this->database->sanitize = FALSE;
+						$matchOnSqlResult               = $this->database->query($sql);
 						$matchOnValueResult             = mysql_fetch_array($matchOnSqlResult['result'], MYSQL_BOTH);
 						
 						if (isset($this->fields[$I]['matchOn']['field'])) {
@@ -674,7 +682,7 @@ class listManagement {
 
 		if ($this->dragOrdering === TRUE) {
 			$output .= '<script type="text/javascript">';
-			$output .= "var table = document.getElementById('".$this->engine->openDB->escape($this->table)."_table');";
+			$output .= "var table = document.getElementById('".$this->database->escape($this->table)."_table');";
 			$output .= 'var tableDnD = new TableDnD();';
 			$output .= 'tableDnD.init(table);';
 			$output .= '</script>';
@@ -800,7 +808,7 @@ class listManagement {
 
 		if ($this->updateInsert === FALSE) {
 			$sql = sprintf("INSERT INTO %s (%s) VALUES(%s)",
-				$this->engine->openDB->escape($this->table),
+				$this->database->escape($this->table),
 				$this->buildFieldListInsert(),
 				$this->buildFieldValueInsert()			
 				);
@@ -808,16 +816,16 @@ class listManagement {
 		else {
 			
 			$sql = sprintf("UPDATE %s SET %s WHERE %s='%s'",
-				$this->engine->openDB->escape($this->table),
+				$this->database->escape($this->table),
 				$this->buildInsertUpdateString(),
-				$this->engine->openDB->escape($this->updateInsertID),
+				$this->database->escape($this->updateInsertID),
 				$this->engine->cleanPost['MYSQL'][$this->updateInsertID."_insert"]
 				);
 					
 		}
 
-		$this->engine->openDB->sanitize = FALSE;
-		$sqlResult = $this->engine->openDB->query($sql);
+		$this->database->sanitize = FALSE;
+		$sqlResult = $this->database->query($sql);
 		
 		$output = "";
 		
@@ -859,26 +867,26 @@ class listManagement {
 				foreach ($multiSelectFields as $I) {
 					
 					$sql = sprintf("DELETE FROM %s WHERE %s='%s'",
-						$this->engine->openDB->escape($I['options']['linkTable']),
-						$this->engine->openDB->escape($I['options']['linkObjectField']),
+						$this->database->escape($I['options']['linkTable']),
+						$this->database->escape($I['options']['linkObjectField']),
 						$linkObjectID
 						);
 
-					$this->engine->openDB->sanitize = FALSE;
-					$sqlResult                      = $this->engine->openDB->query($sql);
+					$this->database->sanitize = FALSE;
+					$sqlResult                      = $this->database->query($sql);
 					
 					if (isset($this->engine->cleanPost['MYSQL'][$I['field']])) {
 						foreach ($this->engine->cleanPost['MYSQL'][$I['field']] as $K=>$value) {
 							$sql = sprintf("INSERT INTO %s(%s, %s) VALUES('%s','%s')",
-								$this->engine->openDB->escape($I['options']['linkTable']),
-								$this->engine->openDB->escape($I['options']['linkValueField']),
-								$this->engine->openDB->escape($I['options']['linkObjectField']),
+								$this->database->escape($I['options']['linkTable']),
+								$this->database->escape($I['options']['linkValueField']),
+								$this->database->escape($I['options']['linkObjectField']),
 								$value,
 								$linkObjectID
 								);
 
-							$this->engine->openDB->sanitize = FALSE;
-							$sqlResult                = $this->engine->openDB->query($sql);
+							$this->database->sanitize = FALSE;
+							$sqlResult                = $this->database->query($sql);
 							
 							if (!$sqlResult['result']) {
 								$output .= webHelper_errorMsg("MultiSelect Insert Error: <br />");
@@ -896,13 +904,13 @@ class listManagement {
 
 		if ($this->dragOrdering === TRUE) {
 			$sql = sprintf("UPDATE %s SET position=%s WHERE %s=%s",
-				$this->engine->openDB->escape($this->table),
+				$this->database->escape($this->table),
 				((int)$sqlResult['id'] - 1),
 				$this->primaryKey,
 				$sqlResult['id']
 			);
-			$this->engine->openDB->sanitize = FALSE;
-			$sqlResult = $this->engine->openDB->query($sql);
+			$this->database->sanitize = FALSE;
+			$sqlResult = $this->database->query($sql);
 		}
 
 		return($output);
@@ -919,13 +927,13 @@ class listManagement {
 			foreach($this->engine->cleanPost['MYSQL']['delete'] as $value) {
 
 				$sql = sprintf("DELETE FROM %s WHERE %s=%s",
-					$this->engine->openDB->escape($this->table),
+					$this->database->escape($this->table),
 					$this->primaryKey,
-					$this->engine->openDB->escape($value)
+					$this->database->escape($value)
 					);
 
-				$this->engine->openDB->sanitize = FALSE;
-				$sqlResult = $this->engine->openDB->query($sql);
+				$this->database->sanitize = FALSE;
+				$sqlResult = $this->database->query($sql);
 
 				if (!$sqlResult['result']) {
 					$output .= webHelper_errorMsg("Delete Error. <br />");
@@ -940,11 +948,11 @@ class listManagement {
 		}
 
 		$sql = sprintf("SELECT * FROM %s",
-			$this->engine->openDB->escape($this->table)
+			$this->database->escape($this->table)
 			);
 
-		$this->engine->openDB->sanitize = FALSE;
-		$sqlResult = $this->engine->openDB->query($sql);
+		$this->database->sanitize = FALSE;
+		$sqlResult = $this->database->query($sql);
 
 		if (!$sqlResult['result']) {
 			$output .= webHelper_errorMsg("Error fetching table entries. <br />");
@@ -1063,14 +1071,14 @@ class listManagement {
 			}
 
 			$sql = sprintf("UPDATE %s SET %s WHERE %s='%s'",
-				$this->engine->openDB->escape($this->table),
+				$this->database->escape($this->table),
 				$this->buildUpdateString($row[0]),
 				$this->primaryKey,
 				$row[0]
 				);
 
-			$this->engine->openDB->sanitize = FALSE;
-			$sqlResult2 = $this->engine->openDB->query($sql);
+			$this->database->sanitize = FALSE;
+			$sqlResult2 = $this->database->query($sql);
 
 			if (!$sqlResult2['result']) {
 				$output .= webHelper_errorMsg("Update Error.<br />");
@@ -1111,19 +1119,19 @@ class listManagement {
 		$idMatch = "";
 		if ($this->updateInsert === TRUE) {
 			$idMatch = sprintf(" AND %s!='%s'",
-				$this->engine->openDB->escape($this->updateInsertID),
-				$this->engine->openDB->escape($this->engine->cleanPost['MYSQL'][$this->updateInsertID."_insert"])
+				$this->database->escape($this->updateInsertID),
+				$this->database->escape($this->engine->cleanPost['MYSQL'][$this->updateInsertID."_insert"])
 			);
 		}
 		$sql = sprintf("SELECT * FROM %s WHERE %s='%s'%s",
-			$this->engine->openDB->escape($this->table),
-			$this->engine->openDB->escape($col),
-			$this->engine->openDB->escape($new),
+			$this->database->escape($this->table),
+			$this->database->escape($col),
+			$this->database->escape($new),
 			$idMatch
 			);
 			
-		$this->engine->openDB->sanitize = FALSE;
-		$sqlResult = $this->engine->openDB->query($sql);
+		$this->database->sanitize = FALSE;
+		$sqlResult = $this->database->query($sql);
 
 		//We should probably do a SQL check here
 		if (!$sqlResult['result']) {
@@ -1158,13 +1166,13 @@ class listManagement {
 				}
 			}
 			
-			$temp[] = $this->engine->openDB->escape($I["field"])."='".$this->engine->cleanPost['MYSQL'][$I["field"]."_".$row]."'";
+			$temp[] = $this->database->escape($I["field"])."='".$this->engine->cleanPost['MYSQL'][$I["field"]."_".$row]."'";
 		}
 		foreach ($this->hiddenFields as $I) {
 			if($I['disabled'] === TRUE) {
 				continue;
 			}
-			$temp[] = $this->engine->openDB->escape($I["field"])."='".$this->engine->cleanPost['MYSQL'][$I["field"]."_".$row]."'";
+			$temp[] = $this->database->escape($I["field"])."='".$this->engine->cleanPost['MYSQL'][$I["field"]."_".$row]."'";
 		}
 		$output = implode(",",$temp);
 		return($output);
@@ -1182,13 +1190,13 @@ class listManagement {
 				continue;
 			}
 			
-			$temp[] = $this->engine->openDB->escape($I["field"])."='".$this->engine->cleanPost['MYSQL'][$I["field"]."_insert"]."'";
+			$temp[] = $this->database->escape($I["field"])."='".$this->engine->cleanPost['MYSQL'][$I["field"]."_insert"]."'";
 		}
 		foreach ($this->hiddenFields as $I) {
 			if($I['disabled'] === TRUE) {
 				continue;
 			}
-			$temp[] = $this->engine->openDB->escape($I["field"])."='".$this->engine->cleanPost['MYSQL'][$I["field"]."_insert"]."'";
+			$temp[] = $this->database->escape($I["field"])."='".$this->engine->cleanPost['MYSQL'][$I["field"]."_insert"]."'";
 		}
 		$output = implode(",",$temp);
 		return($output);

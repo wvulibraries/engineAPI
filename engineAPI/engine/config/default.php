@@ -26,7 +26,7 @@ $engineVars['server']     = ($serverVars === TRUE)?$_SERVER['SERVER_NAME']:"my.d
 
 // stick your protocol in front ... 'http' or 'https' or 'ftp' or whatever
 // Trying to be a little smarter about http and https
-$engineVars['WVULSERVER'] = "http".((!empty($_SERVER['HTTPS']))?"s":"")."://".$engineVars['server'];
+$engineVars['WVULSERVER'] = "http".((isset($_SERVER['HTTPS']) && !empty($_SERVER['HTTPS']))?"s":"")."://".$engineVars['server'];
 
 // If your engine applications don't use your apache document root as its 
 // document root. Setting this is important for recursion and redirection. 
