@@ -42,11 +42,11 @@ class listManagement {
 		$this->table  = $table;
 		$this->engine = EngineAPI::singleton();
 	
-		if (isnull($database)) {
-			$this->database = $this->engine->openDB;
-		}
-		else if (!isnull($database) && is_object($database) && get_class($database) == "engineDB") {
+		if (!isnull($database) && is_object($database) && get_class($database) == "engineDB") {
 			$this->database = $database;
+		}
+		else {
+			$this->database = $this->engine->openDB;
 		}
 	
 	}
