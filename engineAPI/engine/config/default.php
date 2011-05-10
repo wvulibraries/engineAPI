@@ -1,5 +1,7 @@
 <?php
 
+$engineVersion = "3.0";
+
 $accessControl   = array();
 $moduleFunctions = array();
 $engineDB        = NULL;
@@ -77,36 +79,36 @@ $engineVars['imgMinusSign']         = $engineVars['engineInc'] ."/images/minus.g
 $engineVars['baseRoot']      = "/home/library";
 
 // EngineAPI's base directory. ALl of engine's directories will be contained here
-$engineVars['rootPHPDir']    = $engineVars['baseRoot'] ."/phpincludes/engine";
+//$engineVars['rootPHPDir']    = $engineVars['baseRoot'] ."/phpincludes/engine";
 
 // Where the engine templates are stored
-$engineVars['tempDir']       = $engineVars['rootPHPDir'] ."/template";
+$engineVars['tempDir']       = EngineAPI::$engineDir ."/../../template";
 
 // The directory that corrisponds to $engineVars['WEBROOT'], defined above
 $engineVars['documentRoot']  = ($serverVars === TRUE)?$_SERVER['DOCUMENT_ROOT']:$engineVars['baseRoot'] ."/library";
 
 // File listings. XML files that contain metadata about files so what 
 // they can be stored without a mysql database.
-$engineVars['fileListings']  = $engineVars['rootPHPDir'] ."/filelistings";
+$engineVars['fileListings']  = EngineAPI::$engineDir."/../../filelistings";
 
 // phpMailing Include
-$engineVars['emailInclude']  = $engineVars['rootPHPDir'] ."/phpmailer/phpmailer-fe.php";
+$engineVars['emailInclude']  = EngineAPI::$engineDir ."/../../phpmailer/phpmailer-fe.php";
 
 // Engine Modules directory
-$engineVars['modules']       = $engineVars['rootPHPDir'] ."/engineAPI/modules";
+$engineVars['modules']       = EngineAPI::$engineDir."/modules";
 
 // Access Control Modules
-$engineVars['accessModules'] = $engineVars['rootPHPDir'] ."/engineAPI/accessControl";
+$engineVars['accessModules'] = EngineAPI::$engineDir."/accessControl";
 
 // Helper Function Modules
-$engineVars['helperFunctions'] = $engineVars['rootPHPDir'] ."/engineAPI/helperFunctions";
+$engineVars['helperFunctions'] = EngineAPI::$engineDir."/helperFunctions";
 
 // Login Modules
-$engineVars['loginModules']  = $engineVars['rootPHPDir'] ."/engineAPI/login";
+$engineVars['loginModules']  = EngineAPI::$engineDir."/login";
 
 // RSS Templates
 $engineVars['rssDir']        = $engineVars['tempDir'] ."/rss";
-$engineVars['magpieDir']     = $engineVars['baseRoot'] ."/phpincludes/magpie";
+$engineVars['magpieDir']     = EngineAPI::$engineDir ."/../../magpie";
 
 // External URLs
 // External URLs is an array of urls that can be used in applications.

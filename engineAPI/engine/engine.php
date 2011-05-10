@@ -5,6 +5,7 @@ $engineVars = array();
 class EngineAPI {
 	
 	private static $instance; // Hold an instance of this object, for use as Singleton
+	public static $engineDir = NULL;
 	
 	private $localVars        = array();
 	public  $template         = ""; // $engineVars['currentTemplate'];
@@ -46,17 +47,26 @@ class EngineAPI {
 	private $recurseNeeded          = FALSE;
 	private $displayTemplateOff     = FALSE;
 	
-	
+	public function __clone()
+	{
+		trigger_error('Cloning instances of this class is forbidden.', E_USER_ERROR);
+	}
+
+	public function __wakeup()
+	{
+		trigger_error('Unserializing instances of this class is forbidden.', E_USER_ERROR);
+	}
+
 	private function __construct($site="default") {
-		$engineDir = dirname(__FILE__);
+		self::$engineDir = dirname(__FILE__);
 		
-		ob_start(array(&$this, 'displayTemplate'));
+		ob_start('EngineAPI::displayTemplate');
 		
 		//setup $engineVars;
 		global $engineVars;
-		require_once($engineDir."/config/default.php");
+		require_once(self::$engineDir."/config/default.php");
 		if ($site != "default") {
-			require_once($engineDir."/config/".$site.".php");
+			require_once(self::$engineDir."/config/".$site.".php");
 		}
 		
 		//Load Access Control Modules
@@ -72,9 +82,9 @@ class EngineAPI {
 			}
 		}
 		
-		require_once($engineDir."/sessionManagement.php");
-		require_once($engineDir."/stats.php");
-		require_once($engineDir."/userInfo.php");
+		require_once(self::$engineDir."/sessionManagement.php");
+		require_once(self::$engineDir."/stats.php");
+		require_once(self::$engineDir."/userInfo.php");
 		
 		// Setup Current Working Directory
 		$this->cwd = getcwd();
@@ -676,8 +686,10 @@ class EngineAPI {
 	//
 	// This function needs some performance work. 
 	//	
-	public function displayTemplate($content) {
+	public static function displayTemplate($content) {
 		global $engineVars;
+		
+		$engine = EngineAPI::singleton();
 		
 		$contentArray = preg_split('/<!-- engine Instruction break -->/',$content);
 		$content = "";
@@ -687,26 +699,26 @@ class EngineAPI {
 			if (preg_match("/<!-- engine Instruction (\w+) -->/",$line,$matches)) {
 				switch($matches[1]) {
 					case "displayTemplateOff":
-					$this->displayTemplateOff = TRUE;
+					$engine->displayTemplateOff = TRUE;
 					break;
 					case "displayTemplateOn":
-					$this->displayTemplateOff = FALSE;
+					$engine->displayTemplateOff = FALSE;
 					break;
 				}
 			}
 
-			if ($this->displayTemplateOff === FALSE) {
+			if ($engine->displayTemplateOff === FALSE) {
 				//local var replacements
-				$line = preg_replace_callback("/\{local\s+?var=\"(.+?)\"\}/",array( &$this, 'localMatches'),$line);
+				$line = preg_replace_callback("/\{local\s+?var=\"(.+?)\"\}/",'EngineAPI::localMatches',$line);
 
 				//engineVar replacements
-				$line = preg_replace_callback("/\{engine\s+?var=\"(.+?)\"\}/",array( &$this, 'engineVarMatches'),$line);
+				$line = preg_replace_callback("/\{engine\s+?var=\"(.+?)\"\}/",'EngineAPI::engineVarMatches',$line);
 
 				//engine Replacements	
-				$line = preg_replace_callback("/\{engine\s+(.+?)\}/",array( &$this, 'engineMatches'),$line);
+				$line = preg_replace_callback("/\{engine\s+(.+?)\}/",'EngineAPI::engineMatches',$line);
 
 				if ($engineVars['replaceDoubleQuotes'] === TRUE) {
-					$line = preg_replace_callback('/(<[^"]+=)("{2})([^>]+>)/',array( &$this, 'engineDQMatches'),$line);
+					$line = preg_replace_callback('/(<[^"]+=)("{2})([^>]+>)/','EngineAPI::engineDQMatches',$line);
 				}
 				
 				// Check to see if the pattern matches the "standard" for
@@ -730,9 +742,11 @@ class EngineAPI {
 				}
 				
 				//module Replacements
-				foreach ($this->moduleTemplateEngine as $plugin) {
+				foreach ($engine->moduleTemplateEngine as $plugin) {
 					if(isset($plugin['pattern']) && isset($plugin['function'])) {
-						$this->recurseNeeded = TRUE;
+						//testing
+						$engine->cwd = "hate this";//$plugin['pattern'];
+						$engine->recurseNeeded = TRUE;
 						$line = preg_replace_callback($plugin['pattern'],$plugin['function'],$line);
 					}
 				}
@@ -744,15 +758,15 @@ class EngineAPI {
 			$content .= $line;
 		}
 		
-		if ($this->recurseNeeded === TRUE) {
-			if ($this->recurseCount < $this->recurseLevel) {
-				$this->recurseCount++;
-				$content = $this->displayTemplate($content);
+		if ($engine->recurseNeeded === TRUE) {
+			if ($engine->recurseCount < $engine->recurseLevel) {
+				$engine->recurseCount++;
+				$content = $engine->displayTemplate($content);
 			}
 			// There has GOT to be a better way to do this
 			$backtrace = debug_backtrace();
 			if ($backtrace[0]['function'] != "displayTemplate") {
-				$this->recurseCount = 0;
+				$engine->recurseCount = 0;
 			}
 		}
 
@@ -760,7 +774,7 @@ class EngineAPI {
 	}
 	
 	
-	private function engineVarMatches($matches) {
+	public static function engineVarMatches($matches) {
 		global $engineVars;
 		
 		$output = (!empty($engineVars[$matches[1]]))?$engineVars[$matches[1]]:"";
@@ -775,9 +789,11 @@ class EngineAPI {
 
 	}
 	
-	private function localMatches($matches) {
+	public static function localMatches($matches) {
+		
+		$engine    = EngineAPI::singleton();
 
-		$output = (isset($this->localVars[$matches[1]]) && !is_empty($this->localVars[$matches[1]]))?$this->localVars[$matches[1]]:"";
+		$output = (isset($engine->localVars[$matches[1]]) && !is_empty($engine->localVars[$matches[1]]))?$engine->localVars[$matches[1]]:"";
 
 		return($output);
 
@@ -789,14 +805,16 @@ class EngineAPI {
 
 	}
 	
-	private function engineDQMatches($matches) {
+	public static function engineDQMatches($matches) {
 		global $engineVars;
 		
 		$output = $matches[1].'"'.$engineVars['replaceDQCharacter'].'"'.$matches[3];
 		return($output);
 	}
 
-	private function engineMatches($matches) {
+	public static function engineMatches($matches) {
+
+		$engine    = EngineAPI::singleton();
 
 		//Debugging Comments
 		//$output = "debug: <pre>".obsafe_print_r($matches)."</pre>";
@@ -819,7 +837,7 @@ class EngineAPI {
 		//return($output);
 
 		if (isset($temp['name'])) {
-			$output = $this->handleMatch($temp);
+			$output = $engine->handleMatch($temp);
 			return($output);
 		}
 		else {
