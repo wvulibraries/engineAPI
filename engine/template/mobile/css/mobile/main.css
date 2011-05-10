@@ -1,0 +1,91 @@
+body { 
+font: 17px/1.33em Helvetica,Arial,sans-serif;
+background-color: #d9e0e8;
+overflow-x: hidden;
+/*font-size: 17px;*/
+}
+
+h1 {
+	margin: 0;
+	padding: 8px;
+	padding-bottom: 0;
+	font-size: 20px;
+	font-weight: normal;
+}
+
+a {
+	text-decoration: none;
+}
+
+#main {
+	background-color: #FFFFFF;
+	margin-top: 10px;
+	padding: 8px;
+}
+
+ol {
+	margin: 0;
+	padding-left: 1em;
+}
+
+ol li {
+	padding-bottom: 5px;
+}
+
+#subContent {
+	background-color: #edf1f7;
+	margin-top: 10px;
+	padding: 8px;
+}
+
+#breadCrumbs {
+	margin-top: 10px;
+	padding: 8px;
+	background-color: #909eac;
+	color: #FFF;
+}
+
+#breadCrumbs a {
+	color: #fff;
+}
+
+
+#footer {
+	margin: 6px 0 10px 0;
+	padding: 6px;
+	font-size: 11px;
+	line-height: 13px;
+	color: #666;
+}
+
+#availableComputersUL {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+}
+
+.computerList {
+	padding-left: 3em;
+}
+
+.kwic {
+	font-weight: bold;
+}
+
+.hoursSpacing {
+	float: left;
+	width: 100px;
+}
+
+.hoursRSS {
+	font-family: Courier;
+}
+
+.bolditalicText {
+	font-weight: bold;
+	font-style: italic;
+}
+
+.boldText {
+	font-weight: bold;
+}
