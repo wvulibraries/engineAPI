@@ -1,18 +1,16 @@
 <?php
 class ldapSearch
 {
-    private $ldap;
-
-    private $ldapServer;
-    private $ldapServerPort;
-    private $ldapDomain;
-    private $bindUsername;
-    private $bindPassword;
-    private $baseDN;
-
+    /**
+     * LDAP user account types (bitwise)
+     * @see $this->getAllUsers()
+     */
     const USER_ACTIVE = 1;
     const USER_INACTIVE = 2;
-
+    /**
+     * LDAP user group types (bitwise)
+     * @see $this->getAllGroups()
+     */
     const GROUP_GLOBAL_SECURITY=1;
     const GROUP_GLOBAL_DISTRIBUTION=2;
     const GROUP_UNIVERSAL_SECURITY=4;
@@ -20,8 +18,48 @@ class ldapSearch
     const GROUP_LOCAL_SECURITY=16;
     const GROUP_LOCAL_DISTRIBUTION=32;
 
+    /**
+     * LDAP connection resource
+     * @var resource
+     */
+    private $ldap;
+    /**
+     * The LDAP server
+     * @var string
+     */
+    private $ldapServer;
+    /**
+     * The LDAP server port
+     * @var int
+     */
+    private $ldapServerPort;
+    /**
+     * The LDAP domain name
+     * @var string
+     */
+    private $ldapDomain;
+    /**
+     * The LDAP bind username
+     * @var string
+     */
+    private $bindUsername;
+    /**
+     * The LDAP bing password
+     * @var string
+     */
+    private $bindPassword;
+    /**
+     * The DN to be used as a base for all searches
+     * @var string
+     */
+    private $baseDN;
 
-	public function __construct($configKey=NULL)
+    /**
+     * Class Constructor
+     * @param string $configKey
+     *        This can either be the name of an engineVars LDAP array, or a fully qualified LDAP URL
+     */
+    public function __construct($configKey=NULL)
     {
         // We need to figure out of the configKey is just an LDAP URL, or if its a configKey
         $urlInfo = parse_url($configKey);
@@ -39,16 +77,14 @@ class ldapSearch
                 }
             }
         }
-
-//        if(isset($this->ldapServer)) return $this->connect();
-	}
+    }
 
     /**
      * Class Destructor
      */
-	public function __destruct() {
-		return $this->disconnect();
-	}
+    public function __destruct() {
+        return $this->disconnect();
+    }
 
     /**
      * Connect, and bind, to an LDAP server
@@ -68,19 +104,7 @@ class ldapSearch
         ldap_set_option($this->ldap, LDAP_OPT_PROTOCOL_VERSION, 3);
         ldap_set_option($this->ldap, LDAP_OPT_REFERRALS, 0);
 
-        $bindRDN = ($this->bindUsername)
-                ? ($this->ldapDomain)
-                        ? $this->bindUsername."@".$this->ldapDomain
-                        : $this->bindUsername
-                : NULL;
-
-        if(!ldap_bind($this->ldap, $bindRDN, $this->bindPassword)){
-            // Trigger Error!
-            // ldap_error() ldap_errno()
-            return FALSE;
-        }else{
-            return TRUE;
-        }
+        return $this->login($this->bindUsername, $this->bindPassword);
     }
 
     /**
@@ -89,13 +113,70 @@ class ldapSearch
      */
     public function disconnect()
     {
-        if(!ldap_unbind($this->ldap)){
+        if(!$this->logout()){
             // Trigger Error!
             return FALSE;
         }else{
             $this->ldap = NULL;
             return TRUE;
         }
+    }
+
+    /**
+     * Login (bind) to the LDAP server
+     * @param string $username
+     * @param string $password
+     * @param bool $preserve
+     *        Set to TRUE to have the credentials preserved (if they were correct)
+     * @return bool
+     */
+    public function login($username,$password,$preserve=TRUE)
+    {
+        $username = trim($username);
+        $password = trim($password);
+
+        $bindRDN = (isset($username))
+                ? (($this->ldapDomain)
+                        ? $username."@".$this->ldapDomain
+                        : $username)
+                : NULL;
+
+        // If we're not connected, fix that.
+        if(is_null($this->ldap)) $this->connect();
+
+        if(ldap_bind($this->ldap, $bindRDN, $password)){
+            if($preserve){
+                $this->bindUsername = $username;
+                $this->bindPassword = $password;
+            }
+            return TRUE;
+        }else{
+            return FALSE;
+        }
+    }
+
+    /**
+     * Logoug (unbind) from the LDAP server
+     * @return bool
+     */
+    public function logout()
+    {
+        return ldap_unbind($this->ldap);
+    }
+
+    /**
+     * Checks a user's credentials against the LDAP server.
+     * This is done by logging off, then attempting to re-login using these credentials. Lastly, the original credentials are reused
+     * @param string $username
+     * @param string $password
+     * @return bool
+     */
+    public function checkCredentials($username,$password)
+    {
+        $this->logout();
+        $result = $this->login($username,$password,false);
+        $this->login($this->bindUsername, $this->bindPassword);
+        return $result;
     }
 
     /**
@@ -412,7 +493,7 @@ class ldapSearch
      * @param array $searchParams
      * @return array
      */
-	public function getAllUsers($userType=NULL, $searchParams=NULL)
+    public function getAllUsers($userType=NULL, $searchParams=NULL)
     {
         // Set default
         if(!isset($userType)) $userType=self::USER_ACTIVE;
@@ -429,9 +510,9 @@ class ldapSearch
             // Trigger Error
             return array();
         }
-	}
+    }
 
-	/**
+    /**
      * Returns all user groups in LDAP stating at the Base DN
      * @param int $groupType
      * @param array $searchParams
@@ -459,17 +540,17 @@ class ldapSearch
             // Trigger Error
             return array();
         }
-	}
+    }
 
     /**
      * Returns all OUs (Organizational Units) starting at the Base DN
      * @param array $searchParams
      * @return array
      */
-	public function getAllOUs($searchParams=NULL)
+    public function getAllOUs($searchParams=NULL)
     {
-		return $this->searchEntries('objectCategory=organizationalUnit', (array)$searchParams);
-	}
+        return $this->searchEntries('objectCategory=organizationalUnit', (array)$searchParams);
+    }
 
     /**
      * Returns the requested attributes of a given entry
