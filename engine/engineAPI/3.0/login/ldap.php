@@ -1,66 +1,51 @@
 <?php
-
 global $loginFunctions;
 $loginFunctions['ldap'] = "ldapLogin";
 
-function ldapLogin($username,$password,$engine=NULL) { 
+function ldapLogin($username,$password,$engine=NULL)
+{
+    global $ldapSearch;
 
-	$engine = EngineAPI::singleton();
-	
-	global $engineVars;
-	$domain = $engine->localVars("domain");
+	// Load the ldapSearch module
+	require EngineAPI::$engineDir.'/modules/ldapSearch/ldapSearch.php'; // (I'm not sure if the autoloader is set yet)
+	$ldapSearch = new ldapSearch(EngineAPI::singleton()->localVars("domain"));
 
-	$ldapServer = $engineVars['domains'][$domain]['ldapServer'];
-	$ldapDomain = $engineVars['domains'][$domain]['ldapDomain'];
-	$dn         = $engineVars['domains'][$domain]['dn'];
-	$filter     = $engineVars['domains'][$domain]['filter'];
-	$attributes = $engineVars['domains'][$domain]['attributes'];
+	if($ldapSearch->login($username,$password)){
 
-	//print "$username, $ldapServer <br />$ldapDomain <br />$dn         <br />$filter     <br />$attributes";
+        $user = $ldapSearch->findUser($username);
+        if($user){
+	        $groupsClean=array();
+	        $groups = $ldapSearch->getGroupsFromUser($user,TRUE);
+	        foreach($groups as $group){
+	             $group = $ldapSearch->getAttributes($group,'cn');
+	             $groupsClean[] = $group['cn'];
+	        }
 
-	// Replace Meta %whatever% ... right now I just have Username. This should probably be expanded. 
-	$filter     = preg_replace("/%USERNAME%/",$username,$filter);
-	if(is_null($filter)) {
-		return(FALSE);
-	}
-
-	$ldapconn = ldapConnect($ldapServer);
-
-	if (!securityUserCheck($username,$password,"ldap",$ldapconn,$ldapDomain)) {
-		ldapDisconnect($ldapconn);
-		return(FALSE);
-	}
-
-	$sr         = ldap_search($ldapconn, $dn, $filter, $attributes) or die("<br />Object Not Found!<br />");
-	$entry      = ldap_get_entries($ldapconn, $sr);
-
-	ldapDisconnect($ldapconn);
-
-	//	sessionSet("groups")   = (isset($entry[0]["memberof"]))?getGroups($entry[0]["memberof"]):FALSE;
-	//	sessionSet("ou")       = (isset($entry[0]["dn"]))?getOU($entry[0]["dn"]):FALSE;
-	//	sessionSet("username") = $username;
-
-	$_SESSION['groups']   = (isset($entry[0]["memberof"]))?getGroups($entry[0]["memberof"]):FALSE;
-	$_SESSION['ou']       = (isset($entry[0]["dn"]))?getOU($entry[0]["dn"]):FALSE;
-	$_SESSION['username'] = $username;
-	$_SESSION['authType'] = "ldap";
-
-
-	return(TRUE);
-
+			$_SESSION['groups']   = $groupsClean;
+			$_SESSION['ou']       = getOU($user);
+			$_SESSION['username'] = $username;
+			$_SESSION['authType'] = "ldap";
+	        
+	        return TRUE;
+        }else{
+        	return FALSE;
+        }
+	}else{
+        return FALSE;
+    }
 }
 
 function ldapConnect($ldapServer) {
-	
+
 	$ldapConn = ldap_connect($ldapServer);
-	
+
 	if (isset($ldapConn)) {
 		ldap_set_option($ldapConn, LDAP_OPT_PROTOCOL_VERSION, 3);
 		ldap_set_option($ldapConn, LDAP_OPT_REFERRALS, 0);
-		
+
 		return($ldapConn);
 	}
-	
+
 	return(FALSE);
 }
 
@@ -71,9 +56,9 @@ function ldapDisconnect($ldapConn) {
 	}
 
 	ldap_unbind($ldapConn);
-	
+
 	return(TRUE);
-	
+
 }
 
 function getGroups($memberOf) {
@@ -85,20 +70,18 @@ function getGroups($memberOf) {
 	// Hack to fix MS AD LDAP bug that doesn't return Primary Group
 	// Ensures all users are a "Domain User"
 	array_push($groups,"Domain Users");
-	
+
 	return($groups);
 }
 
 function getGroup($dn) {
-	
-	$regex = '/^CN=(.+?)\,/';
-	preg_match($regex,$dn,$matches);
-	
-	if (isset($matches[1])) {
-		return($matches[1]);
-	}
-	
-	return(FALSE);
+    global $ldapSearch;
+    $cn = $ldapSearch->getAttributes($dn, 'cn');
+    if($cn){
+        return $cn;
+    }else{
+        return FALSE;
+    }
 }
 
 // This needs to be modified to support nested OUs.
@@ -116,8 +99,9 @@ function getOU($dn) {
 	return(FALSE);
 }
 
-function securityUserCheck($username,$password,$type,$ldapconn,$ldapDomain) {
-	
+function securityUserCheck($username,$password,$type,$ldapconn,$ldapDomain)
+{
+
 	if(is_null($username) || is_null($password)) {
 		return(FALSE);
 	}
@@ -129,7 +113,7 @@ function securityUserCheck($username,$password,$type,$ldapconn,$ldapDomain) {
 		}
 		return(FALSE);
 	}
-	
+
 	return(FALSE);
 }
 
