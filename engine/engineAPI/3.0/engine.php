@@ -2,10 +2,13 @@
 
 $engineVars = array();
 
-class EngineAPI {
+class EngineAPI
+{
+	const VERSTION='3.0';
 	
 	private static $instance; // Hold an instance of this object, for use as Singleton
 	public static $engineDir = NULL;
+	public static $engineVars = array();
 	
 	private $localVars        = array();
 	public  $template         = ""; // $engineVars['currentTemplate'];
@@ -62,12 +65,16 @@ class EngineAPI {
 		
 		ob_start('EngineAPI::displayTemplate');
 		
-		//setup $engineVars;
-		global $engineVars;
+		// setup $engineVars
 		require_once(self::$engineDir."/config/default.php");
-		if ($site != "default") {
-			require_once(self::$engineDir."/config/".$site.".php");
+		if($site != "default" and is_readable( $siteConfigFile = self::$engineDir."/config/".$site.".php" )){
+			require_once($siteConfigFile);
 		}
+		self::$engineVars = $engineVars;
+		
+		// $engineVars - backward compatibility
+		global $engineVars;
+		$engineVar =& self::$engineVars;
 		
 		//Load Access Control Modules
 		$hfDirHandle = @opendir($engineVars['helperFunctions']) or die("Unable to open ".$engineVars['helperFunctions']);
