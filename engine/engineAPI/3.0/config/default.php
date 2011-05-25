@@ -164,7 +164,7 @@ $engineVars['mysql']['server']   = "localhost";
 $engineVars['mysql']['port']     = "3306";
 //User with permissions to engineCMS database
 $engineVars['mysql']['username'] = "systems";
-$engineVars['mysql']['password'] = "Te\$t1234";
+$engineVars['mysql']['password'] = 'Te$t1234';
 
 //Active Directory (ldap?) Information
 // As many active directories/ldaps can be defined as needed here. 
@@ -174,6 +174,34 @@ $engineVars['domains']['wvulibs']['ldapDomain'] = "your.ad.domain.com";
 $engineVars['domains']['wvulibs']['dn']         = "DC=your,DC=ad,DC=PDC,DC=com";
 $engineVars['domains']['wvulibs']['filter']     = "(|(sAMAccountName=%USERNAME%))";
 $engineVars['domains']['wvulibs']['attributes'] = array("memberof","displayname");
+
+
+// LDAP Authoritative Sources
+// As many active directories/ldaps can be defined as needed here. 
+
+// LDAP Server Definition
+/*
+$engineVars['ldapDomain']['SERVER_KEY']['ldapServer']     = "ldap://your.ad.PDC.com";         // URL of the ldap server
+$engineVars['ldapDomain']['SERVER_KEY']['ldapServerPort'] = 389;                            // IP port on which the LDAP server is listening
+$engineVars['ldapDomain']['SERVER_KEY']['ldapDomain']     = "your.ad.domain.com";             // The name of this domain
+$engineVars['ldapDomain']['SERVER_KEY']['baseDN']         = "DC=your,DC=ad,DC=PDC,DC=com";    // The DN to use as a base for all searching
+$engineVars['ldapDomain']['SERVER_KEY']['bindUsername']   = NULL;                           // A static username to bing with
+$engineVars['ldapDomain']['SERVER_KEY']['bindPassword']   = NULL;                           // A static password to bind with
+$engineVars['ldapDomain']['SERVER_KEY']['dn']             = "DC=your,DC=ad,DC=PDC,DC=com";    // DEPRICATED
+$engineVars['ldapDomain']['SERVER_KEY']['filter']         = "(|(sAMAccountName=%USERNAME%))"; // DEPRICATED
+$engineVars['ldapDomain']['SERVER_KEY']['attributes']     = array("memberof","displayname");  // DEPRICATED
+$engineVars['domains']['SERVER_KEY'] = $engineVars['ldapDomain']['SERVER_KEY'];               // BACKWARD COMPATIBILITY
+*/
+
+// User Authorization module settings (these override in-module defaults)
+$engineVars['userAuth']['dbName']            = '';
+$engineVars['userAuth']['tblUsers']          = '';
+$engineVars['userAuth']['tblGroups']         = '';
+$engineVars['userAuth']['tblPermissions']    = '';
+$engineVars['userAuth']['tblAuthorizations'] = '';
+$engineVars['userAuth']['tblUsers2Groups']   = '';
+$engineVars['userAuth']['tblGroups2Groups']  = '';
+$engineVars['userAuth']['defaultToken']      = '';
 
 // HTML stuff
 // These are just default values. These can be over ridden using local variables, or in 
