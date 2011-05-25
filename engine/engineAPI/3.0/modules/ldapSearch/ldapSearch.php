@@ -70,8 +70,8 @@ class ldapSearch
             global $engineVars;
             if(isset($configKey)){
                 $configKey = trim($configKey);
-                if(isset($engineVars) and array_key_exists('domains', $engineVars) and array_key_exists($configKey, $engineVars['domains'])){
-                    foreach($engineVars['domains'][ trim($configKey) ] as $key => $value){
+                if(@isset($engineVars['ldapDomain'][ trim($configKey) ])){
+                    foreach($engineVars['ldapDomain'][ trim($configKey) ] as $key => $value){
                         $this->$key = $value;
                     }
                 }
@@ -114,7 +114,7 @@ class ldapSearch
     public function disconnect()
     {
         if(!$this->logout()){
-            // Trigger Error!
+            // Trigger Error! @todo
             return FALSE;
         }else{
             $this->ldap = NULL;
@@ -233,7 +233,7 @@ class ldapSearch
         if(!$this->ldap){
             $connParams = (array_key_exists('connection', $params)) ? $params['connection'] : NULL;
             if(!$this->connect($connParams)){
-                // Trigger Error!
+                // Trigger Error! @todo
                 return array();
             }
         }
@@ -243,7 +243,7 @@ class ldapSearch
 
         if(!$ldapSearch){
             echo "<br><br>ERROR!<br>".ldap_errno($this->ldap).':'.ldap_error($this->ldap)."<br><br>";
-            // Trigger Error!
+            // Trigger Error! @todo
             return array();
         }else{
             $entry = ldap_get_entries($this->ldap, $ldapSearch);
@@ -307,7 +307,7 @@ class ldapSearch
         if(!$this->ldap){
             $connParams = (array_key_exists('connection', $params)) ? $params['connection'] : NULL;
             if(!$this->connect($connParams)){
-                // Trigger Error!
+                // Trigger Error! @todo
                 return array();
             }
         }
@@ -316,7 +316,7 @@ class ldapSearch
         $ldapSearch = ldap_search($this->ldap, $baseDN, $filter, (array)$attributes, 0, $sizeLimit, $timeLimit, LDAP_DEREF_ALWAYS);
         if(!$ldapSearch){
             echo "<br><br>ERROR!<br>".ldap_errno($this->ldap).':'.ldap_error($this->ldap)."<br><br>";
-            // Trigger Error!
+            // Trigger Error! @todo
             return array();
         }
 
@@ -389,7 +389,7 @@ class ldapSearch
         if(!$this->ldap){
             $connParams = (array_key_exists('connection', $params)) ? $params['connection'] : NULL;
             if(!$this->connect($connParams)){
-                // Trigger Error!
+                // Trigger Error! @todo
                 return array();
             }
         }
@@ -398,7 +398,7 @@ class ldapSearch
         $ldapSearch = ldap_list($this->ldap, $baseDN, $filter, (array)$attributes, 0, $sizeLimit, $timeLimit,LDAP_DEREF_ALWAYS);
         if(!$ldapSearch){
             echo "<br><br>ERROR!<br>".ldap_errno($this->ldap).':'.ldap_error($this->ldap)."<br><br>";
-            // Trigger Error!
+            // Trigger Error! @todo
             return array();
         }
 
@@ -515,7 +515,10 @@ class ldapSearch
     /**
      * Returns all user groups in LDAP stating at the Base DN
      * @param int $groupType
+     *        Bitwise into of groups to be returned
+     *        Default: All security groups
      * @param array $searchParams
+     *        Optional search parameters (pass through)
      * @return array
      */
     public function getAllGroups($groupType=NULL, $searchParams=NULL)
@@ -642,7 +645,7 @@ class ldapSearch
     public function getUsersInOU($ouDN,$userType=NULL,$searchParams=NULL)
     {
         if(!$this->isOU($ouDN)){
-            // Trigger Error!
+            // Trigger Error! @todo
             return array();
         }
 
@@ -664,7 +667,7 @@ class ldapSearch
     public function getUsersInGroup($groupDN,$userType=self::USER_ACTIVE)
     {
         if(!$this->isGroup($groupDN)){
-            // Trigger Error!
+            // Trigger Error! @todo
             return array();
         }
 
@@ -701,7 +704,7 @@ class ldapSearch
     public function getGroupsInOU($ouDN,$groupType=NULL,$searchParams=NULL)
     {
         if(!$this->isOU($ouDN)){
-            // Trigger Error!
+            // Trigger Error! @todo
             return array();
         }
 
@@ -722,7 +725,7 @@ class ldapSearch
     public function getGroupsInGroup($groupDN,$groupType=NULL)
     {
         if(!$this->isGroup($groupDN)){
-            // Trigger Error!
+            // Trigger Error! @todo
             return array();
         }
 
@@ -773,7 +776,7 @@ class ldapSearch
     public function getOUsInOU($ouDN,$searchParams=NULL)
     {
         if(!$this->isOU($ouDN)){
-            // Trigger Error!
+            // Trigger Error! @todo
             return array();
         }
 
@@ -783,14 +786,26 @@ class ldapSearch
         ));
     }
 
+    /**
+     * Get the user groups of a given user
+     * @param string $userDN
+     *        The distinguished name of the user account
+     * @param bool $recursive
+     *        Set to true to recursively get ALL the user's groups (including inherited ones)
+     * @param int $groupTypes
+     *        Bitwise filter for group types you want returned
+     *        @see $this->getAllGroups()
+     *
+     * @return array
+     */
     public function getGroupsFromUser($userDN,$recursive=FALSE,$groupTypes=NULL)
     {
         if(!$this->isUser($userDN)){
-            // Trigger Error!
+            // Trigger Error! @todo
             return array();
         }
 
-        // Microsoft AD Hack - Return primaryGroupID and objectSid!
+        // Get some attributes of the user.  (Microsoft AD Hack - Return primaryGroupID and objectSid)
         $user = $this->getAttributes($userDN,'memberOf,primaryGroupID,objectSid');
         $results = array();
         foreach($user['memberof'] as $group){
@@ -811,6 +826,16 @@ class ldapSearch
 
         return array_unique($results);
     }
+
+    /**
+     * Helper method of getGroupsFromUser()
+     * @param string $groupDN
+     *        The distinguished name of the potential child group
+     * @param int $groupTypes
+     *        Bitwise filter for group types you want returned
+     *        @see $this->getAllGroups()
+     * @return array
+     */
     private function __getGroupsFromUser($groupDN,$groupTypes=NULL)
     {
         $results = array();
@@ -825,7 +850,6 @@ class ldapSearch
         }
         return $results;
     }
-
 
     /**
      * Returns TRUE ifs the DN is a user account
