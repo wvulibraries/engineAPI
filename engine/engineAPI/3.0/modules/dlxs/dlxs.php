@@ -55,13 +55,15 @@ class dlxs {
 	
 	public $noThumbURL = "/images/noThumbNail.gif";
 	
-	// Template Stuff
-	$pattern = "/\{dlxs\s+(.+?)\}/";
-	$function = "dlxs::templateMatches":
+	//Template Stuff
+	private $pattern = "/\{dlxs\s+(.+?)\}/";
+	private $function = "dlxs::templateMatches";
 	
 	function __construct($url,$class,$collection) {
 		
 		$engine = EngineAPI::singleton();
+		
+		$engine->defTempPattern($this->pattern,$this->function,$this);
 		
 		$this->cleanGet  = $engine->cleanGet;
 		$this->cleanPost = $engine->cleanPost;
@@ -532,7 +534,7 @@ class dlxs {
 
 		$thumbUrl   = $xml->Url[1];
 		$thumbnail  = '<a href="'.$xml->RelatedViews->View->Row->Column->Url[3].'" rel="lightbox">';
-		$thumbnail .= '<img src="'.$thumbUrl.'" />';
+		$thumbnail .= '<img src="'.$thumbUrl.'" alt="foo" />';
 		$thumbnail .= "</a>";
 		
 		$output = "";
@@ -932,26 +934,17 @@ class dlxs {
 					$cc       = $result->EntryIdSplit->cc;
 					$entryid  = $result->EntryIdSplit->entryid;
 
-
-					$thumbnail = "";
-					if ($thumb === TRUE) {
-						if ($thumbUrl != "nothumb") {
-							$thumbnail = '<a href="'.$this->dlxsURL.$this->dlxsCGI[$this->class]['helper'].'?viewid='.$viewid.';entryid='.$entryid.';cc='.$cc.';view=image" rel="lightbox">';
-							$thumbnail .= '<img src="'.$thumbUrl.'" />';
-							$thumbnail .= "</a>"; 
-						}
-						else {
-							$thumbnail = '<img src="'.$this->noThumbURL.'" />';
-						}
-					}
+					$thumbNailTitle = "thumbnail";
 
 					$caption = '<div class="captionDiv">';
 					$caption .= '<ul class="captionList">';
 					foreach ($result->Record->Section->Field as $item) {
 
-//print "<pre>";
-//var_dump($item);
-//print "</pre>";
+						if ($thumbNailTitle == "thumbnail") {
+							$thumbNailTitle = $item->Values->Value;
+							$thumbNailTitle = str_replace("[/markup]","",$thumbNailTitle);
+							$thumbNailTitle = str_replace('[markup style="kwic"]',"",$thumbNailTitle);
+						}
 
 						if ($this->hideSortCaption == TRUE && $item->attributes()->sortfield == "true") {
 							continue;
@@ -971,6 +964,19 @@ class dlxs {
 					$detailLink .= '">';
 					$detailLink .= $this->textDetailRecordLink;
 					$detailLink .= '</a>';
+
+					$thumbnail = "";
+					if ($thumb === TRUE) {
+						if ($thumbUrl != "nothumb") {
+							$thumbnail = '<a href="'.$this->dlxsURL.$this->dlxsCGI[$this->class]['helper'].'?viewid='.$viewid.';entryid='.$entryid.';cc='.$cc.';view=image" rel="lightbox">';
+							$thumbnail .= '<img src="'.$thumbUrl.'" alt="'.(strip_tags($thumbNailTitle)).'" />';
+							$thumbnail .= "</a>"; 
+						}
+						else {
+							$thumbnail = '<img src="'.$this->noThumbURL.'" />';
+						}
+					}
+
 
 					$vTemp = $v;
 					foreach ($vTemp as $k2 => $v2) {
