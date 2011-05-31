@@ -1175,7 +1175,15 @@ class dlxs {
 	
 	private function getRemoteXML($url) {
 		
-		//print "URL: $url -- <br />";
+		// print "URL: $url -- <br />";
+		
+		// $url = str_ireplace("%3b",";",$url);
+		// $url = str_ireplace("%3d","=",$url);
+		// $url = str_ireplace("%2f","/",$url);
+		// $url = str_ireplace("%3a",":",$url);
+		$url = str_ireplace(" ","++",$url);
+		
+		// print "URL: $url -- <br />";
 		
 		$content = file_get_contents($url);
 
