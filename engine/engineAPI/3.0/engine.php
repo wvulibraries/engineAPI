@@ -69,6 +69,7 @@ class EngineAPI
 		require_once(self::$engineDir."/config/default.php");
 		#  and is_readable( $siteConfigFile = self::$engineDir."/config/".$site.".php" )
 		if($site != "default"){
+			$siteConfigFile = self::$engineDir."/config/".$site.".php";
 			require_once($siteConfigFile);
 		}
 		self::$engineVars = $engineVars;
