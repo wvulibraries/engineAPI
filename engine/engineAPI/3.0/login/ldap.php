@@ -40,6 +40,8 @@ function ldapLogin($username,$password,$engine=NULL)
 	}else{
         return FALSE;
     }
+
+	return(FALSE);
 }
 
 function ldapConnect($ldapServer) {

@@ -67,7 +67,8 @@ class EngineAPI
 		
 		// setup $engineVars
 		require_once(self::$engineDir."/config/default.php");
-		if($site != "default" and is_readable( $siteConfigFile = self::$engineDir."/config/".$site.".php" )){
+		#  and is_readable( $siteConfigFile = self::$engineDir."/config/".$site.".php" )
+		if($site != "default"){
 			require_once($siteConfigFile);
 		}
 		self::$engineVars = $engineVars;
@@ -242,6 +243,11 @@ class EngineAPI
 				$this->cleanGet['RAW'][$cleanKey]   = $value;
 			}
 			unset($_GET);
+		}
+		
+		// kill off $_REQUEST and force everything through cleanGet and cleanPost
+		if (isset($_REQUEST)) {
+			unset($_REQUEST); 
 		}
 		
 	}

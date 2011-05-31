@@ -93,11 +93,13 @@ class ldapSearch
      */
     public function connect($params=array())
     {
+		
+		// Change these to ternary
         if(array_key_exists('ldapServer', $params))     $this->ldapServer     = $params['ldapServer'];
         if(array_key_exists('ldapServerPort', $params)) $this->ldapServerPort = $params['ldapServerPort'];
         if(array_key_exists('ldapDomain', $params))     $this->ldapDomain     = $params['ldapDomain'];
-        if(array_key_exists('bindUsername', $params))   $this->bindUsername   = $params['bindUsername'];
-        if(array_key_exists('bindPassword', $params))   $this->bindPassword   = $params['bindPassword'];
+        if(array_key_exists('bindUsername', $params))   $this->bindUsername   = $params['bindUsername']; // this isn't checking that preserve is TRUE
+        if(array_key_exists('bindPassword', $params))   $this->bindPassword   = $params['bindPassword']; 
         if(array_key_exists('baseDN', $params))         $this->baseDN         = $params['baseDN'];
 
         $this->ldap = ldap_connect($this->ldapServer, $this->ldapServerPort);
@@ -142,12 +144,14 @@ class ldapSearch
                 : NULL;
 
         // If we're not connected, fix that.
-        if(is_null($this->ldap)) $this->connect();
+        if(is_null($this->ldap)) {
+			$this->connect();
+		}
 
         if(ldap_bind($this->ldap, $bindRDN, $password)){
             if($preserve){
                 $this->bindUsername = $username;
-                $this->bindPassword = $password;
+                $this->bindPassword = $password; // DO not save password
             }
             return TRUE;
         }else{
