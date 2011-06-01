@@ -8,16 +8,22 @@ class listManagement {
 	private $hiddenFields  = array();
 	private $dateInputs    = FALSE;
 	private $wysiwygInputs = FALSE;
+	private $checkboxInput = FALSE;
 	private $multiSelect   = FALSE;
 	private $database      = NULL;  // database object. defaults to $engine->openDB;
+	private $error         = NULL;
 	
-	public  $orderBy      = NULL;  // Custom sort for the edit table
-	public  $numberRows   = FALSE; // Rows are numbered on the far left
-	public  $sortable     = FALSE; // Edit Table is sortable by click on headers
-	public  $dragOrdering = FALSE; // Enable reordering of elements in the list, by dragging them around
-	                               // Drag and Drop ordering requires a field in the table called "position"
+	public  $orderBy          = NULL;  // Custom sort for the edit table
+	public  $numberRows       = FALSE; // Rows are numbered on the far left
+	public  $numberRowsRight  = FALSE; // Rows are numbered on the far right
+	public  $rowNumDelim      = ".";   // delimiter that appears after (or before for $numberRowsRight)
+	public  $rowNumDelimRight = ".";   // delimiter that appears after (or before for $numberRowsRight)
+	public  $sortable         = FALSE; // Edit Table is sortable by click on headers
+	public  $dragOrdering     = FALSE; // Enable reordering of elements in the list, by dragging them around
+	                                  // Drag and Drop ordering requires a field in the table called "position"
 
-	public  $deleteBox      = TRUE;  // Provide a delete checkbox on edit table
+	public  $deleteBox      = TRUE;  // Provide a delete checkbox on far right of the edit table
+	public  $deleteBoxLeft  = FALSE; // Provide a delete checkbox on far left of the edit table
 	public  $rowStriping    = TRUE;  // Zebtra stripe the edit table
 	public  $repost         = TRUE;  // When an item is added, if there are errors, fillout the form with previous values
 	public  $noSubmit       = FALSE; // Submit button is not displayed. 
@@ -27,6 +33,8 @@ class listManagement {
 	public  $sql            = NULL; // Used in the edit table, custom sql instead of the default
 	public  $submitName     = NULL; // Name of the submit button, override the default
 	
+	public $helpIconDefault = "?"; // Default for the help Icon on the insert list
+	
 	public $primaryKey      = "ID"; // The field name of the primary key
 	
 	public $updateButtonText = "Update";
@@ -35,12 +43,19 @@ class listManagement {
 	public $debug           = FALSE; // If set to TRUE, will display SQL errors. MUST BE SET TO FALSE FOR 
 									 // Production
 	
-	public $validateTypes   = array("alpha","alphaNoSpaces","alphaNumeric","alphaNumericNoSpaces","date","email","ipaddr","integer","integerSpaces","internalEmail","noSpaces","noSpecialChars","phone","url");
+	public $validateTypes   = array("alpha","alphaNoSpaces","alphaNumeric","alphaNumericNoSpaces","date","email","ipaddr","integer","integerSpaces","internalEmail","noSpaces","noSpecialChars","phone","url"); // A list of all the types that are in the validation function. Suitable for use in dropdown/etc ... 
+	
+	private $insertOnlyTypes = array("checkbox", "wysiwyg"); // These are not displayed in the edit table
+	
+	// For template matching
+	public $pattern  = "/\{listObject\s+(.+?)\}/";
+	public $function = "listManagement::templateMatches";
 	
 	function __construct($table,$database=NULL) {
 		
 		$this->table  = $table;
 		$this->engine = EngineAPI::singleton();
+		$this->error  = new errorHandle();
 	
 		if (!isnull($database) && is_object($database) && get_class($database) == "engineDB") {
 			$this->database = $database;
@@ -49,9 +64,46 @@ class listManagement {
 			$this->database = $this->engine->openDB;
 		}
 	
+		$this->engine->defTempPattern($this->pattern,$this->function,$this);
+	
 	}
 	
 	function __destruct() {
+	}
+	
+	/* 
+	$attPairs:
+		display= insertForm || editTable
+		addGet = TRUE || FALSE (default, FALSE); 
+		debug = TRUE || FALSE (default, FALSE);
+	*/
+	public static function templateMatches($matches) {
+
+		$engine   = EngineAPI::singleton();
+
+		$obj      = $engine->retTempObj("listManagement");
+
+		$attPairs = attPairs($matches[1]);
+
+		$addGet = (isset($attPairs['addGet']) && strtolower($attPairs['addGet']) == "true")?TRUE:FALSE;
+		$debug  = (isset($attPairs['debug'])  && strtolower($attPairs['debug'])  == "true")?TRUE:FALSE;
+
+		$output = "Error.";
+		switch($attPairs['display']) {
+			case "insertForm":
+				$output = $obj->displayInsertForm($addGet);
+				break;
+			case "editTable":
+				$output = $obj->displayEditTable($addGet,$debug);
+				break;
+			default:
+				$output = "Unsupported display type";
+				break;
+		}
+		
+
+		return($output);
+
 	}
 	
 	/* Valid Types
@@ -71,6 +123,8 @@ class listManagement {
 	yesNoText : text input with "yes" or "no" corrisponding to "1", "TRUE", TRUE 
 	            or "0", "FALSE", FALSE respectively from the table
 	            Only valid for Table Display
+	yesNo : Select Box or Check box, works the same as yesNoText but in both insert and edit
+	checkbox : check box field. Displays  on Insert form. 
 	*/
 	/* 
 	'matchOn' does no sanitizing, expects everything to be sanitized already
@@ -81,7 +135,7 @@ class listManagement {
 	
 	can also be used for textareas. height and width are valid options, and expect integers. 
 	*/
-	public function addField($field,$label=NULL,$dupes=FALSE,$blank=FALSE,$email=FALSE,$disabled=FALSE,$size="40",$type="text",$options=NULL,$readonly=FALSE,$value=NULL,$matchOn=NULL,$validate=NULL,$original=FALSE) {
+	public function addField($field) {
 		
 		if (is_array($field)) {
 			
@@ -89,20 +143,25 @@ class listManagement {
 				return(FALSE);
 			}
 			
-			$label    = (isset($field['label']))?$field['label']:$label;
-			$email    = (isset($field['email']))?$field['email']:$email;
-			$disabled = (isset($field['disabled']))?$field['disabled']:$disabled;
-			$size     = (isset($field['size']))?$field['size']:$size;
-			$dupes    = (isset($field['dupes']))?$field['dupes']:$dupes;
-			$blank    = (isset($field['blank']))?$field['blank']:$blank;
-			$type     = (isset($field['type']))?$field['type']:$type;
-			$options  = (isset($field['options']))?$field['options']:$options;
-			$readonly = (isset($field['readonly']))?$field['readonly']:$readonly;
-			$value    = (isset($field['value']))?$field['value']:$value;
-			$matchOn  = (isset($field['matchOn']))?$field['matchOn']:$matchOn;
-			$validate = (isset($field['validate']))?$field['validate']:$validate;
-			$original = (isset($field['original']))?$field['original']:$original;
-			$field    = $field['field'];
+			$label       = (isset($field['label']))?$field['label']:NULL;
+			$email       = (isset($field['email']))?$field['email']:FALSE;
+			$disabled    = (isset($field['disabled']))?$field['disabled']:FALSE;
+			$size        = (isset($field['size']))?$field['size']:"40";
+			$dupes       = (isset($field['dupes']))?$field['dupes']:FALSE;
+			$blank       = (isset($field['blank']))?$field['blank']:FALSE;
+			$type        = (isset($field['type']))?$field['type']:"text";
+			$options     = (isset($field['options']))?$field['options']:NULL;
+			$readonly    = (isset($field['readonly']))?$field['readonly']:FALSE;
+			$value       = (isset($field['value']))?$field['value']:NULL;
+			$matchOn     = (isset($field['matchOn']))?$field['matchOn']:NULL;
+			$validate    = (isset($field['validate']))?$field['validate']:NULL;
+			$original    = (isset($field['original']))?$field['original']:FALSE;
+			$placeholder = (isset($field['placeholder']))?$field['placeholder']:FALSE;
+			$help        = (isset($field['help']) && is_array($field['help']))?$field['help']:FALSE;
+			$field       = $field['field'];
+		}
+		else {
+			return(FALSE);
 		}
 
 		if ($type == "date") {
@@ -114,22 +173,27 @@ class listManagement {
 		else if ($type == "multiselect") {
 			$this->multiSelect = TRUE;
 		}
+		else if ($type == "checkbox") {
+			$this->checkboxInput = TRUE;
+		}
 		
 		$temp = array(
-			'field'    => $field,
-			'label'    => $label,
-			'email'    => $email,
-			'disabled' => $disabled,
-			'size'     => $size,
-			'dupes'    => $dupes,
-			'blank'    => $blank,
-			'type'     => $type,
-			'options'  => $options,
-			'readonly' => $readonly,
-			'value'    => $value,
-			'matchOn'  => $matchOn,
-			'validate' => $validate,
-			'original' => $original
+			'field'       => $field,
+			'label'       => $label,
+			'email'       => $email,
+			'disabled'    => $disabled,
+			'size'        => $size,
+			'dupes'       => $dupes,
+			'blank'       => $blank,
+			'type'        => $type,
+			'options'     => $options,
+			'readonly'    => $readonly,
+			'value'       => $value,
+			'matchOn'     => $matchOn,
+			'validate'    => $validate,
+			'original'    => $original,
+			'placeholder' => $placeholder,
+			'help'        => $help
 			);
 
 		if ($type == "hidden") {
@@ -228,17 +292,33 @@ class listManagement {
 				continue;
 			}
 			
+			unset($help);
+			if (isset($I['help']) && isset($I['help']['url'])) {
+				$help = '<a href="'.$I['help']['url'].'" '.((isset($I['help']['title']))?'title="'.$I['help']['title'].'"':"").' '.((isset($I['help']['display']) && $I['help']['display'] == "newWindow")?'target="_blank"':"").'>'.((isset($I['help']['img']))?$I['help']['img']:$this->helpIconDefault).'</a>';
+			} 
+			
 			$output .= "<tr>";
 			$output .= "<td>";
 			
 			// If the label is for a WYSIWYG canvas add a "we_" to the ID, for the javascript find
 			$output .= "<label for=\"".$I['field']."_insert\">";
+			
+			if (isset($help) && ((isset($I['help']['location']) && $I['help']['location'] == "beforeLabel") || !isset($I['help']['location']))) {
+				$output .= $help."&nbsp;";
+			}
+			
 			$output .= ($I['blank'] == FALSE)?"<span class=\"requiredField\">":"";
 			$output .= $I['label'];
 			$output .= ($I['blank'] == FALSE)?"</span>":"";
+			if (isset($help) && isset($I['help']['location']) && $I['help']['location'] == "afterLabel") {
+				$output .= "&nbsp;".$help."&nbsp;";
+			}
 			$output .= ": </label>";
 			$output .= "</td>";
 			$output .= "<td>";
+			if (isset($help) && isset($I['help']['location']) && $I['help']['location'] == "beforeField") {
+				$output .= $help."&nbsp;";
+			}
 			if ($I['type'] == "text" || $I['type'] == "date") {
 				
 				if ($I['original'] === TRUE && isset($I['value'])) {
@@ -257,6 +337,7 @@ class listManagement {
 				$output .= " value=\"".$value."\""; 
 				$output .= ($I['readonly'] === TRUE)?" readonly ":"";
 				$output .= ($I['disabled'] === TRUE)?" disabled ":"";
+				$output .= ($I['placeholder'] !== FALSE)?' placeholder="'.(htmlentities($I['placeholder'])).'"':"";
 				$output .= " />";
 			}
 			else if ($I['type'] == "select") {
@@ -282,6 +363,85 @@ class listManagement {
 					}
 				}
 				$output .= "</select>";
+			}
+			else if ($I['type'] == "yesNo") {
+				if ((isset($I['options']['type']) && $I['options']['type'] != "checkbox") || !isset($I['options']['type'])) {
+					$I['options']['type'] = "select";
+				}
+				
+				if ($I['options']['type'] == "select") {
+					$output .= "<select name=\"".$I['field']."_insert\"";
+					$output .= ($I['readonly'] === TRUE)?" readonly ":"";
+					$output .= ($I['disabled'] === TRUE)?" disabled ":"";
+					$output .= ">";
+					
+					// Yes
+					$output .= '<option value="1"';
+					$output .= ($error === TRUE && $this->engine->cleanPost['HTML'][$I['field'].'_insert'] == "1")?" selected":"";
+					$output .= ($error === FALSE && isset($I['value']) && $I['value'] == "1")?" selected":"";
+					$output .= ">";
+					$output .= (isset($I['options']['yesLabel']))?htmlentities($I['options']['yesLabel']):"Yes";
+					$output .= "</option>";
+					
+					// No
+					$output .= '<option value="0"';
+					$output .= ($error === TRUE && $this->engine->cleanPost['HTML'][$I['field'].'_insert'] == "0")?" selected":"";
+					$output .= ($error === FALSE && isset($I['value']) && $I['value'] == "0")?" selected":"";
+					$output .= ">";
+					$output .= (isset($I['options']['yesLabel']))?htmlentities($I['options']['noLabel']):"No";
+					$output .= "</option>";
+					
+					$output .= "</select>";
+				}
+				else if ($I['options']['type'] == "checkbox") {
+					$output .= '<input type="checkbox" name="'.$I['field'].'_insert" value="1"';
+					$output .= ($error === TRUE && $this->engine->cleanPost['HTML'][$I['field'].'_insert'] == "1")?" checked":"";
+					$output .= ($error === FALSE && isset($I['value']) && $I['value'] == "1")?" checked":"";
+					$output .= ($I['readonly'] === TRUE)?" readonly ":"";
+					$output .= ($I['disabled'] === TRUE)?" disabled ":"";
+					$output .= ">";
+				}
+				else {
+					$output .= "invalid type";
+				}
+				
+			}
+			else if ($I['type'] == "checkbox") {
+				
+				$checkboxError = FALSE;
+				if (!isset($I['options']['valueTable'])) {
+					$this->error->errorMsg("Value table not set");
+					$checkboxError = TRUE;
+				}
+				if (!isset($I['options']['valueDisplayID'])) {
+					$this->error->errorMsg("valueDisplayID not set");
+					$checkboxError = TRUE;
+				}
+				if (!isset($I['options']['valueDisplayField'])) {
+					$this->error->errorMsg("valueDisplayField table not set");
+					$checkboxError = TRUE;
+				}
+				
+				if ($checkboxError === FALSE) {
+					
+					$sql = sprintf("SELECT * FROM %s",
+						$this->database->escape($I['options']['valueTable']));
+
+					$sqlResult = $this->database->query($sql);
+					while($row = mysql_fetch_array($sqlResult['result'],  MYSQL_ASSOC)) {
+						
+						
+						
+						$output .= "<li>";
+						$output .= '<input type="checkbox" name="'.$I['field'].'_insert[]" value="'.htmlsanitize($row[$I['options']['valueDisplayID']]).'" ';
+						$output .= ($error === TRUE && isset($this->engine->cleanPost['HTML'][$I['field'].'_insert']) && in_array($row[$I['options']['valueDisplayID']],$this->engine->cleanPost['HTML'][$I['field'].'_insert']))?"checked":"";
+						$output .= ($error === FALSE && isset($I['options']['selected']) && in_array($row[$I['options']['valueDisplayID']],$I['options']['selected']))?"checked":"";
+						$output .= '/>';
+						$output .= "&nbsp; ".htmlsanitize($row[$I['options']['valueDisplayField']]);
+						$output .= "</li>";
+					}
+						$output .= "</ul>";
+				} // if checkboxError
 			}
 			else if ($I['type'] == "textarea") {
 				
@@ -316,15 +476,15 @@ class listManagement {
 				$multiSelectError = FALSE;
 				
 				if (!isset($I['options']['valueTable'])) {
-					$output .= webhelper_errorMsg("Value table not set");
+					$this->error->errorMsg("Value table not set");
 					$multiSelectError = TRUE;
 				}
 				if (!isset($I['options']['valueDisplayID'])) {
-					$output .= webhelper_errorMsg("valueDisplayID not set");
+					$this->error->errorMsg("valueDisplayID not set");
 					$multiSelectError = TRUE;
 				}
 				if (!isset($I['options']['valueDisplayField'])) {
-					$output .= webhelper_errorMsg("valueDisplayField table not set");
+					$this->error->errorMsg("valueDisplayField table not set");
 					$multiSelectError = TRUE;
 				}
 				
@@ -347,7 +507,10 @@ class listManagement {
 				}
 			}
 			else  {
-				$output .= webhelper_errorMsg("Invalid Type");
+				$this->error->errorMsg("Invalid Type");
+			}
+			if (isset($help) && isset($I['help']['location']) && $I['help']['location'] == "afterField") {
+				$output .= "&nbsp;".$help;
 			}
 			$output .= "</td>";
 			$output .= "</tr>";
@@ -414,17 +577,20 @@ class listManagement {
 
 		if (!$sqlResult['result']) {
 			if ($this->debug === TRUE) {
-				$output .= webHelper_errorMsg($sqlResult['error']."<br />");
-				$output .= webHelper_errorMsg($sqlResult['query']."<br />");
+				$this->error->errorMsg($sqlResult['error']."<br />");
+				$this->error->errorMsg($sqlResult['query']."<br />");
 			}
-			//return webHelper_errorMsg("Error fetching list for Edit table.");
-			return webHelper_errorMsg("SQL Error");
+			// Should be sending a debug error here
+			$this->error->errorMsg("SQL Error");
+			return;
 		}
 
 		$cols = count($this->fields);
 		$colspan = $cols;
-		$colspan += ($this->deleteBox  === TRUE)?1:0;
-		$colspan += ($this->numberRows === TRUE)?1:0;
+		$colspan += ($this->deleteBox       === TRUE)?1:0;
+		$colspan += ($this->numberRows      === TRUE)?1:0;
+		$colspan += ($this->deleteBoxLeft   === TRUE)?1:0;
+		$colspan += ($this->numberRowsRight === TRUE)?1:0;
 
 		$output = "";
 
@@ -456,12 +622,26 @@ class listManagement {
 			$output .= "<th style=\"width: 25px;\">#</th>";
 		}
 
+		if ($this->deleteBoxLeft === TRUE) {
+			$output .= "<th style=\"width: 100px;\">Delete</th>";
+		}
+
 		for($I=0;$I<(int)$cols;$I++) {
+			
+			if ($this->insertOnly($this->fields[$I]['type'])) {
+				continue;
+			}
+			
 			$output .= "<th style=\"text-align: left;\">".$this->fields[$I]['label']."</th>";
 		}
 
+		// Put delete box on the left
 		if ($this->deleteBox === TRUE) {
 			$output .= "<th style=\"width: 100px;\">Delete</th>";
+		}
+		
+		if ($this->numberRowsRight === TRUE) {
+			$output .= "<th style=\"width: 25px;\">#</th>";
 		}
 		
 		$output .= "</tr>";
@@ -482,12 +662,22 @@ class listManagement {
 			
 			if ($this->numberRows === TRUE) {
 				$output .= "<td class=\"alignRight\">";
-				$output .= $numberRowsCount .".";
+				$output .= $numberRowsCount . $this->rowNumDelim;
 				$output .= "</td>";
 			}
-			$numberRowsCount++;
+			
+			if ($this->deleteBoxLeft === TRUE) {
+				$output .= "<td class=\"alignCenter\">";
+				$output .= "<input type=\"checkbox\" name=\"delete[]\" class=\"delete\" value=\"".$row[0]."\" />";
+				$output .= "</td>";
+			}
 
 			for($I=0;$I<(int)$cols;$I++) {
+				
+				if ($this->insertOnly($this->fields[$I]['type'])) {
+					continue;
+				}
+				
 				$output .= "<td ";
 				
 				if ($this->sortable === TRUE && $this->fields[$I]['type'] != "plainText") {
@@ -596,6 +786,47 @@ class listManagement {
 					}
 					$output .= "</select>";
 				}
+				else if ($this->fields[$I]['type'] == "yesNo") {
+					if ((isset($this->fields[$I]['options']['type']) && $this->fields[$I]['options']['type'] != "checkbox") || !isset($this->fields[$I]['options']['type'])) {
+						$this->fields[$I]['options']['type'] = "select";
+					}
+
+					$value = $row[$this->fields[$I]['field']];
+
+					if ($this->fields[$I]['options']['type'] == "select") {
+						$output .= "<select name=\"".$this->fields[$I]['field']."_".$row[0]."\"";
+						$output .= ($this->fields[$I]['readonly'] === TRUE)?" readonly ":"";
+						$output .= ($this->fields[$I]['disabled'] === TRUE)?" disabled ":"";
+						$output .= ">";
+
+						// Yes
+						$output .= '<option value="1"';
+						$output .= ($value == "1")?" selected":"";
+						$output .= ">";
+						$output .= (isset($this->fields[$I]['options']['yesLabel']))?htmlentities($this->fields[$I]['options']['yesLabel']):"Yes";
+						$output .= "</option>";
+
+						// No
+						$output .= '<option value="0"';
+						$output .= ($value == "0")?" selected":"";
+						$output .= ">";
+						$output .= (isset($this->fields[$I]['options']['yesLabel']))?htmlentities($this->fields[$I]['options']['noLabel']):"No";
+						$output .= "</option>";
+
+						$output .= "</select>";
+					}
+					else if ($this->fields[$I]['options']['type'] == "checkbox") {
+						$output .= '<input type="checkbox" name="'.$this->fields[$I]['field'].'_'.$row[0].'" value="1"';
+						$output .= ($value == "1")?" checked":"";
+						$output .= ($this->fields[$I]['readonly'] === TRUE)?" readonly ":"";
+						$output .= ($this->fields[$I]['disabled'] === TRUE)?" disabled ":"";
+						$output .= ">";
+					}
+					else {
+						$output .= "invalid type";
+					}
+
+				}
 				else if ($this->fields[$I]['type'] == "radio") {
 					$output .= "<input type=\"radio\" name=\"".$this->fields[$I]['field']."\" value=\"".htmlsanitize($row[0])."\" id=\"".$this->fields[$I]['field']."_".$row[0]."\" class=\"".$this->fields[$I]['field']."\"";
 					$output .= ($row[$this->fields[$I]['field']] == 1)?" checked":"";
@@ -653,7 +884,11 @@ class listManagement {
 				}
 				else if ($this->fields[$I]['type'] == "multiselect") {
 
-					$output .= webhelper_errorMsg("Multi Select type not supported in table edit");
+					$this->error->errorMsg("Multi Select type not supported in table edit");
+				}
+				else if ($this->fields[$I]['type'] == "checkbox") {
+
+					$this->error->errorMsg("Checkbox type not supported in table edit");
 				}
 				
 				$output .= "</td>";
@@ -664,6 +899,14 @@ class listManagement {
 				$output .= "<input type=\"checkbox\" name=\"delete[]\" class=\"delete\" value=\"".$row[0]."\" />";
 			}
 			$output .= "</td>";
+			
+			if ($this->numberRowsRight === TRUE) {
+				$output .= "<td class=\"alignRight\">";
+				$output .= $this->rowNumDelimRight . $numberRowsCount;
+				$output .= "</td>";
+			}
+			$numberRowsCount++;
+			
 			$output .= "</tr>";
 
 		}
@@ -691,50 +934,84 @@ class listManagement {
 		return($output); 
 	}
 	
+	// returns TRUE if insert is completely successful
+	// otherwise FALSE
 	public function insert() {
 		
-		$error = "";
-		$haveMultiSelect   = FALSE;
+		$error = array();
+		$error['string'] = "";
+		$error["error"]  = FALSE;
+		
 		$multiSelectFields = array();
 		
 		if ($this->updateInsert === TRUE) {
 			
 			if (isnull($this->updateInsertID)) {
-				 return webHelper_errorMsg("Update Error: updateInsertID was not defined");
+				$this->error->errorMsg("Update Error: updateInsertID was not defined");
+				 return(!$error['error']);
 			}
 			else if (!isset($this->engine->cleanPost['MYSQL'][$this->updateInsertID."_insert"])) {
-				return webHelper_errorMsg("Update Error: updateInsertID was not set");
+				$this->error->errorMsg("Update Error: updateInsertID was not set");
+				return(!$error['error']);
 			}
 		}
+		
+		$checkboxFields    = NULL;
+		$multiSelectFields = NULL;
 		
 		foreach ($this->fields as $I) {
 			
 			if ($I['type'] == "plainText") {
 				continue;
 			}
-			
-			if ($I['type'] == "multiselect") {
-				$haveMultiSelect = TRUE;
+			else if ($I['type'] == "multiselect") {
+				if (isnull($multiSelectFields)) {
+					$multiSelectFields = array();
+				}
 				$multiSelectFields[] = $I;
+			}
+			else if ($I['type'] == "checkbox") {
+				if (isnull($checkboxFields)) {
+					$checkboxFields = array();
+				}
+				$checkboxFields[] = $I;
+			}
+			
+			// Check boxes don't return if they aren't checked. Deal with that
+			if ($I["type"] == "yesNo" && $I["options"]["type"] == "checkbox") {
+				if (!isset($this->engine->cleanPost['MYSQL'][$I['field'].'_insert'])) {
+					$this->engine->cleanPost['MYSQL'][$I['field'].'_insert'] = "0";
+					$this->engine->cleanPost['HTML'][$I['field'].'_insert']  = "0";
+					$this->engine->cleanPost['RAW'][$I['field'].'_insert']   = "0";
+				}
 			}
 			
 			// Check for blanks
 			// If the field is NOT allowed to have blanks
 			if ($I["blank"] === FALSE) {
+				
 				// perform a blank check. 
-				if ($I['type'] != "multiselect") {
+				if ($I['type'] != "multiselect" && $I['type'] != "checkbox") {
 					if (is_empty($this->engine->cleanPost['MYSQL'][$I['field'].'_insert'],FALSE)) {
-						$error .= webHelper_errorMsg("Blank entries not allowed in ".htmlentities($I['label']).". Other records may be updated still.");
+						$error['string'] .= $this->error->errorMsg("Blank entries not allowed in ".htmlentities($I['label']).". Other records may be updated still.");
+						$error['error'] = TRUE;
 						continue;
 					}
 
 					if ($I['type'] == "select" && $this->engine->cleanPost['MYSQL'][$I['field'].'_insert'] == "NULL") {
-						$error .= webHelper_errorMsg("Blank entries not allowed in ".htmlentities($I['label']).". Other records may be updated still.");
+						$error['string'] .= $this->error->errorMsg("Blank entries not allowed in ".htmlentities($I['label']).". Other records may be updated still.");
+						$error['error'] = TRUE;
 						continue;
 					}
 				}
 				else if ($I['type'] == "multiselect" && !isset($this->engine->cleanPost['MYSQL'][$I['field']])) {
-					$error .= webHelper_errorMsg("Blank entries not allowed in ".htmlentities($I['label']).". Other records may be updated still.");
+					$error['string'] .= $this->error->errorMsg("Blank entries not allowed in ".htmlentities($I['label']).". Other records may be updated still.");
+					$error['error'] = TRUE;
+					continue;
+				}
+				else if ($I['type'] == "checkbox" && !isset($this->engine->cleanPost['MYSQL'][$I['field']."_insert"])) {
+					$error['string'] .= $this->error->errorMsg("Blank entries not allowed in ".htmlentities($I['label']).". Other records may be updated still.");
+					$error['error'] = TRUE;
 					continue;
 				}
 			}
@@ -744,7 +1021,8 @@ class listManagement {
 			if ($I["email"] === TRUE) {
 				// If its not empty, and it does not have a valid email address, continue
 				if(!empty($this->engine->cleanPost['MYSQL'][$I["field"].'_insert']) && !validateEmailAddr($this->engine->cleanPost['MYSQL'][$I["field"].'_insert'])) {
-					$error .= webHelper_errorMsg("Invalid E-Mail Address: ". htmlentities($this->engine->cleanPost['MYSQL'][$I["field"].'_insert']).". Other records may be updated still.");
+					$error['string'] .= $this->error->errorMsg("Invalid E-Mail Address: ". htmlentities($this->engine->cleanPost['MYSQL'][$I["field"].'_insert']).". Other records may be updated still.");
+					$error['error'] = TRUE;
 					continue;
 				}
 			}
@@ -753,8 +1031,8 @@ class listManagement {
 			// If the field is NOT allowed to have dupes
 			if ($I["dupes"] === FALSE) {
 				
-				// Irrelevant to multiselect 
-				if ($I['type'] == "multiselect") {
+				// Irrelevant to multiselect && checkboxes
+				if ($I['type'] == "multiselect" || $I['type'] == "checkbox") {
 					continue;
 				}
 				
@@ -763,15 +1041,16 @@ class listManagement {
 					// dev@null.com is a special case email. We allow duplicates of it
 				}
 				else if ($this->duplicateCheck($this->engine->cleanPost['MYSQL'][$I['field'].'_insert'],$I["field"])) {
-					$error .= webHelper_errorMsg("Entry, ".htmlentities($this->engine->cleanPost['MYSQL'][$I['field'].'_insert']).", already in database. Other records may be updated still.");
+					$error['string'] .= $this->error->errorMsg("Entry, ".htmlentities($this->engine->cleanPost['MYSQL'][$I['field'].'_insert']).", already in database. Other records may be updated still.");
+					$error['error'] = TRUE;
 					continue;
 				}
 			}
 			
 			if (isset($I['validate'])) {
 				
-				// Irrelevant to multiselect 
-				if ($I['type'] == "multiselect") {
+				// Irrelevant to multiselect && checkboxes
+				if ($I['type'] == "multiselect" || $I['type'] == "checkbox") {
 					continue;
 				}
 				
@@ -782,7 +1061,8 @@ class listManagement {
 				else {
 					$validateResult = $this->validateData($I['validate'],$this->engine->cleanPost['MYSQL'][$I['field'].'_insert']);
 					if ($validateResult !== FALSE) {
-						$error .= $validateResult;
+						$error['string'] .= $validateResult;
+						$error['error'] = TRUE;
 						continue;
 					}
 				}
@@ -796,14 +1076,14 @@ class listManagement {
 				}
 			}
 			
-			// Multiselect doesn't have a _insert variable
-			if ($I['type'] != "multiselect") {
+			// Multiselect doesn't have a _insert variable, checkbox is an array
+			if ($I['type'] != "multiselect" && $I['type'] != "checkbox") {
 				$this->engine->cleanPost['MYSQL'][$I['field'].'_insert'] = stripCarriageReturns($this->engine->cleanPost['MYSQL'][$I['field'].'_insert']);
 			}
 		}
 		
-		if (!is_empty($error)) {
-			return($error);
+		if ($error['error'] === TRUE) {
+			return(!$error['error']);
 		}
 
 		if ($this->updateInsert === FALSE) {
@@ -830,15 +1110,15 @@ class listManagement {
 		$output = "";
 		
 		if (!$sqlResult['result']) {
-			$output .= webHelper_errorMsg("Insert Error: ");
+			$this->error->errorMsg("Insert Error: ");
 			if ($this->debug === TRUE) {
-				$output .= webHelper_errorMsg($sqlResult['error']."<br />");
-				$output .= webHelper_errorMsg($sqlResult['query']."<br />");
+				$this->error->errorMsg($sqlResult['error']."<br />");
+				$this->error->errorMsg($sqlResult['query']."<br />");
 			}
 			
 		}
 		else {
-			$output .= webHelper_successMsg("Entry successfully added to the database.");
+			$this->error->successMsg("Entry successfully added to the database.");
 			
 			// Drop the Insert ID into a local variable suitable for framing
 			if ($this->updateInsert === FALSE) {
@@ -855,8 +1135,69 @@ class listManagement {
 				$this->engine->cleanPost['MYSQL'][$submitButtonName] = NULL;
 			}
 			
+			if (!isnull($checkboxFields)) {
+				if ($this->updateInsert === FALSE) {
+					$linkObjectID = $sqlResult['id'];
+				}
+				else {
+					$linkObjectID = $this->engine->cleanPost['MYSQL'][$this->updateInsertID."_insert"];
+				}
+				
+				foreach ($checkboxFields as $I) {
+					
+					if (isset($I['options']['linkTable']) && isset($I['options']['linkObjectField']) && isset($I['options']['linkValueField'])) {
+						$sql = sprintf("DELETE FROM %s WHERE %s='%s'",
+							$this->database->escape($I['options']['linkTable']),
+							$this->database->escape($I['options']['linkObjectField']),
+							$linkObjectID
+							);
+
+						$sqlResult                      = $this->database->query($sql);
+						
+						//if (isset($this->engine->cleanPost['MYSQL'][$I['field']."_insert"])) {
+							foreach ($this->engine->cleanPost['MYSQL'][$I['field']."_insert"] as $K=>$value) {
+								$sql = sprintf("INSERT INTO %s(%s, %s) VALUES('%s','%s')",
+									$this->database->escape($I['options']['linkTable']),
+									$this->database->escape($I['options']['linkValueField']),
+									$this->database->escape($I['options']['linkObjectField']),
+									$value,
+									$linkObjectID
+									);
+							
+								$this->database->sanitize = FALSE;
+								$sqlResult                = $this->database->query($sql);
+							
+								if (!$sqlResult['result']) {
+									$error['error'] = TRUE;
+									$this->error->errorMsg("Checkbox Insert Error: <br />");
+									if ($this->debug === TRUE) {
+										$this->error->errorMsg($sqlResult['error']."<br />");
+										$this->error->errorMsg($sqlResult['query']."<br />");
+									} // if debug
+								} // if sql error
+							} // foreach insert item
+						//} // if field is set
+						
+					}
+					else {
+						if (!isset($I['options']['linkTable'])) {
+							$this->error->errorMsg("Link table not defined"."<br />");
+						}
+						if (!isset($I['options']['linkObjectField'])) {
+							$this->error->errorMsg("Link Object not defined"."<br />");
+						}
+						if (!isset($I['options']['linkValueField'])) {
+							$this->error->errorMsg("Link Value Field not defined"."<br />");
+						}
+						$error['error'] = TRUE;
+					}
+					
+				}
+				
+			}
+			
 			// If we have any multiselect types, deal with them here
-			if ($haveMultiSelect === TRUE) {
+			if (!isnull($multiSelectFields)) {
 				if ($this->updateInsert === FALSE) {
 					$linkObjectID = $sqlResult['id'];
 				}
@@ -889,18 +1230,19 @@ class listManagement {
 							$sqlResult                = $this->database->query($sql);
 							
 							if (!$sqlResult['result']) {
-								$output .= webHelper_errorMsg("MultiSelect Insert Error: <br />");
+								$error['error'] = TRUE;
+								$this->error->errorMsg("MultiSelect Insert Error: <br />");
 								if ($this->debug === TRUE) {
-									$output .= webHelper_errorMsg($sqlResult['error']."<br />");
-									$output .= webHelper_errorMsg($sqlResult['query']."<br />");
+									$this->error->errorMsg($sqlResult['error']."<br />");
+									$this->error->errorMsg($sqlResult['query']."<br />");
 								}
 							}
-						}
-					}
-				}
-			}
+						} // foreach $K=>$value
+					} // if isset($this->engine->cleanPost['MYSQL'][$I['field']]
+				} // foreach $multiSelectFields
+			} // If Multiselect
 			
-		}
+		} // else
 
 		if ($this->dragOrdering === TRUE) {
 			$sql = sprintf("UPDATE %s SET position=%s WHERE %s=%s",
@@ -913,15 +1255,17 @@ class listManagement {
 			$sqlResult = $this->database->query($sql);
 		}
 
-		return($output);
+		return(!$error['error']);
 	}
 	
+	// returns TRUE if insert is completely successful
+	// otherwise FALSE
+	//
+	// NOTE: will return false if just 1 record fails
 	public function update($returnBool=FALSE) {
 
 		$error           = array();
 		$error["error"]  = FALSE;
-		$error['string'] = "";
-		$output = "";
 
 		if (isset($this->engine->cleanPost['MYSQL']['delete'])) {
 			foreach($this->engine->cleanPost['MYSQL']['delete'] as $value) {
@@ -936,10 +1280,10 @@ class listManagement {
 				$sqlResult = $this->database->query($sql);
 
 				if (!$sqlResult['result']) {
-					$output .= webHelper_errorMsg("Delete Error. <br />");
+					$this->error->errorMsg("Delete Error. <br />");
 					if ($this->debug === TRUE) {
-						$output .= webHelper_errorMsg($sqlResult['error']."<br />");
-						$output .= webHelper_errorMsg($sqlResult['query']."<br />");
+						$this->error->errorMsg($sqlResult['error']."<br />");
+						$this->error->errorMsg($sqlResult['query']."<br />");
 					}
 					$error["error"]   = TRUE;
 				}
@@ -955,13 +1299,12 @@ class listManagement {
 		$sqlResult = $this->database->query($sql);
 
 		if (!$sqlResult['result']) {
-			$output .= webHelper_errorMsg("Error fetching table entries. <br />");
+			$this->error->errorMsg("Error fetching table entries. <br />");
 			if ($this->debug === TRUE) {
-				$output .= webHelper_errorMsg($sqlResult['error']."<br />");
-				$output .= webHelper_errorMsg($sqlResult['query']."<br />");
+				$this->error->errorMsg($sqlResult['error']."<br />");
+				$this->error->errorMsg($sqlResult['query']."<br />");
 			}
 			$error["error"]   = TRUE;
-			//$sqlResult['error']
 		}
 
 		while ($row = mysql_fetch_array($sqlResult['result'], MYSQL_BOTH)) {
@@ -975,8 +1318,17 @@ class listManagement {
 			// FOr each defined field
 			foreach ($this->fields as $I) {
 				
-				if ($I['type'] == "plainText") {
+				if ($this->insertOnly($I['type'])) {
 					continue;
+				}
+				
+				// Check boxes don't return if they aren't checked. Deal with that
+				if ($I["type"] == "yesNo" && $I["options"]["type"] == "checkbox") {
+					if (!isset($this->engine->cleanPost['MYSQL'][$I['field'].'_'.$row[0]])) {
+						$this->engine->cleanPost['MYSQL'][$I['field'].'_'.$row[0]] = "0";
+						$this->engine->cleanPost['HTML'][$I['field'].'_'.$row[0]]  = "0";
+						$this->engine->cleanPost['RAW'][$I['field'].'_'.$row[0]]   = "0";
+					}
 				}
 				
 				//Check for blanks
@@ -984,7 +1336,7 @@ class listManagement {
 				if ($I["blank"] === FALSE && $I['disabled'] === FALSE) {
 					// perform a blank check. Continue to the next row in the database if there is a blank. 
 					if (is_empty($this->engine->cleanPost['MYSQL'][$I['field'].'_'.$row[0]],FALSE)) {
-						$output .= webHelper_errorMsg("Blank entries not allowed in ".htmlentities($I['label']).". Other records may be updated still.");
+						$this->error->errorMsg("Blank entries not allowed in ".htmlentities($I['label']).". Other records may be updated still.");
 						$error["error"]   = TRUE;
 						continue 2;
 					}
@@ -1007,7 +1359,7 @@ class listManagement {
 				if ($I["email"] === TRUE && $I['disabled'] === FALSE) {
 					// If its not empty, and it does not have a valid email address, continue next database row
 					if(!empty($this->engine->cleanPost['MYSQL'][$I["field"].'_'.$row[0]]) && !validateEmailAddr($this->engine->cleanPost['MYSQL'][$I["field"].'_'.$row[0]])) {
-						$output .= webHelper_errorMsg("Invalid E-Mail Address: ". htmlentities($this->engine->cleanPost['MYSQL'][$I["field"].'_'.$row[0]]).". Other records may be updated still.");
+						$this->error->errorMsg("Invalid E-Mail Address: ". htmlentities($this->engine->cleanPost['MYSQL'][$I["field"].'_'.$row[0]]).". Other records may be updated still.");
 						$error["error"]   = TRUE;
 						continue 2;
 					}
@@ -1033,7 +1385,7 @@ class listManagement {
 							
 					// perform a dupe check. Continue to the next row in the database if there is a dupe in that field. 
 					if ($row[$I["field"]] != $this->engine->cleanPost['MYSQL'][$I['field'].'_'.$row[0]] && $this->duplicateCheck($this->engine->cleanPost['MYSQL'][$I['field'].'_'.$row[0]],$I["field"])) {
-						$output .= webHelper_errorMsg("Entry, ".htmlentities($this->engine->cleanPost['MYSQL'][$I['field'].'_'.$row[0]]).", already in database. Other records may be updated still.");
+						$this->error->errorMsg("Entry, ".htmlentities($this->engine->cleanPost['MYSQL'][$I['field'].'_'.$row[0]]).", already in database. Other records may be updated still.");
 						$error["error"]   = TRUE;
 						
 						// Set updateInsert back to original Values
@@ -1059,7 +1411,6 @@ class listManagement {
 					else {
 						$validateResult = $this->validateData($I['validate'],$this->engine->cleanPost['MYSQL'][$I['field'].'_'.$row[0]]);
 						if ($validateResult !== FALSE) {
-							$output .= $validateResult;
 							$error["error"]   = TRUE;
 							continue 2;
 						}
@@ -1081,10 +1432,10 @@ class listManagement {
 			$sqlResult2 = $this->database->query($sql);
 
 			if (!$sqlResult2['result']) {
-				$output .= webHelper_errorMsg("Update Error.<br />");
+				$this->error->errorMsg("Update Error.<br />");
 				if ($this->debug === TRUE) {
-					$output .= webHelper_errorMsg($sqlResult2['error']."<br />");
-					$output .= webHelper_errorMsg($sqlResult2['query']."<br />");
+					$this->error->errorMsg($sqlResult['error']."<br />");
+					$this->error->errorMsg($sqlResult['query']."<br />");
 				}
 				$error["error"]   = TRUE;
 				
@@ -1092,15 +1443,12 @@ class listManagement {
 
 		}
 
-		if(empty($output)) {
-			$output = webHelper_successMsg("Database successfully updated.");
+		if($error["error"] === FALSE) {
+			$this->error->successMsg("Database successfully updated.");
+			return(!$error["error"]);
 		}
 
-		if ($returnBool === TRUE) {
-			$error["string"] = $output;
-			return($error);
-		}
-		return($output);
+		return(!$error["error"]);
 	}
 	
 	public function haveDeletes() {
@@ -1152,7 +1500,7 @@ class listManagement {
 			if($I['disabled'] === TRUE) {
 				continue;
 			}
-			if ($I['type'] == "plainText") {
+			if ($this->insertOnly($I['type'])) {
 				continue;
 			}
 			
@@ -1186,7 +1534,7 @@ class listManagement {
 			if($I['disabled'] === TRUE) {
 				continue;
 			}
-			if ($I['type'] == "plainText" || $I['type'] == "radio" || $I['type'] == "multiselect") {
+			if ($I['type'] == "plainText" || $I['type'] == "radio" || $I['type'] == "multiselect" || $I['checkbox']) {
 				continue;
 			}
 			
@@ -1209,7 +1557,7 @@ class listManagement {
 			if($I['disabled'] === TRUE) {
 				continue;
 			}
-			if ($I['type'] == "plainText" || $I['type'] == "radio" || $I['type'] == "multiselect") {
+			if ($I['type'] == "plainText" || $I['type'] == "radio" || $I['type'] == "multiselect" || $I['type'] == "checkbox") {
 				continue;
 			}
 			$temp[] = $I["field"];
@@ -1232,7 +1580,7 @@ class listManagement {
 			if($I['disabled'] === TRUE) {
 				continue;
 			}
-			if ($I['type'] == "plainText" || $I['type'] == "radio" || $I['type'] == "multiselect" ) {
+			if ($I['type'] == "plainText" || $I['type'] == "radio" || $I['type'] == "multiselect" || $I['type'] == "checkbox") {
 				continue;
 			}
 			
@@ -1255,27 +1603,27 @@ class listManagement {
 		
 		if ($validate == "url") {
 			if (!validURL($data)) {
-				$error .= webHelper_errorMsg("Entry, ".htmlentities($data).", not a valid URL.");
+				$error .= $this->error->errorMsg("Entry, ".htmlentities($data).", not a valid URL.");
 			}
 		}
 		else if ($validate == "email") {
 			if (!validateEmailAddr($data)) {
-				$error .= webHelper_errorMsg("Entry, ".htmlentities($data).", not a valid Email Address.");
+				$error .= $this->error->errorMsg("Entry, ".htmlentities($data).", not a valid Email Address.");
 			}
 		}
 		else if ($validate == "internalEmail") {
 			if (!validateEmailAddr($data,TRUE)) {
-				$error .= webHelper_errorMsg("Entry, ".htmlentities($data).", not a valid Email Address.");
+				$error .= $this->error->errorMsg("Entry, ".htmlentities($data).", not a valid Email Address.");
 			}
 		}
 		else if ($validate == "phone") {
 			if (!validPhoneNumber($data)) {
-				$error .= webHelper_errorMsg("Entry, ".htmlentities($data).", not a valid Phone.");
+				$error .= $this->error->errorMsg("Entry, ".htmlentities($data).", not a valid Phone.");
 			}
 		}
 		else if ($validate == "ipaddr") {
 			if (!validIPAddr($data)) {
-				$error .= webHelper_errorMsg("Entry, ".htmlentities($data).", not a valid IP Address Range.");
+				$error .= $this->error->errorMsg("Entry, ".htmlentities($data).", not a valid IP Address Range.");
 			}
 		}
 		else {
@@ -1328,11 +1676,11 @@ class listManagement {
 
 			// if the regular expression fails, returns false. If there is no match, returns "0" otherwise "1"
 			if ($return === FALSE) {
-				$error .= webHelper_errorMsg("Invalid Regular Expression Passed.");
+				$error .= $this->error->errorMsg("Invalid Regular Expression Passed.");
 				$return = -1;
 			}
 			else if ($return == 0) {
-				$error .= webHelper_errorMsg("Entry, ".htmlentities($data).", is not valid.");
+				$error .= $this->error->errorMsg("Entry, ".htmlentities($data).", is not valid.");
 			}
 
 		}
@@ -1342,6 +1690,15 @@ class listManagement {
 		}
 
 		return($error);
+	}
+	
+	private function insertOnly($type) {
+		
+		if (in_array($type,$this->insertOnlyTypes)) {
+			return(TRUE);
+		}
+		
+		return(FALSE);
 	}
 
 }
