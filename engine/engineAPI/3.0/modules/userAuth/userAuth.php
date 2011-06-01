@@ -87,7 +87,7 @@ class userAuth
         $this->engine = EngineAPI::singleton();
 
         // Load the bcBitwise utility class
-        require_once EngineAPI::$engineDir.'/utilities/bcBitwise.php';
+        require_once EngineAPI::$engineDir.'/helperFunctions/bcBitwise.php';
 
         // Copy in any engine config items
         global $engineVars;
