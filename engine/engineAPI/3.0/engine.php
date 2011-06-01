@@ -9,7 +9,7 @@ class EngineAPI
 	private static $instance; // Hold an instance of this object, for use as Singleton
 	public static $engineDir = NULL;
 	public static $engineVars = array();
-    public static $errorStack = array();
+    public $errorStack = array();
 
     private $localVars        = array();
     public  $template         = ""; // $engineVars['currentTemplate'];
@@ -251,9 +251,9 @@ class EngineAPI
 			unset($_REQUEST); 
 		}
 
-        // Last thing we need to do is load, and initialize the engineError class (the error handeler)
-        require_once(self::$engineDir."/engineError.php");
-        //engineError::singleton();
+        // Last thing we need to do is load, and initialize the errorHandle class (the error handeler)
+        require_once(self::$engineDir."/errorHandle.php");
+        //errorHandle::singleton();
 	}
 	
 	function __destruct() {
