@@ -4,21 +4,21 @@ $engineVars = array();
 
 class EngineAPI
 {
-	const VERSTION='3.0';
+	const VERSION='3.0';
 	
 	private static $instance; // Hold an instance of this object, for use as Singleton
 	public static $engineDir = NULL;
 	public static $engineVars = array();
-	
-	private $localVars        = array();
-	public  $template         = ""; // $engineVars['currentTemplate'];
-	
-	public  $cwd              = "";
-	
-	private $DEBUG            = array();
-	
-	public $errorStack        = array();
-	
+    public static $errorStack = array();
+
+    private $localVars        = array();
+    public  $template         = ""; // $engineVars['currentTemplate'];
+
+    public  $cwd              = "";
+
+    private $DEBUG            = array();
+
+
 	// Cleaned up $_GET and _$POST variables with HTML and MySQL sanitized values
 	public $cleanGet  = array();
 	public $cleanPost = array();
@@ -245,12 +245,15 @@ class EngineAPI
 			}
 			unset($_GET);
 		}
-		
+
 		// kill off $_REQUEST and force everything through cleanGet and cleanPost
 		if (isset($_REQUEST)) {
 			unset($_REQUEST); 
 		}
-		
+
+        // Last thing we need to do is load, and initialize the engineError class (the error handeler)
+        require_once(self::$engineDir."/engineError.php");
+        //engineError::singleton();
 	}
 	
 	function __destruct() {
