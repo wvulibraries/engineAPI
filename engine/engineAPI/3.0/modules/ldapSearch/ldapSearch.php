@@ -89,24 +89,26 @@ class ldapSearch
     /**
      * Connect, and bind, to an LDAP server
      * @param array $params
-     * @return bool
+     * @return null|resource
      */
     public function connect($params=array())
     {
-		
-		// Change these to ternary
         if(array_key_exists('ldapServer', $params))     $this->ldapServer     = $params['ldapServer'];
         if(array_key_exists('ldapServerPort', $params)) $this->ldapServerPort = $params['ldapServerPort'];
         if(array_key_exists('ldapDomain', $params))     $this->ldapDomain     = $params['ldapDomain'];
-        if(array_key_exists('bindUsername', $params))   $this->bindUsername   = $params['bindUsername']; // this isn't checking that preserve is TRUE
-        if(array_key_exists('bindPassword', $params))   $this->bindPassword   = $params['bindPassword']; 
+        if(array_key_exists('bindUsername', $params))   $this->bindUsername   = $params['bindUsername'];
+        if(array_key_exists('bindPassword', $params))   $this->bindPassword   = $params['bindPassword'];
         if(array_key_exists('baseDN', $params))         $this->baseDN         = $params['baseDN'];
 
-        $this->ldap = ldap_connect($this->ldapServer, $this->ldapServerPort);
-        ldap_set_option($this->ldap, LDAP_OPT_PROTOCOL_VERSION, 3);
-        ldap_set_option($this->ldap, LDAP_OPT_REFERRALS, 0);
-
-        return $this->login($this->bindUsername, $this->bindPassword);
+        $ldapConnection = ldap_connect($this->ldapServer, $this->ldapServerPort);
+        if($ldapConnection === FALSE){
+            // Trigger Error! @todo
+            return NULL;
+        }else{
+            ldap_set_option($this->ldap, LDAP_OPT_PROTOCOL_VERSION, 3);
+            ldap_set_option($this->ldap, LDAP_OPT_REFERRALS, 0);
+            return $ldapConnection;
+        }
     }
 
     /**
@@ -128,33 +130,29 @@ class ldapSearch
      * Login (bind) to the LDAP server
      * @param string $username
      * @param string $password
-     * @param bool $preserve
-     *        Set to TRUE to have the credentials preserved (if they were correct)
      * @return bool
      */
-    public function login($username,$password,$preserve=TRUE)
+    public function login($username,$password)
     {
         $username = trim($username);
         $password = trim($password);
-
-        $bindRDN = (isset($username))
+        $bindRDN  = (isset($username))
                 ? (($this->ldapDomain)
                         ? $username."@".$this->ldapDomain
                         : $username)
                 : NULL;
 
         // If we're not connected, fix that.
-        if(is_null($this->ldap)) {
-			$this->connect();
-		}
-
-        if(ldap_bind($this->ldap, $bindRDN, $password)){
-            if($preserve){
-                $this->bindUsername = $username;
-                $this->bindPassword = $password; // DO not save password
+        if(is_null($this->ldap)) $this->ldap = $this->connect();
+        if($this->ldap){
+            if(ldap_bind($this->ldap, $bindRDN, $password)){
+                return TRUE;
+            }else{
+                // Trigger Error! @todo
+                return FALSE;
             }
-            return TRUE;
         }else{
+            // Trigger Error! @todo
             return FALSE;
         }
     }
@@ -170,17 +168,26 @@ class ldapSearch
 
     /**
      * Checks a user's credentials against the LDAP server.
-     * This is done by logging off, then attempting to re-login using these credentials. Lastly, the original credentials are reused
+     * This is done by creating a new connection to the LDAP server (using the passed credentials to bind to the server)
      * @param string $username
      * @param string $password
+     * @param array $connectParams
      * @return bool
      */
-    public function checkCredentials($username,$password)
+    public function checkCredentials($username,$password,$connectParams=array())
     {
-        $this->logout();
-        $result = $this->login($username,$password,false);
-        $this->login($this->bindUsername, $this->bindPassword);
-        return $result;
+        $username = trim($username);
+        $password = trim($password);
+        $bindRDN  = (isset($username))
+                ? (($this->ldapDomain)
+                        ? $username."@".$this->ldapDomain
+                        : $username)
+                : NULL;
+
+        $ldap = $this->connect($connectParams);
+        $bind = ldap_bind($ldap, $bindRDN, $password);
+        if($bind) ldap_unbind($bind);
+        return $bind;
     }
 
     /**
@@ -955,7 +962,7 @@ class ldapSearch
 
 
     /**
-     * Retrieves a requested item from the ldapConfig. If no config is set, will return NUL)
+     * Retrieves a requested item from the ldapConfig. If no config is set, will return NULL)
      * @param  $name
      * @return null|mixed
      */
@@ -1084,7 +1091,7 @@ class ldapSearch
 
     ###################################################################################
     # Helper Function                                                                 #
-    #   This converts the bin GID is search results to a usable hex value             #
+    #   This converts the binary GID is search results to a usable hex value          #
     ###################################################################################
     # Used in: ldapSearch->formatSearchResults()                                      #
     # References: http://us2.php.net/manual/en/function.ldap-get-values-len.php#73198 #
