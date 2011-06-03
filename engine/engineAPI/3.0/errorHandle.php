@@ -4,20 +4,40 @@
  */
 class errorHandle
 {
-    const INFO=1;
-    const DEBUG=2;
-    const LOW=4;
-    const MEDIUM=8;
-    const HIGH=16;
-    const CRITICAL=32;
-    const E_ALL=63;
-
+    /**
+     * Error Severity
+     * (Bitwise compatible)
+     */
+    const INFO     = 1;
+    const DEBUG    = 2;
+    const LOW      = 4;
+    const MEDIUM   = 8;
+    const HIGH     = 16;
+    const CRITICAL = 32;
+    const E_ALL    = 63;
+    /**
+     * EngineAPI error stack types
+     */
+	const ERROR   = "error";
+	const SUCCESS = "success";
+	const WARNING = "warning";
+    /**
+     * Singleton holder
+     * @var errorHandle
+     */
     private static $instance;
-    private static $errorProfiles=array();
-    public static $phpErrMapping=array();
+    /**
+     * Local stack of error profiles
+     * @see self::addProfile()
+     * @var array
+     */
+    private static $errorProfiles = array();
+    /**
+     * The internal mapping between PHP's error types, and our error severities.
+     * @var array
+     */
+    public static $phpErrMapping = array();
     private static $errorReporting;
-
-
 
     private static $errMsg;
     private static $errSeverity;
@@ -27,11 +47,10 @@ class errorHandle
     private static $phpErrNo;
     private static $errorType;
 
-    public static $uiSpanElement = 'p';
-    public static $uiClassError = 'errorMessage';
+    public static $uiSpanElement  = 'p';
+    public static $uiClassError   = 'errorMessage';
     public static $uiClassSuccess = 'successMessage';
     public static $uiClassWarning = 'warningMessage';
-
 
 
     /**
@@ -41,7 +60,9 @@ class errorHandle
      */
     public static function singleton()
     {
-        if(self::$instance === null) self::$instance = new self();
+        if(self::$instance === null) {
+	 		self::$instance = new self();
+		}
         return self::$instance;
     }
 
@@ -57,10 +78,6 @@ class errorHandle
 
     private function __construct()
     {
-        // Register custom handlers for PHP's errors and exceptions
-        set_error_handler(array(__CLASS__, 'phpError'));
-        set_exception_handler(array(__CLASS__, 'phpException'));
-
         // Set PHP Error Constant => errorHandle Constant mapping
         self::$phpErrMapping = array(
             E_WARNING           => self::MEDIUM,
@@ -80,16 +97,68 @@ class errorHandle
         self::addProfile(array('errorSeverity' => self::DEBUG), array('logLocation' => 'nativePHP'));
         self::addProfile(array('errorSeverity' => self::LOW), array('logLocation' => 'nativePHP'));
         self::addProfile(array('errorSeverity' => self::MEDIUM), array('logLocation' => 'nativePHP'));
-        self::addProfile(array('errorSeverity' => self::HIGH), array('logLocation' => 'nativePHP','fetal' => TRUE));
-        self::addProfile(array('errorSeverity' => self::CRITICAL), array('logLocation' => 'nativePHP','fetal' => TRUE));
+        self::addProfile(array('errorSeverity' => self::HIGH), array('logLocation' => 'nativePHP','fatal' => TRUE));
+        self::addProfile(array('errorSeverity' => self::CRITICAL), array('logLocation' => 'nativePHP','fatal' => TRUE));
+
+        // Register custom handlers for PHP's errors and exceptions
+        set_error_handler(array(__CLASS__, 'phpError'));
+        set_exception_handler(array(__CLASS__, 'phpException'));
     }
 
     /**
-     * Adds an error 'profile' for later use
+     * Adds an error 'profile' for later use.
+     * Error profiles are used to tell the system what to do when it encounters an error.
+     *
+     * When an error is encountered, we look though all the available profiles which ALL of its conditions match the error.
+     * Then we find the most specific one, the one with the most conditions, and preform the actions of that profile.
+     * (In the event of a tie, the profile encountered 1st wins)
+     *
      * @static
      * @param array $conditions
+     *        An array of conditions which must all match for this profile to be used for an error
+     *        Possible values include:
+     *         + errorType     - The type of error triggered
+     *                            - 'phpError'    - An error triggered from PHP or with trigger_error()
+     *                            - 'phpException - An uncaught exception
+     *                            - 'custom'      - A custom error message using the newError() method
+     *         + errorSeverity - The severity of the error raised. (INFO, DEBUG, LOW, MEDIUM, HIGH, CRITICAL)
+     *         + errorOrigin   - A RegEx pattern to match against the file path from where the error originated from
+     *         + engineEnv     - The value of the ENGINE_ENVIRONMENT constant. (ex: 'production', 'development', 'cli', etc)
+     *
      * @param array $actions
-     * @return null|string
+     *        An array of actions to take in response to this profile being used
+     *         + logLocation - The location(s) where this error should be recorded to. (use an array for multiple values)
+     *                         These are parsed with PHP's parse_URL, so they look a lot like URLs. For example:
+     *                          - file://FILE_PATH                              - Log this error to a static log file. (FILE_PATH must be absolute)
+     *                          - email://EMAIL_ADDRESS                         - Send a record of this error to the specified email address
+     *                          - mysql://USER:PASS@HOSTNAME/DB_NAME#TABLE_NAME - Log this error for a MySQL database
+     *                          - nativePHP                                     - Hand this error message off to the native PHP log handler.
+     *         + httpRedirect - Redirect the user (via HTTP Header) to a specified URL [Fatal is implied]
+     *         + exec - Execute a 3rdParty script/applications via PHP's exec()
+     *         + fatal - Abort site execution at the conclusion of this profile.
+     *
+     * @return string
+     *         Error profile referenced using a checksum of their conditions.
+     *         This checksum is returned upon successful profile addition. Otherwise an empty string to returned.
+     *
+     *
+     * Example Usage:
+     *
+     *   I want all HIGH severity errors that occurs from any file under /home/example/admin/ to be logged with
+     *   nativePHP, logged in our database, and emailed to me. The user should then be  redirected to our homepage.
+     *
+     *   addProfile(array(
+     *     'errorSeverity' => errorHandle::HIGH,
+     *     'errorOrigin'   => '|/home/example/admin/.+|'
+     *   ), array(
+     *     'logLocation' => array(
+     *       'nativePHP',
+     *       'mysql://foo:bar@localhost/siteErrors#high',
+     *       'email://webmaster@example.com'
+     *     ),
+     *     'httpRedirect' => 'http://example.com'
+     *   ));
+     *
      */
     public static function addProfile($conditions,$actions)
     {
@@ -101,7 +170,7 @@ class errorHandle
             return $profileFingerprint;
         }else{
             // Trigger Error! ??? @todo
-            return NULL;
+            return '';
         }
     }
 
@@ -133,13 +202,15 @@ class errorHandle
      * @param string $errFile    The filename that the error was raised in, as a string
      * @param int    $errLine    The line number the error was raised at, as an integer
      * @param array  $errContext The active symbol table at the point the error occurred
-     * @return boolean
+     * @return bool
      */
     public static function phpError($errNo, $errStr, $errFile, $errLine, $errContext)
     {
         // we only care if the PHP error is being looked for
         $errorReporting = ini_get('error_reporting');
         if($errorReporting === 0 || !($errorReporting & $errNo)) return FALSE;
+
+return FALSE;
 
         self::$errorType = 'phpError';
         self::$phpErrNo = $errNo;
@@ -152,6 +223,7 @@ class errorHandle
         }else{
             error_log($errStr." at $errLine:$errFile");
         }
+        return TRUE;
     }
 
     /**
@@ -168,41 +240,30 @@ class errorHandle
         self::newError($e->getMessage(), self::$phpErrMapping['phpException']);
     }
 
+    
     private static function phpErr2Str($errNo)
     {
-        switch($errNo){
-            case E_WARNING:
-                return 'E_WARNING';
-                break;
-            case E_NOTICE:
-                return 'E_NOTICE';
-                break;
-            case E_USER_ERROR:
-                return 'E_USER_ERROR';
-                break;
-            case E_USER_WARNING:
-                return 'E_USER_WARNING';
-                break;
-            case E_USER_NOTICE:
-                return 'E_USER_NOTICE';
-                break;
-            case E_STRICT:
-                return 'E_STRICT';
-                break;
-            case E_RECOVERABLE_ERROR:
-                return 'E_RECOVERABLE_ERROR';
-                break;
-            case E_DEPRECATED:
-                return 'E_DEPRECATED';
-                break;
-            case E_USER_DEPRECATED:
-                return 'E_USER_DEPRECATED';
-                break;
-            default:
-                return 'unknown';
-                break;
+        $phpErrors = array(
+            E_WARNING      => 'E_WARNING',
+            E_NOTICE       => 'E_NOTICE',
+            E_USER_ERROR   => 'E_USER_ERROR',
+            E_USER_WARNING => 'E_USER_WARNING',
+            E_USER_NOTICE  => 'E_USER_NOTICE',
+            E_STRICT       => 'E_STRICT');
+        if(defined('E_RECOVERABLE_ERROR')) $phpErrors[E_RECOVERABLE_ERROR] = 'E_RECOVERABLE_ERROR';
+        if(defined('E_DEPRECATED'))        $phpErrors[E_DEPRECATED]        = 'E_DEPRECATED';
+        if(defined('E_USER_DEPRECATED'))   $phpErrors[E_USER_DEPRECATED]   = 'E_USER_DEPRECATED';
+
+        if(array_key_exists($errNo, $phpErrors)){
+            return $phpErrors[$errNo];
+        }else{
+            return (string)$errNo;
         }
     }
+
+
+
+
 
     public static function newError($errMsg, $errSeverity, $errInfo=array())
     {
@@ -213,11 +274,11 @@ class errorHandle
         if(!isset(self::$errorType)){
             self::$errorType='newError';
         }
-        self::$errMsg = trim($errMsg);
+        self::$errMsg      = trim($errMsg);
         self::$errSeverity = $errSeverity;
-        self::$backTrace = self::getErrorOrigin();
-        self::$errFile = self::$backTrace[0]['file'];
-        self::$errLine = self::$backTrace[0]['line'];
+        self::$backTrace   = self::getErrorOrigin();
+        self::$errFile     = self::$backTrace[0]['file'];
+        self::$errLine     = self::$backTrace[0]['line'];
 
         // Find all the error profiles which this error can apply to
         $profiles = array();
@@ -306,8 +367,8 @@ class errorHandle
                     }
                     break;
 
-                case 'fetal':
-                    if($value and !defined('FETAL_ERROR')) define("FETAL_ERROR",true);
+                case 'fatal':
+                    if($value and !defined('fatal_ERROR')) define("fatal_ERROR",true);
                     break;
 
                 case 'emailAlert':
@@ -319,45 +380,38 @@ class errorHandle
                     break;
             }
         }
-        if(defined('FETAL_ERROR') and FETAL_ERROR) die('*** Fetal Error ***'); // @todo Change to exit() after development
+        if(defined('fatal_ERROR') and fatal_ERROR) die('*** fatal Error ***'); // @todo Change to exit() after development
     }
 
     public static function errorMsg($msg)
     {
         self::newError($msg, self::INFO);
-        if(class_exists('EngineAPI', FALSE)){
-            $engine = EngineAPI::singleton();
-            $engine->errorStack['error'][] = $msg;
-            $engine->errorStack['all'][] = $msg;
-        }
+        self::errorStack(self::ERROR,$msg);
         return sprintf('<%s class="%s">%s</%s>', self::$uiSpanElement, self::$uiClassError, $msg, self::$uiSpanElement);
     }
 
     public static function successMsg($msg)
     {
         self::newError($msg, self::INFO);
-        if(class_exists('EngineAPI', FALSE)){
-            $engine = EngineAPI::singleton();
-            $engine->errorStack['success'][] = $msg;
-            $engine->errorStack['all'][] = $msg;
-        }
+        self::errorStack(self::SUCCESS,$msg);
         return sprintf('<%s class="%s">%s</%s>', self::$uiSpanElement, self::$uiClassSuccess, $msg, self::$uiSpanElement);
     }
 
     public static function warningMsg($msg)
     {
         self::newError($msg, self::INFO);
-        if(class_exists('EngineAPI', FALSE)){
-            $engine = EngineAPI::singleton();
-            $engine->errorStack['warning'][] = $msg;
-            $engine->errorStack['all'][] = $msg;
-        }
+        self::errorStack(self::WARNING,$msg);
         return sprintf('<%s class="%s">%s</%s>', self::$uiSpanElement, self::$uiClassWarning, $msg, self::$uiSpanElement);
     }
 
-    public static function prettyPrint($type="all") {
-		$engine = EngineAPI::singleton();
+    public static function prettyPrint($type="all")
+    {
+        if(!class_exists('EngineAPI', FALSE)){
+            // There's no EngineAPI to read the errorStacks from, so there's no point trying
+            return '';
+        }
 
+		$engine = EngineAPI::singleton();
 		$output = '<ul class="errorPrettyPrint">';
 		if ($type == "all") {
 			if (!isset($engine->errorStack['all']) || !is_array($engine->errorStack['all'])) {
@@ -365,14 +419,14 @@ class errorHandle
 			}
 			foreach ($engine->errorStack['all'] as $V){
 				switch ($V['type']) {
-					case errorHandle::ERROR:
-						$class = "errorMessage";
+					case self::ERROR:
+						$class = self::$uiClassError;
 						break;
-					case errorHandle::SUCCESS:
-						$class = "successMessage";
+					case self::SUCCESS:
+						$class = self::$uiClassSuccess;
 						break;
-					case errorHandle::WARNING:
-						$class = "warningMessage";
+					case self::WARNING:
+						$class = self::$uiClassWarning;
 						break;
 					default:
 						break;
@@ -413,17 +467,14 @@ class errorHandle
 		return($output);
 	}
 
-/*
-	private function errorStack($type,$message) {
+	private function errorStack($type,$message)
+    {
+        if(!class_exists('EngineAPI', FALSE)){
+            // There's no EngineAPI to push this error onto, so there's no point trying
+            return '';
+        }
 
-		$engine = NULL;
-
-		if (!(isset($this) && get_class($this) == __CLASS__)) {
-			$engine = EngineAPI::singleton();
-		}
-		else {
-			$engine = $this->engine;
-		}
+		$engine = EngineAPI::singleton();
 
 		if (!isset($engine->errorStack[$type])) {
 			$engine->errorStack[$type] = array();
@@ -431,17 +482,16 @@ class errorHandle
 		if (!isset($engine->errorStack["all"])) {
 			$engine->errorStack["all"] = array();
 		}
-
+		
 		$engine->errorStack[$type][] = $message;
-
+		
 		$temp = array();
 		$temp['message'] = $message;
 		$temp['type']    = $type;
 		$engine->errorStack["all"][] = $temp;
-
+		
 		return;
 	}
-*/
 
     public static function errorReporting($newValue=NULL)
     {
