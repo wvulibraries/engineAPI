@@ -1,0 +1,6 @@
+Version 2.0.5 is Dual Licensed: MIT & GPL
+
+http://tablesorter.com/docs/
+http://www.opensource.org/licenses/gpl-license.php
+http://www.opensource.org/licenses/mit-license.php
+
