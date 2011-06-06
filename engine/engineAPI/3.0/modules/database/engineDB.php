@@ -301,7 +301,8 @@ class engineDB {
 		$sqlResult      = $this->query($sql);
 		$row            = mysql_fetch_array($sqlResult['result'],  MYSQL_ASSOC);
 		if ($row['Engine'] != "InnoDB") {
-			return FALSE;
+			$sqlResult['error'] = "Table Engine not InnoDB";
+			return $sqlResult;
 		}
 		
 		
