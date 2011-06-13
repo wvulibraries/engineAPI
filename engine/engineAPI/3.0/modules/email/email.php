@@ -6,7 +6,7 @@ class email {
 
 		if(filter_var($email, FILTER_VALIDATE_EMAIL)) {
 			if($internal) {
-				if (self::internalEmail($email)) {
+				if (self::internalEmailAddr($email) === TRUE) {
 					return(TRUE);
 				}
 				return(FALSE);

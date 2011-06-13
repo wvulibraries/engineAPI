@@ -2,27 +2,37 @@
 
 class fileHandler {
 	
-	private $engine = NULL;
-	private $file = array();
+	private $engine            = NULL;
+	private $database          = NULL;
+	private $file              = array();
 	private $allowedExtensions = array();
+
+	public $maxSize            = 2000000; // 2mb
+	public $basePath           = NULL;
+	public $debug              = FALSE; // Must be FALSE in Production
 	
-	public $maxSize = 2000000; // 2mb
-	public $basePath = NULL;
 	
-	
-	function __construct() {
+	function __construct($database=NULL) {
 		
-		$this->engine = EngineAPI::singleton();
+		$this->engine   = EngineAPI::singleton();
+		$this->database = ($database instanceof engineDB) ? $database : $this->engine->openDB;
 		
 	}
 	
 	function __destruct() {
 	}
 	
+	/**
+	 * Checks a file against size constraints, invalid extensions, and blank file names
+	 *
+	 * @param array $files  The file name, type, size, and data, as an array
+	 * @param int   $i      The array index of the file, as an integer
+	 * @return bool|string
+	 **/
 	public function validate($files,$i) {
 		
 		if (empty($files['name'][$i])) {
-			return webHelper_errorMsg("File skipped: No File Name");
+			return errorHandle::errorMsg("File skipped: No File Name");
 		}
 		else {
 			
@@ -31,15 +41,15 @@ class fileHandler {
 			
 			// file not uploaded correctly, display PHP error
 			if ($files['error'][$i] == 1) {
-				return webHelper_errorMsg("File skipped: ".$fileName." exceeds the maximum file size set in PHP.");
+				return errorHandle::errorMsg("File skipped: ".$fileName." exceeds the maximum file size set in PHP.");
 			}
 			
 			if ($fileSize > $this->maxSize) {
-				return webHelper_errorMsg("File skipped: ".$fileName." (".$this->displayFileSize($fileSize).") exceeds size limit of ".$this->displayFileSize($this->maxSize).".");
+				return errorHandle::errorMsg("File skipped: ".$fileName." (".displayFileSize($fileSize).") exceeds size limit of ".displayFileSize($this->maxSize).".");
 			}
 			
 			if (($output = $this->checkAllowedExtensions($fileName)) !== TRUE) {
-				return webHelper_errorMsg("File skipped: ".$output);
+				return errorHandle::errorMsg("File skipped: ".$output);
 			}
 			
 		}
@@ -48,9 +58,18 @@ class fileHandler {
 		
 	}
 	
+	/**
+	 * Wrapper for retrieval functions
+	 *
+	 * @param string $type      The retrieval method (database/folder), as a string
+	 * @param string $name      The file name, as a string
+	 * @param string $location  The path/table name where a file can be found, as a string
+	 * @param array  $fields    The field names that the database table uses, as an array
+	 * @return bool|array
+	 **/
 	public function retrieve($type,$name,$location,$fields=NULL) {
-		
-		switch($type) {
+
+		switch(strtolower($type)) {
 			case "database":
 				return $this->retrieveFromDB($name,$location,$fields);
 				
@@ -63,11 +82,20 @@ class fileHandler {
 		
 	}
 	
+	/**
+	 * Wrapper for storage functions
+	 *
+	 * @param string $type      The storage method (database/folder), as a string
+	 * @param array $files      The file name, type, size, and data, as an array
+	 * @param string $location  The path/table name where the file will be stored, as a string
+	 * @param array  $fields    The field names that the database table uses, as an array
+	 * @return bool|array
+	 **/
 	public function store($type,$files,$location,$fields=NULL) {
 		
 		$files = $this->normalizeArrayFormat($files);
 		
-		switch ($type) {
+		switch(strtolower($type)) {
 			case "database":
 				return $this->storeInDB($files,$location,$fields);
 				
@@ -80,6 +108,12 @@ class fileHandler {
 		
 	}
 	
+	/**
+	 * Changes array structure to match PHP upload
+	 *
+	 * @param array $files  The file name, type, size, and data, as an array
+	 * @return array
+	 **/
 	private function normalizeArrayFormat($files) {
 		
 		if (!is_array($files['name'])) {
@@ -94,11 +128,21 @@ class fileHandler {
 		
 	}
 	
+	/**
+	 * Retrieve a file from a directory
+	 *
+	 * @param string $name      The file name, as a string
+	 * @param string $location  The path where the file can be found, as a string
+	 * @return bool|array
+	 **/
 	private function retrieveFromFolder($name,$location) {
 		
 		$filePath = $this->basePath."/".$location.'/'.$name;
 		
 		if (!file_exists($filePath)) {
+			if ($this->debug === TRUE) {
+				errorHandle::newError("File does not exist: ".$filePath,errorHandle::DEBUG);
+			}
 			return FALSE;
 		}
 		
@@ -113,36 +157,54 @@ class fileHandler {
 		
 	}
 	
+	/**
+	 * Retrieve a file from a database table
+	 *
+	 * @param string $name      The file name, as a string
+	 * @param string $location  The table name where the file can be found, as a string
+	 * @param array  $fields    The field names that the database table uses, as an array
+	 * @return bool|array
+	 **/
 	private function retrieveFromDB($name,$table,$fields) {
-		
+
 		$select = "";
 		foreach ($fields AS $val) {
 			$select .= (empty($select)?"":", ").$val;
 		}
-		
-		$sql = sprintf("SELECT %s FROM %s WHERE %s='%s' LIMIT 1",
+
+		$sql = sprintf("SELECT `%s` FROM `%s` WHERE `%s`='%s' LIMIT 1",
 			$select,
-			$this->engine->openDB->escape($this->engine->dbTables($table)),
+			$this->database->escape($table),
 			$fields['name'],
 			$name
 			);
-		$engine->openDB->sanitize = FALSE;
-		$sqlResult                = $engine->openDB->query($sql);
+		$sqlResult = $this->database->query($sql);
 		
 		if ($sqlResult['affectedRows'] == 0) {
+			if ($this->debug === TRUE) {
+				errorHandle::newError($name." not found in ".$table,errorHandle::DEBUG);
+			}
 			return FALSE;
 		}
-		
+
 		$file = mysql_fetch_assoc($sqlResult['result']);
-		
+
 		$output['name'] = $file[$fields['name']];
 		$output['type'] = $file[$fields['type']];
 		$output['data'] = $file[$fields['data']];
-		
+
 		return $output;
 		
 	}
 	
+	/**
+	 * Store files in a database table
+	 *
+	 * @param array  $files   The file names, types, and data, as an array
+	 * @param string $table   The table name where the files will be stored, as a string
+	 * @param array  $fields  The field names that the database table uses, as an array
+	 * @return bool|string
+	 **/
 	private function storeInDB($files,$table,$fields) {
 		
 		$errorMsg  = NULL;
@@ -159,20 +221,22 @@ class fileHandler {
 			$fileType = $files['type'][$i];
 			$fileData = file_get_contents($files['tmp_name'][$i]);
 			
-			$sql = sprintf("INSERT INTO %s SET %s='%s', %s='%s', %s='%s'",
-				$this->engine->openDB->escape($this->engine->dbTables($table)),
-				$this->engine->openDB->escape($fields['name']),
-				$this->engine->openDB->escape($files['name'][$i]),
-				$this->engine->openDB->escape($fields['data']),
-				$this->engine->openDB->escape(file_get_contents($files['tmp_name'][$i])),
-				$this->engine->openDB->escape($fields['type']),
-				$this->engine->openDB->escape($fileType)
+			$sql = sprintf("INSERT INTO `%s` SET `%s`='%s', `%s`='%s', `%s`='%s'",
+				$this->database->escape($table),
+				$this->database->escape($fields['name']),
+				$this->database->escape($files['name'][$i]),
+				$this->database->escape($fields['data']),
+				$this->database->escape(file_get_contents($files['tmp_name'][$i])),
+				$this->database->escape($fields['type']),
+				$this->database->escape($fileType)
 				);
-			$this->engine->openDB->sanitize = FALSE;
-			$sqlResult                      = $this->engine->openDB->query($sql);
+			$sqlResult = $this->database->query($sql);
 			
 			if (!$sqlResult['result']) {
-				$errorMsg .= webHelper_errorMsg("Failed to upload ".$fileName);
+				if ($this->debug === TRUE) {
+					errorHandle::newError("Failed to store ".$fileName." in ".$table,errorHandle::DEBUG);
+				}
+				$errorMsg .= errorHandle::errorMsg("Failed to store ".$fileName);
 			}
 			
 		}
@@ -186,6 +250,13 @@ class fileHandler {
 		
 	}
 	
+	/**
+	 * Store files in a directory
+	 *
+	 * @param array  $files   The file names, types, and data, as an array
+	 * @param string $folder  The directory path where the files will be stored, as a string
+	 * @return bool|string
+	 **/
 	private function storeInFolder($files,$folder) {
 		
 		$errorMsg = NULL;
@@ -209,7 +280,7 @@ class fileHandler {
 			$fileData = $files['tmp_name'][$i];
 			
 			if (file_exists($location."/".$fileName)) {
-				$errorMsg .= webHelper_errorMsg("Conflicting filename: ".$fileName);
+				$errorMsg .= errorHandle::errorMsg("Conflicting filename: ".$fileName);
 			}
 			else {
 				if (is_uploaded_file($fileData)) {
@@ -220,7 +291,7 @@ class fileHandler {
 				}
 				
 				if ($output === FALSE) {
-					$errorMsg .= webHelper_errorMsg("Error storing ".$fileName);
+					$errorMsg .= errorHandle::errorMsg("Error storing ".$fileName);
 				}
 			}
 			
@@ -232,239 +303,286 @@ class fileHandler {
 		else {
 			return TRUE;
 		}
-		
+
 	}
 	
+	/**
+	 * Display an HTML form to allow users to upload files to the server
+	 *
+	 * @param string $name          The name used in the input field, as a string
+	 * @param bool   $multiple      Whether or not to allow the form to upload multiple files at the same time, as a boolean
+	 * @param bool   $hiddenFields  Names and values to be inserted into the form as hidden fields, as an array
+	 * @return string
+	 **/
 	public function uploadForm($name,$multiple=FALSE,$hiddenFields=NULL) {
-		
+
 		$output = NULL;
-		
-		$output .= "<form method=\"post\" action=\"".$_SERVER['PHP_SELF']."?".$_SERVER['QUERY_STRING']."&amp;uploadID=".(sessionGet("fileUploadID"))."\" enctype=\"multipart/form-data\">";
-		$output .= "<input type=\"file\" name=\"".$name."[]\" id=\"".$name."_fileInsert\" ".(($multiple)?"multiple":"")." />";
-		
+
+		$output .= '<form method="post" action="'.$_SERVER['PHP_SELF'].'?'.$_SERVER['QUERY_STRING'].'&uploadID='.(sessionGet("fileUploadID")).'" enctype="multipart/form-data">';
+		$output .= '<input type="file" name="'.$name.'[]" id="'.$name.'_fileInsert" '.(($multiple)?'multiple':'').' />';
+
 		if (!isnull($hiddenFields)) {
 			foreach($hiddenFields as $I=>$V) {
-				$output .= "<input type=\"hidden\" name=\"".$V['field']."\" value=\"".$V['value']."\" />";
+				$output .= '<input type="hidden" name="'.$V['field'].'" value="'.$V['value'].'" />';
 			}
 		}
-		
+
 		$output .= sessionInsertCSRF();
-		$output .= "<input type=\"submit\" name=\"".$name."_submit\" value=\"Upload\" />";
-		$output .= "</form>";
-		
+		$output .= '<input type="submit" name="'.$name.'_submit" value="Upload" />';
+		$output .= '</form>';
+
 		return $output;
 	}
-	
+
+	// What is this even being used for?
 	public function dbInsert($table,$fields) {
-		
+
 		$sqlStr = NULL;
-		
+
 		foreach ($fields as $val) {
 			if(!empty($val['field'])) {
-				
-				$sqlStr .= (isnull($sqlStr)?"":", ").dbSanitize($val['field'])." = '".dbSanitize($val['value'])."'";
-				
+
+				$sqlStr .= isnull($sqlStr) ? "" : ", ";
+				$sqlStr .= '`'.dbSanitize($val['field'])."` = '".dbSanitize($val['value'])."'";
+
 			}
 		}
-		
-		$sql = sprintf("INSERT INTO %s SET %s",
-			$this->engine->openDB->escape($this->engine->dbTables($table)),
+
+		$sql = sprintf("INSERT INTO `%s` SET %s",
+			$this->database->escape($table),
 			$sqlStr
 			);
-		$this->engine->openDB->sanitize = FALSE;
-		$sqlResult                      = $this->engine->openDB->query($sql);
-		
+		$sqlResult = $this->database->query($sql);
+
 		if (!$sqlResult['result']) {
-			return webHelper_errorMsg("Insert Error: ");
+			return errorHandle::errorMsg("Insert Error.");
 		}
-		
+
 		return TRUE;		
-		
+
 	}
-	
+
+	/**
+	 * Copy a file from one database table to another
+	 *
+	 * @param string $oldTable       The source table name, as a string
+	 * @param string $newTable       The destination table name, as a string
+	 * @param array  $fields         Field names and values for the tables, as an array
+	 * @param bool   $mysqlFileName  Whether or not to regenerate the file name stored in the new table, as a boolean
+	 * @return bool|array
+	 **/
 	public function copyDbRecord($oldTable,$newTable,$fields,$mysqlFileName=TRUE) {
-		
+
 		// Get fields from Old Table
 		$oldTableFields = array();
-		
-		$sql = sprintf("SHOW FIELDS FROM $oldTable");
-		$this->engine->openDB->sanitize = FALSE;
-		$sqlResult                = $this->engine->openDB->query($sql);
+
+		$sql = sprintf("SHOW FIELDS FROM `$oldTable`");
+		$sqlResult = $this->database->query($sql);
 		while($row = mysql_fetch_array($sqlResult['result'],  MYSQL_ASSOC)) {
 			$oldTableFields[$row['Field']] = TRUE;
 		}
-		
+
 		// Get fields from New Table
 		$newTableFields = array();
-		
-		$sql = sprintf("SHOW FIELDS FROM $newTable");
-		$this->engine->openDB->sanitize = FALSE;
-		$sqlResult                = $this->engine->openDB->query($sql);
+
+		$sql = sprintf("SHOW FIELDS FROM `$newTable`");
+		$sqlResult = $this->database->query($sql);
 		while($row = mysql_fetch_array($sqlResult['result'],  MYSQL_ASSOC)) {
 			$newTableFields[$row['Field']] = TRUE;
 		}
-		
-		
+
+
 		// Grab data from oldTable from the database
-		$sql = sprintf("SELECT * FROM %s WHERE %s = '%s'",
-			$this->engine->openDB->escape($this->engine->dbTables($oldTable)),
-			$this->engine->openDB->escape($fields['id']['field']),
-			$this->engine->openDB->escape($fields['id']['value'])
+		$sql = sprintf("SELECT * FROM `%s` WHERE `%s` = '%s'",
+			$this->database->escape($oldTable),
+			$this->database->escape($fields['id']['field']),
+			$this->database->escape($fields['id']['value'])
 			);
-		$this->engine->openDB->sanitize = FALSE;
-		$sqlResult = $this->engine->openDB->query($sql);
-		
+		$sqlResult = $this->database->query($sql);
+
 		$row = mysql_fetch_assoc($sqlResult['result']);
-		
+
 		// save and nullify old ID
 		$oldID = $row[$fields['id']['field']];
 		$row[$fields['id']['field']] = NULL;
-		
+
 		// Remove the ID, so we aren't copying it over
 		unset($oldTableFields[$fields['id']['field']]);
-		
+
 		// Get rid of fields that are in oldTable but NOT in newTable
 		$nullFields = array_diff_key($oldTableFields,$newTableFields);
 		foreach ($nullFields as $I=>$V) {
 			unset($oldTableFields[$I]);
 		}
-		
+
 		// Build the list of fields we are inserting
-		$insertFieldNames = "(".(implode(",",array_keys($oldTableFields))).")";
-		
+		$insertFieldNames = "(".(implode(",",('`'.array_keys($oldTableFields).'`'))).")";
+
 		// Grab the values from the oldTable that will be inserted in the newTable
 		foreach (array_keys($oldTableFields) as $I) {
 			$vals[] = "'".dbSanitize($row[$I])."'";
 		}
 		$insertFieldVals = implode(",",$vals);
-			
+
 		// insert record into new table
-		$sql = sprintf("INSERT INTO %s %s VALUES(%s)",
-			$this->engine->openDB->escape($this->engine->dbTables($newTable)),
+		$sql = sprintf("INSERT INTO `%s` %s VALUES(%s)",
+			$this->database->escape($newTable),
 			$insertFieldNames,
 			$insertFieldVals
 			);
-		$this->engine->openDB->sanitize = FALSE;
-		
-		$sqlResult = $this->engine->openDB->query($sql);
+		$sqlResult = $this->database->query($sql);
 
 		if (!$sqlResult['result']) {
 			return(FALSE);
 		}
-		
+
 		$return       = array();
 		$return['id'] = $sqlResult['id'];
-		
+
 		// delete record from old table
-		$sql = sprintf("DELETE FROM %s WHERE %s = '%s' LIMIT 1",
-			$this->engine->openDB->escape($this->engine->dbTables($oldTable)),
-			$this->engine->openDB->escape($fields['id']['field']),
+		$sql = sprintf("DELETE FROM `%s` WHERE `%s` = '%s' LIMIT 1",
+			$this->database->escape($oldTable),
+			$this->database->escape($fields['id']['field']),
 			$oldID
 			);
-		$this->engine->openDB->sanitize = FALSE;
-		$sqlResult = $this->engine->openDB->query($sql);
+		$sqlResult = $this->database->query($sql);
 
 		// generate new filename based on $newID
 		if ($mysqlFileName === TRUE) {
-			
+
 			$output = $this->genMysqlFileName($newTable,$fields,$return['id']);
-			
+
 			if ($output === FALSE) {
-				return webHelper_errorMsg("Update Error.");
+				return errorHandle::errorMsg("Update Error.");
 			}
-			
+
 			$return['fileName'] = $output['fileName'];
 			$return['paddedID'] = $output['paddedID'];
 			$return['dir']      = $output['dir'];
-			
+
 			$return["oldFileName"] = $row['directory']."/".$row['fileName'];
 			$return["newFileName"] = $output['dir']."/".$output['fileName'];
-			
+
 		}
-		
+
 		return $return;
-		
+
 	}
-	
+
+	/**
+	 * Generate a new file name based on a given ID
+	 *
+	 * @param string $oldTable       The source table name, as a string
+	 * @param string $newTable       The destination table name, as a string
+	 * @param array  $fields         Field names and values for the tables, as an array
+	 * @param bool   $mysqlFileName  Whether or not to regenerate the file name stored in the new table, as a boolean
+	 * @return bool|array
+	 **/
 	public function genMysqlFileName($table,$fields,$ID,$updateDB=TRUE) {
-		
+
 		$paddedID = str_pad($ID, 3, "0", STR_PAD_LEFT);
 		$ext = pathinfo($fields['name']['value'], PATHINFO_EXTENSION );
-		$dir = $this->basePath."/".substr($paddedID,"0","1")."/".substr($paddedID,"1","1")."/".substr($paddedID,"2","1");
-		
+		$dir = $this->basePath."/".$paddedID[0]."/".$paddedID[1]."/".$paddedID[2];
+
 		$newName = $paddedID.".".$ext;
-		
+
 		if ($updateDB === TRUE) {
-			$sql = sprintf("UPDATE %s SET %s = '%s', %s = '%s' WHERE %s = '%s'",
-				$this->engine->openDB->escape($this->engine->dbTables($table)),
-				$this->engine->openDB->escape($fields['name']['field']),
-				$this->engine->openDB->escape($newName),
-				$this->engine->openDB->escape($fields['dir']['field']),
-				$this->engine->openDB->escape($dir),
-				$this->engine->openDB->escape($fields['id']['field']),
-				$this->engine->openDB->escape($ID)
+			$sql = sprintf("UPDATE `%s` SET `%s` = '%s', `%s` = '%s' WHERE `%s` = '%s'",
+				$this->database->escape($table),
+				$this->database->escape($fields['name']['field']),
+				$this->database->escape($newName),
+				$this->database->escape($fields['dir']['field']),
+				$this->database->escape($dir),
+				$this->database->escape($fields['id']['field']),
+				$this->database->escape($ID)
 				);
-			$this->engine->openDB->sanitize = FALSE;
-			$sqlResult                      = $this->engine->openDB->query($sql);
-		
+			$sqlResult = $this->database->query($sql);
+
 			if (!$sqlResult['result']) {
 				return FALSE;
 			}
 		}
-		
+
 		$return = array();
 		$return['fileName'] = $newName;
 		$return['paddedID'] = $paddedID;
 		$return['dir']      = $dir;
-		
+
 		return $return;
-		
+
 	}
-	
-	public function moveFile($oldFileName,$newFileName) {
-		
-		if (!file_exists($oldFileName)) {
-			return webHelper_errorMsg("Error moving file: $newFileName source not found");
-		}
-		if (file_exists($newFileName)) {
-			return webHelper_errorMsg("Error moving file: Conflicting filename in target directory");
-		}
-		
-		return rename($oldFileName,$newFileName);
-		
-	}
-	
-	public function copyFile($sourceFile,$destFile) {
+
+	/**
+	 * Move a file
+	 *
+	 * @param string $sourceFile  The source file path, as a string
+	 * @param string $destFile    The destination file path, as a string
+	 * @return bool|string
+	 **/
+	public function moveFile($sourceFile,$destFile) {
+
 		if (!file_exists($sourceFile)) {
-			return webHelper_errorMsg("Error copying file: $sourceFile source not found");
+			return errorHandle::errorMsg("Error moving file: $sourceFile source not found");
 		}
 		if (file_exists($destFile)) {
-			return webHelper_errorMsg("Error copying file: Conflicting filename in target directory");
+			return errorHandle::errorMsg("Error moving file: Conflicting filename in target directory");
 		}
-		
+
+		return rename($sourceFile,$destFile);
+
+	}
+
+	/**
+	 * Copy a file
+	 *
+	 * @param string $sourceFile  The source file path, as a string
+	 * @param string $destFile    The destination file path, as a string
+	 * @return bool|string
+	 **/
+	public function copyFile($sourceFile,$destFile) {
+		if (!file_exists($sourceFile)) {
+			return errorHandle::errorMsg("Error copying file: $sourceFile source not found");
+		}
+		if (file_exists($destFile)) {
+			return errorHandle::errorMsg("Error copying file: Conflicting filename in target directory");
+		}
+
 		return copy($sourceFile,$destFile);
 	}
-	
-	public function deleteFile($fileName) {
-		if (file_exists($fileName)) {
-			return unlink($fileName);
+
+	/**
+	 * Delete a file
+	 *
+	 * @param string $filePath  The file path of the file to be deleted, as a string
+	 * @return bool|string
+	 **/
+	public function deleteFile($filePath) {
+		if (file_exists($filePath)) {
+			return unlink($filePath);
 		}
-		return webHelper_errorMsg("Error deleting file: $fileName");
+		return errorHandle::errorMsg("Error deleting file: $filePath");
 	}
-	
+
+	/**
+	 * Display a file -- sets session variables then calls displayFileInline() or redirects to the download page to ensure nothing is displayed before the headers
+	 *
+	 * @param array  $file     The file name, type, and data, as an array
+	 * @param string $display  The method of display (inline|window|download), as a string
+	 * @return bool|string
+	 **/
 	public function displayFile($file,$display=NULL) {
-		
+
 		global $engineVars;
-		
+
 		if (isnull($display)) {
-			$display = "window";
+			$display = "window"; // set to default
 		}
-		
+
 		sessionSet("FMfileName",$file['name']);
 		sessionSet("FMfileType",$file['type']);
 		sessionSet("FMfileData",$file['data']);
 		sessionSet("FMdisplay",$display);
-		
+
 		switch ($display) {
 			case "inline":
 				return $this->displayFileInline($file);
@@ -474,69 +592,64 @@ class fileHandler {
 			default:
 				header("Location: " . $engineVars['downloadPage']);
 		}
-		
+
+		return FALSE;
+
 	}
-	
+
+	/**
+	 * Display an inline file
+	 *
+	 * @param array  $file  The file name, type, and data, as an array
+	 * @return string
+	 **/
 	private function displayFileInline($file) {
-		
+
 		global $engineVars;
-		
+
 		if (strpos($file['type'],'image') !== FALSE) {
 			$output = "<img src=\"".$engineVars['downloadPage']."\" />";
 		}
 		else {
 			$output = $file['data'];
 		}
-		
+
 		return $output;
-		
+
 	}
 
-	public function displayFileSize($filesize){
-		
-		if (is_numeric($filesize)) {
-			$decr = 1000;
-			$step = 0;
-			$prefix = array('Byte','KB','MB','GB','TB','PB');
-			
-			while (($filesize / $decr) > 0.9) {
-				$filesize = $filesize / $decr;
-				$step++;
-			}
-			
-			return round($filesize,2).' '.$prefix[$step];
+	/**
+	 * Display a search form
+	 *
+	 * @param array  $extentions  A list of extensions to display in the form, as an array
+	 * @return string
+	 **/
+	public function displaySearchForm($extensions=array()) {
+
+		if (is_empty($extensions)) {
+			$extensions = $this->getExtensionsInFolder();
+			natcasesort($extensions);
 		}
-		else {
-			return 'NaN';
-		}
-	}
-	
-	public function displaySearchForm($extentions=array()) {
-		
-		if (is_empty($extentions)) {
-			$extentions = $fh->getExtensionsInFolder();
-			natcasesort($extentions);
-		}
-		
+
 		$limits = array(1=>"Bytes", 1000=>"KB", 1000000=>"MB", 1000000000=>"GB");
-		
+
 		$lowSizeUnit  = is_empty($this->engine->cleanPost['MYSQL']['lowSizeUnit'])?1000:$this->engine->cleanPost['MYSQL']['lowSizeUnit'];
 		$highSizeUnit = is_empty($this->engine->cleanPost['MYSQL']['highSizeUnit'])?1000:$this->engine->cleanPost['MYSQL']['highSizeUnit'];
-		
-		$output = '<form action="'.$_SERVER['PHP_SELF'].'?'.$_SERVER['QUERY_STRING'].'" method="post">';
+
+		$output  = '<form action="'.$_SERVER['PHP_SELF'].'?'.$_SERVER['QUERY_STRING'].'" method="post">';
 		$output .= '<table>';
 		$output .= '<tr>';
 		$output .= '<td>File Name</td>';
-		$output .= '<td><input type="text" name="fileName" value="'.$this->engine->cleanPost['MYSQL']['fileName'].'" /></td>';
+		$output .= '<td><input type="text" name="fileName" value="'.$this->engine->cleanPost['HTML']['fileName'].'" /></td>';
 		$output .= '</tr>';
-		
+
 		$output .= '<tr>';
 		$output .= '<td>Type</td>';
 		$output .= '<td>';
 		$output .= '<select name="fileType">';
 		$output .= '<option value="any">Any</option>';
-		foreach ($extentions as $ext) {
-			$output .= '<option value="'.$ext.'" '.(($ext==$this->engine->cleanPost['MYSQL']['fileType'])?'selected':'').'>'.$ext.'</option>';
+		foreach ($extensions as $ext) {
+			$output .= '<option value="'.htmlSanitize($ext).'" '.(($ext==$this->engine->cleanPost['HTML']['fileType'])?'selected':'').'>'.htmlSanitize($ext).'</option>';
 		}
 		$output .= '</select>';
 		$output .= '</td>';
@@ -545,14 +658,14 @@ class fileHandler {
 		$output .= '<tr>';
 		$output .= '<td>Size Limit</td>';
 		$output .= '<td>';
-		$output .= '<input type="text" name="lowSizeLimit" value="'.$this->engine->cleanPost['MYSQL']['lowSizeLimit'].'" size="10" />';
+		$output .= '<input type="text" name="lowSizeLimit" value="'.$this->engine->cleanPost['HTML']['lowSizeLimit'].'" size="10" />';
 		$output .= '<select name="lowSizeUnit">';
 		foreach ($limits as $k => $v) {
 			$output .= '<option value="'.$k.'" '.(($k==$lowSizeUnit)?'selected':'').'>'.$v.'</option>';
 		}
 		$output .= '</select>';
 		$output .= 'To';
-		$output .= '<input type="text" name="highSizeLimit" value="'.$this->engine->cleanPost['MYSQL']['highSizeLimit'].'" size="10" />';
+		$output .= '<input type="text" name="highSizeLimit" value="'.$this->engine->cleanPost['HTML']['highSizeLimit'].'" size="10" />';
 		$output .= '<select name="highSizeUnit">';
 		foreach ($limits as $k => $v) {
 			$output .= '<option value="'.$k.'" '.(($k==$highSizeUnit)?'selected':'').'>'.$v.'</option>';
@@ -560,7 +673,7 @@ class fileHandler {
 		$output .= '</select>';
 		$output .= '</td>';
 		$output .= '</tr>';
-		
+
 		$output .= '<tr>';
 		$output .= '<td colspan="2">';
 		$output .= '{engine name="insertCSRF"}';
@@ -574,14 +687,21 @@ class fileHandler {
 
 	}
 
+	/**
+	 * Recursively search for a file
+	 *
+	 * @param array  $attPairs  The file name, type, size, etc. to searchf or, as an array
+	 * @param string $folder    The base folder to look through past basePath, as a string
+	 * @return array
+	 **/
 	public function search($attPairs, $folder=NULL) {
-		
+
 		$results = array();
 		$dir     = $this->basePath."/".$folder;
 		$files   = scandir($dir);
 
 		foreach ($files as $file) {
-			
+
 			// ignore .files
 			if ($file[0] == '.') {
 				continue;
@@ -592,7 +712,7 @@ class fileHandler {
 				$results = array_merge($results, $this->search($attPairs,$folder."/".$file));
 			}
 			else if (!is_dir($dir."/".$file)) {
-				
+
 				// physical file properties
 				$tmp         = array();
 				$tmp['name'] = $file;
@@ -604,16 +724,15 @@ class fileHandler {
 				// used when a value is stored in the database instead
 				if (isset($attPairs['lookup']) && !is_empty($attPairs['lookup'])) {
 					foreach ($attPairs['lookup'] as $key => $value) {
-						$sql = sprintf("SELECT %s FROM %s.%s WHERE %s='%s' LIMIT 1",
-							$this->engine->openDB->escape($value['field']),
-							$this->engine->openDB->escape($value['database']),
-							$this->engine->openDB->escape($value['table']),
-							$this->engine->openDB->escape($value['matchOn']),
-							$this->engine->openDB->escape($file)
+						$sql = sprintf("SELECT `%s` FROM `%s`.`%s` WHERE `%s`='%s' LIMIT 1",
+							$this->database->escape($value['field']),
+							$this->database->escape($value['database']),
+							$this->database->escape($value['table']),
+							$this->database->escape($value['matchOn']),
+							$this->database->escape($file)
 							);
-						$this->engine->openDB->sanitize = FALSE;
-						$sqlResult                      = $this->engine->openDB->query($sql);
-						
+						$sqlResult = $this->database->query($sql);
+
 						if ($sqlResult['affectedRows'] == 0) {
 							continue(2);
 						}
@@ -662,14 +781,20 @@ class fileHandler {
 
 	}
 
+	/**
+	 * Recursively find all the file extentions within a folder and return as an array
+	 *
+	 * @param string $folder  The base folder to look through past basePath, as a string
+	 * @return array
+	 **/
 	public function getExtensionsInFolder($folder=NULL) {
-		
+
 		$extArr = array();
-		$dir     = $this->basePath."/".$folder;
+		$dir    = $this->basePath."/".$folder;
 		$files  = scandir($dir);
 
 		foreach ($files as $file) {
-			
+
 			if ($file[0] == '.') {
 				continue;
 			}
@@ -686,58 +811,95 @@ class fileHandler {
 		return $extArr;
 
 	}
-	
+
+	/**
+	 * Add a file extension to the allowed list, duplicates are simply ignored
+	 *
+	 * @param string $extension  The extension to be added, as a string
+	 * @return bool
+	 **/
 	public function addAllowedExtension($extension) {
-		
+
 		if (!in_array($extension,$this->allowedExtensions)) {
 			$this->allowedExtensions[] = $extension;
 		}
-		
+
 		return TRUE;
-		
+
 	}
-	
+
+	/**
+	 * Determine that a given file is allowed based on the extension
+	 *
+	 * @param string $fileName  The file name to be parsed, as a string
+	 * @return bool|string
+	 **/
 	private function checkAllowedExtensions($fileName) {
-		
+
 		$fileExt = pathinfo($fileName, PATHINFO_EXTENSION);
-		
+
 		if (!in_array($fileExt,$this->allowedExtensions)) {
-			return ($fileName.": Invalid file type \"".$fileExt."\"");
+			return errorHandle::errorMsg($fileName.": Invalid file type \"".$fileExt."\"");
 		}
-		
+
 		return TRUE;
-		
+
 	}
-	
+
+	/**
+	 * Get the mime type for a given file -- tries to use finfo_open(), then mime_content_type(), then defaults to returnMIMEType()
+	 *
+	 * @param string $file_path  The path of the file to be parsed, as a string
+	 * @return string
+	 **/
 	public function getMimeType($file_path) {
 		global $engineVars;
 		$mimeType = '';
-		
-		try{
-			if(!class_exists('finfo')) throw new Exception("finfo class unavailable!");
+
+		try {
+			if (!class_exists('finfo')) {
+				throw new Exception("finfo class unavailable!");
+			}
 			$fileInfo = @finfo_open(FILEINFO_MIME);
-			if(!$fileInfo and isset($engineVars['magicMimeFile'])) $fileInfo = finfo_open(FILEINFO_MIME, $engineVars['magicMimeFile']);
-			if(is_object($fileInfo)) $mimeType = $finfo->file($file_path);
-			else throw new Exception("Unable to open FileInfo database!");
-		}catch(Exception $e){		
-			try{
-				if(!function_exists('mime_content_type')) throw new Exception("mime_content_type() unavailable!");
+			
+			if (!$fileInfo and isset($engineVars['magicMimeFile'])) {
+				$fileInfo = finfo_open(FILEINFO_MIME, $engineVars['magicMimeFile']);
+			}
+			
+			if (is_object($fileInfo)) {
+				$mimeType = $finfo->file($file_path);
+			}
+			else {
+				throw new Exception("Unable to open FileInfo database!");
+			}
+		} catch (Exception $e) {
+			try {
+				if (!function_exists('mime_content_type')) {
+					throw new Exception("mime_content_type() unavailable!");
+				}
 				$mimeType = mime_content_type($file_path);
-			}catch(Exception $e){
+			} catch (Exception $e) {
 				$mimeType = $this->returnMIMEType($file_path);
 			}
 		}
-		
-		// Is this needed?
-		if($mimeType == '') $mimeType = "application/force-download";
-		
+
+		if ($mimeType == '') {
+			$mimeType = "application/force-download";
+		}
+
 		return $mimeType;		
 	}
-	
+
+	/**
+	 * Get the mime type for a given file without using any php built-in functionality, as a failsafe
+	 *
+	 * @param string $filename  The file name to be parsed, as a string
+	 * @return string
+	 **/
 	private function returnMIMEType($filename) {
-		
+
 		preg_match("|\.([a-z0-9]{2,4})$|i", $filename, $fileSuffix);
-		
+
 		if (!isset($fileSuffix[1])) {
 			return "unknown";
 		}
@@ -745,31 +907,31 @@ class fileHandler {
 		switch (strtolower($fileSuffix[1])) {
 			case "js":
 				return "application/x-javascript";
-				
+
 			case "json":
 				return "application/json";
-				
+
 			case "jpg":
 			case "jpeg":
 			case "jpe":
 				return "image/jpg";
-				
+
 			case "png":
 			case "gif":
 			case "bmp":
 			case "tiff":
 				return "image/".strtolower($fileSuffix[1]);
-				
+
 			case "css":
 				return "text/css";
-				
+
 			case "xml":
 				return "application/xml";
-				
+
 			case "doc":
 			case "docx":
 				return "application/msword";
-				
+
 			case "xls":
 			case "xlt":
 			case "xlm":
@@ -779,63 +941,63 @@ class fileHandler {
 			case "xlw":
 			case "xll":
 				return "application/vnd.ms-excel";
-				
+
 			case "ppt":
 			case "pps":
 				return "application/vnd.ms-powerpoint";
-				
+
 			case "rtf":
 				return "application/rtf";
-				
+
 			case "pdf":
 				return "application/pdf";
-				
+
 			case "html":
 			case "htm":
 			case "php":
 				return "text/html";
-				
+
 			case "txt":
 				return "text/plain";
-				
+
 			case "mpeg":
 			case "mpg":
 			case "mpe":
 				return "video/mpeg";
-				
+
 			case "mp3":
 				return "audio/mpeg3";
-				
+
 			case "wav":
 				return "audio/wav";
-				
+
 			case "aiff":
 			case "aif":
 				return "audio/aiff";
-				
+
 			case "avi":
 				return "video/msvideo";
-				
+
 			case "wmv":
 				return "video/x-ms-wmv";
-				
+
 			case "mov":
 				return "video/quicktime";
-				
+
 			case "zip":
 				return "application/zip";
-				
+
 			case "tar":
 				return "application/x-tar";
-				
+
 			case "swf":
 				return "application/x-shockwave-flash";
-				
+
 			default:
 				return "unknown/" . trim($fileSuffix[0], ".");
 		}
 	}
-	
+
 }
 
 ?>
