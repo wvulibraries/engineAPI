@@ -197,6 +197,7 @@ class engineDB {
 			}
 			
 			$resultArray['affectedRows'] = mysql_affected_rows($this->dbLink);
+			$resultArray['numRows']      = mysql_num_rows($resultArray['result']);
 			$resultArray['errorNumber']  = (mysql_errno($this->dbLink) == 0)?FALSE:mysql_errno($this->dbLink);
 			$resultArray['error']        = mysql_error($this->dbLink);
 			$resultArray['info']         = mysql_info($this->dbLink);
