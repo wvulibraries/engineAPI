@@ -142,7 +142,9 @@ class dlxs {
 		return(FALSE);
 	}
 	
-	public function buildSearchPage($submitURL=null) {
+	public function buildSearchPage($submitURL=null,$get=FALSE) {
+		
+		$method = ($get === FALSE)?"post":"get";
 		
 		switch ($this->class) {
 			case "image":
@@ -169,7 +171,7 @@ class dlxs {
 		
 		if ($this->class == "image") {
 		
-			$output = '<form action="'.$submitURL.'" method="post">';
+			$output = '<form action="'.$submitURL.'" method="'.$method.'">';
 		
 			// This line is for EngineCMS's Built in security checks
 			// If not using EngineCMS, remove this
@@ -231,7 +233,7 @@ class dlxs {
 		}
 		else if ($this->class == "findingaid") {
 			
-			$output  = '<form action="'.$submitURL.'" method="post">';
+			$output  = '<form action="'.$submitURL.'" method="'.$method.'">';
 			$output .= sessionInsertCSRF();
 			
 			$output .= '<input type="hidden" name="dlxsclass" value="findingaid" />';
