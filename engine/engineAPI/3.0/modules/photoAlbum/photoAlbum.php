@@ -21,10 +21,6 @@ class photoAlbum {
 	
 	function __construct($directory=NULL) {
 		
-		if (!($engine instanceof EngineCMS)) {
-			return(FALSE);
-		}
-		
 		if (isnull($directory) || !file_exists($directory)) {
 			return(FALSE);
 		}
