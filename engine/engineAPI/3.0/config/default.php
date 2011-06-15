@@ -159,13 +159,6 @@ $engineVars['onCampus'][] = "72.50.180-185.*";
 // Temp
 $engineVars['onCampus'][] = "192.168.171.1";
 
-//MySQL Information
-$engineVars['mysql']['server']   = "localhost";
-$engineVars['mysql']['port']     = "3306";
-//User with permissions to engineCMS database
-$engineVars['mysql']['username'] = "systems";
-$engineVars['mysql']['password'] = 'Te$t1234';
-
 //Active Directory (ldap?) Information
 // As many active directories/ldaps can be defined as needed here. 
 // WVU Libraries Staff
