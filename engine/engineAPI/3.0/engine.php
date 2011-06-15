@@ -1,13 +1,14 @@
 <?php
 
-$engineVars = array();
+$engineVars        = array();
+$engineVarsPrivate = array();
 
 class EngineAPI
 {
 	const VERSION='3.0';
 	
 	private static $instance; // Hold an instance of this object, for use as Singleton
-	public static $engineDir = NULL;
+	public static $engineDir  = NULL;
 	public static $engineVars = array();
     public $errorStack = array();
 
@@ -37,7 +38,8 @@ class EngineAPI
 	private $dbServer   = "";
 	private $dbPort     = "";
 	private $dbTables   = array();
-	public  $openDB   = NULL;
+	private $engineDB   = NULL;
+	public  $openDB     = NULL;
 	
 	// Module Stuffs
 	private $availableModules       = array();
@@ -49,6 +51,8 @@ class EngineAPI
 	private $recurseLevel           = 3;
 	private $recurseNeeded          = FALSE;
 	private $displayTemplateOff     = FALSE;
+	
+	private $engineVarsPrivate      = array();
 	
 	public function __clone()
 	{
@@ -65,10 +69,14 @@ class EngineAPI
 		
 		ob_start('EngineAPI::displayTemplate');
 		
+		// setup private config variables
+		require_once(self::$engineDir."/config/defaultPrivate.php");
+		$this->engineVarsPrivate = $engineVarsPrivate;
+		unset($engineVarsPrivate);
+		
 		// setup $engineVars
 		require_once(self::$engineDir."/config/default.php");
-		#  and is_readable( $siteConfigFile = self::$engineDir."/config/".$site.".php" )
-		if($site != "default"){
+		if($site != "default" && $site != "defaultPrivate"){
 			$siteConfigFile = self::$engineDir."/config/".$site.".php";
 			require_once($siteConfigFile);
 		}
@@ -103,10 +111,10 @@ class EngineAPI
 		$engineVars['currentTemplate'] = $this->template;
 		
 		// Setup default database connections
-		$this->dbUsername = ($engineVars['mysql']['username'])?$engineVars['mysql']['username']:NULL;
-		$this->dbPassword = ($engineVars['mysql']['password'])?$engineVars['mysql']['password']:NULL;
-		$this->dbPort     = ($engineVars['mysql']['port'])?$engineVars['mysql']['port']:NULL;
-		$this->dbServer   = ($engineVars['mysql']['server'])?$engineVars['mysql']['server']:NULL;
+		$this->dbUsername = ($this->engineVarsPrivate['mysql']['username'])?$this->engineVarsPrivate['mysql']['username']:NULL;
+		$this->dbPassword = ($this->engineVarsPrivate['mysql']['password'])?$this->engineVarsPrivate['mysql']['password']:NULL;
+		$this->dbPort     = ($this->engineVarsPrivate['mysql']['port'])?$this->engineVarsPrivate['mysql']['port']:NULL;
+		$this->dbServer   = ($this->engineVarsPrivate['mysql']['server'])?$this->engineVarsPrivate['mysql']['server']:NULL;
 		
 		//Load Access Control Modules
 		$accessModDirHandle = @opendir($engineVars['accessModules']) or die("Unable to open ".$engineVars['accessModules']);
@@ -194,8 +202,7 @@ class EngineAPI
 		}
 		
 		// Startup engines database connection
-		global $engineDB;
-		$engineDB = new engineDB($engineVars['mysql']['username'],$engineVars['mysql']['password'],$engineVars['mysql']['server'],$engineVars['mysql']['port'],$engineVars['logDB'],FALSE);
+		$this->engineDB = new engineDB($this->engineVarsPrivate['mysql']['username'],$this->engineVarsPrivate['mysql']['password'],$this->engineVarsPrivate['mysql']['server'],$this->engineVarsPrivate['mysql']['port'],$engineVars['logDB'],FALSE);
 		
 		// Start up the logging
 		if ($engineVars['log']) {
@@ -253,7 +260,7 @@ class EngineAPI
 
         // Last thing we need to do is load, and initialize the errorHandle class (the error handeler)
         require_once(self::$engineDir."/errorHandle.php");
-        //errorHandle::singleton();
+        errorHandle::singleton();
 	}
 	
 	function __destruct() {
@@ -274,6 +281,22 @@ class EngineAPI
         return self::$instance;
 	}
 	
+	
+	public function getPrivateVar($varName) {
+		$file     = callingFile();
+		$function = callingFunction();
+		
+		$engineDir = FALSE;
+		if (strpos($file,EngineAPI::engineDir) === 0) {
+			$engineDir = TRUE;
+		}
+		
+		if (isset($this->engineVarsPrivate['privateVars'][$varName]) && basename($this->engineVarsPrivate['privateVars'][$varName]['file']) == $file && $this->engineVarsPrivate['privateVars'][$varName]['function'] == $function && $engineDir === TRUE) {
+			return($this->$varname);
+		}
+		
+		return(FALSE);
+	}
 	
 	// Define Template Object Pattern
 	public function defTempPattern($pattern,$function,$object) {
@@ -655,7 +678,7 @@ class EngineAPI
 	private function engineLog($type="access",$function=NULL,$message=NULL) {
 
 		global $engineVars;
-		global $engineDB;
+		$engineDB = $this->engineDB;
 
 		if (!$engineVars['log'] || $engineDB->status === FALSE) {
 			return(FALSE);
