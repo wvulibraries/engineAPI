@@ -287,12 +287,16 @@ class EngineAPI
 		$function = callingFunction();
 		
 		$engineDir = FALSE;
-		if (strpos($file,EngineAPI::engineDir) === 0) {
+		if (strpos($file,EngineAPI::$engineDir) === 0) {
 			$engineDir = TRUE;
 		}
 		
-		if (isset($this->engineVarsPrivate['privateVars'][$varName]) && basename($this->engineVarsPrivate['privateVars'][$varName]['file']) == $file && $this->engineVarsPrivate['privateVars'][$varName]['function'] == $function && $engineDir === TRUE) {
-			return($this->$varname);
+		if (isset($this->engineVarsPrivate['privateVars'][$varName])) {
+			foreach ($this->engineVarsPrivate['privateVars'][$varName] as $I=>$V) {
+				if (basename($file) == $V['file'] && $engineDir === TRUE && $V['function'] == $function) {
+					return($this->$varName);
+				}
+			}
 		}
 		
 		return(FALSE);
@@ -608,7 +612,6 @@ class EngineAPI
 	######################################################################
 
 	private function autoloader($className) {
-		
 		$fh = fopen("/tmp/modules.txt","a");
 		fwrite($fh,"\n\n=====Autoloader Begin =========\n\n");
 		fwrite($fh,$className);

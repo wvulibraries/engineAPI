@@ -1,5 +1,26 @@
 <?php
 
+function callingFunction() {
+	
+	$backtrace = debug_backtrace();
+	
+	return($backtrace[2]['function']);
+	
+}
+
+function callingFile($basename=FALSE) {
+	
+	$backtrace = debug_backtrace();
+	
+	$file = $backtrace[1]['file'];
+	if ($basename === TRUE) {
+		$file = basename($backtrace[1]['file']);
+	}
+	
+	return($file);
+	
+}
+
 // return attribute pairs
 function attPairs($attpairs) {
 	$attPairs  = split("\" ",$attpairs);
@@ -157,6 +178,24 @@ function linkPhone($attPairs) {
 	$output .= "</span>";
 	
 	return($output);
+}
+
+function displayFileSize($filesize,$base=1000){
+
+	if (is_numeric($filesize)) {
+		$step = 0;
+		$abbrev = array('Byte','KB','MB','GB','TB','PB');
+
+		while (($filesize / $base) > 0.9) {
+			$filesize /= $base;
+			$step++;
+		}
+
+		return round($filesize,2).' '.$abbrev[$step];
+	}
+	else {
+		return 'NaN';
+	}
 }
 
 ?>

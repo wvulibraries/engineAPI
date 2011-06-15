@@ -14,7 +14,9 @@ class stats {
 		$this->startTime = mktime($shour,0,0,$smon,$sday,$syear);
 		$this->endTime   = mktime($ehour,0,0,$emon,$eday,$eyear);
 		
-		global $engineDB;
+		$engine = EngineAPI::singleton();
+		
+		$engineDB = $engine->getPrivateVar("engineDB");
 		
 		$query = sprintf("select * from log where date > %s and date < %s",
 			$engineDB->escape($this->startTime),

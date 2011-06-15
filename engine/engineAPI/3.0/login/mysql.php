@@ -14,6 +14,8 @@ function mysqlLogin($username,$password,$engine=NULL) {
 		$engineVars['mysqlAuthTable'] = "users";
 	}
 	
+	$engineDB = $engine->getPrivateVar("engineDB");
+	
 	$sql = sprintf("SELECT * FROM %s WHERE username='%s' AND password='%s'",
 		$engineDB->escape($engineVars['mysqlAuthTable']),
 		$engineDB->escape($username),
