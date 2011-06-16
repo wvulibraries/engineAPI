@@ -57,8 +57,31 @@ function sessionSet($variable,$value) {
 		return FALSE;
 	}
 	
-	if ($_SESSION[$variable] = $value) {
-		return TRUE;
+	if (is_string($variable) === TRUE) {
+		if ($_SESSION[$variable] = $value) {
+			return TRUE;
+		}
+	}
+	if (is_array($variable) === TRUE && count($variable) > 1) {
+		$arrayLen = count($variable);
+		$count    = 0;
+		
+		foreach ( $variable as $V ) { 
+			$count++;
+			if ($count == 1) { 
+				$_SESSION[$V] = array(); 
+				$prevTemp = &$_SESSION[$V]; 
+			} 
+			else { 
+				if ($count == $arrayLen) {
+					$prevTemp[$V] = $value;
+				}
+				else {
+					$prevTemp[$V] = array(); 
+					$prevTemp = &$prevTemp[$V]; 
+				}
+			} 
+		}
 	}
 	
 	return FALSE;
@@ -67,11 +90,41 @@ function sessionSet($variable,$value) {
 // returns that value of $variable, FALSE if not defined.
 function sessionGet($variable) {
 	
-	if(isset($_SESSION[$variable])) {	
-		return($_SESSION[$variable]);
+	if (is_string($variable) === TRUE) {
+		if(isset($_SESSION[$variable])) {	
+			return($_SESSION[$variable]);
+		}
+	}
+	if (is_array($variable) === TRUE && count($variable) > 1) {
+		$arrayLen = count($variable);
+		$count    = 0;
+		
+		foreach ( $variable as $V ) { 
+			$count++;
+			if ($count == 1) { 
+				if (isset($_SESSION[$V])) {
+					$prevTemp = &$_SESSION[$V];
+				} 
+				else {
+					return(FALSE);
+				}
+				
+			} 
+			else { 
+				if (!isset($prevTemp[$V])) {
+					return(FALSE);
+				}
+				else {
+					$prevTemp = &$prevTemp[$V]; 
+				}
+				if ($count == $arrayLen) {
+					return($prevTemp);
+				}
+			} 
+		}
 	}
 	
-	return FALSE;
+	return(FALSE);
 }
 
 /* 
