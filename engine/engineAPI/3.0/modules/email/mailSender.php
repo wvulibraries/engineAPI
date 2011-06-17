@@ -10,6 +10,7 @@ class mailSender {
 	private $subject     = NULL;
 	private $body        = NULL;
 	private $altbody     = NULL;
+	private $htmlMessage = FALSE;
 	private $attachment  = array();
 	private $engine      = NULL;
 	private $database    = NULL;
@@ -202,15 +203,23 @@ class mailSender {
 	}
 
 	/**
+	 * Set the body of the email to plain text or html
+	 *
+	 * @param bool $html  TRUE to set message to HTML, FALSE to set message to plain text, default is TRUE
+	 * @return void
+	 **/
+	public function isHTML($html=TRUE) {
+		$this->htmlMessage = $html;
+	}
+
+	/**
 	 * Send the email to all recipients at once
 	 *
 	 * @return bool
 	 **/
 	public function sendEmail() {
 
-		global $engineVars;
-
-		$mailClassLocation = $engineVars['rootPHPDir'] ."/phpmailer/class.phpmailer.php";
+		$mailClassLocation = engineAPI::$engineVars['rootPHPDir'] ."/phpmailer/class.phpmailer.php";
 
 		if (!file_exists($mailClassLocation)) {
 			if ($this->debug === TRUE) {
@@ -221,14 +230,27 @@ class mailSender {
 
 		include_once($mailClassLocation);
 
-		$PHPMailer = new PHPMailer();
-		$PHPMailer->IsSMTP();
+		$PHPMailer = new PHPMailer($this->debug);
 
-		$PHPMailer->From     = $this->from['address'];
-		$PHPMailer->FromName = $this->from['name'];
-		$PHPMailer->Subject  = $this->subject;
-		$PHPMailer->AltBody  = $this->altbody;
-		$PHPMailer->MsgHTML(nl2br($this->body));
+		// Set PHPMailer to use smtp and sets settings
+		$PHPMailer->IsSMTP();
+		$PHPMailer->Hostname  = "smtp.wvu.edu";
+		$PHPMailer->Host      = "smtp.wvu.edu";
+		$PHPMailer->Port      = 25;
+		// $PHPMailer->SMTPDebug = $this->debug;
+
+		$PHPMailer->Subject = $this->subject;
+		
+		$PHPMailer->IsHTML($this->htmlMessage);
+		if ($this->htmlMessage === TRUE) {
+			$PHPMailer->AltBody = $this->altbody;
+			$PHPMailer->MsgHTML($this->body);
+		}
+		else {
+			$PHPMailer->Body = $this->body;
+		}
+
+		$PHPMailer->SetFrom($this->from['address'], $this->from['name']);
 
 		foreach ($this->to as $to) {
 			$PHPMailer->AddAddress($to['address'], $to['name']);
@@ -269,8 +291,6 @@ class mailSender {
 	 **/
 	public function sendEmailBulk($sendID,$emails,$dbInfo) {
 
-		global $engineVars;
-
 		// Populate table with emails
 		//
 		// A table MUST be defined in the database with the following fields:
@@ -283,7 +303,7 @@ class mailSender {
 		foreach ($emails as $email) {
 			
 			$sql = sprintf("INSERT INTO %s (sendID,sender,recipient,subject,body) VALUES ('%s','%s','%s','%s','%s')",
-				$this->database->escape($this->engine->dbTables($dbInfo['table'])),
+				$this->database->escape($dbInfo['table']),
 				$this->database->escape($sendID),
 				$this->database->escape($email['sender']),
 				$this->database->escape($email['recipient']),
@@ -301,11 +321,19 @@ class mailSender {
 
 		}
 
-		$dbInfo['database'] = isset($dbInfo['database']) ? $dbInfo['database'] : NULL;
-		$dbInfo['username'] = isset($dbInfo['username']) ? $dbInfo['username'] : $engineVars['mysql']['username'];
-		$dbInfo['password'] = isset($dbInfo['password']) ? $dbInfo['password'] : $engineVars['mysql']['password'];
-		$dbInfo['server']   = isset($dbInfo['server'])   ? $dbInfo['server']   : $engineVars['mysql']['server'];
-		$dbInfo['port']     = isset($dbInfo['port'])     ? $dbInfo['port']     : $engineVars['mysql']['port'];
+		$dbInfo['database'] = isset($dbInfo['database']) ? $dbInfo['database']  : NULL;
+		$dbInfo['table']    = isset($dbInfo['table'])    ? $dbInfo['table']     : NULL;
+		$dbInfo['username'] = isset($dbInfo['username']) ? $dbInfo['username']  : NULL;
+		$dbInfo['password'] = isset($dbInfo['password']) ? $dbInfo['password']  : NULL;
+		$dbInfo['server']   = isset($dbInfo['server'])   ? $dbInfo['server']    : NULL;
+		$dbInfo['port']     = isset($dbInfo['port'])     ? $dbInfo['port']      : NULL;
+
+		if (isnull($dbInfo['database'])) {
+			return errorHandle::newError("Database must be specified.",errorHandle::HIGH);
+		}
+		if (isnull($dbInfo['table'])) {
+			return errorHandle::newError("Table must be specified.",errorHandle::HIGH);
+		}
 
 		// Send emails that have the given sendID
 		$result = $this->performBulkSend($sendID,$dbInfo);
@@ -326,8 +354,52 @@ class mailSender {
 			$dbInfo[$key] = escapeshellarg($value);
 		}
 
-		return exec("php ".$engineVars['documentRoot']."/engineIncludes/emailSendBulk.php -id=$sendID -d=".$dbInfo['database']." -t=".$dbInfo['table']." -u=".$dbInfo['username']." -p=".$dbInfo['password']." -s=".$dbInfo['server']." -P=".$dbInfo['port']." -f=".$dbInfo['fileTable']." >/dev/null &");
+		$exec  = "php ".engineAPI::$engineVars['documentRoot']."/engineIncludes/emailSendBulk.php";
+		$exec .= " -id=$sendID";
+		$exec .= " -d=".$dbInfo['database'];
+		$exec .= " -t=".$dbInfo['table'];
+		$exec .= ($dbInfo['username'] == "''") ? "" : " -u=".$dbInfo['username'];
+		$exec .= ($dbInfo['password'] == "''") ? "" : " -p=".$dbInfo['password'];
+		$exec .= ($dbInfo['server'] == "''")   ? "" : " -s=".$dbInfo['server'];
+		$exec .= ($dbInfo['port'] == "''")     ? "" : " -P=".$dbInfo['port'];
+		$exec .= " -S=10";
+		$exec .= " >/dev/null &";
 
+		return exec($exec);
+
+	}
+
+	public function clearRecipients() {
+		$this->to = array();
+		return TRUE;
+	}
+
+	public function clearCCs() {
+		$this->cc = array();
+		return TRUE;
+	}
+
+	public function clearBCCs() {
+		$this->bcc = array();
+		return TRUE;
+	}
+
+	public function clearReplyTos() {
+		$this->replyTo = array();
+		return TRUE;
+	}
+
+	public function clearAllAddresses() {
+		$this->clearRecipients();
+		$this->clearCCs();
+		$this->clearBCCs();
+		$this->clearReplyTos();
+		return TRUE;
+	}
+
+	public function clearAttachments() {
+		$this->attachment = array();
+		return TRUE;
 	}
 
 }
