@@ -123,4 +123,23 @@ function obfuscateEmail($attPairs) {
 	return($output);
 }
 
+/**
+ * This function will attempt to obscure sensitive parts of a file path.
+ * (This can be usefully if you need to print a filepath to the browser.)
+ * @param string $filepath
+ * @return string
+ */
+function secureFilepath($filepath){
+    // If this is a cli session, there's no need to secure the filepath
+    if(isCLI()) return $filepath;
+    else{
+        return (string)preg_replace(array(
+                '|^'.$_SERVER["DOCUMENT_ROOT"].'|i',
+                 '|^/home|i'
+            ),array(
+                '[DOCUMENT_ROOT]',
+                '[HOME]'
+            ),$filepath);
+    }
+}
 ?>
