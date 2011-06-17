@@ -99,10 +99,9 @@ class ldapSearch
         if(array_key_exists('bindUsername', $params))   $this->bindUsername   = $params['bindUsername'];
         if(array_key_exists('bindPassword', $params))   $this->bindPassword   = $params['bindPassword'];
         if(array_key_exists('baseDN', $params))         $this->baseDN         = $params['baseDN'];
-
         $ldapConnection = ldap_connect($this->ldapServer, $this->ldapServerPort);
         if($ldapConnection === FALSE){
-            // Trigger Error! @todo
+            errorHandle::newError(__METHOD__.'() - Failed to open LDAP connection. '.ldap_errno($ldapConnection).':'.ldap_error($ldapConnection), errorHandle::HIGH);
             return NULL;
         }else{
             ldap_set_option($this->ldap, LDAP_OPT_PROTOCOL_VERSION, 3);
@@ -118,7 +117,6 @@ class ldapSearch
     public function disconnect()
     {
         if(!$this->logout()){
-            // Trigger Error! @todo
             return FALSE;
         }else{
             $this->ldap = NULL;
@@ -145,14 +143,9 @@ class ldapSearch
         // If we're not connected, fix that.
         if(is_null($this->ldap)) $this->ldap = $this->connect();
         if($this->ldap){
-            if(ldap_bind($this->ldap, $bindRDN, $password)){
-                return TRUE;
-            }else{
-                // Trigger Error! @todo
-                return FALSE;
-            }
+            return (bool)ldap_bind($this->ldap, $bindRDN, $password);
         }else{
-            // Trigger Error! @todo
+            errorHandle::newError(__METHOD__.'() - No LDAP connection available to bind to.', errorHandle::HIGH);
             return FALSE;
         }
     }
@@ -244,7 +237,6 @@ class ldapSearch
         if(!$this->ldap){
             $connParams = (array_key_exists('connection', $params)) ? $params['connection'] : NULL;
             if(!$this->connect($connParams)){
-                // Trigger Error! @todo
                 return array();
             }
         }
@@ -253,8 +245,7 @@ class ldapSearch
         $ldapSearch = ldap_read($this->ldap,$dn,'objectClass=*',$attributes,(int)(array_key_exists('listAttributes', $params) and $params['listAttributes']),1,0,LDAP_DEREF_ALWAYS);
 
         if(!$ldapSearch){
-            echo "<br><br>ERROR!<br>".ldap_errno($this->ldap).':'.ldap_error($this->ldap)."<br><br>";
-            // Trigger Error! @todo
+            errorHandle::newError(__METHOD__."() - Failed to read ldap entry '$dn'. ".ldap_errno($this->ldap).':'.ldap_error($this->ldap), errorHandle::MEDIUM);
             return array();
         }else{
             $entry = ldap_get_entries($this->ldap, $ldapSearch);
@@ -318,7 +309,6 @@ class ldapSearch
         if(!$this->ldap){
             $connParams = (array_key_exists('connection', $params)) ? $params['connection'] : NULL;
             if(!$this->connect($connParams)){
-                // Trigger Error! @todo
                 return array();
             }
         }
@@ -326,8 +316,7 @@ class ldapSearch
         // Do the LDAP search
         $ldapSearch = ldap_search($this->ldap, $baseDN, $filter, (array)$attributes, 0, $sizeLimit, $timeLimit, LDAP_DEREF_ALWAYS);
         if(!$ldapSearch){
-            echo "<br><br>ERROR!<br>".ldap_errno($this->ldap).':'.ldap_error($this->ldap)."<br><br>";
-            // Trigger Error! @todo
+            errorHandle::newError(__METHOD__."() - Failed to search ldap directory. ".ldap_errno($this->ldap).':'.ldap_error($this->ldap), errorHandle::MEDIUM);
             return array();
         }
 
@@ -400,7 +389,6 @@ class ldapSearch
         if(!$this->ldap){
             $connParams = (array_key_exists('connection', $params)) ? $params['connection'] : NULL;
             if(!$this->connect($connParams)){
-                // Trigger Error! @todo
                 return array();
             }
         }
@@ -408,8 +396,7 @@ class ldapSearch
         // Do the LDAP search
         $ldapSearch = ldap_list($this->ldap, $baseDN, $filter, (array)$attributes, 0, $sizeLimit, $timeLimit,LDAP_DEREF_ALWAYS);
         if(!$ldapSearch){
-            echo "<br><br>ERROR!<br>".ldap_errno($this->ldap).':'.ldap_error($this->ldap)."<br><br>";
-            // Trigger Error! @todo
+            errorHandle::newError(__METHOD__."() - Failed to search ldap directory. ".ldap_errno($this->ldap).':'.ldap_error($this->ldap), errorHandle::MEDIUM);
             return array();
         }
 
@@ -518,7 +505,7 @@ class ldapSearch
         if(sizeof($filterGroups)){
             return $this->searchEntries(implode(' or ', $filterGroups), (array)$searchParams);
         }else{
-            // Trigger Error
+            errorHandle::newError(__METHOD__."() - No user filtering set!", errorHandle::DEBUG);
             return array();
         }
     }
@@ -548,10 +535,9 @@ class ldapSearch
 
         // Search for all groups based on the filter
         if(sizeof($filterGroups)){
-//            var_dump(implode(' or ', $filterGroups));
             return $this->searchEntries(implode(' or ', $filterGroups), (array)$searchParams);
         }else{
-            // Trigger Error
+            errorHandle::newError(__METHOD__."() - No group filtering set!", errorHandle::DEBUG);
             return array();
         }
     }
@@ -656,12 +642,11 @@ class ldapSearch
     public function getUsersInOU($ouDN,$userType=NULL,$searchParams=NULL)
     {
         if(!$this->isOU($ouDN)){
-            // Trigger Error! @todo
+            errorHandle::newError(__METHOD__."() - Specified OU is not an OU!", errorHandle::DEBUG);
             return array();
         }
 
-        return $this->getAllUsers($userType, array_merge(array(
-            'baseDN'=>$ouDN),
+        return $this->getAllUsers($userType, array_merge(array('baseDN'=>$ouDN),
             (array)$searchParams
         ));
     }
@@ -678,7 +663,7 @@ class ldapSearch
     public function getUsersInGroup($groupDN,$userType=self::USER_ACTIVE)
     {
         if(!$this->isGroup($groupDN)){
-            // Trigger Error! @todo
+            errorHandle::newError(__METHOD__."() - Specified groupDN is not a group!", errorHandle::DEBUG);
             return array();
         }
 
@@ -715,7 +700,7 @@ class ldapSearch
     public function getGroupsInOU($ouDN,$groupType=NULL,$searchParams=NULL)
     {
         if(!$this->isOU($ouDN)){
-            // Trigger Error! @todo
+            errorHandle::newError(__METHOD__."() - Specified OU is not a OU!", errorHandle::DEBUG);
             return array();
         }
 
@@ -736,7 +721,7 @@ class ldapSearch
     public function getGroupsInGroup($groupDN,$groupType=NULL)
     {
         if(!$this->isGroup($groupDN)){
-            // Trigger Error! @todo
+            errorHandle::newError(__METHOD__."() - Specified groupDN is not a group!", errorHandle::DEBUG);
             return array();
         }
 
@@ -787,7 +772,7 @@ class ldapSearch
     public function getOUsInOU($ouDN,$searchParams=NULL)
     {
         if(!$this->isOU($ouDN)){
-            // Trigger Error! @todo
+            errorHandle::newError(__METHOD__."() - Specified OU is not an OU!", errorHandle::DEBUG);
             return array();
         }
 
@@ -812,7 +797,7 @@ class ldapSearch
     public function getGroupsFromUser($userDN,$recursive=FALSE,$groupTypes=NULL)
     {
         if(!$this->isUser($userDN)){
-            // Trigger Error! @todo
+            errorHandle::newError(__METHOD__."() - Specified userDN is not a user!", errorHandle::DEBUG);
             return array();
         }
 
