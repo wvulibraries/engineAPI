@@ -1,9 +1,5 @@
 <?php
-/**
- * @todo Error Reporting support (ignore all errors below a threshold)
- */
-class errorHandle
-{
+class errorHandle{
     /**
      * Error Severity
      * (Bitwise compatible)
@@ -15,17 +11,76 @@ class errorHandle
     const HIGH     = 16;
     const CRITICAL = 32;
     const E_ALL    = 63;
+    
     /**
      * EngineAPI error stack types
      */
 	const ERROR   = "error";
 	const SUCCESS = "success";
 	const WARNING = "warning";
+
     /**
      * Singleton holder
      * @var errorHandle
      */
     private static $instance;
+
+    /**
+     * Internal email handler reference
+     * @var mailSender
+     */
+    private static $email;
+    /**
+     * The sender of all error emails sent by errorHandle
+     * @var string
+     */
+    public static $emailSender = 'libsys@mail.wvu.edu';
+    /**
+     * An email subject prefix for all error emails
+     * @var string
+     */
+    public static $emailSubject = 'EngineAPI Error - ';
+
+    /**
+     * Internal engineDB connection
+     * @var EngineDB
+     */
+    private static $db;
+    /**
+     * The database table where errors will be stored
+     * @var string
+     */
+    public static $dbTblName = 'errorLog';
+
+    /**
+     * The PHP Error type
+     * @var int
+     */
+    private static $phpErrNo;
+    /**
+     * The severity of an error
+     * @var int
+     */
+    private static $errSeverity;
+    /**
+     * A flag indicating the origin of this error. ('phpError','phpException','newError')
+     * @var string
+     */
+    private static $errorType;
+
+    /**
+     * The internal mapping between PHP's error types, and our error severity's.
+     * The array key will be the PHP error type, and the value will be our own error severity.
+     * Default: set in constructor
+     * @var array
+     */
+    public static $phpErrMapping = array();
+    /**
+     * Our own, internal, error reporting level, and is accessed though errorReporting()
+     * Default: set in constructor
+     * @var int
+     */
+    private static $errorReporting;
     /**
      * Local stack of error profiles
      * @see self::addProfile()
@@ -33,51 +88,71 @@ class errorHandle
      */
     private static $errorProfiles = array();
     /**
-     * The internal mapping between PHP's error types, and our error severities.
+     * The backTrace of an error
      * @var array
      */
-    public static $phpErrMapping = array();
-    private static $errorReporting;
-
-    private static $errMsg;
-    private static $errSeverity;
     private static $backTrace;
+    /**
+     * The message explaining an error
+     * @var string
+     */
+    private static $errMsg;
+    /**
+     * The file where an error occurred in
+     * @var string
+     */
     private static $errFile;
+    /**
+     * The line file where an
+     * @var int
+     */
     private static $errLine;
-    private static $phpErrNo;
-    private static $errorType;
+    /**
+     * An array of additional, optional, error information
+     * @var array
+     */
+    private static $errInfo;
 
+    /**
+     * [uiMsg] span element. (This will be the wrapping tag)
+     * @var string
+     */
     public static $uiSpanElement  = 'p';
+    /**
+     * [uiMsg] CSS class for error messages
+     * @var string
+     */
     public static $uiClassError   = 'errorMessage';
+    /**
+     * [uiMsg] CSS class for success messages
+     * @var string
+     */
     public static $uiClassSuccess = 'successMessage';
+    /**
+     * [uiMsg] CSS class for warning messages
+     * @var string
+     */
     public static $uiClassWarning = 'warningMessage';
-
 
     /**
      * Singleton access
      * @static
      * @return errorHandle
      */
-    public static function singleton()
-    {
+    public static function singleton(){
         if(self::$instance === null) {
 	 		self::$instance = new self();
 		}
         return self::$instance;
     }
 
-    public function __clone()
-    {
-        trigger_error('Cloning instances of this class is forbidden.', E_USER_ERROR);
-    }
+    private function __clone(){}
+    private function __wakeup(){}
 
-    public function __wakeup()
-    {
-        trigger_error('Unserializing instances of this class is forbidden.', E_USER_ERROR);
-    }
-
-    private function __construct()
-    {
+    /**
+     * Class constructor
+     */
+    private function __construct(){
         // Set PHP Error Constant => errorHandle Constant mapping
         self::$phpErrMapping = array(
             E_WARNING           => self::MEDIUM,
@@ -100,9 +175,28 @@ class errorHandle
         self::addProfile(array('errorSeverity' => self::HIGH), array('logLocation' => 'nativePHP','fatal' => TRUE));
         self::addProfile(array('errorSeverity' => self::CRITICAL), array('logLocation' => 'nativePHP','fatal' => TRUE));
 
+        // Add the 'catchAll' error profile (DO NOT REMOVE)
+        self::addProfile(array(), array('logLocation' => 'nativePHP'));
+
         // Register custom handlers for PHP's errors and exceptions
         set_error_handler(array(__CLASS__, 'phpError'));
         set_exception_handler(array(__CLASS__, 'phpException'));
+    }
+
+    /**
+     * This method will reset the instance back to it's vanilla state (ready for a new error)
+     * @static
+     * @return void
+     */
+    private static function resetInstance(){
+        self::$errorType   = NULL;
+        self::$errMsg      = NULL;
+        self::$phpErrNo    = NULL;
+        self::$errSeverity = NULL;
+        self::$backTrace   = NULL;
+        self::$errFile     = NULL;
+        self::$errLine     = NULL;
+        self::$email       = NULL;
     }
 
     /**
@@ -129,13 +223,16 @@ class errorHandle
      *        An array of actions to take in response to this profile being used
      *         + logLocation - The location(s) where this error should be recorded to. (use an array for multiple values)
      *                         These are parsed with PHP's parse_URL, so they look a lot like URLs. For example:
-     *                          - file://FILE_PATH                              - Log this error to a static log file. (FILE_PATH must be absolute)
-     *                          - email://EMAIL_ADDRESS                         - Send a record of this error to the specified email address
-     *                          - mysql://USER:PASS@HOSTNAME/DB_NAME#TABLE_NAME - Log this error for a MySQL database
-     *                          - nativePHP                                     - Hand this error message off to the native PHP log handler.
+     *                          - file://FILE_PATH                           - Log this error to a static log file. (FILE_PATH must be absolute)
+     *                          - email://EMAIL_ADDRESS                      - Send a record of this error to the specified email address
+     *                          - db://USER:PASS@HOSTNAME/DB_NAME#TABLE_NAME - Log this error for a MySQL database
+     *                          - nativePHP                                  - Hand this error message off to the native PHP log handler.
      *         + httpRedirect - Redirect the user (via HTTP Header) to a specified URL [Fatal is implied]
      *         + exec - Execute a 3rdParty script/applications via PHP's exec()
      *         + fatal - Abort site execution at the conclusion of this profile.
+     *
+     *  @param bool $replace
+     *         Will replace any existing error profile with the same conditions, otherwise will combine the actions
      *
      * @return string
      *         Error profile referenced using a checksum of their conditions.
@@ -153,25 +250,27 @@ class errorHandle
      *   ), array(
      *     'logLocation' => array(
      *       'nativePHP',
-     *       'mysql://foo:bar@localhost/siteErrors#high',
+     *       'db://foo:bar@localhost/siteErrors#high',
      *       'email://webmaster@example.com'
      *     ),
      *     'httpRedirect' => 'http://example.com'
      *   ));
      *
      */
-    public static function addProfile($conditions,$actions)
-    {
+    public static function addProfile($conditions,$actions,$replace=FALSE){
         $profileFingerprint = md5(print_r($conditions,TRUE));
-        if(!array_key_exists($profileFingerprint, self::$errorProfiles)){
-            self::$errorProfiles[$profileFingerprint] = array(
-                'conditions' => $conditions,
-                'actions' => $actions);
-            return $profileFingerprint;
+        $newProfile = array('conditions' => $conditions, 'actions' => $actions);
+
+        if(!array_key_exists($profileFingerprint, self::$errorProfiles) || $replace){
+            self::$errorProfiles[$profileFingerprint] = $newProfile;
         }else{
-            // Trigger Error! ??? @todo
-            return '';
+            self::$errorProfiles[$profileFingerprint]['actions'] = array_merge_recursive(self::$errorProfiles[$profileFingerprint]['actions'], $actions);
         }
+
+        // Make sure everything is unique!
+        self::$errorProfiles[$profileFingerprint]['actions'] = array_unique_recursive(self::$errorProfiles[$profileFingerprint]['actions']);
+
+        return $profileFingerprint;
     }
 
     /**
@@ -180,14 +279,12 @@ class errorHandle
      * @param array|string $conditions
      * @return bool
      */
-    public static function removeProfile($conditions)
-    {
+    public static function removeProfile($conditions){
         $profileFingerprint = (is_array($conditions)) ? md5(print_r($conditions,TRUE)) : $conditions;
         if(array_key_exists($profileFingerprint, self::$errorProfiles)){
             unset(self::$errorProfiles[$profileFingerprint]);
             return TRUE;
         }else{
-            // Trigger Error! ??? @todo
             return FALSE;
         }
     }
@@ -204,24 +301,35 @@ class errorHandle
      * @param array  $errContext The active symbol table at the point the error occurred
      * @return bool
      */
-    public static function phpError($errNo, $errStr, $errFile, $errLine, $errContext)
-    {
+    public static function phpError($errNo, $errStr, $errFile, $errLine, $errContext){
         // we only care if the PHP error is being looked for
         $errorReporting = ini_get('error_reporting');
         if($errorReporting === 0 || !($errorReporting & $errNo)) return FALSE;
 
-return FALSE;
-
-        self::$errorType = 'phpError';
-        self::$phpErrNo = $errNo;
-        if(sizeof(self::$errorProfiles)){
-            if(sizeof(self::$phpErrMapping)){
-                self::newError($errStr, self::$phpErrMapping[$errNo]);
-            }else{
-                self::newError($errStr, self::CRITICAL);
+        // If a PHP error has occurred in THIS file, then we need to just crash to allow the developer to see it.
+        if($errFile === __FILE__){
+            $lineEndings = (isCLI()) ? "\n" : "<br />";
+            echo "Critical EngineAPI errorHandle Error!".$lineEndings;
+            echo "PHP Error: [".self::phpErr2Str($errNo)."] ".$errStr.$lineEndings;
+            echo "File: [errorHandler File]".$lineEndings;
+            echo "Line: ".$errLine.$lineEndings;
+            if(isCLI()){
+                echo str_repeat('-',strlen($errFile)+6).$lineEndings;
+                echo "Symbol Tree: ".print_r($errContext,TRUE);
             }
+            exit();
         }else{
-            error_log($errStr." at $errLine:$errFile");
+            self::$errorType = 'phpError';
+            self::$phpErrNo = $errNo;
+            if(sizeof(self::$errorProfiles)){
+                if(sizeof(self::$phpErrMapping)){
+                    self::newError($errStr, self::$phpErrMapping[$errNo]);
+                }else{
+                    self::newError($errStr, self::CRITICAL);
+                }
+            }else{
+                error_log($errStr." at $errLine:$errFile");
+            }
         }
         return TRUE;
     }
@@ -234,15 +342,272 @@ return FALSE;
      * @see http://www.php.net/manual/en/class.exception.php
      * @see http://us2.php.net/manual/en/function.set-exception-handler.php
      */
-    public static function phpException(Exception $e)
-    {
+    public static function phpException(Exception $e){
         self::$errorType = 'phpException';
         self::newError($e->getMessage(), self::$phpErrMapping['phpException']);
     }
 
-    
-    private static function phpErr2Str($errNo)
-    {
+    /**
+     * Record a new error
+     * @static
+     * @param string $errMsg
+     *        The message associated with this error
+     * @param int $errSeverity
+     *        The severity of this error (LOW, HIGH, CRITICAL, etc)
+     * @param array $errInfo
+     *        An optional array of addition (contextual) information pertaining to this error
+     * @return void
+     */
+    public static function newError($errMsg, $errSeverity, $errInfo=array()){
+        // we only care if the PHP error is being looked for
+        if(!(self::$errorReporting & $errSeverity)) return;
+
+        // Save the error info for processing
+        if(!isset(self::$errorType)){
+            self::$errorType='newError';
+        }
+        self::$errMsg      = trim($errMsg);
+        self::$errSeverity = $errSeverity;
+        self::$backTrace   = self::getErrorOrigin();
+        self::$errFile     = (is_array(self::$backTrace) and sizeof(self::$backTrace) and array_key_exists('file', self::$backTrace[0]))
+                                ? self::$backTrace[0]['file']
+                                : 'unknown';
+        self::$errLine     = (is_array(self::$backTrace) and sizeof(self::$backTrace) and array_key_exists('line', self::$backTrace[0]))
+                                ? self::$backTrace[0]['line']
+                                : 'unknown';
+
+        if(is_array($errInfo)){
+            foreach($errInfo as $key => $value){
+                self::$errLine[trim($key)] = self::toString($value);
+            }
+        }
+
+        // Find all the error profiles which this error can apply to
+        $profiles = array();
+        foreach(self::$errorProfiles as $errorProfile){
+            if(array_key_exists('conditions', $errorProfile)){
+                foreach($errorProfile['conditions'] as $condition => $value){
+                    switch($condition){
+                        case 'errorType':
+                            if($value != self::$errorType){
+                                continue 3;
+                            }
+                            break;
+
+                        case 'errorSeverity':
+                            if($value != self::$errSeverity){
+                                continue 3;
+                            }
+                            break;
+
+                        case 'errorOrigin':
+                            if(!preg_match($value, self::$errFile)){
+                                continue 3;
+                            }
+                            break;
+
+                        case 'engineEnv':
+                            if(defined('ENGINE_ENVIRONMENT') and ENGINE_ENVIRONMENT != $value){
+                                continue 3;
+                            }
+                            break;
+                    }
+                }
+            }
+            // If we survive to here than this profile will work for this error.
+            $profiles[] = $errorProfile;
+        }
+
+        /*
+         * Okay, we now have a list of errorProfiles which will work for this error. We need to find the one
+         * which is the most specific. (In other words, the one with the most conditions)
+         */
+        $winningProfile=array();
+        foreach($profiles as $profile){
+            if(is_empty($winningProfile) || sizeof($profile['conditions']) > sizeof($winningProfile['conditions'])){
+                $winningProfile = $profile;
+            }
+        }
+
+        // We now have the profile we need to operate on.
+        foreach($winningProfile['actions'] as $action => $value){
+            switch($action){
+                case 'logLocation':
+                    $locations = (array)$value;
+                    foreach($locations as $location){
+                        self::recordError($location);
+                    }
+                    break;
+
+                case 'httpRedirect':
+                    http::redirect($value);
+                    break;
+
+                case 'fatal':
+                    if($value and !defined('FATAL_ERROR')) define("FATAL_ERROR",true);
+                    break;
+
+                case 'exec':
+                    exec($value);
+                    break;
+            }
+        }
+
+        // If there's a active email object, we need to send out that email
+        if(self::$email instanceof mailSender) self::$email->sendEmail();
+
+        // Cleanup - Reset the instance
+        self::resetInstance();
+
+        // Lastly, should I die?
+        if(defined('fatal_ERROR') and FATAL_ERROR) exit();
+    }
+
+    /**
+     * This is a helper funcion for newError()
+     * This method will take the current error and record it in the specified location
+     * @static
+     * @param string $logLocation
+     * @return bool
+     */
+    private static function recordError($logLocation){
+        if($logLocation == 'nativePHP'){
+            error_log(self::$errMsg." at ".self::$errLine.":".self::$errFile);
+        }elseif($logLocation == 'engineDB'){
+            $dbName = EngineAPI::$engineVars['logDB'];
+            global $engineVars;
+
+            if(!(self::$db instanceof engineDB)){
+                $e = EngineAPI::singleton();
+                if(!self::$db = $e->getPrivateVar('engineDB')){
+                    trigger_error('EngineAPI errorHandle - Cannot get to the engineDB!', E_USER_ERROR);
+                    return FALSE;
+                }
+            }
+
+            // First, we need to make sure the target table exists.
+            $qTblSearch = self::$db->query(sprintf("SELECT * FROM `information_schema`.`TABLES` WHERE `TABLE_SCHEMA`='%s' AND `TABLE_NAME`='%s'",
+                self::$db->escape($dbName),
+                self::$db->escape(self::$dbTblName)));
+            if(!mysql_num_rows($qTblSearch['result'])){
+                // We need to create this table!
+                $qTblCreate = self::$db->query(sprintf('CREATE TABLE IF NOT EXISTS `%s`.`%s` (
+                    `ID` int(11) unsigned NOT NULL AUTO_INCREMENT,
+                    `Timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    `IP` varchar(15) NOT NULL,
+                    `SID` varchar(32) NOT NULL,
+                    `UserAgent` varchar(256) NOT NULL,
+                    `File` varchar(256) NOT NULL,
+                    `Line` int(10) unsigned NOT NULL,
+                    `Severity` varchar(32) NOT NULL,
+                    `Message` text NOT NULL,
+                    `Information` text NOT NULL,
+                    `Boxtrace` text NOT NULL,
+                    PRIMARY KEY (`ID`),
+                    KEY `Location` (`File`,`Line`)
+                    ) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1;', self::$db->escape($dbName), self::$db->escape(self::$dbTblName)));
+                if($qTblCreate['error']){
+                    // Crap, we can't create the table. We need to fallback to PHP's native logger
+                    error_log(sprintf(" [errorHandle] Failed to auto-create database table '%s.%s'.\nOriginal Error: %s at %s:%s",
+                        $dbName,self::$dbTblName,self::$errMsg,self::$errLine,self::$errFile));
+                }
+            }
+            // Insert this error into the target table
+            self::$db->query(sprintf("INSERT INTO `%s`.`%s` (`IP`,`SID`,`UserAgent`,`File`,`Line`,`Severity`,`Message`,`Information`,`Boxtrace`) VALUES('%s','%s','%s','%s','%s','%s','%s','%s','%s')",
+                self::$db->escape($dbName),
+                self::$db->escape(self::$dbTblName),
+                self::$db->escape(self::getRemoteIP()),
+                self::$db->escape(session_id()),
+                self::$db->escape(self::getUserAgent()),
+                self::$db->escape(self::$errFile),
+                self::$db->escape(self::$errLine),
+                self::$db->escape(( (self::$errFile) ? self::phpErr2Str(self::$phpErrNo).' => '.self::severity2Str(self::$errSeverity) : self::severity2Str(self::$errSeverity) )),
+                self::$db->escape(self::$errMsg),
+                self::$db->escape(print_r(self::$errInfo, true)),
+                self::$db->escape(self::generateBoxtrace(self::$backTrace))));
+        }else{
+            $logLocation = parse_url($logLocation);
+            switch($logLocation['scheme']){
+                case 'file':
+                    touch($logLocation['path']);
+                    if(isCLI()){
+                        // CLI Interface
+                        error_log(sprintf("[%s] [%s] [cli %s] %s at %s:%s\n",
+                            date('D M d H:i:s Y'),
+                            self::formattedSeverity(),
+                            ( (array_key_exists('USER', $_SERVER)) ? $_SERVER['USER'] : 'unknown' ),
+                            self::$errMsg,
+                            self::$errLine,
+                            self::$errFile), 3, $logLocation['path']);
+                    }else{
+                        // Web Interface
+                        error_log(sprintf("[%s] [%s] [web %s] %s at %s:%s\n",
+                            date('D M d H:i:s Y'),
+                            self::formattedSeverity(),
+                            $_SERVER['REMOTE_ADDR'],
+                            self::$errMsg,
+                            self::$errLine,
+                            self::$errFile), 3, $logLocation['path']);
+                    }
+                    break;
+
+                case 'email':
+                    if(!(self::$email instanceof mailSender)){
+                        self::$email = new mailSender();
+                        self::$email->addSender(self::$emailSender);
+
+                        $errMsg = (strlen(self::$errMsg) > 15) ? substr(self::$errMsg,0,15).'...' : self::$errMsg;
+                        self::$email->addSubject(self::$emailSubject.sprintf('[%s] %s', self::severity2Str(self::$errSeverity), trim($errMsg)));
+
+                        self::$email->addBody(sprintf("EngineAPI errorHandle Error!\n
+                                %s
+                                Severity: %s (%s)
+                                File: %s
+                                Line: %s
+
+                                IP: %s
+                                SID: %s
+                                UserAgent: %s
+                                Additional Info: %s
+
+                                %s",
+                                self::$errMsg,
+                                self::formattedSeverity(),
+                                self::$errorType,
+                                self::$errFile,
+                                self::$errLine,
+                                self::getRemoteIP(),
+                                session_id(),
+                                self::getUserAgent(),
+                                ( (isset(self::$errInfo) and sizeof(self::$errInfo)) ? print_r(self::$errInfo, true) : 'none' ),
+                                self::generateBoxtrace(self::$backTrace)));
+                    }
+                    self::$email->addBCC(sprintf('%s@%s', $logLocation['user'], $logLocation['host']));
+                    break;
+            }
+        }
+    }
+
+    /**
+     * This method will return the error severity in a clean human-readable format
+     * @static
+     * @return string
+     */
+    private static function formattedSeverity(){
+        if(self::$phpErrNo){
+            return sprintf('[%s => %s]', self::phpErr2Str(self::$phpErrNo), self::severity2Str(self::$errSeverity));
+        }else{
+            return sprintf('[%s]', self::severity2Str(self::$errSeverity));
+        }
+    }
+
+    /**
+     * Converts PHP's error type to a human-readable version
+     * @static
+     * @param int $errNo
+     * @return string
+     */
+    private static function phpErr2Str($errNo){
         $phpErrors = array(
             E_WARNING      => 'E_WARNING',
             E_NOTICE       => 'E_NOTICE',
@@ -261,151 +626,285 @@ return FALSE;
         }
     }
 
-
-
-
-
-    public static function newError($errMsg, $errSeverity, $errInfo=array())
-    {
-        // we only care if the PHP error is being looked for
-        if(!(self::$errorReporting & $errSeverity)) return FALSE;
-
-        // Save the error info for processing
-        if(!isset(self::$errorType)){
-            self::$errorType='newError';
+    /**
+     * Converts our internal error severity to a human-readable version
+     * @static
+     * @param int $severity
+     * @return string
+     */
+    private static function severity2Str($severity){
+        $severities = array(
+            self::INFO     => 'Informational',
+            self::DEBUG    => 'Debug',
+            self::LOW      => 'Low',
+            self::MEDIUM   => 'Medium',
+            self::HIGH     => 'High',
+            self::CRITICAL => 'Critical'
+        );
+        if(array_key_exists($severity,$severities)){
+            return $severities[$severity];
+        }else{
+            return 'Unknown';
         }
-        self::$errMsg      = trim($errMsg);
-        self::$errSeverity = $errSeverity;
-        self::$backTrace   = self::getErrorOrigin();
-        self::$errFile     = self::$backTrace[0]['file'];
-        self::$errLine     = self::$backTrace[0]['line'];
-
-        // Find all the error profiles which this error can apply to
-        $profiles = array();
-        foreach(self::$errorProfiles as $errorProfile){
-            foreach($errorProfile['conditions'] as $condition => $value){
-                switch($condition){
-                    case 'errorType':
-                        if($value != self::$errorType){
-                            continue 3;
-                        }
-                        break;
-
-                    case 'errorSeverity':
-                        if($value != self::$errSeverity){
-                            continue 3;
-                        }
-                        break;
-
-                    case 'errorOrigin':
-                        if(!preg_match($value, self::$errFile)){
-                            continue 3;
-                        }
-                        break;
-
-                    case 'engineEnv':
-                        if(defined('ENGINE_ENVIRONMENT') and ENGINE_ENVIRONMENT != $value){
-                            continue 3;
-                        }
-                        break;
-                }
-            }
-
-            // If we survive to here than this profile will work for this error.
-            $profiles[] = $errorProfile;
-        }
-        /*
-         * Okay, we now have a list of errorProfiles which will work for this error. We need to find the one
-         * which is the most specific. (In other words, the one with the most conditions)
-         */
-        $winningProfile=NULL;
-        foreach($profiles as $profile){
-            if(is_null($winningProfile) || sizeof($profile['conditions']) > sizeof($winningProfile['conditions'])){
-                $winningProfile = $profile;
-            }
-        }
-
-        // We now have the profile we need to operate on.
-        foreach($winningProfile['actions'] as $action => $value){
-            switch($action){
-                case 'logLocation':
-                    if($value == 'nativePHP'){
-                        error_log(self::$errMsg." at ".self::$errLine.":".self::$errFile);
-                    }else{
-                        $logLocation = parse_url($value);
-                        switch($logLocation['scheme']){
-                            case 'file':
-                                if(array_key_exists('SHELL', $_SERVER)){
-                                    // CLI Interface
-                                    error_log(sprintf('[%s] [%s] [cli %s] %s\n\t%s:%s',
-                                        date('D M d H:i:s Y'),
-                                        self::phpErr2Str(self::$phpErrNo),
-                                        $_SERVER['USER'],
-                                        self::$errMsg,
-                                        self::$errLine,
-                                        self::$errFile), 3, $logLocation['path']);
-                                }else{
-                                    // Web Interface
-                                    error_log(sprintf('[%s] [%s] [web %s] %s\n\t%s:%s',
-                                        date('D M d H:i:s Y'),
-                                        self::phpErr2Str(self::$phpErrNo),
-                                        $_SERVER['REMOTE_ADDR'],
-                                        self::$errMsg,
-                                        self::$errLine,
-                                        self::$errFile), 3, $logLocation['path']);
-                                }
-                                break;
-
-                            case 'email':
-                                // Send Email @todo
-                                break;
-
-                            case 'db':
-                                // Log in database @todo
-                                break;
-                        }
-                    }
-                    break;
-
-                case 'fatal':
-                    if($value and !defined('fatal_ERROR')) define("fatal_ERROR",true);
-                    break;
-
-                case 'emailAlert':
-                    // Send Email @todo
-                    break;
-
-                case 'exec':
-                    exec($value);
-                    break;
-            }
-        }
-        if(defined('fatal_ERROR') and fatal_ERROR) die('*** fatal Error ***'); // @todo Change to exit() after development
     }
 
-    public static function errorMsg($msg)
-    {
+    /**
+     * This method will take a backtrace array from debug_backtrace() and format it into human-readable ASCII boxes
+     * @static
+     * @param array $backtrace
+     * @param int $depth
+     * @param array $hashTable
+     * @return string
+     */
+    private static function generateBoxtrace($backtrace, $depth=0, $hashTable=array()){
+        $boxWidth      = 100;
+        $boxText       = '';
+        $boxIndent     = str_repeat('  ', $depth);
+        $backtraceNode = array_pop($backtrace);
+
+        // Box header (only on node 0)
+        if($depth == 0)
+        {
+            $boxText .= sprintf("%s+%s\n", $boxIndent, str_repeat("-", $boxWidth-strlen($boxIndent)));
+            $boxText .= sprintf("%s| errorHandle Boxtrace\n", $boxIndent);
+            $boxText .= sprintf("%s+%s\n", $boxIndent, str_repeat("-", $boxWidth-strlen($boxIndent)));
+        }
+
+        // Basic info (File and Line)
+        $boxText .= sprintf("%s| File: %s\n", $boxIndent, ((isset($backtraceNode['file'])) ? $backtraceNode['file'] : "unknown" ));
+        $boxText .= sprintf("%s| Line: %s\n", $boxIndent, ((isset($backtraceNode['line'])) ? $backtraceNode['line'] : "unknown" ));
+
+        // Function / Object called
+        if(isset($backtraceNode['function'])){
+            switch(true){
+                case isset($backtraceNode['type']) and $backtraceNode['type'] == "->":
+                    $functionText = sprintf("$%s->%s()", $backtraceNode['class'], $backtraceNode['function']);
+                    break;
+                case isset($backtraceNode['type']) and $backtraceNode['type'] == "::":
+                    $functionText = sprintf("%s::%s()", $backtraceNode['class'], $backtraceNode['function']);
+                    break;
+                default:
+                    $functionText = sprintf("%s()", $backtraceNode['function']);
+                    break;
+            }
+            $boxText .= sprintf("%s| Function called: %s\n", $boxIndent, $functionText);
+        }
+
+        // Args passed
+        if(isset($backtraceNode['args']) and sizeof($backtraceNode['args'])){
+            $boxText .= sprintf("%s| Args passed: \n", $boxIndent);
+            foreach($backtraceNode['args'] as $number => $value){
+                $dispData = self::toString($value);
+                if(is_array($dispData)){
+                    $hashTable[] = array($dispData[1], $dispData[2]);
+                    $dispData = $dispData[0];
+                }
+                $boxText .= sprintf("%s|  [%s] %s\n", $boxIndent, $number+1, $dispData);
+            }
+        }
+
+        // Table footer
+        if(!sizeof($backtrace)){
+            $strLen = $boxWidth-(strlen($boxIndent));
+            if($strLen<1) $strLen=1;
+            $boxText .= sprintf("%s+%s\n", $boxIndent, str_repeat("-", $strLen));
+            // If there's any hashTable items, output them now!
+            if(sizeof($hashTable)){
+                $alreadyShown = array();
+                $boxText .= "\n\nHash table:\n";
+                foreach($hashTable as $hash){
+                    if(array_search($hash[0], $alreadyShown) !== false) continue;
+                    $boxText .= sprintf(" [%s]\n    %s\n\n", $hash[0], wordwrap($hash[1], 75, "\n    ", true));
+                    $alreadyShown[] = $hash[0];
+                }
+            }
+            return $boxText;
+        }else{
+            $strLen = $boxWidth-(strlen($boxIndent)+2);
+            if($strLen<1) $strLen=1;
+            $boxText .= sprintf("%s+-+%s\n", $boxIndent, str_repeat("-", $strLen));
+            return $boxText.self::generateBoxtrace($backtrace, $depth+1, $hashTable);
+        }
+    }
+
+
+    /**
+     * Convert anything to a string representation of it
+     * @static
+     * @param mixed $data
+     * @param bool $objHash
+     * @return string
+     */
+    private static function toString($data, $objHash=false){
+        switch(true){
+            case is_null($data):
+                return "NULL";
+                break;
+            case is_bool($data):
+                return ($data) ? "boolean(TRUE)" : "boolean(FALSE)";
+                break;
+            case is_int($data):
+                return sprintf("int(%s)", $data);
+                break;
+            case is_float($data):
+                return sprintf("float(%s)", $data);
+                break;
+            case is_string($data):
+                return sprintf("string(%s)[%s]", strlen($data), $data);
+                break;
+            case is_array($data):
+                if($objHash){
+                    $arrayHash = self::encodeObject($data);
+                    return array(sprintf("array(%sx%s)[%s]", self::arrayDepth($data), sizeof($data), md5($arrayHash)), md5($arrayHash), $arrayHash);
+                }else{
+                    return sprintf("array(%sx%s)", self::arrayDepth($data), sizeof($data));
+                }
+                break;
+            case is_object($data):
+                if($objHash){
+                    $objectHash = self::encodeObject($data);
+                    return array(sprintf("object(%s)[%s]", get_class($data), md5($objectHash)), md5($objectHash), $objectHash);
+                }else{
+                    return sprintf("object(%s)", get_class($data));
+                }
+                break;            case is_array($data):
+                return sprintf("array(%sx%s)", self::arrayDepth($data), sizeof($data));
+                break;
+            case is_resource($data):
+                return sprintf("resource(%s)", get_resource_type($data));
+                break;
+        }
+        return "[Unknown]";
+    }
+
+    /**
+     * This method will take an object (or array), and return a compressed string representation of it.
+     * The compression method used is based on http://us2.php.net/manual/en/function.base64-encode.php#87925
+     * @static
+     * @see self::decodeObject() for the reverse direction
+     * @param object|array $obj
+     * @return string
+     */
+    public static function encodeObject($obj){
+        if(!is_object($obj) and !is_array($obj)){
+            return "[Not a valid object or array]";
+        }
+        return base64_encode(gzcompress(print_r($obj, true),9));
+    }
+
+    /**
+     * This method is the reverse of encodeObject() and will return the print_r of the original 
+     * @static
+     * @param string $txt
+     * @return string
+     */
+    public static function decodeObject($txt){
+        return gzuncompress(base64_decode($txt),9);
+    }
+
+    /**
+     * Calculates the depth of an array using the indentation in the output of print_r().
+     * @see http://us3.php.net/manual/en/function.print-r.php#93764
+     * @param array $array
+     * @return int
+     */
+    private static function arrayDepth($array){
+        $max_indentation = 1;
+        $array_str = print_r($array, true);
+        $lines = explode("\n", $array_str);
+        foreach($lines as $line){
+            $indentation = (strlen($line) - strlen(ltrim($line))) / 4;
+            if($indentation > $max_indentation){
+                $max_indentation = $indentation;
+            }
+        }
+        return ceil(($max_indentation - 1) / 2) + 1;
+    }
+
+    /**
+     * Sets the new internal errorReporting level.
+     * @static
+     * @param null|int $newValue
+     *        The new errorReporting level. (omit to keep the current value)
+     * @return int
+     *         The old errorReporting
+     */
+    public static function errorReporting($newValue=NULL){
+        $oldValue = self::$errorReporting;
+        if(!is_null($newValue)) self::$errorReporting = $newValue;
+        return $oldValue;
+    }
+
+    /**
+     * This function will look back through the debug_backtrace() and strip off any nodes which are inside this file.
+     * Thus, getting back to the origin of the error.
+     * @static
+     * @return array
+     */
+    private static function getErrorOrigin(){
+        $backTrace = debug_backtrace();
+        while(sizeof($backTrace) and (!array_key_exists('file',$backTrace[0]) or $backTrace[0]['file'] == __FILE__)){
+            array_shift($backTrace);
+        }
+        return $backTrace;
+    }
+
+    /**
+     * Returns the remote IP of the user
+     * @static
+     * @return string
+     */
+    private static function getRemoteIP(){
+        if (isCLI()) {
+            if (array_key_exists('SSH_CONNECTION', $_SERVER)) {
+                list($remoteIpAddr, $unknown1, $localIpAddr, $unknown2) = explode(' ', $_SERVER['SSH_CONNECTION']);
+            } elseif (array_key_exists('SSH_CLIENT', $_SERVER)) {
+                list($remoteIpAddr, $unknown1, $unknown2) = explode(' ', $_SERVER['SSH_CLIENT']);
+            } else {
+                $remoteIpAddr = 'unknown';
+            }
+
+            return $remoteIpAddr;
+        } else {
+            return $_SERVER['REMOTE_ADDR'];
+        }
+    }
+
+    /**
+     * Returns the user-agent string for the user's client
+     * @static
+     * @return string
+     */
+    private static function getUserAgent(){
+        if(isCLI()){
+            $ip = self::getRemoteIP();
+            $user = (array_key_exists('USER', $_SERVER)) ? $_SERVER['USER'] : 'unknown';
+            if(array_key_exists('SUDO_USER', $_SERVER)){
+                return sprintf('%s (via sudo by %s) from %s', $user, $_SERVER['SUDO_USER'], $ip);
+            }else{
+                return sprintf('%s from %s', $user, $ip);
+            }
+        }else{
+            return $_SERVER['HTTP_USER_AGENT'];
+        }
+    }
+
+    public static function errorMsg($msg){
         self::newError($msg, self::INFO);
         self::errorStack(self::ERROR,$msg);
         return sprintf('<%s class="%s">%s</%s>', self::$uiSpanElement, self::$uiClassError, $msg, self::$uiSpanElement);
     }
-
-    public static function successMsg($msg)
-    {
+    public static function successMsg($msg){
         self::newError($msg, self::INFO);
         self::errorStack(self::SUCCESS,$msg);
         return sprintf('<%s class="%s">%s</%s>', self::$uiSpanElement, self::$uiClassSuccess, $msg, self::$uiSpanElement);
     }
-
-    public static function warningMsg($msg)
-    {
+    public static function warningMsg($msg){
         self::newError($msg, self::INFO);
         self::errorStack(self::WARNING,$msg);
         return sprintf('<%s class="%s">%s</%s>', self::$uiSpanElement, self::$uiClassWarning, $msg, self::$uiSpanElement);
     }
-
-    public static function prettyPrint($type="all")
-    {
+    public static function prettyPrint($type="all"){
         if(!class_exists('EngineAPI', FALSE)){
             // There's no EngineAPI to read the errorStacks from, so there's no point trying
             return '';
@@ -466,53 +965,28 @@ return FALSE;
 		$output .= '</ul>';
 		return($output);
 	}
-
-	private function errorStack($type,$message)
-    {
+    private function errorStack($type,$message){
         if(!class_exists('EngineAPI', FALSE)){
             // There's no EngineAPI to push this error onto, so there's no point trying
             return '';
         }
 
-		$engine = EngineAPI::singleton();
+        $engine = EngineAPI::singleton();
 
-		if (!isset($engine->errorStack[$type])) {
-			$engine->errorStack[$type] = array();
-		}
-		if (!isset($engine->errorStack["all"])) {
-			$engine->errorStack["all"] = array();
-		}
-		
-		$engine->errorStack[$type][] = $message;
-		
-		$temp = array();
-		$temp['message'] = $message;
-		$temp['type']    = $type;
-		$engine->errorStack["all"][] = $temp;
-		
-		return;
-	}
-
-    public static function errorReporting($newValue=NULL)
-    {
-        $oldValue = self::$errorReporting;
-        self::$errorReporting = $newValue;
-        return $oldValue;
-    }
-
-    private static function getErrorOrigin()
-    {
-        $backtrace = debug_backtrace();
-
-        while(sizeof($backtrace) and $backtrace[0]['file'] != __FILE__){
-            array_shift($backtrace);
+        if (!isset($engine->errorStack[$type])) {
+            $engine->errorStack[$type] = array();
+        }
+        if (!isset($engine->errorStack["all"])) {
+            $engine->errorStack["all"] = array();
         }
 
-        // If this is a phpError or a phpException, we need to go 1 more step back
-        if(self::$errorType == 'phpError' || self::$errorType == 'phpException'){
-            array_shift($backtrace);
-        }
+        $engine->errorStack[$type][] = $message;
 
-        return array_reverse($backtrace);
+        $temp = array();
+        $temp['message'] = $message;
+        $temp['type']    = $type;
+        $engine->errorStack["all"][] = $temp;
+
+        return;
     }
 }
