@@ -86,33 +86,33 @@ class userAuth
         // Link to the engine instance
         $this->engine = EngineAPI::singleton();
 
-        // Load the bcBitwise utility class
-        require_once EngineAPI::$engineDir.'/helperFunctions/bcBitwise.php';
-
         // Copy in any engine config items
         global $engineVars;
-        if(@isset($engineVars['userAuth'])){
-            if(@isset($engineVars['userAuth']['dbName']))            $this->dbName            = $engineVars['userAuth']['dbName'];
-            if(@isset($engineVars['userAuth']['tblUsers']))          $this->tblUsers          = $engineVars['userAuth']['tblUsers'];
-            if(@isset($engineVars['userAuth']['tblGroups']))         $this->tblGroups         = $engineVars['userAuth']['tblGroups'];
-            if(@isset($engineVars['userAuth']['tblPermissions']))    $this->tblPermissions    = $engineVars['userAuth']['tblPermissions'];
-            if(@isset($engineVars['userAuth']['tblAuthorizations'])) $this->tblAuthorizations = $engineVars['userAuth']['tblAuthorizations'];
-            if(@isset($engineVars['userAuth']['tblUsers2Groups']))   $this->tblUsers2Groups   = $engineVars['userAuth']['tblUsers2Groups'];
-            if(@isset($engineVars['userAuth']['tblGroups2Groups']))  $this->tblGroups2Groups  = $engineVars['userAuth']['tblGroups2Groups'];
-            if(@isset($engineVars['userAuth']['defaultToken']))      $this->defaultToken      = $engineVars['userAuth']['defaultToken'];
+        if(array_key_exists('userAuth',$engineVars)){
+            if(array_key_exists('dbName',$engineVars['userAuth']))            $this->dbName            = $engineVars['userAuth']['dbName'];
+            if(array_key_exists('tblUsers',$engineVars['userAuth']))          $this->tblUsers          = $engineVars['userAuth']['tblUsers'];
+            if(array_key_exists('tblGroups',$engineVars['userAuth']))         $this->tblGroups         = $engineVars['userAuth']['tblGroups'];
+            if(array_key_exists('tblPermissions',$engineVars['userAuth']))    $this->tblPermissions    = $engineVars['userAuth']['tblPermissions'];
+            if(array_key_exists('tblAuthorizations',$engineVars['userAuth'])) $this->tblAuthorizations = $engineVars['userAuth']['tblAuthorizations'];
+            if(array_key_exists('tblUsers2Groups',$engineVars['userAuth']))   $this->tblUsers2Groups   = $engineVars['userAuth']['tblUsers2Groups'];
+            if(array_key_exists('tblGroups2Groups',$engineVars['userAuth']))  $this->tblGroups2Groups  = $engineVars['userAuth']['tblGroups2Groups'];
+            if(array_key_exists('defaultToken',$engineVars['userAuth']))      $this->defaultToken      = $engineVars['userAuth']['defaultToken'];
         }
 
         // Connect to the database
-        $this->db = $this->engine->dbConnect('database', $this->dbName);
+        if(!$this->db = $this->engine->getPrivateVar('engineDB')){
+            errorHandle::newError(__METHOD__.'() - Cannot get to the engineDB!', errorHandle::HIGH);
+            return FALSE;
+        }
 
         // Get the user's ID
         $sqlUser = $this->db->query(sprintf("SELECT `id` FROM `%s` WHERE `id`='%s' OR `username` LIKE '%s' LIMIT 1",
-            $this->tblUsers,
+            $this->db->escape($this->tblUsers),
             $this->db->escape($userKey),
             $this->db->escape($userKey)));
-        if(!mysql_num_rows($sqlUser['result'])){
-            // Trigger an error? @todo
-            die("No user account found!");
+        if(!$sqlUser['numRows']){
+            errorHandle::newError(__METHOD__."() - Can't locate a user account with given userKey!", errorHandle::HIGH);
+            return FALSE;
         }
 
         // Save the User's ID for later use
@@ -120,12 +120,12 @@ class userAuth
 
         // Get the user's local groups
         $sqlLocalGroups = $this->db->query(sprintf('SELECT `%s`.* FROM `%s` LEFT JOIN `%s` ON `%s`.group = `%s`.id WHERE `%s`.user=%s',
-            $this->tblGroups,
-            $this->tblGroups,
-            $this->tblUsers2Groups,
-            $this->tblUsers2Groups,
-            $this->tblGroups,
-            $this->tblUsers2Groups,
+            $this->db->escape($this->tblGroups),
+            $this->db->escape($this->tblGroups),
+            $this->db->escape($this->tblUsers2Groups),
+            $this->db->escape($this->tblUsers2Groups),
+            $this->db->escape($this->tblGroups),
+            $this->db->escape($this->tblUsers2Groups),
             $this->db->escape($userID)));
         while($row = mysql_fetch_assoc($sqlLocalGroups['result'])){
             $this->groups[ $row['id'] ] = $row;
@@ -133,7 +133,7 @@ class userAuth
         }
 
         // Add the user's LDAP groups
-        if($_SESSION['authType'] == 'ldap'){
+        if(sessionGet('authType') == 'ldap'){
             global $ldapSearch;
 
             $groupCleanDNs = array();
@@ -142,7 +142,7 @@ class userAuth
             }
 
             $sqlLdapGroups = $this->db->query(sprintf('SELECT * FROM `%s` WHERE ldapDN IN (%s)',
-                $this->tblGroups,
+                $this->db->escape($this->tblGroups),
                 implode(',', $groupCleanDNs)
             ));
             while($row = mysql_fetch_assoc($sqlLdapGroups['result'])){
@@ -155,7 +155,7 @@ class userAuth
         $groupIDs = array();
         foreach($this->groups as $group){ $groupIDs[] = $group['id']; }
         $sqlGroupPermissions = $this->db->query(sprintf("SELECT * FROM %s WHERE groupID IN (%s)",
-            $this->tblAuthorizations,
+            $this->db->escape($this->tblAuthorizations),
             implode(',', $groupIDs)
         ));
         while($row = mysql_fetch_assoc($sqlGroupPermissions['result'])){
@@ -167,7 +167,7 @@ class userAuth
 
         // Get the user's permissions
         $sqlUserPermissions = $this->db->query(sprintf("SELECT * FROM %s WHERE userID='%s'",
-            $this->tblAuthorizations,
+            $this->db->escape($this->tblAuthorizations),
             $this->db->escape($userID)));
         while($row = mysql_fetch_assoc($sqlUserPermissions['result'])){
             $authToken = $row['authToken'];
@@ -190,14 +190,14 @@ class userAuth
         $result = array();
 
         $sqlGroups = $this->db->query(sprintf('SELECT `%s`.* FROM `%s` LEFT JOIN `%s` ON `%s`.parentGroup = `%s`.id WHERE `%s`.childGroup=%s',
-            $this->tblGroups,
-            $this->tblGroups,
-            $this->tblGroups2Groups,
-            $this->tblGroups2Groups,
-            $this->tblGroups,
-            $this->tblGroups2Groups,
+            $this->db->escape($this->tblGroups),
+            $this->db->escape($this->tblGroups),
+            $this->db->escape($this->tblGroups2Groups),
+            $this->db->escape($this->tblGroups2Groups),
+            $this->db->escape($this->tblGroups),
+            $this->db->escape($this->tblGroups2Groups),
             $this->db->escape($groupID)));
-        if(mysql_num_rows($sqlGroups['result'])){
+        if($sqlGroups['numRows']){
             while($row = mysql_fetch_assoc($sqlGroups['result'])){
                 $this->groups[ $row['id'] ] = $row;
                 $this->__getGroups($row['id']);
@@ -221,7 +221,8 @@ class userAuth
             // The user is wanting to use a pre-set authToken
             $t = $this->defaultToken;
             if(is_null($t)){
-                // Trigger Error @todo
+                errorHandle::newError(__METHOD__."() - Trying to us a default authToken when one isn't set.", errorHandle::DEBUG);
+                return FALSE;
             }
             $permission = $authToken;
             $authToken  = $t;
@@ -274,10 +275,10 @@ class userAuth
         $result = array();
 
         $sqlPermissions = $this->db->query(sprintf("SELECT permission,isEmpty FROM `%s` WHERE authToken='%s'",
-            $this->tblPermissions,
+            $this->db->escape($this->tblPermissions),
             $this->db->escape($authToken)));
 
-        if(mysql_num_rows($sqlPermissions['result'])){
+        if($sqlPermissions['numRows']){
             while($row = mysql_fetch_assoc($sqlPermissions['result'])){
                 if(!$row['isEmpty']){
                     // Skip non-empty permissions
@@ -320,24 +321,24 @@ class userAuth
             if(preg_match('|^([ug])(?:id)?:(\d+)$|i', $target, $m)){
                 // Make sure this is a valid user/group id
                 $tbl = (strtolower($m[1]) == 'u') ? $this->tblUsers : $this->tblGroups;
-                $sqlIdCheck = $this->db->query(sprintf("SELECT COUNT(id) AS `i` FROM `%s` WHERE `id` = '%s'", $tbl, $this->db->escape($m[2])));
+                $sqlIdCheck = $this->db->query(sprintf("SELECT COUNT(id) AS `i` FROM `%s` WHERE `id` = '%s'", $this->db->escape($tbl), $this->db->escape($m[2])));
                 if(!mysql_result($sqlIdCheck['result'], 0, 'i')){
-                    // Trigger error! @todo
+                    errorHandle::newError(__METHOD__."() - Grant target does not exist.", errorHandle::DEBUG);
                     continue;
                 }
 
                 // Make sure this is a valid permission
                 $sql = ($permission)
                         ? sprintf("SELECT COUNT(*) AS `i` FROM `%s` WHERE `authToken` = '%s' AND `permission` = '%s'",
-                            $this->tblPermissions,
+                            $this->db->escape($this->tblPermissions),
                             $this->db->escape($authToken),
                             $this->db->escape($permission))
                         : sprintf("SELECT COUNT(*) AS `i` FROM `%s` WHERE `authToken` = '%s'",
-                            $this->tblPermissions,
+                            $this->db->escape($this->tblPermissions),
                             $this->db->escape($authToken));
                 $sqlIdCheck = $this->db->query($sql);
                 if(!mysql_result($sqlIdCheck['result'], 0, 'i')){
-                    // Trigger error! @todo
+                    errorHandle::newError(__METHOD__."() - Specified authToken/permission hasn't been defined yet.", errorHandle::DEBUG);
                     continue;
                 }
 
@@ -345,24 +346,24 @@ class userAuth
                 // Look for an already existing authorization
                 $field = (strtolower($m[1]) == 'u') ? 'userID' : 'groupID';
                 $sqlExistingAuth = $this->db->query(sprintf("SELECT * FROM `%s` WHERE `authToken`='%s' AND `%s`='%s'",
-                    $this->tblAuthorizations,
+                    $this->db->escape($this->tblAuthorizations),
                     $this->db->escape($authToken),
-                    $field,
+                    $this->db->escape($field),
                     $this->db->escape($m[2])));
-                if(mysql_num_rows($sqlExistingAuth['result'])){
+                if($sqlExistingAuth['numRows']){
                     // Update the existing authorization for this token
                     $sqlUpdateAuth = $this->db->query(sprintf("UPDATE `%s` SET `permissions`='%s' WHERE `authToken`='%s' AND `%s`='%s' LIMIT 1",
-                        $this->tblAuthorizations,
+                        $this->db->escape($this->tblAuthorizations),
                         $this->db->escape(bcBitwise::bcOR(mysql_result($sqlExistingAuth['result'], 0, 'permissions'), $permission)),
                         $this->db->escape($authToken),
-                        $field,
+                        $this->db->escape($field),
                         $this->db->escape($m[2])));
                     $results[] = ($sqlUpdateAuth['errorNumber']) ? 0 : 1;
                 }else{
                     // Create a new authorization for this token
                     $sqlNewAuth = $this->db->query(sprintf("INSERT INTO `%s` (`authToken`,`%s`,`permissions`) VALUES('%s','%s','%s')",
-                        $this->tblAuthorizations,
-                        $field,
+                        $this->db->escape($this->tblAuthorizations),
+                        $this->db->escape($field),
                         $this->db->escape($authToken),
                         $this->db->escape($m[2]),
                         $this->db->escape($permission)));
@@ -403,29 +404,29 @@ class userAuth
                 if(!$permission){
                     // Remove the auth row
                     $sqlAuthRevoke = $this->db->query(sprintf("DELETE FROM `%s` WHERE `authToken`='%s' AND `%s`='%s' LIMIT 1",
-                        $this->tblAuthorizations,
+                        $this->db->escape($this->tblAuthorizations),
                         $this->db->escape($authToken),
-                        $field,
+                        $this->db->escape($field),
                         $this->db->escape($m[2])));
                     $results[] = ($sqlAuthRevoke['errorNumber']) ? 0 : 1;
                 }else{
                     // Update the auth row (remove the permission)
                     $sqlExistingAuth = $this->db->query(sprintf("SELECT `permissions` FROM `%s` WHERE `authToken`='%s' AND `%s`='%s'",
-                        $this->tblAuthorizations,
+                        $this->db->escape($this->tblAuthorizations),
                         $this->db->escape($authToken),
-                        $field,
+                        $this->db->escape($field),
                         $this->db->escape($m[2])));
                     
-                    if(mysql_num_rows($sqlExistingAuth['result'])){
+                    if($sqlExistingAuth['numRows']){
                         $sqlAuthUpdate = $this->db->query(sprintf("UPDATE `%s` SET `permissions`='%s' WHERE `authToken`='%s' AND `%s`='%s' LIMIT 1",
-                            $this->tblAuthorizations,
+                            $this->db->escape($this->tblAuthorizations),
                             $this->db->escape(bcBitwise::bcXOR(mysql_result($sqlExistingAuth['result'],0,'permissions'), $permission)),
                             $this->db->escape($authToken),
-                            $field,
+                            $this->db->escape($field),
                             $this->db->escape($m[2])));
                         $results[] = ($sqlAuthUpdate['errorNumber']) ? 0 : 1;
                     }else{
-                        // Trigger error/warning @todo
+                        errorHandle::newError(__METHOD__."() - Specified authToken/permission dosen't exist on the target.", errorHandle::DEBUG);
                         continue;
                     }
                 }
@@ -450,7 +451,7 @@ class userAuth
     public function addPermission($authToken,$name,$desc='')
     {
         $sqlPermissions = $this->db->query(sprintf("SELECT `permission`,`isEmpty` FROM `%s` WHERE `authToken`='%s' ORDER BY `permission` + 0 ASC",
-            $this->tblPermissions,
+            $this->db->escape($this->tblPermissions),
             $this->db->escape($authToken)));
 
         $lastPermission=0;
@@ -462,7 +463,7 @@ class userAuth
             }else{
                 // Okay, we are now at the 1st 'empty' permission. This is where we'll place this new permission
                 $this->db->query(sprintf("UPDATE `%s` SET `isEmpty`='0',`name`='%s',`description`='%s' WHERE `authToken`='%s' AND `permission`='%s'",
-                    $this->tblPermissions,
+                    $this->db->escape($this->tblPermissions),
                     $this->db->escape(trim($name)),
                     $this->db->escape(trim($desc)),
                     $this->db->escape($authToken),
@@ -481,7 +482,7 @@ class userAuth
          */
         $nextNumber = ($lastPermission) ? bcmul( $lastPermission, '2') : 1;
         $this->db->query(sprintf("INSERT INTO `%s` (`authToken`,`permission`,`name`,`description`) VALUES('%s','%s','%s','%s')",
-            $this->tblPermissions,
+            $this->db->escape($this->tblPermissions),
             $this->db->escape(trim($authToken)),
             $this->db->escape(trim($nextNumber)),
             $this->db->escape(trim($name)),
@@ -504,16 +505,16 @@ class userAuth
         if($this->checkToken($authToken)){
             // Get all the authorization candidates
             $sqlAuth = $this->db->query(sprintf("SELECT `id`,`permissions` FROM `%s` WHERE `authToken`='%s'",
-                $this->tblAuthorizations,
+                $this->db->escape($this->tblAuthorizations),
                 $this->db->escape($authToken)));
 
-            if(mysql_num_rows($sqlAuth['result'])){
+            if($sqlAuth['numRows']){
                 while($row = mysql_fetch_assoc($sqlAuth)){
                     // If AND passes, then this row contains this permission. (So we need to update it)
                     if(bcBitwise::bcAND($row['permissions'], $permission)){
                         $newPermission = bcBitwise::bcXOR($row['permissions'], $permission);
                         $this->db->query(sprintf("UPDATE `%s` SET `permissions`='%s' WHERE `id`='%s' LIMIT 1",
-                            $this->tblAuthorizations,
+                            $this->db->escape($this->tblAuthorizations),
                             $this->db->escape($newPermission),
                             $this->db->escape($row['id'])));
                     }
@@ -522,14 +523,14 @@ class userAuth
             
             // Okay, we can now remove the permission
             $sqlRemovePermission = $this->db->query(sprintf("UPDATE `%s` SET `isEmpty`='1', `name`='', `description`='' WHERE `authToken`='%s' AND `permission`='%s' LIMIT 1",
-                $this->tblPermissions,
+                $this->db->escape($this->tblPermissions),
                 $this->db->escape($authToken),
                 $this->db->escape($permission)));
 
             // Return the result
             return $sqlRemovePermission['errorNumber'] == 0;
         }else{
-            // Trigger error @todo
+            errorHandle::newError(__METHOD__."() - Specified authToken dosen't exist.", errorHandle::DEBUG);
             return false;
         }
     }
@@ -542,8 +543,8 @@ class userAuth
     public function checkToken($authToken)
     {
         $sqltokenCheck = $this->db->query(sprintf("SELECT COUNT(`authToken`) FROM `%s` WHERE `authToken`='%s'",
-            $this->tblPermissions,
+            $this->db->escape($this->tblPermissions),
             $this->db->escape($authToken)));
-        return (bool)mysql_num_rows($sqltokenCheck['result']);
+        return (bool)$sqltokenCheck['numRows'];
     }
 }
