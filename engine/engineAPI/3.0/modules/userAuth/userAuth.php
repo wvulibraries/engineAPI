@@ -6,48 +6,42 @@
 class userAuth
 {
     /**
-     * The database where the auth tables live
-     * @var string
-     */
-    public $dbName = 'userAuth';
-
-    /**
      * The database table where user accounts live
      * @var string
      */
-    public $tblUsers = 'users';
+    public $tblUsers = 'auth_users';
 
     /**
      * The database table where user groups live
      * @var string
      */
-    public $tblGroups = 'groups';
+    public $tblGroups = 'auth_groups';
 
     /**
      * The database table where the permissions list lives
      * The 'permissions list' is a master listing of ALL available permissions across the entire system
      * @var string
      */
-    public $tblPermissions = 'permissions';
+    public $tblPermissions = 'auth_permissions';
 
     /**
      * The database table where the system authorizations live
      * Authorizations is the mapping of a permission to a given user group or account
      * @var string
      */
-    public $tblAuthorizations = 'authorizations';
+    public $tblAuthorizations = 'auth_authorizations';
 
     /**
      * The database table representing the many to many linking between users and groups
      * @var string
      */
-    public $tblUsers2Groups = 'users_groups';
+    public $tblUsers2Groups = 'auth_users_groups';
 
     /**
      * The database table representing the many to many linking between groups and groups
      * @var string
      */
-    public $tblGroups2Groups = 'groups_groups';
+    public $tblGroups2Groups = 'auth_groups_groups';
 
     /**
      * A default authToken. If this is specified, it will be used in lue of specifying one on each checkPermission() call
@@ -93,7 +87,6 @@ class userAuth
         // Copy in any engine config items
         global $engineVars;
         if(array_key_exists('userAuth',$engineVars)){
-            if(array_key_exists('dbName',$engineVars['userAuth']))            $this->dbName            = $engineVars['userAuth']['dbName'];
             if(array_key_exists('tblUsers',$engineVars['userAuth']))          $this->tblUsers          = $engineVars['userAuth']['tblUsers'];
             if(array_key_exists('tblGroups',$engineVars['userAuth']))         $this->tblGroups         = $engineVars['userAuth']['tblGroups'];
             if(array_key_exists('tblPermissions',$engineVars['userAuth']))    $this->tblPermissions    = $engineVars['userAuth']['tblPermissions'];
