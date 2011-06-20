@@ -1,5 +1,5 @@
-DROP TABLE IF EXISTS `groups`;
-CREATE TABLE `groups` (
+DROP TABLE IF EXISTS `auth_groups`;
+CREATE TABLE `auth_groups` (
   `ID` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `ldapDN` varchar(256) DEFAULT NULL,
   `name` varchar(32) NOT NULL,
@@ -8,8 +8,8 @@ CREATE TABLE `groups` (
   UNIQUE KEY `ldapDN` (`ldapDN`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=latin1;
 
-DROP TABLE IF EXISTS `users`;
-CREATE TABLE `users` (
+DROP TABLE IF EXISTS `auth_users`;
+CREATE TABLE `auth_users` (
   `ID` int(11) NOT NULL AUTO_INCREMENT,
   `username` varchar(16) DEFAULT NULL,
   `password` varchar(32) NOT NULL,
@@ -17,8 +17,8 @@ CREATE TABLE `users` (
   UNIQUE KEY `username` (`username`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=latin1;
 
-DROP TABLE IF EXISTS `permissions`;
-CREATE TABLE `permissions` (
+DROP TABLE IF EXISTS `auth_permissions`;
+CREATE TABLE `auth_permissions` (
   `authToken` varchar(64) NOT NULL,
   `permission` varchar(128) NOT NULL,
   `isEmpty` tinyint(1) NOT NULL DEFAULT '0',
@@ -27,8 +27,8 @@ CREATE TABLE `permissions` (
   PRIMARY KEY (`authToken`,`permission`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
-DROP TABLE IF EXISTS `authorizations`;
-CREATE TABLE `authorizations` (
+DROP TABLE IF EXISTS `auth_authorizations`;
+CREATE TABLE `auth_authorizations` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `userID` int(10) unsigned DEFAULT NULL,
   `groupID` int(10) unsigned DEFAULT NULL,
@@ -40,8 +40,8 @@ CREATE TABLE `authorizations` (
   UNIQUE KEY `groupIDtoken` (`groupID`,`authToken`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
-DROP TABLE IF EXISTS `groups_groups`;
-CREATE TABLE `groups_groups` (
+DROP TABLE IF EXISTS `auth_groups_groups`;
+CREATE TABLE `auth_groups_groups` (
   `ID` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `childGroup` int(10) unsigned NOT NULL,
   `parentGroup` int(10) unsigned NOT NULL,
@@ -49,8 +49,8 @@ CREATE TABLE `groups_groups` (
   UNIQUE KEY `childGroup` (`childGroup`,`parentGroup`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=latin1;
 
-DROP TABLE IF EXISTS `users_groups`;
-CREATE TABLE `users_groups` (
+DROP TABLE IF EXISTS `auth_users_groups`;
+CREATE TABLE `auth_users_groups` (
   `ID` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `user` int(10) unsigned NOT NULL,
   `group` int(10) unsigned NOT NULL,
