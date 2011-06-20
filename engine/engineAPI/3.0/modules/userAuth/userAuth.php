@@ -105,7 +105,7 @@ class userAuth
 
         // Connect to the database
         if(!$this->db = $this->engine->getPrivateVar('engineDB')){
-            errorHandle::newError(__METHOD__.'() - Cannot get to the engineDB!', errorHandle::HIGH);
+            errorHandle::newError(__METHOD__.'() - Cannot get to the engineDB!', errorHandle::CRITICAL);
             return FALSE;
         }
 
@@ -115,7 +115,7 @@ class userAuth
             $this->db->escape($userKey),
             $this->db->escape($userKey)));
         if(!$sqlUser['numRows']){
-            errorHandle::newError(__METHOD__."() - Can't locate a user account with given userKey!", errorHandle::HIGH);
+            errorHandle::newError(__METHOD__."() - Can't locate a user account with given userKey '$userKey'!", errorHandle::HIGH);
             return FALSE;
         }
 
