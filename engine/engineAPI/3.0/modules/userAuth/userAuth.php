@@ -1,4 +1,8 @@
 <?php
+/**
+ * @todo Add a method for adding a user to a group(s)
+ * @todo Add a method for adding a group to a group(s)
+ */
 class userAuth
 {
     /**
@@ -106,7 +110,7 @@ class userAuth
         }
 
         // Get the user's ID
-        $sqlUser = $this->db->query(sprintf("SELECT `id` FROM `%s` WHERE `id`='%s' OR `username` LIKE '%s' LIMIT 1",
+        $sqlUser = $this->db->query(sprintf("SELECT `ID` FROM `%s` WHERE `ID`='%s' OR `username` LIKE '%s' LIMIT 1",
             $this->db->escape($this->tblUsers),
             $this->db->escape($userKey),
             $this->db->escape($userKey)));
@@ -116,10 +120,10 @@ class userAuth
         }
 
         // Save the User's ID for later use
-        $userID = mysql_result($sqlUser['result'],0,'id');
+        $userID = mysql_result($sqlUser['result'],0,'ID');
 
         // Get the user's local groups
-        $sqlLocalGroups = $this->db->query(sprintf('SELECT `%s`.* FROM `%s` LEFT JOIN `%s` ON `%s`.group = `%s`.id WHERE `%s`.user=%s',
+        $sqlLocalGroups = $this->db->query(sprintf('SELECT `%s`.* FROM `%s` LEFT JOIN `%s` ON `%s`.group = `%s`.`ID` WHERE `%s`.user=%s',
             $this->db->escape($this->tblGroups),
             $this->db->escape($this->tblGroups),
             $this->db->escape($this->tblUsers2Groups),
@@ -128,8 +132,8 @@ class userAuth
             $this->db->escape($this->tblUsers2Groups),
             $this->db->escape($userID)));
         while($row = mysql_fetch_assoc($sqlLocalGroups['result'])){
-            $this->groups[ $row['id'] ] = $row;
-            $this->__getGroups($row['id']);
+            $this->groups[ $row['ID'] ] = $row;
+            $this->__getGroups($row['ID']);
         }
 
         // Add the user's LDAP groups
@@ -146,14 +150,14 @@ class userAuth
                 implode(',', $groupCleanDNs)
             ));
             while($row = mysql_fetch_assoc($sqlLdapGroups['result'])){
-                $this->groups[ $row['id'] ] = $row;
-                $this->__getGroups($row['id']);
+                $this->groups[ $row['ID'] ] = $row;
+                $this->__getGroups($row['ID']);
             }
         }
 
         // Get the user's group permissions
         $groupIDs = array();
-        foreach($this->groups as $group){ $groupIDs[] = $group['id']; }
+        foreach($this->groups as $group){ $groupIDs[] = $group['ID']; }
         $sqlGroupPermissions = $this->db->query(sprintf("SELECT * FROM %s WHERE groupID IN (%s)",
             $this->db->escape($this->tblAuthorizations),
             implode(',', $groupIDs)
@@ -189,7 +193,7 @@ class userAuth
     {
         $result = array();
 
-        $sqlGroups = $this->db->query(sprintf('SELECT `%s`.* FROM `%s` LEFT JOIN `%s` ON `%s`.parentGroup = `%s`.id WHERE `%s`.childGroup=%s',
+        $sqlGroups = $this->db->query(sprintf('SELECT `%s`.* FROM `%s` LEFT JOIN `%s` ON `%s`.parentGroup = `%s`.`ID` WHERE `%s`.childGroup=%s',
             $this->db->escape($this->tblGroups),
             $this->db->escape($this->tblGroups),
             $this->db->escape($this->tblGroups2Groups),
@@ -199,8 +203,8 @@ class userAuth
             $this->db->escape($groupID)));
         if($sqlGroups['numRows']){
             while($row = mysql_fetch_assoc($sqlGroups['result'])){
-                $this->groups[ $row['id'] ] = $row;
-                $this->__getGroups($row['id']);
+                $this->groups[ $row['ID'] ] = $row;
+                $this->__getGroups($row['ID']);
             }
         }
         return $result;
@@ -308,10 +312,12 @@ class userAuth
      *        The authToken to assign
      * @param int $permission
      *        The permission to assign
+     * @param string $notes
+     *
      * @return int
      *         The number of grants which completed successfully will be returned
      */
-    public function grantPermission($target,$authToken,$permission=0)
+    public function grantPermission($target,$authToken,$permission=NULL,$notes='')
     {
         $results = array();
         // Make sure we're working with an array of targets
@@ -321,7 +327,7 @@ class userAuth
             if(preg_match('|^([ug])(?:id)?:(\d+)$|i', $target, $m)){
                 // Make sure this is a valid user/group id
                 $tbl = (strtolower($m[1]) == 'u') ? $this->tblUsers : $this->tblGroups;
-                $sqlIdCheck = $this->db->query(sprintf("SELECT COUNT(id) AS `i` FROM `%s` WHERE `id` = '%s'", $this->db->escape($tbl), $this->db->escape($m[2])));
+                $sqlIdCheck = $this->db->query(sprintf("SELECT COUNT(`ID`) AS `i` FROM `%s` WHERE `ID` = '%s'", $this->db->escape($tbl), $this->db->escape($m[2])));
                 if(!mysql_result($sqlIdCheck['result'], 0, 'i')){
                     errorHandle::newError(__METHOD__."() - Grant target does not exist.", errorHandle::DEBUG);
                     continue;
@@ -352,21 +358,23 @@ class userAuth
                     $this->db->escape($m[2])));
                 if($sqlExistingAuth['numRows']){
                     // Update the existing authorization for this token
-                    $sqlUpdateAuth = $this->db->query(sprintf("UPDATE `%s` SET `permissions`='%s' WHERE `authToken`='%s' AND `%s`='%s' LIMIT 1",
+                    $sqlUpdateAuth = $this->db->query(sprintf("UPDATE `%s` SET `permissions`='%s', `notes`='%s' WHERE `authToken`='%s' AND `%s`='%s' LIMIT 1",
                         $this->db->escape($this->tblAuthorizations),
                         $this->db->escape(bcBitwise::bcOR(mysql_result($sqlExistingAuth['result'], 0, 'permissions'), $permission)),
+                        $this->db->escape($notes),
                         $this->db->escape($authToken),
                         $this->db->escape($field),
                         $this->db->escape($m[2])));
                     $results[] = ($sqlUpdateAuth['errorNumber']) ? 0 : 1;
                 }else{
                     // Create a new authorization for this token
-                    $sqlNewAuth = $this->db->query(sprintf("INSERT INTO `%s` (`authToken`,`%s`,`permissions`) VALUES('%s','%s','%s')",
+                    $sqlNewAuth = $this->db->query(sprintf("INSERT INTO `%s` (`authToken`,`%s`,`permissions`,`notes`) VALUES('%s','%s','%s','%s')",
                         $this->db->escape($this->tblAuthorizations),
                         $this->db->escape($field),
                         $this->db->escape($authToken),
                         $this->db->escape($m[2]),
-                        $this->db->escape($permission)));
+                        $this->db->escape($permission),
+                        $this->db->escape($notes)));
                     $results[] = ($sqlNewAuth['errorNumber']) ? 0 : 1;
                 }
             }
@@ -504,7 +512,7 @@ class userAuth
         // Check to make sure the token is valid
         if($this->checkToken($authToken)){
             // Get all the authorization candidates
-            $sqlAuth = $this->db->query(sprintf("SELECT `id`,`permissions` FROM `%s` WHERE `authToken`='%s'",
+            $sqlAuth = $this->db->query(sprintf("SELECT `ID`,`permissions` FROM `%s` WHERE `authToken`='%s'",
                 $this->db->escape($this->tblAuthorizations),
                 $this->db->escape($authToken)));
 
@@ -513,10 +521,10 @@ class userAuth
                     // If AND passes, then this row contains this permission. (So we need to update it)
                     if(bcBitwise::bcAND($row['permissions'], $permission)){
                         $newPermission = bcBitwise::bcXOR($row['permissions'], $permission);
-                        $this->db->query(sprintf("UPDATE `%s` SET `permissions`='%s' WHERE `id`='%s' LIMIT 1",
+                        $this->db->query(sprintf("UPDATE `%s` SET `permissions`='%s' WHERE `ID`='%s' LIMIT 1",
                             $this->db->escape($this->tblAuthorizations),
                             $this->db->escape($newPermission),
-                            $this->db->escape($row['id'])));
+                            $this->db->escape($row['ID'])));
                     }
                 }
             }
