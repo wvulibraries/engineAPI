@@ -91,7 +91,7 @@ class ldapSearch
      * @param array $params
      * @return null|resource
      */
-    public function connect($params=array())
+    public function &connect($params=array())
     {
         if(array_key_exists('ldapServer', $params))     $this->ldapServer     = $params['ldapServer'];
         if(array_key_exists('ldapServerPort', $params)) $this->ldapServerPort = $params['ldapServerPort'];
@@ -104,8 +104,8 @@ class ldapSearch
             errorHandle::newError(__METHOD__.'() - Failed to open LDAP connection. '.ldap_errno($ldapConnection).':'.ldap_error($ldapConnection), errorHandle::HIGH);
             return NULL;
         }else{
-            ldap_set_option($this->ldap, LDAP_OPT_PROTOCOL_VERSION, 3);
-            ldap_set_option($this->ldap, LDAP_OPT_REFERRALS, 0);
+            ldap_set_option($ldapConnection, LDAP_OPT_PROTOCOL_VERSION, 3);
+            ldap_set_option($ldapConnection, LDAP_OPT_REFERRALS, 0);
             return $ldapConnection;
         }
     }
@@ -141,7 +141,7 @@ class ldapSearch
                 : NULL;
 
         // If we're not connected, fix that.
-        if(is_null($this->ldap)) $this->ldap = $this->connect();
+        if(is_null($this->ldap)) $this->ldap =& $this->connect();
         if($this->ldap){
             return (bool)ldap_bind($this->ldap, $bindRDN, $password);
         }else{
@@ -177,7 +177,7 @@ class ldapSearch
                         : $username)
                 : NULL;
 
-        $ldap = $this->connect($connectParams);
+        $ldap =& $this->connect($connectParams);
         $bind = ldap_bind($ldap, $bindRDN, $password);
         if($bind) ldap_unbind($bind);
         return $bind;
@@ -236,7 +236,7 @@ class ldapSearch
         // If we're not connected, connect now
         if(!$this->ldap){
             $connParams = (array_key_exists('connection', $params)) ? $params['connection'] : NULL;
-            if(!$this->connect($connParams)){
+            if(!$this->ldap =& $this->connect($connParams)){
                 return array();
             }
         }
@@ -308,7 +308,7 @@ class ldapSearch
         // If we're not connected, connect now
         if(!$this->ldap){
             $connParams = (array_key_exists('connection', $params)) ? $params['connection'] : NULL;
-            if(!$this->connect($connParams)){
+            if(!$this->ldap =& $this->connect($connParams)){
                 return array();
             }
         }
@@ -388,7 +388,7 @@ class ldapSearch
         // If we're not connected, connect now
         if(!$this->ldap){
             $connParams = (array_key_exists('connection', $params)) ? $params['connection'] : NULL;
-            if(!$this->connect($connParams)){
+            if(!$this->ldap =& $this->connect($connParams)){
                 return array();
             }
         }
