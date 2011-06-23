@@ -6,7 +6,7 @@ CREATE TABLE `auth_groups` (
   `description` text NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `ldapDN` (`ldapDN`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1;
 
 DROP TABLE IF EXISTS `auth_users`;
 CREATE TABLE `auth_users` (
@@ -15,7 +15,7 @@ CREATE TABLE `auth_users` (
   `password` varchar(32) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `username` (`username`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1;
 
 DROP TABLE IF EXISTS `auth_permissions`;
 CREATE TABLE `auth_permissions` (
@@ -25,7 +25,7 @@ CREATE TABLE `auth_permissions` (
   `name` varchar(128) NOT NULL,
   `description` text NOT NULL,
   PRIMARY KEY (`authToken`,`permission`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 DROP TABLE IF EXISTS `auth_authorizations`;
 CREATE TABLE `auth_authorizations` (
@@ -38,7 +38,7 @@ CREATE TABLE `auth_authorizations` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `userIDtoken` (`userID`,`authToken`),
   UNIQUE KEY `groupIDtoken` (`groupID`,`authToken`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 DROP TABLE IF EXISTS `auth_groups_groups`;
 CREATE TABLE `auth_groups_groups` (
@@ -47,7 +47,7 @@ CREATE TABLE `auth_groups_groups` (
   `parentGroup` int(10) unsigned NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `childGroup` (`childGroup`,`parentGroup`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1;
 
 DROP TABLE IF EXISTS `auth_users_groups`;
 CREATE TABLE `auth_users_groups` (
@@ -56,4 +56,4 @@ CREATE TABLE `auth_users_groups` (
   `group` int(10) unsigned NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `user` (`user`,`group`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1;

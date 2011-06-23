@@ -98,9 +98,11 @@ class userAuth
 
         // Connect to the database
         if(!$this->db = $this->engine->getPrivateVar('engineDB')){
-            errorHandle::newError(__METHOD__.'() - Cannot get to the engineDB!', errorHandle::CRITICAL);
+            errorHandle::newError(__METHOD__ . '() - Cannot get to the engineDB!', errorHandle::CRITICAL);
             return FALSE;
         }
+
+        if(defined('ENGINE_DB_NAME')) $this->selectDB(ENGINE_DB_NAME);
 
         // Get the user's ID
         $sqlUser = $this->db->query(sprintf("SELECT `ID` FROM `%s` WHERE `ID`='%s' OR `username` LIKE '%s' LIMIT 1",
@@ -108,73 +110,74 @@ class userAuth
             $this->db->escape($userKey),
             $this->db->escape($userKey)));
         if(!$sqlUser['numRows']){
-            errorHandle::newError(__METHOD__."() - Can't locate a user account with given userKey '$userKey'!", errorHandle::HIGH);
-            return FALSE;
-        }
+            errorHandle::newError(__METHOD__ . "() - Can't locate a user account with given userKey '$userKey'!", errorHandle::DEBUG);
+        }else{
+            // Save the User's ID for later use
+            $userID = mysql_result($sqlUser['result'], 0, 'ID');
 
-        // Save the User's ID for later use
-        $userID = mysql_result($sqlUser['result'],0,'ID');
-
-        // Get the user's local groups
-        $sqlLocalGroups = $this->db->query(sprintf('SELECT `%s`.* FROM `%s` LEFT JOIN `%s` ON `%s`.group = `%s`.`ID` WHERE `%s`.user=%s',
-            $this->db->escape($this->tblGroups),
-            $this->db->escape($this->tblGroups),
-            $this->db->escape($this->tblUsers2Groups),
-            $this->db->escape($this->tblUsers2Groups),
-            $this->db->escape($this->tblGroups),
-            $this->db->escape($this->tblUsers2Groups),
-            $this->db->escape($userID)));
-        while($row = mysql_fetch_assoc($sqlLocalGroups['result'])){
-            $this->groups[ $row['ID'] ] = $row;
-            $this->__getGroups($row['ID']);
-        }
-
-        // Add the user's LDAP groups
-        if(sessionGet('authType') == 'ldap'){
-            global $ldapSearch;
-
-            $groupCleanDNs = array();
-            foreach($_SESSION['auth_ldap']['groups'] as $groupDN){
-                $groupCleanDNs[] = "'".$this->db->escape($groupDN)."'";
-            }
-
-            $sqlLdapGroups = $this->db->query(sprintf('SELECT * FROM `%s` WHERE ldapDN IN (%s)',
+            // Get the user's local groups
+            $sqlLocalGroups = $this->db->query(sprintf('SELECT `%s`.* FROM `%s` LEFT JOIN `%s` ON `%s`.group = `%s`.`ID` WHERE `%s`.user=%s',
                 $this->db->escape($this->tblGroups),
-                implode(',', $groupCleanDNs)
-            ));
-            while($row = mysql_fetch_assoc($sqlLdapGroups['result'])){
-                $this->groups[ $row['ID'] ] = $row;
+                $this->db->escape($this->tblGroups),
+                $this->db->escape($this->tblUsers2Groups),
+                $this->db->escape($this->tblUsers2Groups),
+                $this->db->escape($this->tblGroups),
+                $this->db->escape($this->tblUsers2Groups),
+                $this->db->escape($userID)));
+            while ($row = mysql_fetch_assoc($sqlLocalGroups['result'])) {
+                $this->groups[$row['ID']] = $row;
                 $this->__getGroups($row['ID']);
             }
-        }
 
-        // Get the user's group permissions
-        $groupIDs = array();
-        foreach($this->groups as $group){ $groupIDs[] = $group['ID']; }
-        $sqlGroupPermissions = $this->db->query(sprintf("SELECT * FROM %s WHERE groupID IN (%s)",
-            $this->db->escape($this->tblAuthorizations),
-            implode(',', $groupIDs)
-        ));
-        while($row = mysql_fetch_assoc($sqlGroupPermissions['result'])){
-            $authToken = $row['authToken'];
-            $this->permissions[$authToken] = (array_key_exists($authToken, $this->permissions))
-                    ? $this->permissions[$authToken] | $row['permissions']
-                    : $row['permissions'];
-        }
+            // Add the user's LDAP groups
+            if (sessionGet('authType') == 'ldap') {
+                global $ldapSearch;
 
-        // Get the user's permissions
-        $sqlUserPermissions = $this->db->query(sprintf("SELECT * FROM %s WHERE userID='%s'",
-            $this->db->escape($this->tblAuthorizations),
-            $this->db->escape($userID)));
-        while($row = mysql_fetch_assoc($sqlUserPermissions['result'])){
-            $authToken = $row['authToken'];
-            $this->permissions[$authToken] = (array_key_exists($authToken, $this->permissions))
-                    ? $this->permissions[$authToken] | $row['permissions']
-                    : $row['permissions'];
-        }
+                $groupCleanDNs = array();
+                foreach ($_SESSION['auth_ldap']['groups'] as $groupDN) {
+                    $groupCleanDNs[] = "'" . $this->db->escape($groupDN) . "'";
+                }
 
-        // Sort the permissions list (to clean it up)
-        ksort($this->permissions);
+                $sqlLdapGroups = $this->db->query(sprintf('SELECT * FROM `%s` WHERE ldapDN IN (%s)',
+                    $this->db->escape($this->tblGroups),
+                    implode(',', $groupCleanDNs)));
+                while ($row = mysql_fetch_assoc($sqlLdapGroups['result'])) {
+                    $this->groups[$row['ID']] = $row;
+                    $this->__getGroups($row['ID']);
+                }
+            }
+
+            // Get the user's group permissions
+            $groupIDs = array();
+            foreach ($this->groups as $group) {
+                $groupIDs[] = $group['ID'];
+            }
+            if(sizeof($groupIDs)){
+                $sqlGroupPermissions = $this->db->query(sprintf("SELECT * FROM %s WHERE groupID IN (%s)",
+                    $this->db->escape($this->tblAuthorizations),
+                    implode(',', $groupIDs)));
+                while($row = mysql_fetch_assoc($sqlGroupPermissions['result'])){
+                    $authToken = $row['authToken'];
+                    $this->permissions[$authToken] = (array_key_exists($authToken, $this->permissions))
+                        ? $this->permissions[$authToken] | $row['permissions']
+                        : $row['permissions'];
+                  }
+            }
+
+            // Get the user's permissions
+            $sqlUserPermissions = $this->db->query(sprintf("SELECT * FROM %s WHERE userID='%s'",
+                $this->db->escape($this->tblAuthorizations),
+                $this->db->escape($userID)));
+            while ($row = mysql_fetch_assoc($sqlUserPermissions['result'])) {
+                $authToken = $row['authToken'];
+                $this->permissions[$authToken] = (array_key_exists($authToken, $this->permissions))
+                        ? $this->permissions[$authToken] | $row['permissions']
+                        : $row['permissions'];
+            }
+
+            // Sort the permissions list (to clean it up)
+            ksort($this->permissions);
+        }
     }
 
     /**
@@ -317,38 +320,35 @@ class userAuth
         $targets = (array)$target; unset($target);
         foreach($targets as $target){
             // Make sure this is a valid target
-            if(preg_match('|^([ug])(?:id)?:(\d+)$|i', $target, $m)){
+            if($target = $this->parseTarget($target)){
                 // Make sure this is a valid user/group id
-                $tbl = (strtolower($m[1]) == 'u') ? $this->tblUsers : $this->tblGroups;
-                $sqlIdCheck = $this->db->query(sprintf("SELECT COUNT(`ID`) AS `i` FROM `%s` WHERE `ID` = '%s'", $this->db->escape($tbl), $this->db->escape($m[2])));
+                $tbl = ($target['type'] == 'user') ? $this->tblUsers : $this->tblGroups;
+                $sqlIdCheck = $this->db->query(sprintf("SELECT COUNT(`ID`) AS `i` FROM `%s` WHERE `ID` = '%s'", $this->db->escape($tbl), $this->db->escape($target['id'])));
                 if(!mysql_result($sqlIdCheck['result'], 0, 'i')){
                     errorHandle::newError(__METHOD__."() - Grant target does not exist.", errorHandle::DEBUG);
                     continue;
                 }
-
                 // Make sure this is a valid permission
                 $sql = ($permission)
-                        ? sprintf("SELECT COUNT(*) AS `i` FROM `%s` WHERE `authToken` = '%s' AND `permission` = '%s'",
+                        ? sprintf("SELECT `authToken`,`permission` FROM `%s` WHERE `authToken` = '%s' AND `permission` = '%s'",
                             $this->db->escape($this->tblPermissions),
                             $this->db->escape($authToken),
                             $this->db->escape($permission))
-                        : sprintf("SELECT COUNT(*) AS `i` FROM `%s` WHERE `authToken` = '%s'",
+                        : sprintf("SELECT `authToken`,`permission` FROM `%s` WHERE `authToken` = '%s'",
                             $this->db->escape($this->tblPermissions),
                             $this->db->escape($authToken));
                 $sqlIdCheck = $this->db->query($sql);
-                if(!mysql_result($sqlIdCheck['result'], 0, 'i')){
+                if(!$sqlIdCheck['numRows']){
                     errorHandle::newError(__METHOD__."() - Specified authToken/permission hasn't been defined yet.", errorHandle::DEBUG);
                     continue;
                 }
-
-
                 // Look for an already existing authorization
-                $field = (strtolower($m[1]) == 'u') ? 'userID' : 'groupID';
+                $field = (strtolower($target['type']) == 'u') ? 'userID' : 'groupID';
                 $sqlExistingAuth = $this->db->query(sprintf("SELECT * FROM `%s` WHERE `authToken`='%s' AND `%s`='%s'",
                     $this->db->escape($this->tblAuthorizations),
                     $this->db->escape($authToken),
                     $this->db->escape($field),
-                    $this->db->escape($m[2])));
+                    $this->db->escape($target['id'])));
                 if($sqlExistingAuth['numRows']){
                     // Update the existing authorization for this token
                     $sqlUpdateAuth = $this->db->query(sprintf("UPDATE `%s` SET `permissions`='%s', `notes`='%s' WHERE `authToken`='%s' AND `%s`='%s' LIMIT 1",
@@ -357,7 +357,7 @@ class userAuth
                         $this->db->escape($notes),
                         $this->db->escape($authToken),
                         $this->db->escape($field),
-                        $this->db->escape($m[2])));
+                        $this->db->escape($target['id'])));
                     $results[] = ($sqlUpdateAuth['errorNumber']) ? 0 : 1;
                 }else{
                     // Create a new authorization for this token
@@ -365,14 +365,13 @@ class userAuth
                         $this->db->escape($this->tblAuthorizations),
                         $this->db->escape($field),
                         $this->db->escape($authToken),
-                        $this->db->escape($m[2]),
+                        $this->db->escape($target['id']),
                         $this->db->escape($permission),
                         $this->db->escape($notes)));
                     $results[] = ($sqlNewAuth['errorNumber']) ? 0 : 1;
                 }
             }
         }
-
         // Return the results
         return array_sum($results);
     }
@@ -399,16 +398,16 @@ class userAuth
         $targets = (array)$target; unset($target);
         foreach($targets as $target){
             // Make sure this is a valid target
-            if(preg_match('|^([ug])(?:id)?:(\d+)$|i', $target, $m)){
+            if($target = $this->parseTarget($target)){
                 // Okay, if $permission is zero. then we're removing the entire authentication row. Otherwise, we're just revoking the permission itself
-                $field = (strtolower($m[1]) == 'u') ? 'userID' : 'groupID';
+                $field = ($target['type'] == 'user') ? 'userID' : 'groupID';
                 if(!$permission){
                     // Remove the auth row
                     $sqlAuthRevoke = $this->db->query(sprintf("DELETE FROM `%s` WHERE `authToken`='%s' AND `%s`='%s' LIMIT 1",
                         $this->db->escape($this->tblAuthorizations),
                         $this->db->escape($authToken),
                         $this->db->escape($field),
-                        $this->db->escape($m[2])));
+                        $this->db->escape($target['id'])));
                     $results[] = ($sqlAuthRevoke['errorNumber']) ? 0 : 1;
                 }else{
                     // Update the auth row (remove the permission)
@@ -416,7 +415,7 @@ class userAuth
                         $this->db->escape($this->tblAuthorizations),
                         $this->db->escape($authToken),
                         $this->db->escape($field),
-                        $this->db->escape($m[2])));
+                        $this->db->escape($target['id'])));
                     
                     if($sqlExistingAuth['numRows']){
                         $sqlAuthUpdate = $this->db->query(sprintf("UPDATE `%s` SET `permissions`='%s' WHERE `authToken`='%s' AND `%s`='%s' LIMIT 1",
@@ -424,7 +423,7 @@ class userAuth
                             $this->db->escape(bcBitwise::bcXOR(mysql_result($sqlExistingAuth['result'],0,'permissions'), $permission)),
                             $this->db->escape($authToken),
                             $this->db->escape($field),
-                            $this->db->escape($m[2])));
+                            $this->db->escape($target['id'])));
                         $results[] = ($sqlAuthUpdate['errorNumber']) ? 0 : 1;
                     }else{
                         errorHandle::newError(__METHOD__."() - Specified authToken/permission dosen't exist on the target.", errorHandle::DEBUG);
@@ -547,5 +546,251 @@ class userAuth
             $this->db->escape($this->tblPermissions),
             $this->db->escape($authToken)));
         return (bool)$sqltokenCheck['numRows'];
+    }
+
+    /**
+     * Creates a new auth group
+     * @param string $name
+     * @param string $desc
+     * @param string $ldapDN
+     * @return int
+     *         The unique ID for the group just created (or 0 if an error occurred)
+     */
+    public function createGroup($name,$desc='',$ldapDN='')
+    {
+        // If we were given an LDAP DN we need to make sure it's not already in use
+        if($ldapDN){
+            if(!is_null($this->ldapDN2groupID($ldapDN))){
+                errorHandle::newError(__METHOD__."() - A group with the given LDAP DN already exists!", errorHandle::DEBUG);
+                return FALSE;
+            }
+        }
+
+        $sql = ($ldapDN)
+                ? sprintf("INSERT INTO `%s` (`name`,`description`,`ldapDN`) VALUES('%s','%s','%s')",
+                    $this->db->escape($this->tblGroups),
+                    $this->db->escape($name),
+                    $this->db->escape($desc),
+                    $this->db->escape($ldapDN))
+                : sprintf("INSERT INTO `%s` (`name`,`description`) VALUES('%s','%s')",
+                    $this->db->escape($this->tblGroups),
+                    $this->db->escape($name),
+                    $this->db->escape($desc));
+
+        $dbGroupCreate = $this->db->query($sql);
+        if($dbGroupCreate['errorNumber']){
+            errorHandle::newError(__METHOD__."() - Failed to create new group. (SQL Error: ".$dbGroupCreate['error'].")", errorHandle::DEBUG);
+            return 0;
+        }else{
+            return $dbGroupCreate['id'];
+        }
+    }
+
+    /**
+     * Delete an auth from from the database
+     * @param int|string $groupKey
+     *        This will be either the Group's ID number, or the LDAP DN for an LDAP group
+     * @return bool
+     *         The success of the deletion
+     */
+    public function deleteGroup($groupKey)
+    {
+        // We need to get the group ID (if we were given an string)
+        if(!is_numeric($groupKey)){
+            // Check if the user is using the gid:# format, or an LDAP DN
+            if($str = $this->parseTarget($groupKey) and $str['type'] == 'group'){
+                $groupKey = $str['id'];
+            }else{
+                $groupKey = $this->ldapDN2groupID($groupKey);
+                if(!$groupKey) return FALSE;
+            }
+        }
+
+        // Clean the user input
+        $groupKey = $this->db->escape($groupKey);
+
+        // Start the transaction
+        $this->db->transBegin($this->db->escape($this->tblGroups));
+
+        // Remove all the children of this group (NOTE: We are only deleting the relationships, NOT the actual children)
+        $sqlDelete1 = $this->db->query(sprintf("DELETE FROM `%s` WHERE `group`='%s'", $this->db->escape($this->tblUsers2Groups), $groupKey));
+        $sqlDelete2 = $this->db->query(sprintf("DELETE FROM `%s` WHERE `childGroup`='%s' OR `parentGroup`='%s'", $this->db->escape($this->tblGroups2Groups), $groupKey, $groupKey));
+
+        // Remove all authorizations that this group had
+        $sqlDelete3 = $this->db->query(sprintf("DELETE FROM `%s` WHERE `groupID`='%s' LIMIT 1", $this->db->escape($this->tblAuthorizations), $groupKey));
+
+        // Remove the actual group
+        $sqlDelete4 = $this->db->query(sprintf("DELETE FROM `%s` WHERE `ID`='%s' LIMIT 1", $this->db->escape($this->tblGroups), $groupKey));
+
+        // Lastly, we ensure all is well with this transaction
+        if(!$sqlDelete1['errorNumber'] and !$sqlDelete2['errorNumber'] and !$sqlDelete3['errorNumber'] and !$sqlDelete4['errorNumber']){
+            // Commit the transaction
+            $this->db->transCommit();
+            $this->db->transEnd();
+            return TRUE;
+        }else{
+            // Rollback the transaction
+            $this->db->transRollback();
+            $this->db->transEnd();
+            return FALSE;
+        }
+    }
+
+    /**
+     * This method will assign a user or group to a parent group
+     * @param string $entity
+     * @param string $parentGroup
+     * @return bool
+     */
+    public function assignToGroup($entity,$parentGroup)
+    {
+        if(!$entity = $this->parseTarget($entity)){
+            errorHandle::newError(__METHOD__.'() - Malformed entity sent!', errorHandle::DEBUG);
+            return FALSE;
+        }
+        if(!$parentGroup = $this->parseTarget($parentGroup)){
+            errorHandle::newError(__METHOD__.'() - Malformed parentGroup sent!', errorHandle::DEBUG);
+            return FALSE;
+        }
+
+        // We're good to go!
+        $dbTblName     = ($entity['type'] == 'user') ? $this->db->escape($this->tblUsers2Groups) : $this->db->escape($this->tblGroups2Groups);
+        $dbFieldEntity = ($entity['type'] == 'user') ? 'user' : 'childGroup';
+        $dbFieldGroup  = ($entity['type'] == 'user') ? 'group' : 'parentGroup';
+
+        // Check for an existing relationship
+        $sqlExistingAssignment = $this->db->query(sprintf("SELECT * FROM `%s` WHERE `%s`='%s' AND `%s`='%s'",
+            $dbTblName,
+            $dbFieldEntity,
+            $this->db->escape($entity['id']),
+            $dbFieldGroup,
+            $this->db->escape($parentGroup['id'])));
+
+        // If none found, create one
+        if(!$sqlExistingAssignment['numRows']){
+            $sqlNewAssignment = $this->db->query(sprintf("INSERT INTO `%s` (`%s`,`%s`) VALUES('%s','%s')",
+                $dbTblName,
+                $dbFieldEntity,
+                $dbFieldGroup,
+                $this->db->escape($entity['id']),
+                $this->db->escape($parentGroup['id'])));
+            if($sqlNewAssignment['errorNumber']){
+                errorHandle::newError(__METHOD__."() - Failed to create new auth group! (SQL Error: ".$sqlNewAssignment['error'].")", errorHandle::DEBUG);
+                return FALSE;
+            }
+        }
+
+        // If we get here, the user was added to (or already was in) the parentGroup
+        return TRUE;
+    }
+
+    /**
+     * This method will remove a user or group from its a parent group
+     * @param string $entity
+     * @param string $parentGroup
+     * @return bool
+     */
+    public function removeFromGroup($entity,$parentGroup)
+    {
+        if(!$entity = $this->parseTarget($entity)){
+            errorHandle::newError(__METHOD__.'() - Malformed entity sent!', errorHandle::DEBUG);
+            return FALSE;
+        }
+        if(!$parentGroup = $this->parseTarget($parentGroup)){
+            errorHandle::newError(__METHOD__.'() - Malformed parentGroup sent!', errorHandle::DEBUG);
+            return FALSE;
+        }
+
+        // We're good to go!
+        $dbTblName           = ($entity['type'] == 'user') ? $this->db->escape($this->tblUsers2Groups) : $this->db->escape($this->tblGroups2Groups);
+        $dbFieldEntity       = ($entity['type'] == 'user') ? 'user' : 'childGroup';
+        $dbFieldGroup        = ($entity['type'] == 'user') ? 'group' : 'parentGroup';
+        $sqlDeleteAssignment = $this->db->query(sprintf("DELETE FROM `%s` WHERE `%s`='%s' AND `%s`='%s' LIMIT 1",
+            $dbTblName,
+            $dbFieldEntity,
+            $this->db->escape($entity['id']),
+            $dbFieldGroup,
+            $this->db->escape($parentGroup['id'])));
+        return ($sqlDeleteAssignment['errorNumber'] == 0);
+    }
+
+    /**
+     * Returns all the members (both users and groups) of a given parent group
+     * @param int|string $parentGroup
+     *        Either the Group ID or the Group's LDAP DN
+     * @param bool $recursive
+     * @return array|bool
+     */
+    public function getMembers($parentGroup, $recursive=FALSE)
+    {
+        $result = array();
+        // We need to get the group ID (if we were given an string)
+        if(!is_numeric($parentGroup)){
+            // Check if the user is using the gid:# format, or an LDAP DN
+            if($str = $this->parseTarget($parentGroup) and $str['type'] == 'group'){
+                $parentGroup = $str['id'];
+            }else{
+                $parentGroup = $this->ldapDN2groupID($parentGroup);
+                if(!$parentGroup) return FALSE;
+            }
+        }
+
+        // Get all member groups
+        $sqlChildGroups = $this->db->query(sprintf("SELECT `childGroup` FROM `%s` WHERE `parentGroup`='%s'",
+            $this->db->escape($this->tblGroups2Groups),
+            $this->db->escape($parentGroup)));
+        if($sqlChildGroups['numRows']){
+            while($row = mysql_fetch_assoc($sqlChildGroups['result'])){
+                $result[] = $row['childGroup'];
+                if($recursive) $result = array_merge($result, $this->getMembers($row['childGroup']));
+            }
+        }
+
+        // Get all member users
+        $sqlChildUsers = $this->db->query(sprintf("SELECT `user` FROM `%s` WHERE `group`='%s'",
+            $this->db->escape($this->tblUsers2Groups),
+            $this->db->escape($parentGroup)));
+        if($sqlChildUsers['numRows']){
+            while($row = mysql_fetch_assoc($sqlChildUsers['result'])){
+                $result[] = $row['user'];
+            }
+        }
+
+        return array_unique($result);
+    }
+
+    /**
+     * Looks up a group's ID by its LDAP DN
+     * @param string $dn
+     * @return int|null
+     */
+    public function ldapDN2groupID($dn)
+    {
+        $sqlGroup = $this->db->query(sprintf("SELECT * FROM `%s` WHERE `ldapDN`='%s' LIMIT 1", $this->db->escape($this->tblGroups), $this->db->escape($dn)));
+        if(!$sqlGroup['numRows']){
+            if($sqlGroup['errorNumber']) errorHandle::newError(__METHOD__."() - SQL error: ".$sqlGroup['error'], errorHandle::DEBUG);
+            errorHandle::newError(__METHOD__."() - Can't locate group with supplied LDAP DN.", errorHandle::DEBUG);
+            return NULL;
+        }
+        return (int)mysql_result($sqlGroup['result'],0,'ID');
+    }
+
+    /**
+     * This method will parse a user/group target string for it's key parts
+     * @param string $str
+     * @return array
+     */
+    private function parseTarget($str)
+    {
+        $result=array();
+        if(preg_match('|^([ug])(?:id)?:(\d+)$|i', $str, $m)){
+            $result['type'] = (strtolower($m[1]) == 'u') ? 'user' : 'group';
+            $result['id'] = $m[2];
+        }
+        return $result;
+    }
+
+    public function selectDB($db){
+        $this->db->select_db($db);
     }
 }
