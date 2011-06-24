@@ -1,5 +1,6 @@
 <?php
-class errorHandle{
+class errorHandle
+{
     /**
      * Error Severity
      * (Bitwise compatible)
@@ -152,7 +153,8 @@ class errorHandle{
     /**
      * Class constructor
      */
-    private function __construct(){
+    private function __construct()
+    {
         // Set PHP Error Constant => errorHandle Constant mapping
         self::$phpErrMapping = array(
             E_WARNING           => self::MEDIUM,
@@ -188,7 +190,8 @@ class errorHandle{
      * @static
      * @return void
      */
-    private static function resetInstance(){
+    private static function resetInstance()
+    {
         self::$errorType   = NULL;
         self::$errMsg      = NULL;
         self::$phpErrNo    = NULL;
@@ -257,7 +260,8 @@ class errorHandle{
      *   ));
      *
      */
-    public static function addProfile($conditions,$actions,$replace=FALSE){
+    public static function addProfile($conditions,$actions,$replace=FALSE)
+    {
         $profileFingerprint = md5(print_r($conditions,TRUE));
         $newProfile = array('conditions' => $conditions, 'actions' => $actions);
 
@@ -279,7 +283,8 @@ class errorHandle{
      * @param array|string $conditions
      * @return bool
      */
-    public static function removeProfile($conditions){
+    public static function removeProfile($conditions)
+    {
         $profileFingerprint = (is_array($conditions)) ? md5(print_r($conditions,TRUE)) : $conditions;
         if(array_key_exists($profileFingerprint, self::$errorProfiles)){
             unset(self::$errorProfiles[$profileFingerprint]);
@@ -301,7 +306,8 @@ class errorHandle{
      * @param array  $errContext The active symbol table at the point the error occurred
      * @return bool
      */
-    public static function phpError($errNo, $errStr, $errFile, $errLine, $errContext){
+    public static function phpError($errNo, $errStr, $errFile, $errLine, $errContext)
+    {
         // we only care if the PHP error is being looked for
         $errorReporting = ini_get('error_reporting');
         if($errorReporting === 0 || !($errorReporting & $errNo)) return FALSE;
@@ -342,7 +348,8 @@ class errorHandle{
      * @see http://www.php.net/manual/en/class.exception.php
      * @see http://us2.php.net/manual/en/function.set-exception-handler.php
      */
-    public static function phpException(Exception $e){
+    public static function phpException(Exception $e)
+    {
         self::$errorType = 'phpException';
         self::newError($e->getMessage(), self::$phpErrMapping['phpException']);
     }
@@ -358,7 +365,8 @@ class errorHandle{
      *        An optional array of addition (contextual) information pertaining to this error
      * @return void
      */
-    public static function newError($errMsg, $errSeverity, $errInfo=array()){
+    public static function newError($errMsg, $errSeverity, $errInfo=array())
+    {
         // we only care if the PHP error is being looked for
         if(!(self::$errorReporting & $errSeverity)) return;
 
@@ -470,7 +478,8 @@ class errorHandle{
      * @param string $logLocation
      * @return bool
      */
-    private static function recordError($logLocation){
+    private static function recordError($logLocation)
+    {
         if($logLocation == 'nativePHP'){
             error_log(self::$errMsg." at ".self::$errLine.":".self::$errFile);
         }elseif($logLocation == 'engineDB'){
@@ -593,7 +602,8 @@ class errorHandle{
      * @static
      * @return string
      */
-    private static function formattedSeverity(){
+    private static function formattedSeverity()
+    {
         if(self::$phpErrNo){
             return sprintf('[%s => %s]', self::phpErr2Str(self::$phpErrNo), self::severity2Str(self::$errSeverity));
         }else{
@@ -607,7 +617,8 @@ class errorHandle{
      * @param int $errNo
      * @return string
      */
-    private static function phpErr2Str($errNo){
+    private static function phpErr2Str($errNo)
+    {
         $phpErrors = array(
             E_WARNING      => 'E_WARNING',
             E_NOTICE       => 'E_NOTICE',
@@ -632,7 +643,8 @@ class errorHandle{
      * @param int $severity
      * @return string
      */
-    private static function severity2Str($severity){
+    private static function severity2Str($severity)
+    {
         $severities = array(
             self::INFO     => 'Informational',
             self::DEBUG    => 'Debug',
@@ -735,7 +747,8 @@ class errorHandle{
      * @param bool $objHash
      * @return string
      */
-    private static function toString($data, $objHash=false){
+    private static function toString($data, $objHash=false)
+    {
         switch(true){
             case is_null($data):
                 return "NULL";
@@ -785,7 +798,8 @@ class errorHandle{
      * @param object|array $obj
      * @return string
      */
-    public static function encodeObject($obj){
+    public static function encodeObject($obj)
+    {
         if(!is_object($obj) and !is_array($obj)){
             return "[Not a valid object or array]";
         }
@@ -798,7 +812,8 @@ class errorHandle{
      * @param string $txt
      * @return string
      */
-    public static function decodeObject($txt){
+    public static function decodeObject($txt)
+    {
         return gzuncompress(base64_decode($txt),9);
     }
 
@@ -808,7 +823,8 @@ class errorHandle{
      * @param array $array
      * @return int
      */
-    private static function arrayDepth($array){
+    private static function arrayDepth($array)
+    {
         $max_indentation = 1;
         $array_str = print_r($array, true);
         $lines = explode("\n", $array_str);
@@ -829,7 +845,8 @@ class errorHandle{
      * @return int
      *         The old errorReporting
      */
-    public static function errorReporting($newValue=NULL){
+    public static function errorReporting($newValue=NULL)
+    {
         $oldValue = self::$errorReporting;
         if(!is_null($newValue)) self::$errorReporting = $newValue;
         return $oldValue;
@@ -841,7 +858,8 @@ class errorHandle{
      * @static
      * @return array
      */
-    private static function getErrorOrigin(){
+    private static function getErrorOrigin()
+    {
         $backTrace = debug_backtrace();
         while(sizeof($backTrace) and (!array_key_exists('file',$backTrace[0]) or $backTrace[0]['file'] == __FILE__)){
             array_shift($backTrace);
@@ -854,7 +872,8 @@ class errorHandle{
      * @static
      * @return string
      */
-    private static function getRemoteIP(){
+    private static function getRemoteIP()
+    {
         if (isCLI()) {
             if (array_key_exists('SSH_CONNECTION', $_SERVER)) {
                 list($remoteIpAddr, $unknown1, $localIpAddr, $unknown2) = explode(' ', $_SERVER['SSH_CONNECTION']);
@@ -875,7 +894,8 @@ class errorHandle{
      * @static
      * @return string
      */
-    private static function getUserAgent(){
+    private static function getUserAgent()
+    {
         if(isCLI()){
             $ip = self::getRemoteIP();
             $user = (array_key_exists('USER', $_SERVER)) ? $_SERVER['USER'] : 'unknown';
@@ -889,22 +909,23 @@ class errorHandle{
         }
     }
 
-    public static function errorMsg($msg){
-        self::newError($msg, self::INFO);
+    public static function errorMsg($msg)
+    {
         self::errorStack(self::ERROR,$msg);
         return sprintf('<%s class="%s">%s</%s>', self::$uiSpanElement, self::$uiClassError, $msg, self::$uiSpanElement);
     }
-    public static function successMsg($msg){
-        self::newError($msg, self::INFO);
+    public static function successMsg($msg)
+    {
         self::errorStack(self::SUCCESS,$msg);
         return sprintf('<%s class="%s">%s</%s>', self::$uiSpanElement, self::$uiClassSuccess, $msg, self::$uiSpanElement);
     }
-    public static function warningMsg($msg){
-        self::newError($msg, self::INFO);
+    public static function warningMsg($msg)
+    {
         self::errorStack(self::WARNING,$msg);
         return sprintf('<%s class="%s">%s</%s>', self::$uiSpanElement, self::$uiClassWarning, $msg, self::$uiSpanElement);
     }
-    public static function prettyPrint($type="all"){
+    public static function prettyPrint($type="all")
+    {
         if(!class_exists('EngineAPI', FALSE)){
             // There's no EngineAPI to read the errorStacks from, so there's no point trying
             return '';
@@ -965,7 +986,8 @@ class errorHandle{
 		$output .= '</ul>';
 		return($output);
 	}
-    private function errorStack($type,$message){
+    private function errorStack($type,$message)
+    {
         if(!class_exists('EngineAPI', FALSE)){
             // There's no EngineAPI to push this error onto, so there's no point trying
             return '';
