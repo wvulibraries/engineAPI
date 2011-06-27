@@ -4,8 +4,7 @@ CREATE TABLE `auth_groups` (
   `ldapDN` varchar(256) DEFAULT NULL,
   `name` varchar(32) NOT NULL,
   `description` text NOT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `ldapDN` (`ldapDN`)
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=latin1;
 
 DROP TABLE IF EXISTS `auth_users`;
@@ -13,18 +12,25 @@ CREATE TABLE `auth_users` (
   `ID` int(11) NOT NULL AUTO_INCREMENT,
   `username` varchar(16) DEFAULT NULL,
   `password` varchar(32) NOT NULL,
+  `firstname` varchar(25) DEFAULT NULL,
+  `lastname` varchar(25) DEFAULT NULL,
+  `email` varchar(25) DEFAULT NULL,
+  `cellPhone` varchar(25) DEFAULT NULL,
+  `officePhone` varchar(25) DEFAULT NULL,
+  `homePhone` varchar(25) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `username` (`username`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=latin1;
 
 DROP TABLE IF EXISTS `auth_permissions`;
 CREATE TABLE `auth_permissions` (
+	`ID` int(11) NOT NULL AUTO_INCREMENT,
   `authToken` varchar(64) NOT NULL,
   `permission` varchar(128) NOT NULL,
   `isEmpty` tinyint(1) NOT NULL DEFAULT '0',
   `name` varchar(128) NOT NULL,
   `description` text NOT NULL,
-  PRIMARY KEY (`authToken`,`permission`)
+  PRIMARY KEY (`ID`,`authToken`,`permission`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 DROP TABLE IF EXISTS `auth_authorizations`;
