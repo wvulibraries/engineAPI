@@ -258,7 +258,7 @@ class EngineAPI
 			unset($_REQUEST); 
 		}
 
-        // Last thing we need to do is load, and initialize the errorHandle class (the error handeler)
+        // Last thing we need to do is load, and initialize the errorHandle class (the error handler)
         require_once(self::$engineDir."/errorHandle.php");
         errorHandle::singleton();
 	}
@@ -612,11 +612,12 @@ class EngineAPI
 	######################################################################
 
 	private function autoloader($className) {
-		$fh = fopen("/tmp/modules.txt","a");
-		fwrite($fh,"\n\n=====Autoloader Begin =========\n\n");
-		fwrite($fh,$className);
-		fwrite($fh,"\n\n=====Autoloader END =========\n\n");
-		fclose($fh);
+		// // Debugging
+		// $fh = fopen("/tmp/modules.txt","a");
+		// fwrite($fh,"\n\n=====Autoloader Begin =========\n\n");
+		// fwrite($fh,$className);
+		// fwrite($fh,"\n\n=====Autoloader END =========\n\n");
+		// fclose($fh);
 		
 		if (!class_exists($className, FALSE)) {
 

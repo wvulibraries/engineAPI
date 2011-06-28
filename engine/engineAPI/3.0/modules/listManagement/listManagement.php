@@ -7,12 +7,30 @@ class listManagement {
 	private $fields        = array();
 	private $hiddenFields  = array();
 	private $dateInputs    = FALSE;
+	private $passwdInputs  = FALSE;
 	private $wysiwygInputs = FALSE;
 	private $checkboxInput = FALSE;
 	private $multiSelect   = FALSE;
 	private $database      = NULL;  // database object. defaults to $engine->openDB;
 	private $error         = NULL;
+	private $multiKey      = array();
+
+	// If set, these will be called after all of the validation checks have been run
+	// instead of using the internal update.
+	public $callbackObj    = NULL;  
+	public $insertCallback = NULL;
+	public $updateCallback = NULL; // Not yet Implimented
+	public $deleteCallback = NULL;
 	
+
+	public $rel            = NULL;
+	public $rev            = NULL;
+	public $confirmUpdateDelete = TRUE; // If this is set to false, update edit tables will not confirm deletes
+	
+	public  $passwordHash  = MHASH_SHA512;
+	
+	public $updateBlankIsDupe = FALSE; // If set to true, and DUPES are not allowed on a field, yell if 2 blanks
+									   // By default, blanks are not considered to be dupes
 	public  $orderBy          = NULL;  // Custom sort for the edit table
 	public  $numberRows       = FALSE; // Rows are numbered on the far left
 	public  $numberRowsRight  = FALSE; // Rows are numbered on the far right
@@ -30,12 +48,18 @@ class listManagement {
 	public  $whereClause    = "";    // Where clause that is used for the edit list. This is NOT a sanitized in the module!
 	public  $updateInsert   = FALSE; // The insert HTML form is treated as an "Update" instead of an insert.
 	public  $updateInsertID = NULL; // If updateInsert == TRUE, we need to know the ID Field to match on.
+									// Also used when using multiKeys. needs to be defined for the update table to work properly.
 	public  $sql            = NULL; // Used in the edit table, custom sql instead of the default
 	public  $submitName     = NULL; // Name of the submit button, override the default
 	
 	public $helpIconDefault = "?"; // Default for the help Icon on the insert list
 	
 	public $primaryKey      = "ID"; // The field name of the primary key
+	
+	public $passwordVerfifyPlaceholder = "Re-enter password for verification"; // Placeholder text for password verification fields;
+	
+	public $insertSuccessMsg = "Entry successfully added to the database."; // Message that is displayed when a insert form returns successful.
+	public $deleteErrorMsg  = "Delete Error."; // Message that is displayed when an error occures deleting an item
 	
 	public $updateButtonText = "Update";
 	public $insertButtonText = "Insert";
@@ -46,9 +70,9 @@ class listManagement {
 	public $debug           = FALSE; // If set to TRUE, will display SQL errors. MUST BE SET TO FALSE FOR 
 									 // Production
 	
-	public $validateTypes   = array("alpha","alphaNoSpaces","alphaNumeric","alphaNumericNoSpaces","date","email","ipaddr","integer","integerSpaces","internalEmail","noSpaces","noSpecialChars","phone","url"); // A list of all the types that are in the validation function. Suitable for use in dropdown/etc ... 
+	public $validateTypes   = array("alpha","alphaNoSpaces","alphaNumeric","alphaNumericNoSpaces","date","email","ipaddr","integer","integerSpaces","internalEmail","noSpaces","noSpecialChars","phone","url","optionalURL"); // A list of all the types that are in the validation function. Suitable for use in dropdown/etc ... 
 	
-	private $insertOnlyTypes = array("checkbox", "wysiwyg", "multiselect"); // These are not displayed in the edit table
+	private $insertOnlyTypes = array("checkbox", "wysiwyg", "multiselect", "password"); // These are not displayed in the edit table
 	
 	// For template matching
 	public $pattern  = "/\{listObject\s+(.+?)\}/";
@@ -132,6 +156,8 @@ class listManagement {
 	            Only valid for Table Display
 	yesNo : Select Box or Check box, works the same as yesNoText but in both insert and edit
 	checkbox : check box field. Displays  on Insert form. 
+	password : sets type to password. List object will automatically add a verification field.
+			   Only one password field can be defined, additional will be ignored. Insert form only
 	*/
 	/* 
 	'matchOn' does no sanitizing, expects everything to be sanitized already
@@ -141,6 +167,20 @@ class listManagement {
 	index should have "value", "field", optionally "selected" can be set to TRUE || FALSE
 	
 	can also be used for textareas. height and width are valid options, and expect integers. 
+	*/
+	/* Help Options
+	help is an array with the following indexes
+	
+	url: URL to link too (optional)
+	Title: Title to be applied to the URL link, or used for hover if no URL specified 
+		   (Optional, but recommeneded)
+	display: newWindow (optional). Only affects if URL is specified. Opens in a new window 
+			 if set to newWindow. Otherwise the same window
+	img : (optional) character to display for this help item. Overrides $this->helpIconDefault. 
+		  If you want an image it must contain the HTML tags and such. 
+	
+	NOTE: Must have either Title or URL for the help icon to appear. 
+	
 	*/
 	public function addField($field) {
 		
@@ -155,7 +195,12 @@ class listManagement {
 			$disabled    = (isset($field['disabled']))?$field['disabled']:FALSE;
 			$size        = (isset($field['size']))?$field['size']:"40";
 			$dupes       = (isset($field['dupes']))?$field['dupes']:FALSE;
+			
+			// $field['blank'] and $field['optional] are equivilant. Only one needs to be set.
+			// 'optional' is more intuitive. 'blank' is being kept for backwards compatibility 
 			$blank       = (isset($field['blank']))?$field['blank']:FALSE;
+			$blank       = ($blank === FALSE && isset($field['optional']))?$field['optional']:$blank;
+			
 			$type        = (isset($field['type']))?$field['type']:"text";
 			$options     = (isset($field['options']))?$field['options']:NULL;
 			$readonly    = (isset($field['readonly']))?$field['readonly']:FALSE;
@@ -171,17 +216,29 @@ class listManagement {
 			return(FALSE);
 		}
 
-		if ($type == "date") {
-			$this->dateInputs = TRUE;
-		}
-		else if ($type == "wysiwyg") {
-			$this->wysiwygInputs = TRUE;
-		}
-		else if ($type == "multiselect") {
-			$this->multiSelect = TRUE;
-		}
-		else if ($type == "checkbox") {
-			$this->checkboxInput = TRUE;
+		switch($type) {
+			case "date":
+				$this->dateInputs = TRUE;
+				break;
+			case "wysiwyg":
+				$this->wysiwygInputs = TRUE;
+				break;
+			case "multiselect":
+				$this->multiSelect = TRUE;
+				break;
+			case "checkbox":
+				$this->checkboxInput = TRUE;
+				break;
+			case "password":
+				if ($this->passwdInputs === TRUE) {
+					return(FALSE);
+				}
+				else {
+					$this->passwdInputs = TRUE;
+				}
+				break;
+			default:
+				break;
 		}
 		
 		$temp = array(
@@ -282,7 +339,7 @@ class listManagement {
 	
 	public function displayInsertForm($addGet=TRUE) {
 		$queryString = "";
-		if ($addGet === TRUE) {
+		if ($addGet === TRUE && isset($_SERVER['QUERY_STRING']) && !is_empty($_SERVER['QUERY_STRING'])) {
 			$queryString = "?".$_SERVER['QUERY_STRING'];
 		}
 		
@@ -292,7 +349,12 @@ class listManagement {
 		
 		$output  = "";
 		$output .= "<!-- engine Instruction break -->".'<!-- engine Instruction displayTemplateOff -->'."<!-- engine Instruction break -->";
-		$output .= "<form action=\"".$_SERVER['PHP_SELF']."".$queryString."\" method=\"post\">";
+		$output .= sprintf('<form action="%s%s" method="post" class="listObj insertForm" %s %s>',
+			$_SERVER['PHP_SELF'],
+			$queryString,
+			(is_null($this->rel))?"":'rel="'.$this->rel.'"',
+			(is_null($this->rev))?"":'rev="'.$this->rev.'"'
+			);
 		$output .= sessionInsertCSRF();
 		foreach ($this->hiddenFields as $I) {
 			$output .= '<input type="hidden" name="'.$I['field'].'_insert" value="'.htmlentities($I['value']).'" />';
@@ -314,6 +376,19 @@ class listManagement {
 					((isset($I['help']['img']))?$I['help']['img']:$this->helpIconDefault)				
 					);
 			} 
+			else if (isset($I['help']) && isset($I['help']['title'])) {
+				$help = sprintf('<span title="%s">%s</span>',
+					 htmlentities($I['help']['title']),
+					((isset($I['help']['img']))?$I['help']['img']:$this->helpIconDefault)
+					);
+			}
+			
+			
+			unset($value);
+			$value = ($error === TRUE)?(($I['type'] == "wysiwyg")?$this->engine->cleanPost['RAW'][$I['field'].'_insert']:$this->engine->cleanPost['HTML'][$I['field'].'_insert']):"";
+			if (is_empty($value) && !isnull($I['value'])) {
+				$value = ($I['type'] == "wysiwyg")?$I['value']:htmlentities($I['value']);
+			}
 			
 			$output .= "<tr>";
 			$output .= "<td>";
@@ -343,11 +418,6 @@ class listManagement {
 					$output .= '<input type="hidden" name="original_'.$I['field'].'_insert" value="'.(htmlentities($I['value'])).'" />';
 				}
 				
-				$value = ($error === TRUE)?$this->engine->cleanPost['HTML'][$I['field'].'_insert']:"";
-				if (is_empty($value) && !isnull($I['value'])) {
-					$value = htmlentities($I['value']);
-				}
-				
 				$output .= "<input type=\"text\" name=\"".$I['field']."_insert\" id=\"".$I['field']."_insert\"";
 				$output .= ' size="'.$I['size'].'"';
 				$output .= ($I['type'] == "date")?" class=\"date_input\"":"";
@@ -357,6 +427,36 @@ class listManagement {
 				$output .= ($I['disabled'] === TRUE)?" disabled ":"";
 				$output .= ($I['placeholder'] !== FALSE)?' placeholder="'.(htmlentities($I['placeholder'])).'"':"";
 				$output .= " />";
+			}
+			else if ($I['type'] == "password") {
+				
+				// if ($I['original'] === TRUE && isset($I['value'])) {
+				// 	$output .= '<input type="hidden" name="original_'.$I['field'].'_insert" value="'.(htmlentities($I['value'])).'" />';
+				// }
+				
+				// On error, don't populate value. require it again. 
+				$value = ($error === TRUE)?"":$value;
+				
+				$output .= "<input type=\"password\" name=\"".$I['field']."_insert\" id=\"".$I['field']."_insert\"";
+				$output .= ' size="'.$I['size'].'"';
+				//Handle if the form is being reposted after a failed submit attempt
+				$output .= " value=\"".$value."\""; 
+				$output .= ($I['readonly'] === TRUE)?" readonly ":"";
+				$output .= ($I['disabled'] === TRUE)?" disabled ":"";
+				$output .= ($I['placeholder'] !== FALSE)?' placeholder="'.(htmlentities($I['placeholder'])).'"':"";
+				$output .= " />";
+				
+				// Need a verification field
+				$output .= "<br />";
+				$output .= "<input type=\"password\" name=\"".$I['field']."_insert_verify\" id=\"".$I['field']."_insert_verify\"";
+				$output .= ' size="'.$I['size'].'"';
+				//Handle if the form is being reposted after a failed submit attempt
+				$output .= " value=\"".$value."\""; 
+				$output .= ($I['readonly'] === TRUE)?" readonly ":"";
+				$output .= ($I['disabled'] === TRUE)?" disabled ":"";
+				$output .= ' placeholder="'.$this->passwordVerfifyPlaceholder.'"';
+				$output .= " />";
+				
 			}
 			else if ($I['type'] == "select") {
 				
@@ -454,8 +554,9 @@ class listManagement {
 						$output .= '<input type="checkbox" name="'.$I['field'].'_insert[]" value="'.htmlsanitize($row[$I['options']['valueDisplayID']]).'" ';
 						$output .= ($error === TRUE && isset($this->engine->cleanPost['HTML'][$I['field'].'_insert']) && in_array($row[$I['options']['valueDisplayID']],$this->engine->cleanPost['HTML'][$I['field'].'_insert']))?"checked":"";
 						$output .= ($error === FALSE && isset($I['options']['selected']) && in_array($row[$I['options']['valueDisplayID']],$I['options']['selected']))?"checked":"";
+						$output .= ' id="'.htmlSanitize($row[$I['options']['valueDisplayID']]).'"';
 						$output .= '/>';
-						$output .= "&nbsp; ".htmlsanitize($row[$I['options']['valueDisplayField']]);
+						$output .= '&nbsp; <label for="'.htmlSanitize($row[$I['options']['valueDisplayID']]).'">'.htmlSanitize($row[$I['options']['valueDisplayField']])."</label>";
 						$output .= "</li>";
 					}
 						$output .= "</ul>";
@@ -477,13 +578,12 @@ class listManagement {
 				$output .= ($I['readonly'] === TRUE)?" readonly ":"";
 				$output .= ($I['disabled'] === TRUE)?" disabled ":"";
 				$output .= ">";
-				$output .= ($error === TRUE)?$this->engine->cleanPost['HTML'][$I['field'].'_insert']:"";
-				$output .= ($error === FALSE)?htmlentities($I['value']):"";
+				$output .= $value;
 				$output .= "</textarea>";
 			}
 			else if ($I['type'] == "wysiwyg") {
 				$output .= '<canvas id="'.$I['field'].'_insert" name="'.$I['field'].'"_insert" class="engineWYSIWYG '.$I['field'].'_insert">';
-				$output .= ($error === TRUE)?$this->engine->cleanPost['RAW'][$I['field'].'_insert']:$I['value'];
+				$output .= $value;
 				$output .= '</canvas>';
 				
 				$output .= '<script type="text/javascript">wysiwygInit(\''.$I['field'].'_insert\');</script>';
@@ -525,7 +625,7 @@ class listManagement {
 				}
 			}
 			else  {
-				errorHandle::errorMsg("Invalid Type");
+				errorHandle::errorMsg("Invalid Type: ".$I['type']);
 			}
 			if (isset($help) && isset($I['help']['location']) && $I['help']['location'] == "afterField") {
 				$output .= "&nbsp;".$help;
@@ -560,7 +660,7 @@ class listManagement {
 	
 	public function displayEditTable($addGet=TRUE,$debug=FALSE) {
 		$queryString = "";
-		if ($addGet === TRUE) {
+		if ($addGet === TRUE && isset($_SERVER['QUERY_STRING']) && !is_empty($_SERVER['QUERY_STRING'])) {
 			$queryString = "?".$_SERVER['QUERY_STRING'];
 		}
 		
@@ -632,7 +732,15 @@ class listManagement {
 		}
 
 		$output .= "\n<!-- engine Instruction break -->".'<!-- engine Instruction displayTemplateOff -->'."\n<!-- engine Instruction break -->";
-		$output .= "<form action=\"".$_SERVER['PHP_SELF']."".$queryString."\" method=\"post\" onsubmit=\"return listObjDeleteConfirm(this);\">".$this->eolChar;
+		$output .= sprintf('<form action="%s%s" method="post" class="listObj insertForm" %s %s %s>%s',
+			$_SERVER['PHP_SELF'],
+			$queryString,
+			($this->confirmUpdateDelete === TRUE)?'onsubmit="return listObjDeleteConfirm(this);"':"",
+			(is_null($this->rel))?"":'rel="'.$this->rel.'"',
+			(is_null($this->rev))?"":'rev="'.$this->rev.'"',
+			$this->eolChar
+			);
+		// $output .= "<form action=\"".$_SERVER['PHP_SELF']."".$queryString."\" method=\"post\" onsubmit=\"return listObjDeleteConfirm(this);\">".$this->eolChar;
 		$output .= sessionInsertCSRF();
 		$output .= "\n";
 		$output .= "<table border=\"0\" cellpadding=\"1\" cellspacing=\"0\" id=\"".$this->database->escape($this->table)."_table\"";
@@ -1010,6 +1118,14 @@ class listManagement {
 				$checkboxFields[] = $I;
 			}
 			
+			// If it is a password field, and this is an update insert, and the password field is blank
+			// skip it. (Password is not being updated)
+			if ($this->updateInsert === TRUE && $I['type'] == "password" &&
+			 	is_empty($this->engine->cleanPost['MYSQL'][$I['field'].'_insert'])) 
+			{
+				continue;
+			}
+			
 			// Check boxes don't return if they aren't checked. Deal with that
 			if ($I["type"] == "yesNo" && $I["options"]["type"] == "checkbox") {
 				if (!isset($this->engine->cleanPost['MYSQL'][$I['field'].'_insert'])) {
@@ -1109,16 +1225,64 @@ class listManagement {
 				}
 			}
 			
+			// passwords
+			if ($I['type'] == "password") {
+				if ($this->engine->cleanPost['MYSQL'][$I['field'].'_insert'] !=
+				 	$this->engine->cleanPost['MYSQL'][$I['field'].'_insert_verify']) 
+				{
+					$error['string'] .= errorHandle::errorMsg("Passwords do not match");
+					$error['error']   = TRUE;
+					continue;
+				}
+			}
+			
 			// Multiselect doesn't have a _insert variable, checkbox is an array
 			if ($I['type'] != "multiselect" && $I['type'] != "checkbox") {
 				$this->engine->cleanPost['MYSQL'][$I['field'].'_insert'] = stripCarriageReturns($this->engine->cleanPost['MYSQL'][$I['field'].'_insert']);
 			}
-		}
+			
+		} // Foreach field
 		
 		if ($error['error'] === TRUE) {
 			return(!$error['error']);
 		}
 
+		// Begin the actual Insert
+		// Check to see if we should use callbacks
+
+		
+		if (!isnull($this->insertCallback)) {
+			
+			$function = $this->insertCallback;
+			
+			if (!isnull($this->callbackObj) && is_object($this->callbackObj) === TRUE) {
+				$obj         = $this->callbackObj;
+				$returnValue = $obj->$function();
+			}
+			else {
+				$returnValue = $function();
+			}
+			
+			if ($returnValue === FALSE) {
+				errorHandle::errorMsg("Error in Callback");
+				return(FALSE);
+			}
+			else {
+
+				errorHandle::successMsg($this->insertSuccessMsg);
+				// Clear the submit button name on a success submit, so we don't repopulate 
+				// the form
+				if ($this->repost === TRUE) {
+					$submitButtonName = (isnull($this->submitName))?$this->table.'_submit':$this->submitName;
+					$this->engine->cleanPost['MYSQL'][$submitButtonName] = NULL;
+				}
+				return($returnValue);
+			}
+			
+			return(FALSE);
+		}
+
+		// No callbacks, insert the data ourselves
 		$result = $this->database->transBegin($this->database->escape($this->table));
 
 		if ($result !== TRUE) {
@@ -1317,7 +1481,7 @@ class listManagement {
 			$this->database->transCommit();
 			$this->database->transEnd();
 			
-			errorHandle::successMsg("Entry successfully added to the database.");
+			errorHandle::successMsg($this->insertSuccessMsg);
 
 			// Drop the Insert ID into a local variable suitable for framing
 			if ($this->updateInsert === FALSE) {
@@ -1361,25 +1525,45 @@ class listManagement {
 
 				$this->deletedIDs[] = $value;
 
-				$sql = sprintf("DELETE FROM %s WHERE %s=%s",
-					$this->database->escape($this->table),
-					$this->primaryKey,
-					$this->database->escape($value)
-					);
+				// handle the deletes via callback function
+				if (!isnull($this->deleteCallback)) {
 
-				$this->database->sanitize = FALSE;
-				$sqlResult = $this->database->query($sql);
+					$function = $this->deleteCallback;
 
-				if (!$sqlResult['result']) {
-					errorHandle::errorMsg("Delete Error. <br />");
-					if ($this->debug === TRUE) {
-						errorHandle::errorMsg($sqlResult['error']."<br />");
-						errorHandle::errorMsg($sqlResult['query']."<br />");
+					if (!isnull($this->callbackObj) && is_object($this->callbackObj) === TRUE) {
+						$obj         = $this->callbackObj;
+						$returnValue = $obj->$function($value);
 					}
-					$error["error"]   = TRUE;
-				}
+					else {
+						$returnValue = $function($value);
+					}
 
-			}
+					if ($returnValue === FALSE) {
+						errorHandle::errorMsg($this->deleteErrorMsg);
+					}
+				}
+				// handle the deletes internally
+				else {
+					$sql = sprintf("DELETE FROM %s WHERE %s=%s",
+						$this->database->escape($this->table),
+						$this->primaryKey,
+						$this->database->escape($value)
+						);
+
+					$this->database->sanitize = FALSE;
+					$sqlResult = $this->database->query($sql);
+
+					if (!$sqlResult['result']) {
+
+						errorHandle::errorMsg($this->deleteErrorMsg);
+						if ($this->debug === TRUE) {
+							errorHandle::errorMsg($sqlResult['error']."<br />");
+							errorHandle::errorMsg($sqlResult['query']."<br />");
+						}
+						$error["error"]   = TRUE;
+					} // error check
+				} // no callback else
+			} // foreach
 		}
 
 		$sql = sprintf("SELECT * FROM %s",
@@ -1411,7 +1595,7 @@ class listManagement {
 			// FOr each defined field
 			foreach ($this->fields as $I) {
 				
-				if ($this->insertOnly($I['type'])) {
+				if ($this->insertOnly($I['type']) || $I['type'] == "plainText") {
 					continue;
 				}
 				
@@ -1468,38 +1652,48 @@ class listManagement {
 				// If the field is NOT allowed to have dupes
 				if ($I["dupes"] === FALSE && $I['disabled'] === FALSE) {
 					
+					$dupeCheck = TRUE;
+					if ($this->updateBlankIsDupe === FALSE && 
+						is_empty($this->engine->cleanPost['MYSQL'][$I['field'].'_'.$row[0]])) 
+					{
+						$dupeCheck = FALSE;
+					}
 					
-					// We have to make sure that update insert is true, so that Capital and Lower Case letters 
-					// don't scream on changes. Saving the old, just in case it was set. 
-					$tempUI = $this->updateInsert;
-					$tempID = $this->updateInsertID;
-					$tempPT = (isset($this->engine->cleanPost['MYSQL'][$this->updateInsertID."_insert"]))?$this->engine->cleanPost['MYSQL'][$this->updateInsertID."_insert"]:NULL;
-					
-					$this->updateInsert   = TRUE;
-					// Suspect -- $this->primaryKey ???
-					// $this->updateInsertID = $this->primaryKey;
-					$this->updateInsertID = (isset($this->updateInsertID))?$this->updateInsertID:$this->primaryKey;
-					
-					$this->engine->cleanPost['MYSQL'][$this->updateInsertID."_insert"] = $row[0];			
-							
-					// perform a dupe check. Continue to the next row in the database if there is a dupe in that field. 
-					if ($row[$I["field"]] != $this->engine->cleanPost['MYSQL'][$I['field'].'_'.$row[0]] && $this->duplicateCheck($this->engine->cleanPost['MYSQL'][$I['field'].'_'.$row[0]],$I["field"])) {
-						errorHandle::errorMsg("Entry, ".htmlentities($this->engine->cleanPost['MYSQL'][$I['field'].'_'.$row[0]]).", already in database. Other records may be updated still.");
-						$error["error"]   = TRUE;
-						
+					// We check to see if it is empty and if blanks are allowed. 
+					if ($dupeCheck === TRUE) {
+
+						// We have to make sure that update insert is true, so that Capital and Lower Case letters 
+						// don't scream on changes. Saving the old, just in case it was set. 
+						$tempUI = $this->updateInsert;
+						$tempID = $this->updateInsertID;
+						$tempPT = (isset($this->engine->cleanPost['MYSQL'][$this->updateInsertID."_insert"]))?$this->engine->cleanPost['MYSQL'][$this->updateInsertID."_insert"]:NULL;
+
+						$this->updateInsert   = TRUE;
+						// Suspect -- $this->primaryKey ???
+						// $this->updateInsertID = $this->primaryKey;
+						$this->updateInsertID = (isset($this->updateInsertID))?$this->updateInsertID:$this->primaryKey;
+
+						$this->engine->cleanPost['MYSQL'][$this->updateInsertID."_insert"] = $row[0];			
+
+						// perform a dupe check. Continue to the next row in the database if there is a dupe in that field. 
+						// $row[$I["field"]] != $this->engine->cleanPost['MYSQL'][$I['field'].'_'.$row[0]] &&
+						if ($this->duplicateCheck($this->engine->cleanPost['MYSQL'][$I['field'].'_'.$row[0]],$I["field"],$row[0])) {
+							errorHandle::errorMsg("Entry, ".htmlentities($this->engine->cleanPost['MYSQL'][$I['field'].'_'.$row[0]]).", already in database. Other records may be updated still.");
+							$error["error"]   = TRUE;
+
+							// Set updateInsert back to original Values
+							$this->updateInsert   = $tempUI;
+							$this->updateInsertID = $tempID;
+							$this->engine->cleanPost['MYSQL'][$this->updateInsertID."_insert"] = $tempPT;
+
+							continue 2;
+						}
+
 						// Set updateInsert back to original Values
 						$this->updateInsert   = $tempUI;
 						$this->updateInsertID = $tempID;
 						$this->engine->cleanPost['MYSQL'][$this->updateInsertID."_insert"] = $tempPT;
-						
-						continue 2;
-					}
-					
-					// Set updateInsert back to original Values
-					$this->updateInsert   = $tempUI;
-					$this->updateInsertID = $tempID;
-					$this->engine->cleanPost['MYSQL'][$this->updateInsertID."_insert"] = $tempPT;
-					
+					} // if Dupe Check
 				}
 				
 				if (isset($I['validate'])) {
@@ -1643,27 +1837,68 @@ class listManagement {
 		return($updateIDs);
 	}
 	
-	private function duplicateCheck($new,$col) {
+	public function addMultiKeyField($field=NULL,$value=NULL) {
 		
-		$idMatch = "";
-		if ($this->updateInsert === TRUE) {
+		if (isnull($field)) {
+			return(FALSE);
+		}
+		
+		$temp = array();
+		$temp['field'] = $field;
+		$temp['value'] = $value;
+		$this->multiKey[] = $temp;
+		unset($temp);
+		return(TRUE);
+		
+	}
+	
+	private function duplicateCheck($new,$col,$row=NULL) {
+		
+		$idMatch  = "";
+		$multiKey = "";
+		if ($this->updateInsert === TRUE || !isnull($row)) {
 			$idMatch = sprintf(" AND %s!='%s'",
 				$this->database->escape($this->updateInsertID),
-				$this->database->escape($this->engine->cleanPost['MYSQL'][$this->updateInsertID."_insert"])
+				(isset($this->engine->cleanPost['MYSQL'][$this->updateInsertID."_insert"]))?$this->database->escape($this->engine->cleanPost['MYSQL'][$this->updateInsertID."_insert"]):$row
+				
 			);
 		}
-		$sql = sprintf("SELECT * FROM %s WHERE %s='%s'%s",
+
+		if (!is_empty($this->multiKey)) {
+			
+			$temp = array();
+			foreach ($this->multiKey as $I=>$V) {
+				if(isnull($row)) {
+					$value = $V['value'];
+				}
+				else {
+					$value = $this->engine->cleanPost['MYSQL'][$V['field'].'_'.$row];
+				}
+				$str = $V['field']."='".$value."'";
+				$temp[] = $str;
+			}
+
+			$multiKey = " AND ". implode(" AND ",$temp);
+		}
+		
+		$sql = sprintf("SELECT * FROM %s WHERE %s='%s'%s%s",
 			$this->database->escape($this->table),
 			$this->database->escape($col),
 			$this->database->escape($new),
+			$multiKey,
 			$idMatch
 			);
+			
 			
 		$this->database->sanitize = FALSE;
 		$sqlResult = $this->database->query($sql);
 
 		//We should probably do a SQL check here
 		if (!$sqlResult['result']) {
+			if ($this->debug === TRUE) {
+				errorHandle::errorMsg($sqlResult['error']."<br />");
+				errorHandle::errorMsg($sqlResult['query']."<br />");
+			}
 			return(TRUE);
 		}
 		
@@ -1683,7 +1918,7 @@ class listManagement {
 			if($I['disabled'] === TRUE) {
 				continue;
 			}
-			if ($this->insertOnly($I['type'])) {
+			if ($this->insertOnly($I['type']) || $I['type'] == "plainText") {
 				continue;
 			}
 			
@@ -1718,11 +1953,20 @@ class listManagement {
 			if($I['disabled'] === TRUE) {
 				continue;
 			}
-			if ($I['type'] == "plainText" || $I['type'] == "radio" || $I['type'] == "multiselect" || $I['checkbox']) {
+			if ($I['type'] == "plainText" || $I['type'] == "radio" || $I['type'] == "multiselect" || $I['type'] == "checkbox") {
+				continue;
+			}
+			// If it is a password field, and this is an update insert, and the password field is blank
+			// skip it. (Password is not being updated)
+			if ($this->updateInsert === TRUE && $I['type'] == "password" &&
+			 	is_empty($this->engine->cleanPost['MYSQL'][$I['field'].'_insert'])) 
+			{	
 				continue;
 			}
 			
-			$temp[] = $this->database->escape($I["field"])."='".$this->engine->cleanPost['MYSQL'][$I["field"]."_insert"]."'";
+			$temp[] = sprintf("%s='%s'",
+				$this->database->escape($I["field"]),
+				($I['type'] == "password")?mhash($this->passwordHash,$this->engine->cleanPost['MYSQL'][$I["field"]."_insert"]):$this->engine->cleanPost['MYSQL'][$I["field"]."_insert"]);
 		}
 		foreach ($this->hiddenFields as $I) {
 			if($I['disabled'] === TRUE) {
@@ -1768,7 +2012,9 @@ class listManagement {
 				continue;
 			}
 			
-			$temp[] = "'".$this->engine->cleanPost['MYSQL'][$I["field"]."_insert"]."'";
+			$value = ($I['type'] == "password")?bin2hex(mhash($this->passwordHash,$this->engine->cleanPost['MYSQL'][$I["field"]."_insert"])):$this->engine->cleanPost['MYSQL'][$I["field"]."_insert"];
+			
+			$temp[] = "'".$value."'";
 		}
 		foreach ($this->hiddenFields as $I) {
 			if($I['disabled'] === TRUE) {
@@ -1787,6 +2033,11 @@ class listManagement {
 		
 		if ($validate == "url") {
 			if (!validURL($data)) {
+				$error .= errorHandle::errorMsg("Entry, ".htmlentities($data).", not a valid URL.");
+			}
+		}
+		else if ($validate == "optionalURL") {
+			if (!validOptionalURL($data)) {
 				$error .= errorHandle::errorMsg("Entry, ".htmlentities($data).", not a valid URL.");
 			}
 		}

@@ -30,12 +30,24 @@ function validIPAddr($ip) {
 	return(FALSE);
 }
 
+// Allow just about anything, but if it appears to be a URL it must be a valid URL
+function validOptionalURL($url) {
+	$urlCheckRegex = "/^(https?|ftp|ssh|telnet)\:\/\/.+/";
+	$match = preg_match($urlCheckRegex,$url);
+	
+	if ($match == 1) {
+		return(validURL($url));
+	}
+	
+	return(TRUE);
+}
+
 function validURL($url) {
 	
 	// Regex stolen from
 	// http://phpcentral.com/208-url-validation-in-php.html
 	
-	$urlregex = "/^(https?|ftp)\:\/\/([a-z0-9+!*(),;?&=\$_.-]+(\:[a-z0-9+!*(),;?&=\$_.-]+)?@)?[a-z0-9+\$_-]+(\.[a-z0-9+\$_-]+)*(\:[0-9]{2,5})?(\/([a-z0-9+\$_-]\.?)+)*\/?(\?[a-z+&\$_.-][a-z0-9;:@\/&%=+\$_.-]*)?(#[a-z_.-][a-z0-9+\$_.-]*)?\$/i";
+	$urlregex = "/^(https?|ftp|ssh|telnet)\:\/\/([a-z0-9+!*(),;?&=\$_.-]+(\:[a-z0-9+!*(),;?&=\$_.-]+)?@)?[a-z0-9+\$_-]+(\.[a-z0-9+\$_-]+)*(\:[0-9]{2,5})?(\/([a-z0-9+\$_-]\.?)+)*\/?(\?[a-z+&\$_.-][a-z0-9;:@\/&%=+\$_.-]*)?(#[a-z_.-][a-z0-9+\$_.-]*)?\$/i";
 	
 	$match = preg_match($urlregex,$url);
 	
