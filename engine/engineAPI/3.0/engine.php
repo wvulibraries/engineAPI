@@ -498,7 +498,7 @@ class EngineAPI
 			return(TRUE);
 		}
 		
-		if(!array_key_exists($action,$this->accessMethods)) {
+		if(!isset($this->accessMethods[$action])) {
 			if ($this->accessExistsTest === TRUE) {
 				die("Access Control $action is undefined. Exiting.\n");
 			}
