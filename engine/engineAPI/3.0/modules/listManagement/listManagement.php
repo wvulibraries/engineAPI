@@ -1792,12 +1792,6 @@ class listManagement {
 			$row = mysql_fetch_array($sqlResult['result'],  MYSQL_ASSOC);
 
 			// If count is 0, it didn't find a match, so something changed
-			print "<pre>";
-			var_dump($row);
-			print "</pre>";
-			print "<pre>";
-			var_dump($sql);
-			print "</pre>";
 			if ($row["COUNT(*)"] == 0) {
 				return(TRUE);
 			}
