@@ -1774,6 +1774,42 @@ class listManagement {
 		return(FALSE);
 	}
 	
+	// Returns TRUE when there are modifications
+	// FALSE otherwise.
+	// NOTE: if there is an error it will set an error message as well as FALSE
+	public function haveUpdate() {
+		
+		$sql = sprintf("SELECT COUNT(*) FROM %s WHERE %s",
+			$this->database->escape($this->table),
+			$this->buildInsertUpdateString(TRUE),
+			$this->primaryKey,
+			$this->engine->cleanPost['MYSQL'][$this->updateInsertID."_insert"]
+			);
+
+		$sqlResult                = $this->database->query($sql);
+		
+		if ($sqlResult['result']) {
+			$row = mysql_fetch_array($sqlResult['result'],  MYSQL_ASSOC);
+
+			// If count is 0, it didn't find a match, so something changed
+			print "<pre>";
+			var_dump($row);
+			print "</pre>";
+			print "<pre>";
+			var_dump($sql);
+			print "</pre>";
+			if ($row["COUNT(*)"] == 0) {
+				return(TRUE);
+			}
+		}
+		else {
+			errorHandle::errorMsg("Error comparing results. Likely all fields disabled. <br />");
+			return(FALSE);
+		}
+		
+		return(FALSE);
+	}
+	
 	// Returns array of IDs when there are modifications
 	// FALSE otherwise.
 	// NOTE: if there is an error it will set an error message as well as FALSE
@@ -1822,6 +1858,7 @@ class listManagement {
 			if ($sqlResultUpdates['result']) {
 				$rowUpdate = mysql_fetch_array($sqlResultUpdates['result'],  MYSQL_ASSOC);
 
+				// If count is 0, it didn't find a match, so something changed
 				if ($rowUpdate["COUNT(*)"] == 0) {
 					$updateIDs[] = $row[0];
 				}
@@ -1946,7 +1983,9 @@ class listManagement {
 
 	}
 	
-	private function buildInsertUpdateString() {
+	private function buildInsertUpdateString($and=FALSE) {
+
+		$sep = ($and === TRUE)?" and ":",";
 
 		$temp = array();
 		foreach ($this->fields as $I) {
@@ -1974,7 +2013,7 @@ class listManagement {
 			}
 			$temp[] = $this->database->escape($I["field"])."='".$this->engine->cleanPost['MYSQL'][$I["field"]."_insert"]."'";
 		}
-		$output = implode(",",$temp);
+		$output = implode($sep,$temp);
 		return($output);
 
 	}
