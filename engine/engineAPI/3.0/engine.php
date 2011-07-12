@@ -898,6 +898,9 @@ class EngineAPI
 
 		$output = "Error: handleMatch in template.php";
 		switch($attPairs['name']) {
+			case "phpself":
+				$output = $_SERVER['PHP_SELF'];
+				break;
 			case "include":
 			//$output = "Begin recurseInsert<br />";
 			    $output = recurseInsert($attPairs['file'],$attPairs['type']);

@@ -1,5 +1,18 @@
 <?php
 
+// determines if the passed argument is a function
+// swiped from http://us2.php.net/manual/en/function.create-function.php#96321
+function is_function( &$mixed ) {
+    if ( is_object( $mixed ) ) {
+        return ( $mixed instanceof Closure );
+    } elseif( is_string( $mixed ) ) {
+        return function_exists( $mixed );
+    } else {
+        return false;
+    }
+	return FALSE;
+}
+
 function is_odd($number) {
 	
 	if ($number&1) {
@@ -58,6 +71,9 @@ function isnull($var,$strict=TRUE) {
 //
 // $strict === FALSE, gets pasted to isnull(). if FALSE uses built in is_null instead
 // 		of engineAPI's is_null()
+function isempty($v,$strict=TRUE) {
+	return is_empty($v,$strict);
+}
 function is_empty($v,$strict=TRUE) {
 	
 	if (!isset($v)) {
