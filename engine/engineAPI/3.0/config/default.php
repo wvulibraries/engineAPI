@@ -44,7 +44,7 @@ $engineVars['JAVAURL']    = $engineVars['WEBROOT'] ."/javascript";
 $engineVars['engineInc']  = $engineVars['WEBROOT'] ."/engineIncludes";
 
 //Support Pages
-$engineVars['loginPage']    = $engineVars['engineInc'] ."/login.php"; 
+$engineVars['loginPage']    = $engineVars['engineInc'] ."/login-3.0.php"; 
 $engineVars['logoutPage']   = $engineVars['engineInc'] ."/logout.php"; 
 $engineVars['downloadPage'] = $engineVars['engineInc'] ."/download.php";
 
@@ -52,7 +52,7 @@ $engineVars['downloadPage'] = $engineVars['engineInc'] ."/download.php";
 $engineVars['jquery']          = $engineVars['engineInc'] ."/jquery.js";
 $engineVars['jqueryDate']      = $engineVars['engineInc'] ."/jquery.date.js";
 $engineVars['jqueryCookie']    = $engineVars['engineInc'] ."/jquery.eikooc.js";
-$engineVars['sortableTables']  = $engineVars['engineInc'] ."/jquery.tablesorter.js"; //."/sorttable.js"; 
+$engineVars['sortableTables']  = $engineVars['engineInc'] ."/sorttable.js"; 
 $engineVars['tablesDragnDrop'] = $engineVars['engineInc'] ."/tablednd.js";
 $engineVars['selectBoxJS']     = $engineVars['engineInc'] ."/engineSelectBoxes.js";
 $engineVars['convert2TextJS']  = $engineVars['engineInc'] ."/convert2TextArea.js";
@@ -79,7 +79,7 @@ $engineVars['imgMinusSign']         = $engineVars['engineInc'] ."/images/minus.g
 $engineVars['baseRoot']      = "/home/library";
 
 // EngineAPI's base directory. ALl of engine's directories will be contained here
-//$engineVars['rootPHPDir']    = $engineVars['baseRoot'] ."/phpincludes/engine";
+$engineVars['rootPHPDir']    = $engineVars['baseRoot'] ."/phpincludes/engine";
 
 // Where the engine templates are stored
 $engineVars['tempDir']       = EngineAPI::$engineDir ."/../../template";
@@ -123,7 +123,7 @@ $engineVars['rss2.0'] = $engineVars['rssDir'] ."/rss20.xml";
 
 //Behavior
 $engineVars['stripCarriageReturns'] = FALSE;
-$engineVars['replaceDoubleQuotes']  = TRUE; // if engine sees "" in attributes, replaces it 
+$engineVars['replaceDoubleQuotes']  = FALSE; // if engine sees "" in attributes, replaces it 
 									    	//with "~" where ~ is replaceDQCharacter
 $engineVars['replaceDQCharacter']   = "~"; // any string
 $engineVars['forceSSLLogin']        = TRUE; // If set to TRUE, the Login page redirects to the https:// login
@@ -159,6 +159,13 @@ $engineVars['onCampus'][] = "72.50.180-185.*";
 // Temp
 $engineVars['onCampus'][] = "192.168.171.1";
 
+//MySQL Information
+$engineVars['mysql']['server']   = "localhost";
+$engineVars['mysql']['port']     = "3306";
+//User with permissions to engineCMS database
+$engineVars['mysql']['username'] = "systems";
+$engineVars['mysql']['password'] = 'Te$t1234';
+
 //Active Directory (ldap?) Information
 // As many active directories/ldaps can be defined as needed here. 
 // WVU Libraries Staff
@@ -170,16 +177,29 @@ $engineVars['domains']['wvulibs']['attributes'] = array("memberof","displayname"
 
 
 // LDAP Authoritative Sources
-// As many active directories/ldaps can be defined as needed here. 
+// As many active directories/LDAPs can be defined as needed here.
+
+$engineVars['ldapDomain']['wvu-ad']['ldapServer']     = "ldap://wvu-ad.wvu.edu";         // URL of the ldap server
+$engineVars['ldapDomain']['wvu-ad']['ldapServerPort'] = 389;                              // IP port on which the LDAP server is listening
+$engineVars['ldapDomain']['wvu-ad']['ldapDomain']     = "wvu-ad.wvu.edu";             // The name of this domain
+$engineVars['ldapDomain']['wvu-ad']['baseDN']         = "DC=wvu-ad,DC=wvu,DC=edu";    // The DN to use as a base for all searching
+//$engineVars['ldapDomain']['wvu-ad']['bindUsername']   = NULL;                             // A static username to bing with
+//$engineVars['ldapDomain']['wvu-ad']['bindPassword']   = NULL;                             // A static password to bind with
+//$engineVars['ldapDomain']['wvu-ad']['dn']             = "DC=your,DC=ad,DC=PDC,DC=com";    // DEPRICATED
+//$engineVars['ldapDomain']['wvu-ad']['filter']         = "(|(sAMAccountName=%USERNAME%))"; // DEPRICATED
+//$engineVars['ldapDomain']['wvu-ad']['attributes']     = array("memberof","displayname");  // DEPRICATED
+$engineVars['domains']['wvu-ad'] = $engineVars['ldapDomain']['wvu-ad'];               // BACKWARD COMPATIBILITY
+
+
 
 // LDAP Server Definition
 /*
 $engineVars['ldapDomain']['SERVER_KEY']['ldapServer']     = "ldap://your.ad.PDC.com";         // URL of the ldap server
-$engineVars['ldapDomain']['SERVER_KEY']['ldapServerPort'] = 389;                            // IP port on which the LDAP server is listening
+$engineVars['ldapDomain']['SERVER_KEY']['ldapServerPort'] = 389;                              // IP port on which the LDAP server is listening
 $engineVars['ldapDomain']['SERVER_KEY']['ldapDomain']     = "your.ad.domain.com";             // The name of this domain
 $engineVars['ldapDomain']['SERVER_KEY']['baseDN']         = "DC=your,DC=ad,DC=PDC,DC=com";    // The DN to use as a base for all searching
-$engineVars['ldapDomain']['SERVER_KEY']['bindUsername']   = NULL;                           // A static username to bing with
-$engineVars['ldapDomain']['SERVER_KEY']['bindPassword']   = NULL;                           // A static password to bind with
+$engineVars['ldapDomain']['SERVER_KEY']['bindUsername']   = NULL;                             // A static username to bing with
+$engineVars['ldapDomain']['SERVER_KEY']['bindPassword']   = NULL;                             // A static password to bind with
 $engineVars['ldapDomain']['SERVER_KEY']['dn']             = "DC=your,DC=ad,DC=PDC,DC=com";    // DEPRICATED
 $engineVars['ldapDomain']['SERVER_KEY']['filter']         = "(|(sAMAccountName=%USERNAME%))"; // DEPRICATED
 $engineVars['ldapDomain']['SERVER_KEY']['attributes']     = array("memberof","displayname");  // DEPRICATED
@@ -187,6 +207,7 @@ $engineVars['domains']['SERVER_KEY'] = $engineVars['ldapDomain']['SERVER_KEY']; 
 */
 
 // User Authorization module settings (these override in-module defaults)
+/*
 $engineVars['userAuth']['dbName']            = '';
 $engineVars['userAuth']['tblUsers']          = '';
 $engineVars['userAuth']['tblGroups']         = '';
@@ -195,6 +216,7 @@ $engineVars['userAuth']['tblAuthorizations'] = '';
 $engineVars['userAuth']['tblUsers2Groups']   = '';
 $engineVars['userAuth']['tblGroups2Groups']  = '';
 $engineVars['userAuth']['defaultToken']      = '';
+*/
 
 // HTML stuff
 // These are just default values. These can be over ridden using local variables, or in 
@@ -229,4 +251,10 @@ $engineVars['templateHeader'] = $engineVars['tempDir'] ."/". $engineVars['templa
 
 // Called after page content
 $engineVars['templateFooter'] = $engineVars['tempDir'] ."/". $engineVars['templateDefault'] ."/templateFooter.php"; 
+
+// Mediasite Defaults
+$engineVars['mediaSite']['url']      = "http://mediasite.lib.wvu.edu/Mediasite1";
+$engineVars['mediaSite']['username'] = "engineAPI";
+$engineVars['mediaSite']['password'] = "Te\$t1234";
+$engineVars['mediaSite']['authLen']  = "30";
 ?>

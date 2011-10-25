@@ -379,10 +379,10 @@ class errorHandle
         self::$backTrace   = self::getErrorOrigin();
         self::$errFile     = (is_array(self::$backTrace) and sizeof(self::$backTrace) and array_key_exists('file', self::$backTrace[0]))
                                 ? self::$backTrace[0]['file']
-                                : 'unknown';
+                                : 'unknown(errorHandle)';
         self::$errLine     = (is_array(self::$backTrace) and sizeof(self::$backTrace) and array_key_exists('line', self::$backTrace[0]))
                                 ? self::$backTrace[0]['line']
-                                : 'unknown';
+                                : 'unknown(errorHandle)';
 
         if(is_array($errInfo)){
             foreach($errInfo as $key => $value){
@@ -780,7 +780,8 @@ class errorHandle
                 }else{
                     return sprintf("object(%s)", get_class($data));
                 }
-                break;            case is_array($data):
+                break;
+			case is_array($data):
                 return sprintf("array(%sx%s)", self::arrayDepth($data), sizeof($data));
                 break;
             case is_resource($data):

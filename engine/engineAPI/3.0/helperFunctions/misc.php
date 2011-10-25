@@ -1,24 +1,71 @@
 <?php
 
-function callingFunction() {
+// Determines if a function exists
+function functionExists($param1,$param2=null) {
 	
-	$backtrace = debug_backtrace();
+	$langConstructs = array("die", 
+							"echo", "empty", "exit", "eval", 
+							"include", "include_once", "isset", 
+							"list", 
+							"print",
+							"require", "require_once", 
+							"unset"
+							);
 	
-	return($backtrace[2]['function']);
+	// 2 params provided, assume class
+	if (!isnull($param2)) {
+		return(method_exists($param1,$param2));
+	}
 	
+	// Ignore everything that isn't a string, from this point on
+	if (!is_string($param1)) {
+		return(FALSE);
+	}
+	
+	// check if function exists
+	if (function_exists($param1) === TRUE) {
+		return(TRUE);
+	}
+	
+	// Check to see if it is an object being passed as a string. 
+	// if so, assume object
+	$items = explode("::",$param1);
+	if (count($items) == 2) {
+		return(method_exists($items[0],$items[1]));
+	}
+	
+	$items = explode("->",$param1);
+	if (count($items) == 2) {
+		return(method_exists($items[0],$items[1]));
+	}
+	
+	// check to see if it is a language construct
+	if (in_array($param1,$langConstructs)) {
+		return(TRUE);
+	}
+	
+	return(FALSE);
 }
 
-function callingFile($basename=FALSE) {
-	
+function callingFunction(){
 	$backtrace = debug_backtrace();
-	
+	$fn = (isset($backtrace[2]['function'])) ? $backtrace[2]['function'] : 'unknown';
+	return $fn;
+}
+function callingLine(){
+	$backtrace = debug_backtrace();
+	$ln = (isset($backtrace[1]['line'])) ? $backtrace[1]['line'] : 'unknown';
+	return $ln;
+}
+function callingFile($basename=FALSE){
+	$backtrace = debug_backtrace();
+	if(!isset($backtrace[1]['file'])) return 'unknown';
+
 	$file = $backtrace[1]['file'];
 	if ($basename === TRUE) {
 		$file = basename($backtrace[1]['file']);
 	}
-	
 	return($file);
-	
 }
 
 // return attribute pairs
@@ -123,7 +170,7 @@ function recurseInsert($file,$type="php",$engine=NULL) {
 			return(TRUE);
 		}
 		elseif ($type == "url") {
-			$cwdTemp = str_replace($engineVars['documentRoot'],"",$cwdTemp);
+			$cwdTemp = str_replace($engineVars['documentRoot'],"",$cwdTemp."/");
 			$url = $engineVars['WVULSERVER'].$cwdTemp."/".$file;
 			return($url);
 		}
@@ -195,6 +242,23 @@ function displayFileSize($filesize,$base=1000){
 	}
 	else {
 		return 'NaN';
+	}
+}
+
+/**
+ * @param mixed $input
+ * @param string $cast
+ * @return mixed
+ * @see http://us2.php.net/manual/en/function.settype.php
+ */
+function castAs($input,$cast){
+	$castable = array('boolean','bool','integer','int','float','double','string','array','object','null');
+	$cast     = trim(strtolower($cast));
+	if(in_array($cast, $castable) and settype($input,$cast)){
+		return $input;
+	}else{
+		// Trigger Error?
+		return null;
 	}
 }
 

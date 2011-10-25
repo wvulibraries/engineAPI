@@ -2924,23 +2924,18 @@ class mediaSite {
 	private $mediasiteGroupRoot  = NULL;
 	private $ticketUsername      = 'user@example.com';
 	
-	function __construct($engine) {
-		$sql = sprintf("SELECT mediaSiteUsername, mediaSitePassword, mediaSiteURL, mediaSiteAuthLen FROM siteConfig LIMIT 1");
+    function __construct($attPairs) {
 
-		$engine->openDB->sanitize = FALSE;
-		$sqlResult                = $engine->openDB->query($sql);
-		$row                      = mysql_fetch_array($sqlResult['result'],  MYSQL_ASSOC);
-		
-		$this->mediasiteServerRoot = $row['mediaSiteURL'];
-		$this->mediasiteUsername   = $row['mediaSiteUsername'];
-		$this->mediasitePassword   = $row['mediaSitePassword'];
-		$this->ticketLifetime      = $row['mediaSiteAuthLen'];
-		
-		$this->serviceEndpoint     = $this->mediasiteServerRoot.'/ExternalDataAccess_5_0/Service.asmx';
-		$this->mediasitePlayerRoot = $this->mediasiteServerRoot.'/Viewer';
-		$this->mediasiteGroupRoot  = $this->mediasiteServerRoot.'/Catalog/pages/catalog.aspx?';
-		
-	}
+        $this->mediasiteServerRoot = isset($attPairs['url'])      ? $attPairs['url']      : $engineVars['mediaSite']['url'];
+        $this->mediasiteUsername   = isset($attPairs['username']) ? $attPairs['username'] : $engineVars['mediaSite']['username'];
+        $this->mediasitePassword   = isset($attPairs['password']) ? $attPairs['password'] : $engineVars['mediaSite']['password'];
+        $this->ticketLifetime      = isset($attPairs['authLen'])  ? $attPairs['authLen']  : $engineVars['mediaSite']['authLen'];
+
+        $this->serviceEndpoint     = $this->mediasiteServerRoot.'/ExternalDataAccess_5_0/Service.asmx';
+        $this->mediasitePlayerRoot = $this->mediasiteServerRoot.'/Viewer';
+        $this->mediasiteGroupRoot  = $this->mediasiteServerRoot.'/Catalog/pages/catalog.aspx?';
+
+    }
 	
 	function __destruct() {
 	}

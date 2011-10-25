@@ -1,7 +1,7 @@
 <?php
 
 class fileHandler {
-	
+
 	private $engine            = NULL;
 	private $database          = NULL;
 	private $file              = array();
@@ -10,18 +10,18 @@ class fileHandler {
 	public $maxSize            = 2000000; // 2mb
 	public $basePath           = NULL;
 	public $debug              = FALSE; // Must be FALSE in Production
-	
-	
+
+
 	function __construct($database=NULL) {
-		
-		$this->engine   = EngineAPI::singleton();
-		$this->database = ($database instanceof engineDB) ? $database : $this->engine->openDB;
-		
+
+		$engine         = EngineAPI::singleton();
+		$this->database = ($database instanceof engineDB) ? $database : $engine->openDB;
+
 	}
-	
+
 	function __destruct() {
 	}
-	
+
 	/**
 	 * Checks a file against size constraints, invalid extensions, and blank file names
 	 *
@@ -30,34 +30,34 @@ class fileHandler {
 	 * @return bool|string
 	 **/
 	public function validate($files,$i) {
-		
+
 		if (empty($files['name'][$i])) {
 			return errorHandle::errorMsg("File skipped: No File Name");
 		}
 		else {
-			
+
 			$fileSize = dbSanitize($files['size'][$i]);
 			$fileName = dbSanitize($files['name'][$i]);
-			
+
 			// file not uploaded correctly, display PHP error
 			if ($files['error'][$i] == 1) {
 				return errorHandle::errorMsg("File skipped: ".$fileName." exceeds the maximum file size set in PHP.");
 			}
-			
+
 			if ($fileSize > $this->maxSize) {
 				return errorHandle::errorMsg("File skipped: ".$fileName." (".displayFileSize($fileSize).") exceeds size limit of ".displayFileSize($this->maxSize).".");
 			}
-			
+
 			if (($output = $this->checkAllowedExtensions($fileName)) !== TRUE) {
 				return errorHandle::errorMsg("File skipped: ".$output);
 			}
-			
+
 		}
-		
+
 		return TRUE;
-		
+
 	}
-	
+
 	/**
 	 * Wrapper for retrieval functions
 	 *
@@ -72,16 +72,16 @@ class fileHandler {
 		switch(strtolower($type)) {
 			case "database":
 				return $this->retrieveFromDB($name,$location,$fields);
-				
+
 			case "folder":
 				return $this->retrieveFromFolder($name,$location);
-				
+
 			default:
 				return FALSE;
 		}
-		
+
 	}
-	
+
 	/**
 	 * Wrapper for storage functions
 	 *
@@ -92,22 +92,22 @@ class fileHandler {
 	 * @return bool|array
 	 **/
 	public function store($type,$files,$location,$fields=NULL) {
-		
+
 		$files = $this->normalizeArrayFormat($files);
-		
+
 		switch(strtolower($type)) {
 			case "database":
 				return $this->storeInDB($files,$location,$fields);
-				
+
 			case "folder":
 				return $this->storeInFolder($files,$location);
-				
+
 			default:
 				return FALSE;
 		}
-		
+
 	}
-	
+
 	/**
 	 * Changes array structure to match PHP upload
 	 *
@@ -115,7 +115,7 @@ class fileHandler {
 	 * @return array
 	 **/
 	private function normalizeArrayFormat($files) {
-		
+
 		if (!is_array($files['name'])) {
 			$tmp = array();
 			foreach ($files as $key => $val) {
@@ -123,11 +123,11 @@ class fileHandler {
 			}
 			$files = $tmp;
 		}
-		
+
 		return $files;
-		
+
 	}
-	
+
 	/**
 	 * Retrieve a file from a directory
 	 *
@@ -136,27 +136,27 @@ class fileHandler {
 	 * @return bool|array
 	 **/
 	private function retrieveFromFolder($name,$location) {
-		
+
 		$filePath = $this->basePath."/".$location.'/'.$name;
-		
+
 		if (!file_exists($filePath)) {
 			if ($this->debug === TRUE) {
 				errorHandle::newError("File does not exist: ".$filePath,errorHandle::DEBUG);
 			}
 			return FALSE;
 		}
-		
+
 		$content = file_get_contents($filePath);
 		$type = $this->getMimeType($filePath);
-		
+
 		$output['name'] = utf8_encode($name);
 		$output['type'] = $type;
 		$output['data'] = $content;
-		
+
 		return $output;
-		
+
 	}
-	
+
 	/**
 	 * Retrieve a file from a database table
 	 *
@@ -179,7 +179,7 @@ class fileHandler {
 			$name
 			);
 		$sqlResult = $this->database->query($sql);
-		
+
 		if ($sqlResult['affectedRows'] == 0) {
 			if ($this->debug === TRUE) {
 				errorHandle::newError($name." not found in ".$table,errorHandle::DEBUG);
@@ -194,9 +194,9 @@ class fileHandler {
 		$output['data'] = $file[$fields['data']];
 
 		return $output;
-		
+
 	}
-	
+
 	/**
 	 * Store files in a database table
 	 *
@@ -206,21 +206,21 @@ class fileHandler {
 	 * @return bool|string
 	 **/
 	private function storeInDB($files,$table,$fields) {
-		
+
 		$errorMsg  = NULL;
 		$fileCount = count($files['name']);
-		
+
 		for ($i = 0; $i < $fileCount; $i++) {
-			
+
 			if (($valid = $this->validate($files,$i)) !== TRUE) {
 				$errorMsg .= $valid;
 				continue;
 			}
-			
+
 			$fileName = $files['name'][$i];
 			$fileType = $files['type'][$i];
 			$fileData = file_get_contents($files['tmp_name'][$i]);
-			
+
 			$sql = sprintf("INSERT INTO `%s` SET `%s`='%s', `%s`='%s', `%s`='%s'",
 				$this->database->escape($table),
 				$this->database->escape($fields['name']),
@@ -231,25 +231,25 @@ class fileHandler {
 				$this->database->escape($fileType)
 				);
 			$sqlResult = $this->database->query($sql);
-			
+
 			if (!$sqlResult['result']) {
 				if ($this->debug === TRUE) {
 					errorHandle::newError("Failed to store ".$fileName." in ".$table,errorHandle::DEBUG);
 				}
 				$errorMsg .= errorHandle::errorMsg("Failed to store ".$fileName);
 			}
-			
+
 		}
-		
+
 		if (!isnull($errorMsg)) {
 			return $errorMsg;
 		}
 		else {
 			return TRUE;
 		}
-		
+
 	}
-	
+
 	/**
 	 * Store files in a directory
 	 *
@@ -258,27 +258,27 @@ class fileHandler {
 	 * @return bool|string
 	 **/
 	private function storeInFolder($files,$folder) {
-		
+
 		$errorMsg = NULL;
-		
+
 		$location = $this->basePath."/".$folder;
 		if (!is_dir($location)) {
 			mkdir($location, 0700, TRUE);
 		}
 
 		$fileCount = count($files['name']);
-		
+
 		for ($i = 0; $i < $fileCount; $i++) {
-			
+
 			if (($valid = $this->validate($files,$i)) !== TRUE) {
 				$errorMsg .= $valid;
 				continue;
 			}
-			
+
 			$fileName = utf8_decode($files['name'][$i]);
 			$fileType = $files['type'][$i];
 			$fileData = $files['tmp_name'][$i];
-			
+
 			if (file_exists($location."/".$fileName)) {
 				$errorMsg .= errorHandle::errorMsg("Conflicting filename: ".$fileName);
 			}
@@ -289,14 +289,14 @@ class fileHandler {
 				else {
 					$output = $this->copyFile($fileName,$location."/".$fileName);
 				}
-				
+
 				if ($output === FALSE) {
 					$errorMsg .= errorHandle::errorMsg("Error storing ".$fileName);
 				}
 			}
-			
+
 		}
-		
+
 		if (!isnull($errorMsg)) {
 			return $errorMsg;
 		}
@@ -305,7 +305,7 @@ class fileHandler {
 		}
 
 	}
-	
+
 	/**
 	 * Display an HTML form to allow users to upload files to the server
 	 *
@@ -358,7 +358,7 @@ class fileHandler {
 			return errorHandle::errorMsg("Insert Error.");
 		}
 
-		return TRUE;		
+		return TRUE;
 
 	}
 
@@ -572,25 +572,25 @@ class fileHandler {
 	 **/
 	public function displayFile($file,$display=NULL) {
 
-		global $engineVars;
-
 		if (isnull($display)) {
 			$display = "window"; // set to default
 		}
 
-		sessionSet("FMfileName",$file['name']);
-		sessionSet("FMfileType",$file['type']);
-		sessionSet("FMfileData",$file['data']);
-		sessionSet("FMdisplay",$display);
+		$id = rand();
+
+		$_SESSION['fileHandler_'.$id]['fileName'] = $file['name'];
+		$_SESSION['fileHandler_'.$id]['fileType'] = $file['type'];
+		$_SESSION['fileHandler_'.$id]['fileData'] = $file['data'];
+		$_SESSION['fileHandler_'.$id]['display']  = $display;
 
 		switch ($display) {
 			case "inline":
-				return $this->displayFileInline($file);
+				return self::displayFileInline($file,$id);
 				break;
 			case "download":
 			case "window":
 			default:
-				header("Location: " . $engineVars['downloadPage']);
+				header("Location: " . EngineAPI::$engineVars['downloadPage'].'?id='.$id);
 		}
 
 		return FALSE;
@@ -603,12 +603,10 @@ class fileHandler {
 	 * @param array  $file  The file name, type, and data, as an array
 	 * @return string
 	 **/
-	private function displayFileInline($file) {
-
-		global $engineVars;
+	private function displayFileInline($file,$id) {
 
 		if (strpos($file['type'],'image') !== FALSE) {
-			$output = "<img src=\"".$engineVars['downloadPage']."\" />";
+			$output = '<img src="'.EngineAPI::$engineVars['downloadPage'].'?id='.$id.'" />';
 		}
 		else {
 			$output = $file['data'];
@@ -626,6 +624,8 @@ class fileHandler {
 	 **/
 	public function displaySearchForm($extensions=array()) {
 
+		$engine = EngineAPI::singleton();
+
 		if (is_empty($extensions)) {
 			$extensions = $this->getExtensionsInFolder();
 			natcasesort($extensions);
@@ -633,14 +633,19 @@ class fileHandler {
 
 		$limits = array(1=>"Bytes", 1000=>"KB", 1000000=>"MB", 1000000000=>"GB");
 
-		$lowSizeUnit  = is_empty($this->engine->cleanPost['MYSQL']['lowSizeUnit'])?1000:$this->engine->cleanPost['MYSQL']['lowSizeUnit'];
-		$highSizeUnit = is_empty($this->engine->cleanPost['MYSQL']['highSizeUnit'])?1000:$this->engine->cleanPost['MYSQL']['highSizeUnit'];
+		$lowSizeLimit  = isset($engine->cleanPost['HTML']['lowSizeLimit'])  ? $engine->cleanPost['HTML']['lowSizeLimit']  : NULL;
+		$lowSizeUnit   = isset($engine->cleanPost['HTML']['lowSizeUnit'])   ? $engine->cleanPost['HTML']['lowSizeUnit']   : 1000;
+		$highSizeLimit = isset($engine->cleanPost['HTML']['highSizeLimit']) ? $engine->cleanPost['HTML']['highSizeLimit'] : NULL;
+		$highSizeUnit  = isset($engine->cleanPost['HTML']['highSizeUnit'])  ? $engine->cleanPost['HTML']['highSizeUnit']  : 1000;
+
+		$fileName = isset($engine->cleanPost['HTML']['fileName']) ? $engine->cleanPost['HTML']['fileName'] : NULL;
+		$fileType = isset($engine->cleanPost['HTML']['fileType']) ? $engine->cleanPost['HTML']['fileType'] : NULL;
 
 		$output  = '<form action="'.$_SERVER['PHP_SELF'].'?'.$_SERVER['QUERY_STRING'].'" method="post">';
 		$output .= '<table>';
 		$output .= '<tr>';
 		$output .= '<td>File Name</td>';
-		$output .= '<td><input type="text" name="fileName" value="'.$this->engine->cleanPost['HTML']['fileName'].'" /></td>';
+		$output .= '<td><input type="text" name="fileName" value="'.$fileName.'" /></td>';
 		$output .= '</tr>';
 
 		$output .= '<tr>';
@@ -649,7 +654,8 @@ class fileHandler {
 		$output .= '<select name="fileType">';
 		$output .= '<option value="any">Any</option>';
 		foreach ($extensions as $ext) {
-			$output .= '<option value="'.htmlSanitize($ext).'" '.(($ext==$this->engine->cleanPost['HTML']['fileType'])?'selected':'').'>'.htmlSanitize($ext).'</option>';
+			$ext = htmlSanitize($ext);
+			$output .= '<option value="'.$ext.'"'.(($ext==$fileType)?' selected':'').'>'.$ext.'</option>';
 		}
 		$output .= '</select>';
 		$output .= '</td>';
@@ -658,17 +664,17 @@ class fileHandler {
 		$output .= '<tr>';
 		$output .= '<td>Size Limit</td>';
 		$output .= '<td>';
-		$output .= '<input type="text" name="lowSizeLimit" value="'.$this->engine->cleanPost['HTML']['lowSizeLimit'].'" size="10" />';
+		$output .= '<input type="text" name="lowSizeLimit" value="'.$lowSizeLimit.'" size="10" />';
 		$output .= '<select name="lowSizeUnit">';
 		foreach ($limits as $k => $v) {
-			$output .= '<option value="'.$k.'" '.(($k==$lowSizeUnit)?'selected':'').'>'.$v.'</option>';
+			$output .= '<option value="'.$k.'"'.(($k==$lowSizeUnit)?' selected':'').'>'.$v.'</option>';
 		}
 		$output .= '</select>';
 		$output .= 'To';
-		$output .= '<input type="text" name="highSizeLimit" value="'.$this->engine->cleanPost['HTML']['highSizeLimit'].'" size="10" />';
+		$output .= '<input type="text" name="highSizeLimit" value="'.$highSizeLimit.'" size="10" />';
 		$output .= '<select name="highSizeUnit">';
 		foreach ($limits as $k => $v) {
-			$output .= '<option value="'.$k.'" '.(($k==$highSizeUnit)?'selected':'').'>'.$v.'</option>';
+			$output .= '<option value="'.$k.'"'.(($k==$highSizeUnit)?' selected':'').'>'.$v.'</option>';
 		}
 		$output .= '</select>';
 		$output .= '</td>';
@@ -676,7 +682,7 @@ class fileHandler {
 
 		$output .= '<tr>';
 		$output .= '<td colspan="2">';
-		$output .= '{engine name="insertCSRF"}';
+		$output .= '{engine name="csrf"}';
 		$output .= '<input type="submit" name="fileSubmit" value="Submit" />';
 		$output .= '</td>';
 		$output .= '</tr>';
@@ -853,7 +859,6 @@ class fileHandler {
 	 * @return string
 	 **/
 	public function getMimeType($file_path) {
-		global $engineVars;
 		$mimeType = '';
 
 		try {
@@ -861,11 +866,11 @@ class fileHandler {
 				throw new Exception("finfo class unavailable!");
 			}
 			$fileInfo = @finfo_open(FILEINFO_MIME);
-			
-			if (!$fileInfo and isset($engineVars['magicMimeFile'])) {
-				$fileInfo = finfo_open(FILEINFO_MIME, $engineVars['magicMimeFile']);
+
+			if (!$fileInfo and isset(EngineAPI::$engineVars['magicMimeFile'])) {
+				$fileInfo = finfo_open(FILEINFO_MIME, EngineAPI::$engineVars['magicMimeFile']);
 			}
-			
+
 			if (is_object($fileInfo)) {
 				$mimeType = $finfo->file($file_path);
 			}
@@ -887,7 +892,7 @@ class fileHandler {
 			$mimeType = "application/force-download";
 		}
 
-		return $mimeType;		
+		return $mimeType;
 	}
 
 	/**

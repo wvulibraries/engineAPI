@@ -535,9 +535,15 @@ class dlxs {
 		$template = $this->buildTemplate($file);
 
 		$thumbUrl   = $xml->Url[1];
-		$thumbnail  = '<a href="'.$xml->RelatedViews->View->Row->Column->Url[3].'" rel="lightbox">';
-		$thumbnail .= '<img src="'.$thumbUrl.'" alt="foo" />';
-		$thumbnail .= "</a>";
+		$thumbnail  = "";
+		if ($thumbUrl != "nothumb") {
+			$thumbnail  = '<a href="'.$xml->RelatedViews->View->Row->Column->Url[3].'" rel="lightbox">';
+			$thumbnail .= '<img src="'.$thumbUrl.'" />';
+			$thumbnail .= "</a>";
+		}
+		else if ($this->displayNoThumbonDetail === TRUE) {
+			$thumbnail = '<img src="'.$this->noThumbURL.'" />';
+		}
 		
 		$output = "";
 

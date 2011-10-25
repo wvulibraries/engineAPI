@@ -47,24 +47,22 @@ function isint($int) {
 // Returns TRUE if string evaluates to "null" as well as normal cases. 
 // If strict===FALSE uses the built in is_null() php function
 function isnull($var,$strict=TRUE) {
-	if ($strict === FALSE) {
-		return(is_null($var));
+	if($strict === FALSE){
+		return (is_null($var));
 	}
 
-	if (is_array($var)) {
-		return(FALSE);
+	if(is_array($var)){
+		return (FALSE);
 	}
-	
-	if (is_string($var)) {
-		if (strtolower($var) == "null") {
-			return(TRUE);
-		}
+
+	if(is_string($var) and strtolower($var) == "null"){
+		return (TRUE);
 	}
-	else if ($var === NULL) {
-		return(TRUE);
+	elseif($var === NULL){
+		return (TRUE);
 	}
-	
-	return(FALSE);
+
+	return (FALSE);
 }
 
 // Does NOT return true when test variable is int 0 or string "0"

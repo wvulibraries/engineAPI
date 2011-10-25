@@ -74,7 +74,10 @@ function sessionSet($variable,$value) {
 			} 
 			else { 
 				if ($count == $arrayLen) {
-					$prevTemp[$V] = $value;
+					// $prevTemp[$V] = $value;
+					if ($prevTemp[$V] = $value) {
+						return TRUE;
+					}
 				}
 				else {
 					$prevTemp[$V] = array(); 
@@ -87,7 +90,7 @@ function sessionSet($variable,$value) {
 	return FALSE;
 }
 
-// returns that value of $variable, FALSE if not defined.
+// returns that value of $variable, NULL if not defined.
 function sessionGet($variable) {
 	
 	if (is_string($variable) === TRUE) {
@@ -124,7 +127,13 @@ function sessionGet($variable) {
 		}
 	}
 	
-	return(FALSE);
+	return(NULL);
+}
+
+// delete a variable from the session
+function sessionDelete($variable) {
+	unset($_SESSION[$variable]);
+	return(TRUE);
 }
 
 /* 
@@ -161,7 +170,7 @@ function sessionInsertCSRF($form = TRUE) {
 		$output = "engineCSRF not set";
 	}
 	
-	if($form) {
+	if($form === TRUE) {
 		$output = "<input type=\"hidden\" name=\"engineCSRFCheck\" value=\"".$output."\" />";
 	}
 	

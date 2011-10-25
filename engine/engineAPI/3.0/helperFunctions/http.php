@@ -1,8 +1,4 @@
 <?php
-/**
- * The HTTP (Hypertext Transfer Protocol) class is a general purpose, utility,
- * class to provide http related functions.
- */
 class http
 {
     /**

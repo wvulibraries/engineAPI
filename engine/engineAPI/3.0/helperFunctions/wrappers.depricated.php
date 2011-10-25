@@ -13,7 +13,7 @@ function webHelper_successMsg($message) {
 }
 
 function engine_isMobileBrowser() {
-	return(mobileBrowsers::isMobileBrower());
+	return(mobileBrowsers::isMobileBrowser());
 }
 
 // Template Date
@@ -50,6 +50,19 @@ function filelist($dir,$template,$engine) {
 	$engineVars['fileList'] = NULL;
 	
 	return($output);
+}
+
+function printENV($engine=NULL) {
+	debug::printENV();
+	return;
+}
+
+function obsafe_print_r($var, $return = TRUE, $level = 0) {
+	$return = debug::obsafe_print_r($var, $return, $level);
+	if (!is_empty($return)) {
+		return($return);
+	}
+	return;
 }
 
 ?>

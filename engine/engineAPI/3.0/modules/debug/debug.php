@@ -104,7 +104,7 @@ class debug {
 		foreach($var as $key => $value) {
 			if (is_array($value) || is_object($value)) {
 				$level++;
-				$value = obsafe_print_r($value, true, $html, $level);
+				$value = obsafe_print_r($value, true, $level);
 				$level--;
 			}
 			$output .= $tabs . "[" . $key . "] => " . $value . $newline;

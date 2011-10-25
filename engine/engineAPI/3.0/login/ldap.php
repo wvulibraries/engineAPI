@@ -4,13 +4,14 @@ $loginFunctions['ldap'] = "ldapLogin";
 
 function ldapLogin($username,$password,$engine=NULL)
 {
-    global $ldapSearch;
+//    global $ldapSearch;
 
 	// Load the ldapSearch module
 	require EngineAPI::$engineDir.'/modules/ldapSearch/ldapSearch.php'; // (I'm not sure if the autoloader is set yet)
-	$ldapSearch = new ldapSearch(EngineAPI::singleton()->localVars("domain"));
-	if($ldapSearch->login($username,$password)){
+    $ldapSearch = new ldapSearch(EngineAPI::singleton()->localVars("domain"));
+    if($ldapSearch->login($username,$password)){
         $user = $ldapSearch->findUser($username);
+//        die(__LINE__.' - '.__FILE__);
         if($user){
 	        $groupsClean=array();
 	        $groups = $ldapSearch->getGroupsFromUser($user,TRUE);
@@ -18,7 +19,7 @@ function ldapLogin($username,$password,$engine=NULL)
 	             $group = $ldapSearch->getAttributes($group,'cn');
 	             $groupsClean[] = $group['cn'];
 	        }
-
+                                          echo __FUNCTION__.'()';
 			$_SESSION['groups']   = $groupsClean;
 			$_SESSION['ou']       = getOU($user);
 			$_SESSION['username'] = $username;
@@ -27,10 +28,9 @@ function ldapLogin($username,$password,$engine=NULL)
             // Proposed new layout:
             $_SESSION['authType'] = "ldap";
             $_SESSION['auth_ldap'] = array(
+                'groups'   => $groups,
                 'userDN'   => $user,
                 'username' => $username
-                'ou'       => getOU($user),
-                'groups'   => $groups,
             );
             
 	        return TRUE;
@@ -40,8 +40,6 @@ function ldapLogin($username,$password,$engine=NULL)
 	}else{
         return FALSE;
     }
-
-	return(FALSE);
 }
 
 function ldapConnect($ldapServer) {

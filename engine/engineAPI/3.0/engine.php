@@ -12,6 +12,8 @@ class EngineAPI
 	public static $engineVars = array();
     public $errorStack = array();
 
+	public $obCallback = TRUE; //  if set to false, the engine tags will not be processed. 
+
     private $localVars        = array();
     public  $template         = ""; // $engineVars['currentTemplate'];
 
@@ -54,13 +56,11 @@ class EngineAPI
 	
 	private $engineVarsPrivate      = array();
 	
-	public function __clone()
-	{
+	public function __clone() {
 		trigger_error('Cloning instances of this class is forbidden.', E_USER_ERROR);
 	}
 
-	public function __wakeup()
-	{
+	public function __wakeup() {
 		trigger_error('Unserializing instances of this class is forbidden.', E_USER_ERROR);
 	}
 
@@ -140,7 +140,8 @@ class EngineAPI
 		}
 		
 		// Define the AutoLoader
-		spl_autoload_register(array($this, 'autoloader'));
+		// spl_autoload_register(array($this, 'autoloader'));
+		$this->addAutoloader(array($this, 'autoloader'));
 		
 		// Get modules ready for Autoloader (previously loaded modules). Load the "onLoad.php" files
 		// for each module
@@ -202,6 +203,7 @@ class EngineAPI
 		}
 		
 		// Startup engines database connection
+		require_once(self::$engineDir."/modules/database/engineDB.php");
 		$this->engineDB = new engineDB($this->engineVarsPrivate['mysql']['username'],$this->engineVarsPrivate['mysql']['password'],$this->engineVarsPrivate['mysql']['server'],$this->engineVarsPrivate['mysql']['port'],$engineVars['logDB'],FALSE);
 		
 		// Start up the logging
@@ -272,6 +274,11 @@ class EngineAPI
 		ob_flush();
 	}
 	
+    /**
+     * @static
+     * @param string $site
+     * @return EngineAPI
+     */
 	public static function singleton($site="default") {
 		if (!isset(self::$instance)) {
             $c = __CLASS__;
@@ -281,6 +288,33 @@ class EngineAPI
         return self::$instance;
 	}
 	
+	public function addLibrary($libraryDir) {
+		
+		// Make sure that it is a directory
+		if (is_dir($libraryDir) === FALSE) {
+			return(FALSE);
+		}
+		
+		// Make sure that we can read it
+		if (is_readable($libraryDir) === FALSE) {
+			return(FALSE);
+		}
+		
+		$dirHandle = @opendir($libraryDir);
+		
+		if ($dirHandle === FALSE) {
+			return(FALSE);
+		}
+		
+		while (false !== ($file = readdir($dirHandle))) {
+
+			$fileChunks = array_reverse(explode(".", $file));
+			$ext        = $fileChunks[0];
+			if ($ext == "php") {
+				$this->availableModules[$fileChunks[1]] = $libraryDir."/".$file;
+			}
+		}
+	}
 	
 	public function getPrivateVar($varName) {
 		$file     = callingFile();
@@ -298,6 +332,9 @@ class EngineAPI
 				}
 			}
 		}
+
+		// Record this denial for debugging
+		errorHandle::newError(__METHOD__."() - Access Denied to privateVar '$varName' for file '$file' and function '$function'!", errorHandle::DEBUG);
 		
 		return(FALSE);
 	}
@@ -611,7 +648,43 @@ class EngineAPI
 	#Private Functions
 	######################################################################
 
-	private function autoloader($className) {
+	function addAutoloader($autoload) {
+
+		if (version_compare(PHP_VERSION, '5.3.0') >= 0) {
+			$return = spl_autoload_register($autoload,TRUE,TRUE);
+			return($return);
+		}
+
+		$functions = spl_autoload_functions();
+
+		if ($functions === FALSE) {
+			$return = spl_autoload_register($autoload);
+			return($return);
+		}
+
+		foreach ($functions as $I=>$V) {
+			$return = spl_autoload_unregister($V); 
+			if ($return === FALSE) {
+				return(FALSE);
+			}
+		}
+
+		$return = spl_autoload_register($autoload);
+		if ($return === FALSE) {
+			return(FALSE);
+		}
+		foreach ($functions as $I=>$V) {
+			$return = spl_autoload_register($V);
+			if ($return === FALSE) {
+				return(FALSE);
+			}
+		}
+
+		return($return);
+
+	}
+
+	public static function autoloader($className) {
 		// // Debugging
 		// $fh = fopen("/tmp/modules.txt","a");
 		// fwrite($fh,"\n\n=====Autoloader Begin =========\n\n");
@@ -619,28 +692,31 @@ class EngineAPI
 		// fwrite($fh,"\n\n=====Autoloader END =========\n\n");
 		// fclose($fh);
 		
+		$engine = EngineAPI::singleton();
+		
 		if (!class_exists($className, FALSE)) {
 
-			if (isset($this->availableModules[$className]) && file_exists($this->availableModules[$className])) {
+			if (isset($engine->availableModules[$className]) && file_exists($engine->availableModules[$className])) {
 	
-				require_once($this->availableModules[$className]);
+				require_once($engine->availableModules[$className]);
 				return(TRUE);
 			}
 			
-			$filename = NULL;
-			foreach ($this->library as $I=>$V) {
-				if (file_exists($V."/".$className.".php")) {
-					$filename = $V."/".$className.".php";
-				}
-				else if (file_exists($V."/".$className.".class.php")) {
-					$filename = $V."/".$className.".class.php";
-				}
-			}
-			
-			if (!isnull($filename)) {
-				require_once($filename);
-				return(TRUE);
-			}
+			// No longer needed, $engine->addLibrary() replaces the need for this. 
+			// $filename = NULL;
+			// foreach ($this->library as $I=>$V) {
+			// 	if (file_exists($V."/".$className.".php")) {
+			// 		$filename = $V."/".$className.".php";
+			// 	}
+			// 	else if (file_exists($V."/".$className.".class.php")) {
+			// 		$filename = $V."/".$className.".class.php";
+			// 	}
+			// }
+			// 
+			// if (!isnull($filename)) {
+			// 	require_once($filename);
+			// 	return(TRUE);
+			// }
 
 			// Can't throw exceptions in php 5.2 from an autoloader, but you can 
 			// catch it from this eval block. 
@@ -735,6 +811,10 @@ class EngineAPI
 		
 		$engine = EngineAPI::singleton();
 		
+		if ($engine->obCallback === FALSE) {
+			return($content);
+		}
+		
 		$contentArray = preg_split('/<!-- engine Instruction break -->/',$content);
 		$content = "";
 		
@@ -776,7 +856,12 @@ class EngineAPI
 						if (!class_exists($className, FALSE)) {
 							$className = preg_replace("/[^a-zA-Z0-9]/", "", $className);
 							try {
-								$temp = new $className();
+								// if(!class_exists($className,FALSE)){
+								// 	throw new Exception("Class '$className' not found!");
+								// }
+								if (array_key_exists($className,$engine->availableModules)) {
+									$temp = new $className();
+								}
 							}
 							catch (Exception $e) {
 								// do nothing

@@ -1,6 +1,6 @@
 <?php
 class search {
-	
+
 	private $engine         = NULL;
 	private $searchArray    = array();
 	private $searchString   = array();
@@ -8,55 +8,58 @@ class search {
 	private $tables         = array();
 	private $fields         = array();
 	private $query          = array();
-	
+	private $debug          = FALSE;
+
 	public $tempTablePrefix = "engineSearchModule_";
 	public $searchRows      = 1;
 	public $whereClause     = NULL;
 	public $orderBy         = NULL;
 	public $relevanceSearch = TRUE;
-	
-	
+
+
 	function __construct() {
-		
-		$this->engine   = EngineAPI::singleton();
+
 		$this->boolOperands = array('or'  => '',
 									'and' => '+',
 									'not' => '-');
 
+		$debug = debug::create();
+		$debug->password = (isset($debug->password)) ? $debug->password : "search";
+		if ($debug->needed("search")) {
+			$this->debug = TRUE;
+		}
 	}
-	
+
 	function __destruct() {
 	}
-	
+
 
 	public function createTable($table) {
-		
+
 		if (empty($this->fields)) {
-			return webHelper_errorMsg("No fields defined.");
+			return errorHandle::errorMsg("No fields defined.");
 		}
-		
+
+		$engine       = EngineAPI::singleton();
 		$tableName    = $this->tempTablePrefix.$table;
 		$fromClause   = NULL;
 		$selectClause = NULL;
 		$fieldNames   = array();
 		$from         = array();
-		
+
 
 		if (is_array($this->links)) {
 			foreach ($this->links as $link) {
-				if (is_empty($from)) {
-					$from[$link['table1']][] = $link['table1'];
-				}
-				$from[$link['table2']][] = $link['table2'].".".$link['field2']."=".$link['table1'].".".$link['field1'];
+				$from[$link['table1']][$link['table2']][] = $link['table2'].".".$link['field2']."=".$link['table1'].".".$link['field1'];
 			}
 		}
 
-		foreach ($from as $tName => $fields) {
-			if (isnull($fromClause)) {
-				$fromClause .= $tName;
-			}
-			else {
-				$fromClause .= " LEFT JOIN ".$tName." ON (";
+		foreach ($from as $t1Name => $t2Arr) {
+			foreach ($t2Arr as $t2Name => $fields) {
+				if (isnull($fromClause)) {
+					$fromClause .= $t1Name;
+				}
+				$fromClause .= " LEFT JOIN ".$t2Name." ON (";
 				foreach ($fields as $key => $value) {
 					$fromClause .= (($key!=0)?" AND ":"").$value;
 				}
@@ -81,75 +84,72 @@ class search {
 				}
 			}
 		}
-		
 
-		$sql = sprintf("CREATE TEMPORARY TABLE %s (%s TEXT, FULLTEXT (%s)) ENGINE=MyISAM",
-			$this->engine->openDB->escape($tableName),
+
+		$sql = sprintf("CREATE TEMPORARY TABLE `%s` (%s TEXT, FULLTEXT (%s)) ENGINE=MyISAM",
+			$engine->openDB->escape($tableName),
 			implode(" TEXT, ",$fieldNames),
 			implode(", ",$fieldNames)
 			);
-		$this->engine->openDB->sanitize = FALSE;
-		$sqlResult                      = $this->engine->openDB->query($sql);
-		
+		$sqlResult = $engine->openDB->query($sql);
+
 		if (!$sqlResult['result']) {
-			return webHelper_errorMsg("Failed to create table: $table");
+			return errorHandle::errorMsg("Failed to create table: $table");
 		}
 
-		
-		$sql = sprintf("INSERT INTO %s (%s) SELECT DISTINCT %s FROM %s %s",
-			$this->engine->openDB->escape($tableName),
-			$this->engine->openDB->escape(implode(", ",$fieldNames)),
+
+		$sql = sprintf("INSERT INTO `%s` (%s) SELECT DISTINCT %s FROM %s %s",
+			$engine->openDB->escape($tableName),
+			$engine->openDB->escape(implode(", ",$fieldNames)),
 			$selectClause,
-			$this->engine->openDB->escape($fromClause),
+			$engine->openDB->escape($fromClause),
 			$this->whereClause
 			);
-		$this->engine->openDB->sanitize = FALSE;
-		$sqlResult                      = $this->engine->openDB->query($sql);
-		
-		if (debugNeeded("populate")) {
+		$sqlResult = $engine->openDB->query($sql);
+
+		if ($this->debug === TRUE) {
 			print "<pre>";
 			print_r($sqlResult);
 			print "</pre>";
 		}
-		
+
 		if (!$sqlResult['result']) {
-			return webHelper_errorMsg("Error populating table: $table");
+			return errorHandle::errorMsg("Error populating table: $table");
 		}
 
 		// Debug: To view contents of the temp table
-		// $sql = sprintf("SELECT * FROM %s",
-		// 	$this->engine->openDB->escape($tableName)
+		// $sql = sprintf("SELECT * FROM `%s`",
+		// 	$engine->openDB->escape($tableName)
 		// 	);
-		// $this->engine->openDB->sanitize = FALSE;
-		// $sqlResult                      = $this->engine->openDB->query($sql);
+		// $sqlResult = $engine->openDB->query($sql);
 		// while ($row = mysql_fetch_array($sqlResult['result'], MYSQL_ASSOC)) {
 		// 	print "<pre>";
 		// 	print_r($row);
 		// 	print "</pre>";
 		// }
-		
+
 		$thisTable = array();
 		$thisTable['name']   = $this->tempTablePrefix.$table;
 		$thisTable['fields'] = $this->fields;
 		$thisTable['links']  = $this->links;
-		
+
 		$this->tables[] = $thisTable;
-		
+
 		$this->destroyTableDefs();
-		
+
 
 	}
 
 	public function addField($attPairs) {
 		$this->fields[] = $attPairs;
 	}
-	
+
 	public function addLink($attPairs) {
 		$this->links[] = $attPairs;
 	}
 
 	private function destroyTableDefs() {
-		
+
 		unset($this->fields);
 		unset($this->links);
 
@@ -161,19 +161,20 @@ class search {
 
 	}
 
-	
+
 	public function submit() {
-		
+
+		$engine  = EngineAPI::singleton();
 		$output  = NULL;
 		$results = array();
 		$this->searchArray  = $this->createSearchArray();
 		$this->searchString = $this->convertSearchArrayToBoolForm();
-		
-		if (debugNeeded("search")) {
+
+		if ($this->debug === TRUE) {
 			print "<pre>";
 			print_r($this->searchArray);
 			print "</pre>";
-			
+
 		}
 
 		$fieldNames = array();
@@ -184,7 +185,7 @@ class search {
 				}
 				$fieldNames[$table['name']][] = $field['fieldName'];
 			}
-			
+
 			$match = "MATCH(".implode(", ",$fieldNames[$table['name']]).") AGAINST ('".$this->searchString."' IN BOOLEAN MODE)";
 
 			// where
@@ -194,14 +195,14 @@ class search {
 			else {
 				$whereStr = "WHERE";
 			}
-			
-			$sql = sprintf("SELECT DISTINCT *, %s AS relevance FROM %s %s %s HAVING relevance > 0.2",
+
+			$sql = sprintf("SELECT DISTINCT *, %s AS relevance FROM `%s` %s %s HAVING relevance > 0.2",
 				$match,
-				$this->engine->openDB->escape($table['name']),
+				$engine->openDB->escape($table['name']),
 				$whereStr,
 				$match
 				);
-			
+
 			// order by
 			if ($this->relevanceSearch === TRUE) {
 				if (isnull($this->orderBy)) {
@@ -215,47 +216,46 @@ class search {
 			else {
 				$sql .= " ".$this->orderBy;
 			}
-			
-			if (debugNeeded("query")) {
+
+			if ($this->debug === TRUE) {
 				print "<br />$sql<br /><br />";
 			}
 
-			$this->engine->openDB->sanitize = FALSE;
-			$sqlResult                      = $this->engine->openDB->query($sql);
+			$sqlResult = $engine->openDB->query($sql);
 
 			while ($row = mysql_fetch_array($sqlResult['result'], MYSQL_ASSOC)) {
 				$row[$this->tempTablePrefix.'tableName'] = $table['name'];
 				$results[] = $row;
 			}
-				
+
 		}
 
 		$output .= $this->displayResults($results);
-		
+
 		return $output;
-		
+
 	}
 
 
 	private function displayResults($results) {
-		
+
 		if (count($results) ==0) {
-			return webHelper_errorMsg("No results found.");
-		}
-		
-		$output = NULL;
-		
-		if ($this->relevanceSearch === TRUE) {
-			$tmp = array(); 
-			foreach($results as &$ma) {
-			    $tmp[] = &$ma['relevance']; 
-			}
-			array_multisort($tmp, SORT_DESC, $results); 
+			return errorHandle::errorMsg("No results found.");
 		}
 
-		
-		$output .= "<table>";
-		
+		$output = NULL;
+
+		if ($this->relevanceSearch === TRUE) {
+			$tmp = array();
+			foreach($results as &$ma) {
+			    $tmp[] = &$ma['relevance'];
+			}
+			array_multisort($tmp, SORT_DESC, $results);
+		}
+
+
+		$output .= '<table class="searchResults">';
+
 		foreach ($results as $key => $result) {
 			foreach ($this->tables as $table) {
 				if ($result['engineSearchModule_tableName'] == $table['name']) {
@@ -268,14 +268,14 @@ class search {
 						if (!isset($result[$field['fieldName']]) || is_empty($result[$field['fieldName']])) {
 							continue;
 						}
-						
+
 						$value = $result[$field['fieldName']];
 						$relevant = FALSE;
 						foreach ($this->searchArray as $keyword) {
 							if (!array_key_exists(strtolower($keyword),$this->boolOperands)) {
-								
+
 								$newValue = kwic(htmlSanitize(trim($keyword,"+-*")),$value);
-								
+
 								if ($newValue != $value) {
 									$value = $newValue;
 									$relevant = TRUE;
@@ -305,9 +305,9 @@ class search {
 								$output .= '<a href="'.$link.'">';
 
 							}
-							
+
 							$output .= $value;
-							
+
 							if (isset($field['link'])) {
 								$output .= '</a>';
 							}
@@ -318,7 +318,7 @@ class search {
 						}
 
 					}
-					
+
 					// separate results
 					$output .=  "<tr><td class=\"searchResult_empty\">&nbsp;</td><td class=\"searchResult_empty\">&nbsp;</td></tr>";
 
@@ -327,14 +327,14 @@ class search {
 		}
 
 		$output .= "</table>";
-		
+
 		return $output;
-		
+
 	}
-	
+
 	private function super_unique($array) {
 		$result = array_map("unserialize", array_unique(array_map("serialize", $array)));
-		
+
 		foreach ($result as $key => $value) {
 			if ( is_array($value) ) {
 				$result[$key] = $this->super_unique($value);
@@ -342,17 +342,18 @@ class search {
 		}
 		return $result;
 	}
-	
+
 	private function createSearchArray() {
-		
-		$searchString  = isset($this->engine->cleanPost['RAW']['searchString'])?$this->engine->cleanPost['RAW']['searchString']:array();
-		$bool          = isset($this->engine->cleanPost['MYSQL']['bool'])?$this->engine->cleanPost['MYSQL']['bool']:array();
+
+		$engine        = EngineAPI::singleton();
+		$searchString  = isset($engine->cleanPost['RAW']['searchString'])?$engine->cleanPost['RAW']['searchString']:array();
+		$bool          = isset($engine->cleanPost['MYSQL']['bool'])?$engine->cleanPost['MYSQL']['bool']:array();
 		$keywords      = array();
 		$fullSearchStr = NULL;
-		
+
 		// loop through each row in the form
-		for ($i = 0; $i < $this->searchRows; $i++) { 
-			
+		for ($i = 0; $i < $this->searchRows; $i++) {
+
 			if (!isset($searchString[$i]) || is_empty($searchString[$i])) {
 				continue;
 			}
@@ -361,7 +362,7 @@ class search {
 			if (isset($bool[$i]) && !is_empty($bool[$i])) {
 				$fullSearchStr .= " ".$bool[$i];
 			}
-			
+
 			$fullSearchStr .= " ".$searchString[$i]."";
 
 		}
@@ -371,49 +372,49 @@ class search {
 		return $keywords;
 
 	}
-	
+
 	private function searchStringToArray($searchStr) {
 
 		$keywords = array();
 		$result   = NULL;
-		
+
 		$l = strlen($searchStr);
 
 		for ($i=0; $i<=$l; $i++) {
-			
+
 			$char = substr($searchStr, $i, 1);
-		    
+
 			if ($char != ' ' && $char != '(' && $char != ')') {
 				$result .= trim($char);
 			}
 			else {
-				
+
 				if (!empty($result)) {
 					$keywords[] = $result;
 				}
-				
+
 				$char = trim($char);
-				
+
 				if (!empty($char)) {
 					$keywords[] = $char;
 				}
-				
+
 				$result = '';
 
 			}
 		}
-		
+
 		if (!empty($result)) {
 			$keywords[] = $result;
 		}
-		
+
 		return $keywords;
 
 	}
 
 
 	private function convertSearchArrayToBoolForm($searchArray=NULL) {
-		
+
 		if (isnull($searchArray)) {
 			$searchArray = $this->searchArray;
 		}
@@ -426,16 +427,16 @@ class search {
 		while ($i < 1) {
 
 			$keyword = strtolower(array_pop($keywords));
-			
+
 			if ($keyword == '(') {
-				
+
 				$parens = 0;
-				$tmp = array();	
-				
+				$tmp = array();
+
 				while ($j < 1) {
-					
+
 					$keyword2 = strtolower(trim(array_pop($keywords)));
-					
+
 					if ($keyword2 == '(') {
 						$tmp[] = $keyword2;
 						$parens++;
@@ -445,12 +446,12 @@ class search {
 						$parens--;
 						$keyword2 = array_pop($keywords);
 					}
-						
+
 					if ($keyword2 == ')' && $parens <= 0)	{
 						$results[] = '('.$this->convertSearchArrayToBoolForm($tmp).')';
-						break;		
+						break;
 					}
-					
+
 					$tmp[] = trim($keyword2);
 					if (count($keywords)<=0)	{
 						$results[] = '('.trim($this->convertSearchArrayToBoolForm($tmp)).')';
@@ -463,7 +464,7 @@ class search {
 			else {
 				$results[] = $keyword;
 			}
-			
+
 			if (count($keywords) <= 0) {
 				break;
 			}
@@ -472,13 +473,13 @@ class search {
 
 		$tmp = array_reverse($results);
 		$results = array();
-		
+
 		while (count($tmp))	{
-			
+
 			$a = array_pop($tmp);
 			$b = array_pop($tmp);
 			$c = array_pop($tmp);
-			
+
 			if (!$a) {
 				break;
 			}
@@ -487,7 +488,7 @@ class search {
 			$bistoken = array_key_exists($b, $this->boolOperands)*2;
 			$cistoken = array_key_exists($c, $this->boolOperands)*4;
 			$sw = $aistoken + $bistoken + $cistoken;
-			
+
 			switch ($sw) {
 				// No bool operands in the 3 elements, therefore all are OR
 				case 0:
@@ -495,10 +496,10 @@ class search {
 					$results[] = $b;
 					$results[] = $c;
 					break;
-				
+
 				// $a is a bool operand (shouldn't ever happen), therefore $b gets the sign and $c gets pushed back
 				case 1:
-					$results[] = $this->boolOperands[$a].$b;	
+					$results[] = $this->boolOperands[$a].$b;
 					array_push($tmp, $c);
 					break;
 
@@ -521,14 +522,14 @@ class search {
 						$a = trim($a);
 						break;
 					}
-					
+
 					// If we have AND and OR consecutively it is an error and we'll go with OR
 					if (($a == 'or' && $b == 'and') || ($a == 'and' && $b == 'or'))	{
 						$results[] = $this->boolOperands['or'].$c;
 						break;
 					}
-					
-					// Every thing else is an AND/OR NOT clause, so we just need the NOT sign 
+
+					// Every thing else is an AND/OR NOT clause, so we just need the NOT sign
 					// anything else should be apparent
 					$results[] = $this->boolOperands['not'].$c;
 					break;
@@ -559,48 +560,49 @@ class search {
 					if ($a == $b && $b == $c) {
 						array_push($tmp, $a);
 					}
-					
+
 					// if $a == $b != $c we'll turn $a and $c into one and return that and $c
 					// if $a != $b == $c we'll turn $b and $c into one and return that and $a
 					elseif (($a == $b && $b != $c) || $b == $c)	{
 						array_push($tmp, $a);
 						array_push($tmp, $c);
 					}
-					
+
 					// if $a != $b != $c we're hopelessly lost
 					$a = trim($a);
 					$b = trim($b);
 					$c = trim($c);
 					break;
-					
+
 				default:
 					break;
-				
+
 			}
 
 		}
-		
+
 		return implode($results, ' ');
 
 	}
-	
+
 
 	public function displayForm($rows=1,$addGet=TRUE) {
-		
-		$this->searchRows = $rows;
-		
+
+		$engine = EngineAPI::singleton();
 		$output = NULL;
-		$bool   = isset($this->engine->cleanPost['HTML']['bool'])?$this->engine->cleanPost['HTML']['bool']:array();
-		$type   = isset($this->engine->cleanPost['HTML']['searchTypes'])?$this->engine->cleanPost['HTML']['searchTypes']:array();
-		$search = isset($this->engine->cleanPost['HTML']['searchString'])?$this->engine->cleanPost['HTML']['searchString']:array();
-		
-		
+		$bool   = isset($engine->cleanPost['HTML']['bool'])?$engine->cleanPost['HTML']['bool']:array();
+		$type   = isset($engine->cleanPost['HTML']['searchTypes'])?$engine->cleanPost['HTML']['searchTypes']:array();
+		$search = isset($engine->cleanPost['HTML']['searchString'])?$engine->cleanPost['HTML']['searchString']:array();
+
+		$this->searchRows = $rows;
+
+
 		$output .= '<form method="post" action="'.$_SERVER['PHP_SELF'].($addGet?'?'.$_SERVER['QUERY_STRING']:'').'">';
 		$output .= '<table>';
-		
+
 		for ($i = 0; $i < $this->searchRows; $i++) {
 			$output .= '<tr>';
-			
+
 			$output .= '<td>';
 			if ($i == 0) {
 				$output .= '<input type="hidden" name="bool[]" value="" />';
@@ -609,7 +611,7 @@ class search {
 				if (!isset($bool[$i])) {
 					$bool[$i] = NULL;  // avoids errors on new forms
 				}
-				
+
 				$output .= '<select name="bool[]">';
 				$output .= '<option value="and"'.($bool[$i]=='and'?' selected':'').'>AND</option>';
 				$output .= '<option value="or"'.($bool[$i]=='or'?' selected':'').'>OR</option>';
@@ -617,7 +619,7 @@ class search {
 				$output .= '</select>';
 			}
 			$output .= '</td>';
-			
+
 			$output .= '<td>';
 			if (!empty($this->searchTypes)) {
 				$output .= '<select name="searchTypes[]">';
@@ -632,7 +634,7 @@ class search {
 				$output .= '</select>';
 			}
 			$output .= '</td>';
-			
+
 			$output .= '<td><input type="search" name="searchString[]" value="'.(isset($search[$i])?$search[$i]:"").'" />';
 			if ($i == 0) {
 				$output .= '<input type="submit" name="searchSubmit" value="Search" />';
@@ -640,14 +642,14 @@ class search {
 			$output .= '</td>';
 			$output .= '</tr>';
 		}
-		
+
 		$output .= '</table>';
 		$output .= sessionInsertCSRF();
 		$output .= '</form>';
-		
-		return $output;		
-		
+
+		return $output;
+
 	}
-	
+
 }
 ?>

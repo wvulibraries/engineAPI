@@ -55,6 +55,47 @@ function htmlSanitize($var, $quotes=ENT_QUOTES, $charSet="UTF-8", $doubleEncode=
 
 }
 
+// $var = array from json_decode
+// $type = HTML or MYSQL, defaults to mysql
+function jsonSanitize($var,$type="mysql") {
+	
+	$type = strtolower($type);
+	
+	if ($type != "mysql" && $type != "html") {
+		return($type);
+	}
+	
+	switch($type) {
+		case "mysql":
+			$sanitizeFunction = "dbSanitize";
+			break;
+		case "html":
+			$sanitizeFunction = "htmlSanitize";
+			break;
+		default:
+			return(FALSE);
+			break;
+	}
+	
+	$varSanitized = array();
+	
+	foreach((array)$var as $I=>$V) {
+		$index = $sanitizeFunction($I);
+
+		if (is_array($V)) {
+			$value = jsonSanitize($V,$type);
+		}
+		else {
+			$value = $sanitizeFunction($V);
+		}
+		
+		$varSanitized[$index] = $value;
+		
+	}
+	
+	return($varSanitized);
+}
+
 function stripCarriageReturns($string) {
 
 	global $engineVars;

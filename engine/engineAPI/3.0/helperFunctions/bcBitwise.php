@@ -7,6 +7,8 @@
  * 
  * @see http://www.nirvani.net/software/bc_bitwise/bc_bitwise-0.9.0.inc.php.asc
  */
+
+
 class bcBitwise
 {
     /**
