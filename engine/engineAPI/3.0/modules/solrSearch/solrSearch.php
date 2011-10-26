@@ -2,7 +2,7 @@
 
 require_once dirname(__FILE__).'/searchSolr.php';
 
-class search
+class solrSearch
 {
 	private static $_clients = array();
 	/**
