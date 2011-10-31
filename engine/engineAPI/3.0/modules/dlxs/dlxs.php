@@ -54,6 +54,7 @@ class dlxs {
 	public $backLink = NULL;
 	
 	public $noThumbURL = "/images/noThumbNail.gif";
+	public $displayNoThumbonDetail = TRUE;
 	
 	//Template Stuff
 	private $pattern = "/\{dlxs\s+(.+?)\}/";
@@ -1105,7 +1106,7 @@ class dlxs {
 		
 		$qs = "";
 		
-		if (!empty($this->cleanGet['HTML']['q1']) && !empty($this->cleanGet['HTML']['rgn1'])) {
+		if (!empty($this->cleanGet['HTML']['q1']) && !empty($this->cleanGet['HTML']['rgn1']) && empty($this->cleanPost['HTML']['q1']) && empty($this->cleanPost['HTML']['rgn1'])) {
 		
 			$q1   = urlencode($this->cleanGet['HTML']['q1']);
 			$rgn1 = urlencode($this->cleanGet['HTML']['rgn1']);
@@ -1171,11 +1172,11 @@ class dlxs {
 	private function findAidTags2Markup($str) {
 		
 		$str = preg_replace('/\[markup style="(.+?)"\]/','<span class="$1">',$str);
-		$str = preg_replace('/\[link url="(.+?)"\]/','<a href="$1">',$str);
+		$str = preg_replace('/[\[\%]link url="(.+?)"[\]\%]/','<a href="$1">',$str);
 		$str = preg_replace('/\[image url="(.+?)"\]/','<img src="$1">',$str);
 		
 		$str = preg_replace('/\[\/markup\]/','</span>',$str);
-		$str = preg_replace('/\[\/link\]/','</a>',$str);
+		$str = preg_replace('/[\[\%]\/link[\]\%]/','</a>',$str);
 		$str = preg_replace('/\[\/image\]/','</img>',$str);
 		
 		return($str);
