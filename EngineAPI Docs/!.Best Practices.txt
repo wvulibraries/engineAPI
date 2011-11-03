@@ -1,0 +1,3 @@
+Database:
+
+* If you are only working with a single Database object, it is best to connect with a state of TRUE and use $engine->openDB for all your database transactions. If you are working with multiple database connections it is best to return all database objects and use variables so that there is no confusion about which database object is which. 
