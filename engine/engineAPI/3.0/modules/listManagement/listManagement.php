@@ -342,6 +342,54 @@ class listManagement {
 		return TRUE;
 	}
 
+
+	// $type : "fieldNames" or "fields". Fields returns full array for each field. "fieldNames" returns just the field names
+	// $hidden : if TRUE, return hidden fields as well. No if false
+	// $plaintext : If FALSE it does NOT return plain text fields, otherwise yes. 
+	//
+	// Returns an Array or FALSE if errors
+	public function listFields($type="fieldNames",$hidden=TRUE,$plaintext=FALSE) {
+	
+		$return = FALSE;
+	
+		if ($type == "fieldNames") {
+			$return = array();
+			
+			foreach ($this->fields as $I=>$field) {
+				if ($field['type'] == "plainText" && $plaintext === FALSE) {
+					continue;
+				}
+				$return[] = $field['field'];
+			}
+			
+			if ($hidden === TRUE) {
+				foreach ($this->hiddenFields as $I=>$field) {
+					$return[] = $field['field'];
+				}
+			}
+		}
+		
+		else if ($type == "fields") {
+			$return = array();
+			
+			foreach ($this->fields as $I=>$field) {
+				if ($field['type'] == "plainText" && $plaintext === FALSE) {
+					continue;
+				}
+				$return[] = $field;
+			}
+			
+			if ($hidden === TRUE) {
+				foreach ($this->hiddenFields as $I=>$field) {
+					$return[] = $field;
+				}
+			}
+		}
+		
+		return($return);
+		
+	}
+
 	public function displayInsertForm($addGet=TRUE) {
 		$engine = EngineAPI::singleton();
 		$queryString = "";
@@ -595,17 +643,18 @@ class listManagement {
 				// Extra toolbar on top
 				$output .= '<div class="mceCustomToolbar defaultSkin" style="border:1px solid #CCC;border-bottom:0px;background-color:#F0F0EE">';
 				$output .= '<table style="width:100%"><tr><td>';
-				$output .= '<a href="javascript:tinyMCE.execCommand(\'mcePDWToggleToolbars\');"><img src="'.EngineAPI::$engineVars['engineInc'].'/wysiwyg/plugins/pdw/img/toolbars.gif" /></a>';
+				$output .= '<a href="javascript:tinyMCE.execCommand(\'mcePDWToggleToolbars\');" class="mce"><img src="'.EngineAPI::$engineVars['engineInc'].'/wysiwyg/plugins/pdw/img/toolbars.gif" /></a>';
+				$output .= '</td><td style="text-align: center">';
+				$output .= '<a href="javascript:void(0)" onclick="toggleEditor(\''.$I['field'].'_insert\')" class="mce">Toggle Editor</a>';
 				$output .= '</td><td style="text-align: right">';
-				$output .= '<a href="javascript:tinyMCE.execCommand(\'mceFullScreen\');"><span class="mceIcon mce_fullscreen" style="float:right"></span></a>';
+				$output .= '<a href="javascript:tinyMCE.execCommand(\'mceFullScreen\');" class="mce"><span class="mceIcon mce_fullscreen" style="float:right"></span></a>';
 				$output .= '</td></tr></table>';
 				$output .= '</div>';
 				// Extra toolbar on top
 
-				$output .= '<textarea id="'.$I['field'].'_insert" name="'.$I['field'].'"_insert" class="engineWYSIWYG '.$I['field'].'_insert" cols="65" rows="14">';
+				$output .= '<textarea id="'.$I['field'].'_insert" name="'.$I['field'].'_insert" class="engineWYSIWYG '.$I['field'].'_insert" cols="65" rows="14">';
 				$output .= $value;
 				$output .= '</textarea>';
-				// $output .= '<div><a href="javascript:void(0)" onclick="toggleEditor(\''.$I['field'].'_insert\')">Toggle Editor</a></div>';
 				$output .= '<script type="text/javascript">wysiwygInit(\''.$I['field'].'_insert\');</script>';
 
 			}
@@ -2091,82 +2140,82 @@ class listManagement {
 		$error = "";
 
 		if ($validate == "url") {
-			if (!validURL($data)) {
+			if (!validate::url($data)) {
 				$error .= errorHandle::errorMsg("Entry, ".htmlentities($data).", not a valid URL.");
 			}
 		}
 		else if ($validate == "optionalURL") {
-			if (!validOptionalURL($data)) {
+			if (!validate::optionalURL($data)) {
 				$error .= errorHandle::errorMsg("Entry, ".htmlentities($data).", not a valid URL.");
 			}
 		}
 		else if ($validate == "email") {
-			if (!validateEmailAddr($data)) {
+			if (!validate::emailAddr($data)) {
 				$error .= errorHandle::errorMsg("Entry, ".htmlentities($data).", not a valid Email Address.");
 			}
 		}
 		else if ($validate == "internalEmail") {
-			if (!validateEmailAddr($data,TRUE)) {
+			if (!validate::emailAddr($data,TRUE)) {
 				$error .= errorHandle::errorMsg("Entry, ".htmlentities($data).", not a valid Email Address.");
 			}
 		}
 		else if ($validate == "phone") {
-			if (!validPhoneNumber($data)) {
+			if (!validate::phoneNumber($data)) {
 				$error .= errorHandle::errorMsg("Entry, ".htmlentities($data).", not a valid Phone.");
 			}
 		}
 		else if ($validate == "ipaddr") {
-			if (!validIPAddr($data)) {
+			if (!validate::ipAddr($data)) {
 				$error .= errorHandle::errorMsg("Entry, ".htmlentities($data).", not a valid IP Address Range.");
 			}
 		}
 		else {
 
 			$regexp = $validate;
-
+			$return = FALSE;
 			switch($validate) {
 				case "integer":
-					$regexp = "/^[0-9]+$/";
+					$return = validate::integer($data);
 					break;
 
 				case "integerSpaces":
-					$regexp = "/^[0-9\ ]+$/";
+					$return = validate::integerSpaces($data);
 					break;
 
 				case "alphaNumeric":
-					$regexp = "/^[a-zA-Z0-9\-\_\ ]+$/";
+					$return = validate::alphaNumeric($data);
 					break;
 
 				case "alphaNumericNoSpaces":
-					$regexp = "/^[a-zA-Z0-9\-\_]+$/";
+					$return = validate::alphaNumericNoSpaces($data);
 					break;
 
 				case "alpha":
-					$regexp = "/^[a-zA-Z\ ]+$/";
+					$return = validate::alpha($data);
 					break;
 
 				case "alphaNoSpaces":
-					$regexp = "/^[a-zA-Z]+$/";
+					$return = validate::alphaNoSpaces($data);
 					break;
 
 				case "noSpaces":
-					$regexp = "/^[^\ ]+$/";
+					$return = validate::noSpaces($data);
 					break;
 
 				case "noSpecialChars":
-					$regexp = "/^[^\W]+$/";
-				break;
+					$return = validate::noSpecialChars($data);
+					break;
 
 				case "date":
-					$regexp = "/^\d\d\/\d\d\/\d\d\d\d$/";
+					$return = validate::date($data);
 					break;
 
 				default:
-				break;
+					break;
 			}
 
 
-			$return = @preg_match($regexp,$data);
+			// $return = @preg_match($regexp,$data);
 
 			// if the regular expression fails, returns false. If there is no match, returns "0" otherwise "1"
 			if ($return === FALSE) {
