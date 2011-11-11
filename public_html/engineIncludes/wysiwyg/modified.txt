@@ -1,0 +1,7 @@
+# Files that are either missing or modified from the installation.
+# Backup these files before upgrading:
+
+plugins/dlxs
+plugins/engineAPI
+plugins/engineCMS
+plugins/fullscreen

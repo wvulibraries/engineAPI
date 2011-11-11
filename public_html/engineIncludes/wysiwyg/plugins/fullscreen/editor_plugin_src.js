@@ -13,7 +13,7 @@
 
 	tinymce.create('tinymce.plugins.FullScreenPlugin', {
 		init : function(ed, url) {
-			var t = this, s = {}, vp;
+			var t = this, s = {}, vp, posCss;
 
 			t.editor = ed;
 
@@ -29,6 +29,7 @@
 							tinymce.dom.Event.remove(DOM.win, 'resize', t.resizeFunc);
 							tinyMCE.get(ed.getParam('fullscreen_editor_id')).setContent(ed.getContent({format : 'raw'}), {format : 'raw'});
 							tinyMCE.remove(ed);
+							DOM.remove('mce_fullscreen_filter');
 							DOM.remove('mce_fullscreen_container');
 							de.style.overflow = ed.getParam('fullscreen_html_overflow');
 							DOM.setStyle(DOM.doc.body, 'overflow', ed.getParam('fullscreen_overflow'));
@@ -36,6 +37,7 @@
 							tinyMCE.settings = tinyMCE.oldSettings; // Restore old settings
 						}, 10);
 					}
+					$('td > .mce_fullscreen').show();
 
 					return;
 				}
@@ -65,7 +67,7 @@
 
 					// Fixes an IE bug where the scrollbars doesn't reappear
 					if (tinymce.isIE && (s.fullscreen_html_overflow == 'visible' || s.fullscreen_html_overflow == 'scroll'))
-						s.fullscreen_html_overflow = 'auto'; 
+						s.fullscreen_html_overflow = 'auto';
 
 					if (s.fullscreen_overflow == '0px')
 						s.fullscreen_overflow = '';
@@ -78,7 +80,18 @@
 					if (tinymce.isIE)
 						vp.h -= 1;
 
-					n = DOM.add(DOM.doc.body, 'div', {id : 'mce_fullscreen_container', style : 'position:' + (tinymce.isIE6 || (tinymce.isIE && !DOM.boxModel) ? 'absolute' : 'fixed') + ';top:0;left:0;width:' + vp.w + 'px;height:' + vp.h + 'px;z-index:200000;'});
+					// Use fixed position if it exists
+					if (tinymce.isIE6)
+						posCss = 'absolute;top:' + vp.y + 50 + 'px';
+					else
+						posCss = 'fixed;top:50px';
+
+					DOM.add(DOM.doc.body, 'div', {
+						id : 'mce_fullscreen_filter',
+						style : 'position:absolute;top:0;left:0;width:100%;height:100%;opacity:0.75;background-color:#000;z-index:199999;'});
+					n = DOM.add(DOM.doc.body, 'div', {
+						id : 'mce_fullscreen_container',
+						style : 'position:' + posCss + ';left:50px;width:' + vp.w + 'px;height:' + vp.h + 'px;z-index:200000;'});
 					DOM.add(n, 'div', {id : 'mce_fullscreen'});
 
 					tinymce.each(ed.settings, function(v, n) {
@@ -86,8 +99,8 @@
 					});
 
 					s.id = 'mce_fullscreen';
-					s.width = n.clientWidth;
-					s.height = n.clientHeight - 15;
+					s.width = n.clientWidth - 100;
+					s.height = n.clientHeight - 115;
 					s.fullscreen_is_enabled = true;
 					s.fullscreen_editor_id = ed.id;
 					s.theme_advanced_resizing = false;
@@ -110,26 +123,57 @@
 					});
 
 					t.fullscreenEditor.render();
-					tinyMCE.add(t.fullscreenEditor);
 
 					t.fullscreenElement = new tinymce.dom.Element('mce_fullscreen_container');
 					t.fullscreenElement.update();
 					//document.body.overflow = 'hidden';
 
 					t.resizeFunc = tinymce.dom.Event.add(DOM.win, 'resize', function() {
-						var vp = tinymce.DOM.getViewPort();
+						var vp = tinymce.DOM.getViewPort(), fed = t.fullscreenEditor;
 
-						t.fullscreenEditor.theme.resizeTo(vp.w, vp.h);
+						fed.theme.resizeTo(vp.w - 100, vp.h - 230);
 					});
+
+					a = DOM.add('mce_fullscreen_toolbargroup', 'div', {
+						id : 'mce_fullscreen_button_container',
+						style : 'position:absolute;top:3px;right:103px;'
+					});
+					b = DOM.add(a, 'a', {
+						id : 'mce_fullscreen_fullscreen',
+						role : 'button',
+						href : "javascript:tinyMCE.execCommand('mceFullScreen');",
+						class : "mceButton mceButtonEnabled mce_fullscreen mceButtonActive",
+						'aria-labelledby' : "mce_fullscreen_fullscreen_voice",
+						title : "Toggle Full Screen Mode",
+						tabindex : "-1",
+						'aria-pressed' : "true"
+					});
+					DOM.add(b, 'span', {
+						class : "mceIcon mce_fullscreen"
+					});
+					DOM.add(b, 'span', {
+						id : "mce_fullscreen_fullscreen_voice",
+						class : "mceVoiceLabel mceIconOnly",
+						style : "display:none"
+					});
+					$('td > .mce_fullscreen').hide();
 				}
 			});
 
 			// Register buttons
 			ed.addButton('fullscreen', {title : 'fullscreen.desc', cmd : 'mceFullScreen'});
 
+
 			ed.onNodeChange.add(function(ed, cm) {
 				cm.setActive('fullscreen', ed.getParam('fullscreen_is_enabled'));
 			});
+
+			// Escape key closes fullscreen
+			ed.onKeyDown.add(function(ed, e) {
+				if (ed.getParam('fullscreen_is_enabled') && e.keyCode == 27)
+					ed.execCommand('mceFullScreen');
+			});
+
 		},
 
 		getInfo : function() {
