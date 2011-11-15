@@ -416,7 +416,7 @@ class fileHandler {
 		}
 
 		// Build the list of fields we are inserting
-		$insertFieldNames = "(".(implode(",",('`'.array_keys($oldTableFields).'`'))).")";
+		$insertFieldNames = "(`".(implode("`,`",(array_keys($oldTableFields))))."`)";
 
 		// Grab the values from the oldTable that will be inserted in the newTable
 		foreach (array_keys($oldTableFields) as $I) {
