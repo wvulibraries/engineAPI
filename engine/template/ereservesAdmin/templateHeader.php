@@ -12,36 +12,27 @@
 
 	<link rel="stylesheet" href="/css/admin.css" type="text/css" media="Screen" />
 	<link rel="stylesheet" href="/css/main.css" type="text/css" media="Screen" />
-	<link rel="stylesheet" href="/css/date_input.css" type="text/css">
-	
-	<script src="{engine var="engineListObjJS"}" type="text/javascript"></script>
-	<script src="{engine var="convert2TextJS"}"  type="text/javascript"></script>
-	<script src="{engine var="selectBoxJS"}"     type="text/javascript"></script>
-	<script src="{engine var="jquery"}"          type="text/javascript"></script>
-	<script src="{engine var="jqueryDate"}"      type="text/javascript"></script>
-	<script src="{engine var="jqueryCookie"}"    type="text/javascript"></script>
-	<script src="{engine var="engineWYSIWYGJS"}" type="text/javascript"></script>
-	<script src="{engine var="tiny_mce_JS"}"     type="text/javascript"></script>
-	
-	<script>
-	$.extend(DateInput.DEFAULT_OPTS, {
-	  stringToDate: function(string) {
-	    var matches;
-	    if (matches = string.match(/^(\d{2,2})\/(\d{2,2})\/(\d{4,4})$/)) {
-	      return new Date(matches[3], matches[1] - 1, matches[2]);
-	    } else {
-	      return null;
-	    };
-	  },
+	<link rel="stylesheet" href="/css/ui-smoothness/jquery.ui.css" type="text/css">
+	<style>
+		.ui-timepicker-div .ui-widget-header { margin-bottom: 8px; }
+		.ui-timepicker-div dl { text-align: left; }
+		.ui-timepicker-div dl dt { height: 25px; }
+		.ui-timepicker-div dl dd { margin: -25px 10px 10px 65px; }
+		.ui-timepicker-div td { font-size: 90%; }
+		.ui-tpicker-grid-label { background: none; border: none; margin: 0; padding: 0; }
+	</style>
 
-	  dateToString: function(date) {
-	    var month = (date.getMonth() + 1).toString();
-	    var dom = date.getDate().toString();
-	    if (month.length == 1) month = "0" + month;
-	    if (dom.length == 1) dom = "0" + dom;
-	    return month + "/" + dom + "/" + date.getFullYear();
-	  }
-	});</script>
+	<script type="text/javascript" src="{engine var="engineListObjJS"}"></script>
+	<script type="text/javascript" src="{engine var="convert2TextJS"}"></script>
+	<script type="text/javascript" src="{engine var="selectBoxJS"}"></script>
+	<script type="text/javascript" src="{engine var="jquery"}"></script>
+	<script type="text/javascript" src="{engine var="jqueryCookie"}"></script>
+	<script type="text/javascript" src="{engine var="engineWYSIWYGJS"}"></script>
+	<script type="text/javascript" src="{engine var="tiny_mce_JS"}"></script>
+	<script type="text/javascript" src="{engine var="engineInc"}/jquery.ui.js"></script>
+	<script type="text/javascript" src="{engine var="engineInc"}/jquery.ui.touch.js"></script>
+	<script type="text/javascript" src="{engine var="engineInc"}/jquery.ui.timepicker.js"></script>
+
 	<?php recurseInsert("headerIncludes.php","php")	?>
 
 </head>
