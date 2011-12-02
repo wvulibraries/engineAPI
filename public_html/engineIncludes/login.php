@@ -1,13 +1,11 @@
 <?php
 
-$loginType = "mysql";
-#$loginType = "ldap";
+$loginType = "ldap";
 
-$engineDir = "/home/library/phpincludes/engine/engineAPI";
-include($engineDir ."/engine.php");
+require("/home/ereserves/phpincludes/engine/engineAPI/3.0/engine.php");
 $engine = EngineAPI::singleton();
- 
-if($engineVars['forceSSLLogin'] === TRUE && is_empty($_SERVER['HTTPS'])) {
+
+if($engineVars['forceSSLLogin'] === TRUE && isset($_SERVER['HTTPS']) && !is_empty($_SERVER['HTTPS'])) {
 	$engineVars['loginPage'] = str_replace("http://","https://",$engineVars['loginPage']);
 	header("Location: ".$engineVars['loginPage']."?".$_SERVER['QUERY_STRING']);
 	exit;
@@ -16,7 +14,10 @@ if($engineVars['forceSSLLogin'] === TRUE && is_empty($_SERVER['HTTPS'])) {
 $localVars['pageTitle'] = "Login Page";
 
 // Domain for ldap login
-$engine->localVars("domain","wvulibs");
+$engine->localVars("domain","wvu-ad");
+
+$debug = debug::create();
+$debug->password = "eReserves";
 
 $authFail  = FALSE; // Authorization to the current resource .. we may end up not using this
 $loginFail = FALSE; // Login Success/Failure
@@ -47,8 +48,10 @@ if (isset($engine->cleanPost['HTML']['loginSubmit'])) {
 			}
 			else {
 				
-				if (debugNeeded("login")) {
-					debugDisplay("login","\$_SESSION",1,"Contents of the \$_SESSION array.",$_SESSION);
+				if ($debug->needed("login")) {
+					print "<pre>";
+					var_dump($_SESSION);
+					print "</pre>";
 				}
 				else if (isset($page)) {
 					header("Location: ".$page."?".$qs );
@@ -69,14 +72,6 @@ if (isset($engine->cleanPost['HTML']['loginSubmit'])) {
 
 
 $engine->eTemplate("include","header");
-?>
-
-
-<?php
-if (debugNeeded("login")) {
-	debugDisplay("login","\$_SESSION",1,"Contents of the \$_SESSION array.",$_SESSION);
-}
-
 ?>
 
 

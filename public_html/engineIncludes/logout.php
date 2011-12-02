@@ -1,16 +1,19 @@
 <?php
-
-$engineDir = "/home/library/phpincludes/engine/engineAPI";
-include($engineDir ."/engine.php");
+require("/home/ereserves/phpincludes/engine/engineAPI/3.0/engine.php");
 $engine = EngineAPI::singleton();
+
+$debug = debug::create();
+$debug->password = "eReserves";
 
 if(isset($_SESSION)) {
 	
-	if (debugNeeded("logout")) {
-		debugDisplay("logout","\$_SESSION",1,"Contents of the \$_SESSION array.",$_SESSION);
+	if ($debug->needed("logout")) {
+		print "<pre>";
+		var_dump($_SESSION);
+		print "</pre>";
 	}
 
-	$termed = sessionEnd();
+	$termed = sessionEnd($engine);
 }
 
 ?>
@@ -18,18 +21,12 @@ if(isset($_SESSION)) {
 <?php
 if ($termed) {
 
-	$logoutRedirect = $engineVars['WEBROOT'];
-	if (isset($engine->cleanGet['HTML']['redirect'])) {
-		$logoutRedirect = $engine->cleanGet['HTML']['redirect'];
-	}
-
-	if (!debugNeeded("logout")) {
-		global $engineVars;
-		header("Location: ".$logoutRedirect );
+	if (!$debug->needed("logout")) {
+		header("Location: ".$engineVars['WEBROOT'] );
 	}
 
 }
 else {
- print "<h1>CSRF Error Check</h1>";
+	print "<h1>CSRF Error Check</h1>";
 }
 ?>
