@@ -269,7 +269,7 @@ class search {
 							continue;
 						}
 
-						$value = $result[$field['fieldName']];
+						$value = htmlSanitize($result[$field['fieldName']]);
 						$relevant = FALSE;
 						foreach ($this->searchArray as $keyword) {
 							if (!array_key_exists(strtolower($keyword),$this->boolOperands)) {
@@ -346,7 +346,7 @@ class search {
 	private function createSearchArray() {
 
 		$engine        = EngineAPI::singleton();
-		$searchString  = isset($engine->cleanPost['RAW']['searchString'])?$engine->cleanPost['RAW']['searchString']:array();
+		$searchString  = isset($engine->cleanPost['MYSQL']['searchString'])?$engine->cleanPost['MYSQL']['searchString']:array();
 		$bool          = isset($engine->cleanPost['MYSQL']['bool'])?$engine->cleanPost['MYSQL']['bool']:array();
 		$keywords      = array();
 		$fullSearchStr = NULL;
