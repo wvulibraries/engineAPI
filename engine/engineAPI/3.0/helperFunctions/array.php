@@ -45,12 +45,14 @@ function array_diff_assoc_recursive($array1, $array2)
     return $difference;
 }
 
-// $array is array to be searched
-// $index is the known index
-//
-// Returns the index of the index immediately after $index. 
-// If $index is the last index in $array, returns NULL
-// if $index is not found in array, returns FALSE
+/**
+ * Returns the index of the index immediately after $index. 
+ *
+ * @param array $array is array to be searched
+ * @param string|int $index is the known index
+ * @param bool $loop if TRUE, will loop when it gets to the end of the array and continue at beginning
+ * @param mixed array index of the next item in the array, NULL if $index is the last in the array, FALSE if $index is not found
+ */
 function array_nextIndex($array,$index,$loop=FALSE) {
 	
 	if (!is_array($array)) {
@@ -81,12 +83,15 @@ function array_nextIndex($array,$index,$loop=FALSE) {
 	return($next);
 }
 
-// $array is array to be searched
-// $index is the known index
-//
-// Returns the index of the index immediately before $index. 
-// If $index is the first index in $array, returns NULL
-// if $index is not found in array, returns FALSE
+
+/**
+ * Returns the index of the index immediately before $index. 
+ *
+ * @param array $array is array to be searched
+ * @param string|int $index is the known index
+ * @param bool $loop if TRUE, will loop when it gets to the beginning of the array and continue at end
+ * @param mixed array index of the next item in the array, NULL if $index is the first in the array, FALSE if $index is not found
+ */
 function array_prevIndex($array,$index,$loop=FALSE) {
 	
 	if (!is_array($array)) {
@@ -118,7 +123,11 @@ function array_prevIndex($array,$index,$loop=FALSE) {
 	return(FALSE);
 }
 
-// returns the first index of the array, otherwise false
+/**
+ * returns the first index of the array, otherwise false
+ * @param array $array array to search
+ * @return mixed Returns the index if found, otherwise FALSE
+ */ 
 function array_getFirstIndex($array) {
 	if (is_array($array) && count($array) > 0) {
 		reset($array);
@@ -129,7 +138,11 @@ function array_getFirstIndex($array) {
 	return(FALSE);
 }
 
-// returns the last index of the array, otherwise false
+/**
+ * returns the last index of the array, otherwise false
+ * @param array $array array to search
+ * @return mixed Returns the index if found, otherwise FALSE
+ */
 function array_getLastIndex($array) {
 
 	
@@ -138,6 +151,26 @@ function array_getLastIndex($array) {
 	}
 	
 	return(FALSE);
+}
+
+/** 
+ * Turns an array into a string, using a definable delimiter. 
+ * if parameter is not an array, returns that parameter unmodified. 
+ *
+ * @param array $array
+ * @return array|mixed
+ */
+function buildECMSArray($array) {
+	global $engineVars;
+	
+	$output = "";
+	if(is_array($array)) {
+		$output = implode($engineVars['delim'],$array);
+	}
+	else {
+		$output = $array;
+	}
+	return($output);
 }
 
 ?>

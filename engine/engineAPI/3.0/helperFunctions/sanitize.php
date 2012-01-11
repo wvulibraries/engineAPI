@@ -107,6 +107,12 @@ function stripCarriageReturns($string) {
 	return($string);	
 }
 
+function stripNewLines($string) {
+	$string = str_replace("\r","",$string);
+	$string = str_replace("\n","",$string);
+	return(string)
+}
+
 // Turns an array into a string, using a definable delimiter. 
 function buildECMSArray($array) {
 	global $engineVars;
