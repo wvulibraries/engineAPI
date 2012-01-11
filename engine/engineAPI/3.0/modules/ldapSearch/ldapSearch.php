@@ -625,7 +625,12 @@ class ldapSearch
     {
         $searchFn = ($recursive) ? 'searchEntries' : 'listEntries';
         $user = $this->$searchFn("(&(objectClass=user)(sAMAccountName=$username))", (array)$searchParams);
-        return $user[0]['dn'];
+
+ 		if (isset($user[0]['dn'])) {
+			return($user[0]['dn']);
+		}
+		
+		return(FALSE);
     }
 
     /**
