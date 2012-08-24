@@ -1,1 +1,0 @@
-<script src="/engineIncludes/capslock.js" type="text/javascript"></script>

@@ -1,7 +1,0 @@
-Documentation\_directory corresponds to a directory in \engine\trunk\engine\
-
-Documentation\_directory\directory\ corresponds to a PHP file contained in \engine\trunk\engine\
-E.g.: Documentation\_modules\email\ corresponds to \engine\trunk\engine\modules
-
-Documentation\_directory\directory\filename corresponds to a function within a PHP file.
-E.g.: Documentation\_modules\email\performBulkSend corresponds to performBulkSend() within engine\trunk\engine\modules\email.php

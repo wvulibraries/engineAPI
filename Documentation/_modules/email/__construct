@@ -1,9 +1,0 @@
-mailSender::__construct()
-
-Description
-    mailSender::__construct([object $engine = NULL])
-	Constructor for mailSender.  Sets $this->engine to $engine.
-	
-Parameters
-    engine
-		The engine object.

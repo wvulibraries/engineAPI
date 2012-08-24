@@ -1,8 +1,0 @@
-pagination::nav_bar()
-
-Description
-    public string pagination::nav_bar(void)
-    Builds the string to display the pagination bar.
-
-Return Values
-    Returns a string value containing the data and proper markup to create a page's pagination.

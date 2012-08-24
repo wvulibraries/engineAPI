@@ -1,8 +1,0 @@
-engineDB::test()
-
-Description
-    public void engineDB::test(void)
-    Prints the contents of certain variables of engineDB object.
-
-See Also
-    engineDB::testConnection()

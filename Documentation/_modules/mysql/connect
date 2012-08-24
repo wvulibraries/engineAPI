@@ -1,8 +1,0 @@
-engineDB::connect()
-
-Description
-    private bool engineDB::connect()
-    A wrapper function for mysql_connect()
-
-Return Values
-    Returns TRUE on success or FALSE on FAILURE.
