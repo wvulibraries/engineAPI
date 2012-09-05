@@ -873,8 +873,12 @@ class fileHandler {
         if(class_exists('finfo')){
             if(isPHP('5.3')){
                 // $fInfo = new finfo(FILEINFO_MIME_TYPE);
+
                 @$fInfo = new finfo(FILEINFO_MIME_TYPE, EngineAPI::$engineVars['mimeFilename']);
                 @$mimeType = $fInfo->file($file_path);
+                print "<pre>";
+                var_dump($mimeType);
+                print "</pre>";
                 if($mimeType === FALSE){
 	                $fInfo = new finfo(FILEINFO_MIME_TYPE);
 	                $mimeType = $fInfo->file($file_path);

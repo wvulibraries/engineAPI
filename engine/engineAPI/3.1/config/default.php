@@ -244,5 +244,5 @@ $engineVars['mediaSite']['password'] = "password";
 $engineVars['mediaSite']['authLen']  = "30";
 
 // File Handler
-$engineVars['mimeFilename'] = "/usr/share/misc/magic";
+$engineVars['mimeFilename'] = NULL;
 ?>
