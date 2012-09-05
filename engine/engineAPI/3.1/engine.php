@@ -974,6 +974,11 @@ class EngineAPI
 			return($content);
 		}
 
+		// Todo this should be configurable:
+		if (strlen($content) > 1000000) {
+			return($content);
+		}
+
 		$contentArray = preg_split('/<!-- engine Instruction break -->/',$content);
 		$content = "";
 
