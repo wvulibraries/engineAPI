@@ -872,11 +872,21 @@ class fileHandler {
 
         if(class_exists('finfo')){
             if(isPHP('5.3')){
-                $fInfo = new finfo(FILEINFO_MIME_TYPE, EngineAPI::$engineVars['mimeFilename']);
-                $mimeType = $fInfo->file($file_path);
+                // $fInfo = new finfo(FILEINFO_MIME_TYPE);
+                @$fInfo = new finfo(FILEINFO_MIME_TYPE, EngineAPI::$engineVars['mimeFilename']);
+                @$mimeType = $fInfo->file($file_path);
+                if($mimeType === FALSE){
+	                $fInfo = new finfo(FILEINFO_MIME_TYPE);
+	                $mimeType = $fInfo->file($file_path);
+                }
             }else{
-                $fInfo = new finfo(FILEINFO_MIME, EngineAPI::$engineVars['mimeFilename']);
-                $mimeParts = explode(';', $fInfo->file($file_path));
+                @$fInfo = new finfo(FILEINFO_MIME, EngineAPI::$engineVars['mimeFilename']);
+                @$mimeData = $fInfo->file($file_path);
+                if($mimeData === FALSE){
+	                $fInfo = new finfo(FILEINFO_MIME);
+	                $mimeData = $fInfo->file($file_path);
+                }
+                $mimeParts = explode(';', $mimeData);
                 $mimeType = trim($mimeParts[0]);
             }
         }elseif(function_exists('mime_content_type')){
