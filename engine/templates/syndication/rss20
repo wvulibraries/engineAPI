@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+ 
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+<channel>
+	
+	<title>{xml name="title"}</title>
+	<link>{xml name="link"}</link>
+	<atom:link href="{xml name="link"}" rel="self" type="application/rss+xml" />
+	<description>{xml name="description"}</description>
+	<lastBuildDate>{xml name="lastBuildDate"}</lastBuildDate>
+	<language>{xml name="language"}</language>
+	
+	{xml repeat="start"}
+	
+	<item>
+		<title>{xml name="itemTitle"}</title>
+		<link>{xml name="itemLink"}</link>
+		<guid>{xml name="itemGuid"}</guid>
+		<pubDate>{xml name="itemPubdate"}</pubDate>
+		<description><![CDATA[ {xml name="itemDescription"} ]]></description>
+	</item>
+	
+	{xml repeat="end"}
+	
+</channel>
+</rss>

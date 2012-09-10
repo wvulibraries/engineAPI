@@ -113,6 +113,9 @@ $engineVars['loginModules']  = EngineAPI::$engineDir."/login";
 $engineVars['rssDir']        = $engineVars['tempDir'] ."/rss";
 $engineVars['magpieDir']     = dirname(dirname(EngineAPI::$engineDir)) ."/magpie";
 
+// Syndication Configuration (replacement for RSS above)
+$engineVars['syndicationTemplateDir'] = $engineVars['tempDir'] ."/syndication";
+
 // External URLs
 // External URLs is an array of urls that can be used in applications.
 // WVU sets up proxy servers here.
