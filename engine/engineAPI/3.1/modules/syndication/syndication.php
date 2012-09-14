@@ -146,6 +146,37 @@ class syndication {
 
 	}
 
+	public static function get($url,$cache=NULL,$cacheDir=NULL) {
+
+		$cacheUpdate = (!isnull($cache) && validate::integer($cache))?$cache:EngineAPI::$engineVars['syndicationCache'];
+
+		$fileHash    = hash("md5",$url);
+		$filename    = (!isnull($cacheDir) && is_writable($cacheDir))?$cacheDir."/".$fileHash:EngineAPI::$engineVars['syndicationCacheDir']."/".$fileHash;
+
+		$currentTime = time();
+
+		$fromCache   = FALSE;
+
+	// Check to see if we should use the current cached download
+		if (is_readable($filename) && $currentTime - filemtime($filename) < $cacheUpdate) {
+			$url = $filename;
+			$fromCache = TRUE;
+		}
+
+		if (($xml = simplexml_load_file($url)) === FALSE) {
+			return(FALSE);
+		}
+
+		if ($fromCache === FALSE) {
+			if ($xml->asXML($filename) === FALSE) {
+				errorHandle::newError(__METHOD__."() - Error writing XML cache file", errorHandle::HIGH);
+			}
+		}
+
+		return($xml);
+
+	}
+
 	private function buildTemplate() {
 
 		if (isnull($this->template)) {

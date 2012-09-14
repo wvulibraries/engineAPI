@@ -115,6 +115,8 @@ $engineVars['magpieDir']     = dirname(dirname(EngineAPI::$engineDir)) ."/magpie
 
 // Syndication Configuration (replacement for RSS above)
 $engineVars['syndicationTemplateDir'] = $engineVars['tempDir'] ."/syndication";
+$engineVars['syndicationCacheDir']    = "/tmp/engineSyndication";
+$engineVars['syndicationCache']       = 300; // In seconds
 
 // External URLs
 // External URLs is an array of urls that can be used in applications.
