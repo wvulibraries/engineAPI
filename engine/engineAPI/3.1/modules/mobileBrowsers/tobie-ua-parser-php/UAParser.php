@@ -1,7 +1,7 @@
 <?php
 
 /*!
- * ua-parser-php v1.4.1
+ * ua-parser-php v1.4.3
  *
  * Copyright (c) 2011-2012 Dave Olsen, http://dmolsen.com
  * Licensed under the MIT license
@@ -44,7 +44,7 @@ class UA {
 	public static function parse($ua = NULL) {
 		
 		self::$ua      = $ua ? $ua : strip_tags($_SERVER["HTTP_USER_AGENT"]);
-		self::$accept  = strip_tags($_SERVER["HTTP_ACCEPT"]);
+		self::$accept  = empty($_SERVER["HTTP_ACCEPT"]) ? '' : strip_tags($_SERVER["HTTP_ACCEPT"]);
 		if (file_exists(__DIR__."/resources/regexes.yaml")) {
 			self::$regexes = Spyc::YAMLLoad(__DIR__."/resources/regexes.yaml");
 		} else {
@@ -144,6 +144,7 @@ class UA {
 			}
 			if (isset($matches[4])) {
 				$obj->build = $matches[4];
+				$obj->patch = $matches[4];
 			}
 			if (isset($matches[5])) {
 				$obj->revision = $matches[5];
@@ -151,6 +152,7 @@ class UA {
 			
 			// pull out the browser family. replace the version number if necessary
 			$obj->browser = isset($regex['family_replacement']) ? str_replace("$1",$obj->major,$regex['family_replacement']) : $matches[1];
+			$obj->family  = isset($regex['family_replacement']) ? str_replace("$1",$obj->major,$regex['family_replacement']) : $matches[1];
 			
 			// set-up a clean version number
 			$obj->version = isset($obj->major) ? $obj->major : "";
@@ -252,6 +254,7 @@ class UA {
 				
 				// Make sure matches 2 and 3 are at least set to null for setting
 				// Major and Minor defaults
+				if (!isset($matches[1])) { $matches[1] = null; }
 				if (!isset($matches[2])) { $matches[2] = null; }
 				if (!isset($matches[3])) { $matches[3] = null; }
 
@@ -260,6 +263,7 @@ class UA {
 				$osObj->osMinor   = isset($osRegex['os_v2_replacement']) ? $osRegex['os_v2_replacement'] : $matches[3];
 				if (isset($matches[4])) {
 					$osObj->osBuild = $matches[4];
+					$osObj->osPatch = $matches[4];
 				}
 				if (isset($matches[5])) {
 					$osObj->osRevision = $matches[5];
@@ -296,8 +300,9 @@ class UA {
 		foreach ($deviceRegexes as $deviceRegex) {
 			if (preg_match("/".str_replace("/","\/",$deviceRegex['regex'])."/i",self::$ua,$matches)) {
 				
-				// Make sure matches 2 and 3 are at least set to null for setting
-				// Major and Minor defaults
+				// Make sure device matches are null
+				// Device Name, Major and Minor defaults
+				if (!isset($matches[1])) { $matches[1] = null; }
 				if (!isset($matches[2])) { $matches[2] = null; }
 				if (!isset($matches[3])) { $matches[3] = null; }
 
