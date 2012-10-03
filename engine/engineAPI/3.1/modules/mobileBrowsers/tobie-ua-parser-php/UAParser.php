@@ -1,7 +1,7 @@
 <?php
 
 /*!
- * ua-parser-php v1.4.3
+ * ua-parser-php v1.4.4
  *
  * Copyright (c) 2011-2012 Dave Olsen, http://dmolsen.com
  * Licensed under the MIT license
@@ -45,17 +45,20 @@ class UA {
 		
 		self::$ua      = $ua ? $ua : strip_tags($_SERVER["HTTP_USER_AGENT"]);
 		self::$accept  = empty($_SERVER["HTTP_ACCEPT"]) ? '' : strip_tags($_SERVER["HTTP_ACCEPT"]);
-		if (file_exists(__DIR__."/resources/regexes.yaml")) {
-			self::$regexes = Spyc::YAMLLoad(__DIR__."/resources/regexes.yaml");
-		} else {
-			print "<h1>Error</h1>
-				   <p>Please download the regexes.yaml file before using UAParser.php.</p>
-				   <p>You can type the following at the command line to download the latest version:</p>
-				   <blockquote>
-					<code>%: cd /path/to/UAParser</code><br />
-				   	<code>%: php UAParser.php -get</code>
-				   </blockquote>";
-			exit;
+		if (empty(self::$regexes)) {
+			if (file_exists(__DIR__."/resources/regexes.yaml")) {
+				self::$regexes = Spyc::YAMLLoad(__DIR__."/resources/regexes.yaml");
+				print "loading yaml...<br />";
+			} else {
+				print "<h1>Error</h1>
+					   <p>Please download the regexes.yaml file before using UAParser.php.</p>
+					   <p>You can type the following at the command line to download the latest version:</p>
+					   <blockquote>
+						<code>%: cd /path/to/UAParser</code><br />
+					   	<code>%: php UAParser.php -get</code>
+					   </blockquote>";
+				exit;
+			}
 		}
 	
 		
@@ -322,7 +325,8 @@ class UA {
 				// this isn't really needed because if it matches a mobile browser it'll automatically mark it as a mobile device
 				$deviceObj->isMobileDevice = false;
 				$mobileDevices  = array("iPhone","iPod","iPad","HTC","Kindle","Lumia","Amoi","Asus","Bird","Dell","DoCoMo","Huawei","i-mate","Kyocera",
-				                        "Lenovo","LG","Kin","Motorola","Philips","Samsung","Softbank","Palm","HP ","Generic Feature Phone","Generic Smartphone");
+				                        "Lenovo","LG","Kin","Motorola","Philips","Samsung","Softbank","Palm","HP ","Generic Feature Phone","Generic Smartphone",
+										"Nintendo DSi","Nintendo 3DS","PlayStation Vita");
 				foreach($mobileDevices as $mobileDevice) {
 					if (stristr($deviceObj->device, $mobileDevice)) {
 						$deviceObj->isMobileDevice = true;
