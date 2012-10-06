@@ -19,6 +19,10 @@ class date {
 		$attPairs = attPairs($matches[1]);
 
 		if (isset($attPairs['time'])) {
+			if (!validate::integer($attPairs['time'])) {
+				errorHandle::newError(__METHOD__."() - ".$attPairs['time'], errorHandle::DEBUG);
+				return(FALSE);
+			}
 			return(date($attPairs['format'],$attPairs['time']));
 		}
 
