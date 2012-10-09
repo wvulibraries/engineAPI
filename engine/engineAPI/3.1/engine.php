@@ -542,7 +542,7 @@ class EngineAPI
 
 	// load == define which tempalte to use. "Default" was setup above
 	// include == fire off the 'header' or the 'footer'
-	public function eTemplate($func,$value=NULL) {
+	public function eTemplate($func,$value=NULL,$fileCheck=TRUE) {
 
 		global $engineVars;
 
@@ -552,7 +552,7 @@ class EngineAPI
 				return(FALSE);
 			}
 
-			if (file_exists($engineVars['tempDir']."/".$value)) {
+			if (file_exists($engineVars['tempDir']."/".$value) || $fileCheck === FALSE) {
 				$this->template = $engineVars['tempDir']."/".$value;
 				$engineVars['currentTemplate'] = $this->template;
 			}
