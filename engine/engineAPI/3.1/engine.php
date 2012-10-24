@@ -542,7 +542,7 @@ class EngineAPI
 
 	// load == define which tempalte to use. "Default" was setup above
 	// include == fire off the 'header' or the 'footer'
-	public function eTemplate($func,$value=NULL,$fileCheck=TRUE) {
+	public function eTemplate($func,$value=NULL) {
 
 		global $engineVars;
 
@@ -552,7 +552,7 @@ class EngineAPI
 				return(FALSE);
 			}
 
-			if (file_exists($engineVars['tempDir']."/".$value) || $fileCheck === FALSE) {
+			if (file_exists($engineVars['tempDir']."/".$value)) {
 				$this->template = $engineVars['tempDir']."/".$value;
 				$engineVars['currentTemplate'] = $this->template;
 			}
@@ -954,6 +954,8 @@ class EngineAPI
 
 	private function accessControlDenied() {
 		global $engineVars;
+
+		$engineVars['loginPage'] = EngineAPI::$engineVars['loginPage'];
 
 		ob_end_clean();
 		header( 'Location: '.$engineVars['loginPage'].'?page='.$_SERVER['PHP_SELF']."&qs=".(urlencode($_SERVER['QUERY_STRING'])) ) ;
