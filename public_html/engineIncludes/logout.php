@@ -1,13 +1,12 @@
 <?php
 
-$engineDir = "/home/library/phpincludes/engineAPI/engine";
-include($engineDir ."/engine.php");
-$engine = new EngineCMS();
+include("/home/dev1.systems.lib.wvu.edu/phpincludes/engine/engineAPI/3.1/engine.php");
+$engine = EngineAPI::singleton();
 
 if(isset($_SESSION)) {
-	
-	if (debugNeeded("logout")) {
-		debugDisplay("logout","\$_SESSION",1,"Contents of the \$_SESSION array.",$_SESSION);
+
+	if (!isset($engine->cleanGet['MYSQL']['csrf']) && isset($_SESSION['CSRF'])) {
+		$engine->cleanGet['MYSQL']['csrf'] = $_SESSION['CSRF'];
 	}
 
 	$termed = sessionEnd($engine);
@@ -23,10 +22,6 @@ if ($termed) {
 		$logoutRedirect = $engine->cleanGet['HTML']['redirect'];
 	}
 
-	if (!debugNeeded("logout")) {
-		global $engineVars;
-		header("Location: ".$logoutRedirect );
-	}
 
 }
 else {
