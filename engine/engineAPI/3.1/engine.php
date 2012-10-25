@@ -632,6 +632,7 @@ class EngineAPI
 					return(TRUE);
 				}
 
+
 				$returnValue = $this->accessMethods[$action]($value['value'],$value['state']);
 
 				// NULL value is error state. set auth to false to be safe
@@ -662,12 +663,18 @@ class EngineAPI
 
 			// foreach group ("action") check if it is true. If all actions are true, YAY!
 			// Otherwise Ugh!
+			$auth = NULL;
 			foreach ($this->aclgroups as $key => $value) {
 
+				// At this point, the only "FALSE" things should be those that did not have a hard break
+				// so we should NOT exit if we see them, unless ALL things fail. 
+
 				if ($value === FALSE) {
-					$auth = FALSE;
-					$this->accessControlDenied();
-					exit;
+					if (isnull($auth)) {
+						$auth = FALSE;
+					}
+					// $this->accessControlDenied();
+					// exit;
 				}
 				else if ($value === TRUE) {
 					$auth = TRUE;
@@ -678,11 +685,13 @@ class EngineAPI
 				}
 			}
 
-			// Safety check in case of errors
-			if (isnull($auth)) {
-				$this->accessControlDenied();
-				exit;
+			if ($auth === TRUE) {
+				return(TRUE);
 			}
+
+
+			$this->accessControlDenied();
+			exit;
 
 			return($auth);
 		}
