@@ -310,7 +310,7 @@ function array_merge_recursive_overwrite() {
 }
 
 /**
- * Peak into an array without modifying it
+ * Peak into an array without modifying it (Warning: may not play well with objects @todo)
  * @param array $arr
  * @param string $side
  *        Which side of the array are we looking at? (left|front|top or right|end|bottom)
@@ -328,6 +328,7 @@ function array_peak($arr,$side='LEFT'){
         case 'LEFT':
         case 'FRONT':
         case 'TOP':
+        default:
             return array_shift($arr2);
             break;
 
@@ -335,10 +336,6 @@ function array_peak($arr,$side='LEFT'){
         case 'END':
         case 'BOTTOM':
             return array_pop($arr2);
-
-        default:
-            return array_peak($arr2);
-            break;
     }
 }
 ?>
