@@ -309,4 +309,36 @@ function array_merge_recursive_overwrite() {
     return $merged;
 }
 
+/**
+ * Peak into an array without modifying it
+ * @param array $arr
+ * @param string $side
+ *        Which side of the array are we looking at? (left|front|top or right|end|bottom)
+ *        Default: Left
+ * @return mixed|null
+ */
+function array_peak($arr,$side='LEFT'){
+    // Make sure we're playing with an array
+    if(!is_array($arr)) return NULL;
+
+    // Make a copy of the array (makes sure we aren't working with a ref)
+    $arr2 = $arr;
+
+    switch(trim(strtoupper($side))){
+        case 'LEFT':
+        case 'FRONT':
+        case 'TOP':
+            return array_shift($arr2);
+            break;
+
+        case 'RIGHT':
+        case 'END':
+        case 'BOTTOM':
+            return array_pop($arr2);
+
+        default:
+            return array_peak($arr2);
+            break;
+    }
+}
 ?>
