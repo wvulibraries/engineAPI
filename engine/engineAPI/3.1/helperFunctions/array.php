@@ -317,7 +317,7 @@ function array_merge_recursive_overwrite() {
  *        Default: Left
  * @return mixed|null
  */
-function array_peak($arr,$side='LEFT'){
+function array_peak($arr,$side='TOP'){
     // Make sure we're playing with an array
     if(!is_array($arr)) return NULL;
 
@@ -325,16 +325,16 @@ function array_peak($arr,$side='LEFT'){
     $arr2 = $arr;
 
     switch(trim(strtoupper($side))){
+        case 'START':
         case 'LEFT':
-        case 'FRONT':
-        case 'TOP':
+        case 'BOTTOM':
         default:
             return array_shift($arr2);
             break;
 
-        case 'RIGHT':
         case 'END':
-        case 'BOTTOM':
+        case 'RIGHT':
+        case 'TOP':
             return array_pop($arr2);
     }
 }
