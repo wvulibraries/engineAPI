@@ -10,11 +10,14 @@ class listManagement {
 	private $passwdInputs  = FALSE;
 	private $wysiwygInputs = FALSE;
 	private $checkboxInput = FALSE;
-	private $dndInputs     = FALSE;
 	private $multiSelect   = FALSE;
 	private $database      = NULL;  // database object. defaults to $engine->openDB;
 	private $error         = NULL;
 	private $multiKey      = array();
+
+	private $dndInputs     = FALSE;
+	private $dndPathJS     = "/fineuploader/jquery.fineuploader-3.0.min.js";
+	private $dndPathCSS    = "/fineuploader/fineuploader.css";
 
 	public $redirectURL    = NULL; // redirects to this URL on a successful submit.
 								   // {insertID} will be replaced by the mysql insert id
@@ -435,11 +438,13 @@ class listManagement {
 		$output .= "<!-- engine Instruction break -->".'<!-- engine Instruction displayTemplateOff -->'."<!-- engine Instruction break -->";
 
 		if ($this->dndInputs === TRUE) {
-			$output .= sprintf('<script type="text/javascript" src="%s/fileUploader/jquery.fileuploader.js"></script>',
-				EngineAPI::$engineVars["engineInc"]
+			$output .= sprintf('<script type="text/javascript" src="%s%s"></script>',
+				EngineAPI::$engineVars["engineInc"],
+				$this->dndPathJS
 				);
-			$output .= sprintf('<link rel="stylesheet" href="%s/fileUploader/fileuploader.css">',
-				EngineAPI::$engineVars["engineInc"]
+			$output .= sprintf('<link rel="stylesheet" href="%s%s">',
+				EngineAPI::$engineVars["engineInc"],
+				$this->dndPathCSS
 				);
 		}
 
@@ -796,15 +801,20 @@ class listManagement {
 
 				$output .= sprintf('
 					<script type="text/javascript">
-					$(function() {
-						$("#%s").FileUploader({
-							action: "%s",
-							multiple: false,
-							debug: %s,
-							onComplete: %s
+						$(function() {
+							$("#%s")
+								.fineUploader({
+									request: {
+										endpoint: "%s"
+									},
+									multiple: false,
+									debug: %s,
+								})
+								.on("complete", function(event,id,fileName,responseJSON) {
+									%s
+								});
 						});
-					})
-				</script>
+					</script>
 				',
 				$I['field']."_dnd",
 				(isset($I['dnd']['URL']))?$I['dnd']['URL']:"dndURL not set",
