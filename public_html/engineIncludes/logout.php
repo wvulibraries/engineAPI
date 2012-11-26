@@ -1,6 +1,6 @@
 <?php
 
-include("/home/dev1.systems.lib.wvu.edu/phpincludes/engine/engineAPI/3.1/engine.php");
+include("/home/dev.systems.lib.wvu.edu/phpincludes/engine/engineAPI/3.1/engine.php");
 $engine = EngineAPI::singleton();
 
 if(isset($_SESSION)) {
@@ -22,6 +22,7 @@ if ($termed) {
 		$logoutRedirect = $engine->cleanGet['HTML']['redirect'];
 	}
 
+	header("Location: ".$logoutRedirect);
 
 }
 else {
