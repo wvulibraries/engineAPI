@@ -987,6 +987,7 @@ class EngineAPI
 
 		// Todo this should be configurable:
 		if (strlen($content) > 1000000) {
+			trigger_error(__METHOD__.'() - Cannot parse output (too large)', E_USER_WARNING);
 			return($content);
 		}
 
