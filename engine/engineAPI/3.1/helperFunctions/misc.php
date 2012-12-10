@@ -183,7 +183,7 @@ function recurseInsert($file,$type="php",$regex=NULL,$condition="REQUEST_URI",$c
 				global $dbt;
 				$dbt = $dbTables;
 			}
-			return(TRUE);
+			return("");
 		}
 		elseif ($type == "url") {
 			$cwdTemp = str_replace($engineVars['documentRoot'],"",$cwdTemp."/");
