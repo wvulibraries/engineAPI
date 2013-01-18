@@ -16,28 +16,31 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `linking`
+-- Table structure for table `revisions`
 --
 
-DROP TABLE IF EXISTS `linking`;
+DROP TABLE IF EXISTS `revisions`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `linking` (
+CREATE TABLE `revisions` (
   `ID` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `test` int(11) DEFAULT NULL,
-  `tset` int(11) DEFAULT NULL,
+  `productionTable` varchar(30) DEFAULT NULL,
+  `primaryID` int(11) DEFAULT NULL,
+  `secondaryID` int(10) unsigned DEFAULT NULL,
+  `metadata` text,
+  `digitalObjects` blob,
+  `relatedData` text,
   PRIMARY KEY (`ID`)
-) ENGINE=MyISAM AUTO_INCREMENT=7 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `linking`
+-- Dumping data for table `revisions`
 --
 
-LOCK TABLES `linking` WRITE;
-/*!40000 ALTER TABLE `linking` DISABLE KEYS */;
-INSERT INTO `linking` VALUES (2,1,3),(1,1,2),(3,2,1),(4,2,2),(5,1,1),(6,4,2);
-/*!40000 ALTER TABLE `linking` ENABLE KEYS */;
+LOCK TABLES `revisions` WRITE;
+/*!40000 ALTER TABLE `revisions` DISABLE KEYS */;
+/*!40000 ALTER TABLE `revisions` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -53,4 +56,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2013-01-18 12:42:43
+-- Dump completed on 2013-01-18 12:44:54
