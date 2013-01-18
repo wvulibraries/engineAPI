@@ -187,7 +187,7 @@ function recurseInsert($file,$type="php",$regex=NULL,$condition="REQUEST_URI",$c
 		}
 		elseif ($type == "url") {
 			$cwdTemp = str_replace($engineVars['documentRoot'],"",$cwdTemp."/");
-			$url = $engineVars['WVULSERVER'].$cwdTemp."/".$file;
+			$url = $engineVars['WVULSERVER']."/".$cwdTemp.$file;
 			return($url);
 		}
 		elseif ($type == "text") {
