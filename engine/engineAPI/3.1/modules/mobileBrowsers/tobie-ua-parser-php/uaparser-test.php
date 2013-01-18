@@ -41,7 +41,7 @@ function test($tc_ua,$tc_family,$tc_major,$tc_minor,$tc_patch,$type) {
 		$minor_result  = ($ua->osMinor == $tc_minor) ? true : false;
 		$patch_result  = ($ua->osPatch == $tc_patch) ? true : false;
 	}
-	
+
 	if (!$family_result || !$major_result || !$minor_result || !$patch_result) {
 		print "\n    mismatch: got ".$ua->family." ".$ua->major." ".$ua->minor." ".$ua->patch." and expected ".$tc_family." ".$tc_major." ".$tc_minor." ".$tc_patch;
 		print "\n    the mismatched ua: ".$tc_ua;
@@ -55,7 +55,7 @@ function test($tc_ua,$tc_family,$tc_major,$tc_minor,$tc_patch,$type) {
  */
 
 if (php_sapi_name() == 'cli') {
-	
+
 	print "\nrunning UAParser.php against test_user_agent_parser.yaml...\n";
 	$data = Spyc::YAMLLoad(__DIR__."/../test_resources/test_user_agent_parser.yaml");
 	foreach($data['test_cases'] as $test_case) {
