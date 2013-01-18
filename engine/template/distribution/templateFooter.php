@@ -1,23 +1,17 @@
-			</div>
-		</div>
+			</div> <!-- /.span9 -->
+		</div> <!-- /.row-fluid -->
 
-		<div id="footer" class="Font8pt">
-			<p id="footerLeft">
-				Organization Name <br />
-				Street Address <br />
-				City, ST 12345-6789
-			</p>
-			<p id="footerRight">
-				<span class="boldText">Phone</span>: <span class="phoneNumber">xxx.xxx.xxxx</span> <br />
-				<span class="boldText">Fax</span>: <span class="phoneNumber">xxx.xxx.xxxx</span> <br />
-				<span class="boldText">Email</span>: <a href="/contactus">{engine name="function" function="obfuscateEmail" email="foo@bar.com"}</a> <br />
+		<hr>
 
-				<span class="boldText"><a href="/copyright" title="Copyright Statement">&copy; Organization Name</a></span>
-			</p> 
-		</div>
+		<footer>
+			<p>&copy; Organization 2012</p>
+		</footer>
 
-	</div>
+	</div> <!-- /.container-fluid -->
+
+	<script type="text/javascript" src="http://code.jquery.com/jquery-latest.min.js"></script>
+	<script type="text/javascript" src="/templateIncludes/js/bootstrap.min.js"></script>
+	<?php recurseInsert("footerIncludes.php","php") ?>
 
 </body>
-
 </html>
