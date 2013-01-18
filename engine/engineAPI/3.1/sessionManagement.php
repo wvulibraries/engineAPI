@@ -141,11 +141,6 @@ function sessionGet($variable) {
 	return(NULL);
 }
 
-// Checks if the given name exists in the session
-function sessionIsset($name){
-	return isset($_SESSION[$name]);
-}
-
 // delete a variable from the session
 function sessionDelete($variable) {
 	unset($_SESSION[$variable]);

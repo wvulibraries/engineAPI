@@ -170,6 +170,12 @@ class validate {
 		$regexp = "/^\d\d".$delim."\d\d".$delim."\d\d\d\d$/";
 		return(self::regexp($regexp,$test));
 	}
+
+	// Stolen from php.net 
+	// http://us1.php.net/manual/en/function.unserialize.php#85097
+	public static function serialized($str) {
+		return ($str == serialize(false) || @unserialize($str) !== false);
+	}
 	
 }
 
