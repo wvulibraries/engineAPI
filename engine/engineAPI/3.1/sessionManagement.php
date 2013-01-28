@@ -1,37 +1,29 @@
 <?php
 
-/* 
-This exists to provide a 'standard' way of dealing with sessions. If we ever start using a
-module to handle sessions we can modify these functions and not have to touch any of the code.
-*/
-
+/**
+ * Starts the session
+ * This exists to provide a 'standard' way of dealing with sessions.
+ * If we ever start using a module to handle sessions we can modify these functions and not have to touch any of the code.
+ *
+ * @return void
+ */
 function sessionStart() {
-	
 	session_name("EngineAPI"); // apparently setting this is important
 	session_start();
-
-	// $params = session_get_cookie_params();
-	// $secure = FALSE;
-	// if (!empty($_SERVER["HTTPS"])) {
-	// 	$secure = TRUE;
-	// }
-
-	// setcookie(session_name(), '', $params['lifetime'],
-	// 			$params["path"], $params["domain"],
-	// 			$secure, TRUE
-	// 			);
 
 	$userCSRF = sessionGet("CSRF");
 	if ($userCSRF == FALSE || $userCSRF == "engineCSRF not set") {
 		sessionSetCSRF();
 	}
-	
-
 }
 
-// This should only be called when doing a log off. 
+/**
+ * Ends the session
+ * This should only be called when doing a log off.
+ *
+ * @return bool
+ */
 function sessionEnd() {
-	
 	$engine = EngineAPI::singleton();
 	
 	if (isset($engine->cleanGet["MYSQL"]["csrf"]) && sessionCheckCSRF($engine->cleanGet["MYSQL"]["csrf"])) {
@@ -60,14 +52,17 @@ function sessionEnd() {
 }
 
 
-// Returns true if the variable is assigned the value
-// Otherwise False
+/**
+ * Sets the given variable in the session
+ * Returns true if the variable is assigned the value, otherwise False
+ *
+ * @param string $variable
+ * @param mixed $value
+ * @return bool
+ */
 function sessionSet($variable,$value) {
-	
-	if(!isset($_SESSION)) {
-		return FALSE;
-	}
-	
+	if(!isset($_SESSION)) return FALSE;
+
 	if (is_string($variable) === TRUE) {
 		if ($_SESSION[$variable] = $value) {
 			return TRUE;
@@ -101,7 +96,13 @@ function sessionSet($variable,$value) {
 	return FALSE;
 }
 
-// returns that value of $variable, NULL if not defined.
+/**
+ * Retrieves the requested variable from the session
+ * returns that value of $variable, NULL if not defined.
+ *
+ * @param string $variable
+ * @return mixed|null
+ */
 function sessionGet($variable) {
 	
 	if (is_string($variable) === TRUE) {
@@ -120,13 +121,13 @@ function sessionGet($variable) {
 					$prevTemp = &$_SESSION[$V];
 				} 
 				else {
-					return(FALSE);
+					return(NULL);
 				}
 				
 			} 
 			else { 
 				if (!isset($prevTemp[$V])) {
-					return(FALSE);
+					return(NULL);
 				}
 				else {
 					$prevTemp = &$prevTemp[$V]; 
@@ -141,55 +142,60 @@ function sessionGet($variable) {
 	return(NULL);
 }
 
-// delete a variable from the session
+/**
+ * delete a variable from the session
+ *
+ * @param string $variable
+ * @return bool TRUE if unset, FALSE otherwise
+ */
 function sessionDelete($variable) {
 	unset($_SESSION[$variable]);
-	return(TRUE);
+	return isset($_SESSION[$variable]);
 }
 
+/**
+ * Returns the session id
+ *
+ * @return string
+ */
 function sessionID(){
     return session_id();
 }
 
-/* 
-Functions to prevent Cross Site Request Forgeries 
-*/
-
+/**
+ * Sets CSRF token in session
+ *
+ * @see http://en.wikipedia.org/wiki/Cross-site_request_forgery
+ * @return bool TRUE if set, FALSE otherwise
+ */
 function sessionSetCSRF() {
 	$md5time = md5(uniqid(rand(), true));
-	$return = sessionSet("CSRF",$md5time);
-	
-	return($return);
+	return sessionSet("CSRF",$md5time);
 }
 
-function sessionCheckCSRF($CSRF) {
-
+/**
+ * Checks the CSRF token
+ *
+ * @param string $csrf The supplied token to be checked
+ * @return bool TRUE if tokens match, FALSE otherwise
+ */
+function sessionCheckCSRF($csrf) {
 	$userCSRF = sessionGet("CSRF");
-
-	if ($userCSRF == FALSE || $userCSRF == "engineCSRF not set") {
-		return(FALSE);
-	}
-	
-	if ($CSRF == $userCSRF) {
-		return(TRUE);
-	}
-	
-	return(FALSE);
-	
+	return $csrf == $userCSRF;
 }
 
+/**
+ * Retrieves CSRF token from session
+ * @param bool $form If TRUE, token will be wrapped inside hidden <input> tag. Otherwise, raw token will be returned
+ * @return mixed|null|string
+ */
 function sessionInsertCSRF($form = TRUE) {
-	$output = sessionGet("CSRF");
-	
-	if (!$output) {
-		$output = "engineCSRF not set";
-	}
-	
-	if($form === TRUE) {
-		$output = "<input type=\"hidden\" name=\"engineCSRFCheck\" value=\"".$output."\" />";
-	}
-	
-	return($output);
+	$csrf = sessionGet("CSRF");
+	if(!$csrf) return "engineCSRF not set";
+
+	return $form
+		? '<input type="hidden" name="engineCSRFCheck" value="'.$csrf.'" />'
+		: $csrf;
 }
 
 ?>
