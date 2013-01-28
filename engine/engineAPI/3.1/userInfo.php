@@ -1,12 +1,14 @@
 <?php
-
-/*
-$ipRanges is an array of valid IP ranges, same type that is used for security
-$checkIP is option, if provided it checks against checkip, otherise it uses the clients remote_addr
-
-returns true if the clients IP is in this range, otherwise false
-
-*/
+/**
+ * $ipRanges is an array of valid IP ranges, same type that is used for security
+ * $checkIP is option, if provided it checks against checkip, otherise it uses the clients remote_addr
+ *
+ * returns true if the clients IP is in this range, otherwise false
+ *
+ * @param $ipRanges IP range(s) to check against
+ * @param string|null $checkIP The IP address to check
+ * @return bool
+ */
 function userInfoIPRangeCheckArray($ipRanges,$checkIP = NULL) {
 	
 	if(isnull($checkIP) && isset($_SERVER['REMOTE_ADDR'])) {
@@ -36,6 +38,11 @@ function userInfoIPRangeCheckArray($ipRanges,$checkIP = NULL) {
 	
 }
 
+/**
+ * @param $ip
+ * @param string|null $checkIP The IP address to check
+ * @return bool
+ */
 function userInfoIPRangeCheck($ip,$checkIP = NULL) {
 
 	if(isnull($checkIP) && isset($_SERVER['REMOTE_ADDR'])) {
@@ -86,6 +93,11 @@ function userInfoIPRangeCheck($ip,$checkIP = NULL) {
 	
 }
 
+/**
+ * @param $ipRanges
+ * @param string|null $checkIP The IP address to check
+ * @return bool
+ */
 function ipRangeCheck($ipRanges,$checkIP = NULL) {
 	if(is_array($ipRanges)) {
 		return(userInfoIPRangeCheckArray($ipRanges,$checkIP));
@@ -93,6 +105,12 @@ function ipRangeCheck($ipRanges,$checkIP = NULL) {
 	return(userInfoIPRangeCheck($ipRanges,$checkIP));
 }
 
+/**
+ * Returns TRUE if the IP is an 'onCampus' IP
+ * onCampus is defined in engine config
+ * @param null $checkIP
+ * @return bool
+ */
 function onCampus($checkIP = NULL) {
 	
 	global $engineVars;
