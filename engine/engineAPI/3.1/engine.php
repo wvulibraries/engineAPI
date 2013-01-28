@@ -104,7 +104,6 @@ class EngineAPI
 		}
 
 		require_once(self::$engineDir."/sessionManagement.php");
-		require_once(self::$engineDir."/stats.php");
 		require_once(self::$engineDir."/userInfo.php");
 
 		// Setup Current Working Directory
