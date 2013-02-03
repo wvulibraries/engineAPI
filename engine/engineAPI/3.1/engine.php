@@ -75,6 +75,10 @@ class EngineAPI
 
 		// setup private config variables
 		require_once(self::$engineDir."/config/defaultPrivate.php");
+		if($site != "default" && $site != "defaultPrivate"){
+			$siteConfigFile = self::$engineDir."/config/".$site."Private.php";
+			require_once($siteConfigFile);
+		}
 		$this->engineVarsPrivate = $engineVarsPrivate;
 		unset($engineVarsPrivate);
 
@@ -496,7 +500,7 @@ class EngineAPI
 
 		$class     = (is_array($function))?$function[0]:NULL;
 		$function  = (is_array($function))?$function[1]:$function;
-		
+
 
 		$functions = $this->getFunctionExtension($function,$class);
 
@@ -666,7 +670,7 @@ class EngineAPI
 			foreach ($this->aclgroups as $key => $value) {
 
 				// At this point, the only "FALSE" things should be those that did not have a hard break
-				// so we should NOT exit if we see them, unless ALL things fail. 
+				// so we should NOT exit if we see them, unless ALL things fail.
 
 				if ($value === FALSE) {
 					if (isnull($auth)) {
