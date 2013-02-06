@@ -1,8 +1,16 @@
 <?php
 
-// Returns a string with, space delimited, with $wordCount number of words.
-//
-// Can be used from {engine } function call, with attributes 'str' & 'wordCount'
+/**
+ * Returns a string with, space delimited, with $wordCount number of words.
+ * Can be used from {engine } function call, with attributes 'str' & 'wordCount'
+ *
+ * @param string|array $str
+ *        If String; The String to evaluate
+ *        If Array; keys 'str' and 'wordCount'
+ * @param int $wordCount
+ *        Pass-through for array_slice()'s $length
+ * @return string
+ */
 function wordSubStr($str,$wordCount=NULL) {
 
     if (is_array($str)) {
@@ -17,11 +25,12 @@ function wordSubStr($str,$wordCount=NULL) {
     return($str);
 }
 
-//Key Words in Context
-// Highlights $str1 in $str2
-//
-// $str1 = search term
-// $str2 = compair with string
+/**
+ * Key Words in Context (Highlights $str1 in $str2)
+ * @param string $str1
+ * @param string $str2
+ * @return mixed
+ */
 function kwic($str1,$str2) {
 
     $kwicLen = strlen($str1);
@@ -47,14 +56,14 @@ function kwic($str1,$str2) {
     return($str2);
 }
 
-/*
-Plugin Name: Title Case
-Plugin URI: http://nanovivid.com/stuff/wordpress/title-case/
-Description: Attempts to properly capitalize post titles. Based on <a href="http://daringfireball.net/2008/05/title_case">code by John Gruber</a>.
-Version: 1.1
-Author: Adam Nolley
-Author URI: http://nanovivid.com/
-*/
+/**
+ * Attempts to properly capitalize post titles.
+ *
+ * @see http://nanovivid.com/stuff/wordpress/title-case/
+ * @see http://daringfireball.net/2008/05/title_case/
+ * @param $str
+ * @return mixed|string
+ */
 
 function str2TitleCase($str) {
 
@@ -107,13 +116,28 @@ function str2TitleCase($str) {
 
     return $words;
 }
+
+/**
+ * Um...
+ * @todo Is this still needed? (Can it be deprecated/removed?)
+ * @param $matches
+ * @return string
+ */
 function nv_title_skip_dotted($matches) {
     return preg_match('/[[:alpha:]] [.] [[:alpha:]]/x', $matches[0]) ? $matches[0] : ucfirst($matches[0]);
 }
 
-function obfuscateEmail($attPairs) {
-
-    $email = $attPairs['email'];
+/**
+ * Obfuscate an email address
+ *
+ * @param string $input
+ * @return string
+ */
+function obfuscateEmail($input){
+	// Accept both array and srt input
+	$email = is_array($input)
+		? array_shift($input)
+		: $input;
 
     $output = "";
     for ($i=0; $i<strlen($email); $i++){
@@ -124,23 +148,24 @@ function obfuscateEmail($attPairs) {
 }
 
 /**
- * This function will attempt to obscure sensitive parts of a file path.
- * (This can be usefully if you need to print a filepath to the browser.)
+ * Obfuscate full filepaths
+ * This function will attempt to obfuscate sensitive parts of a file path.
+ * Note: If we are in CLI mode, no obfuscation will be done
+ *
  * @param string $filepath
  * @return string
  */
 function secureFilepath($filepath){
     // If this is a cli session, there's no need to secure the filepath
     if(isCLI()) return $filepath;
-    else{
-        return (string)preg_replace(array(
-                '|^'.$_SERVER["DOCUMENT_ROOT"].'|i',
-                 '|^/home|i'
-            ),array(
-                '[DOCUMENT_ROOT]',
-                '[HOME]'
-            ),$filepath);
-    }
+
+	return (string)preg_replace(array(
+		'|^'.$_SERVER["DOCUMENT_ROOT"].'|i',
+		'|^/home|i'
+	), array(
+		'[DOCUMENT_ROOT]',
+		'[HOME]'
+	), $filepath);
 }
 
 /**
@@ -202,6 +227,7 @@ function formatPhone($phoneIn,$format=1,$extFormat=1){
 
 /**
  * Convert a logical boolean into a string 'boolean'
+ *
  * @param mixed $input
  * @param bool $returnBit
  *        If TRUE; return 1 or 0, otherwise return 'true' or 'false'
@@ -217,6 +243,7 @@ function bool2str($input,$returnBit=FALSE){
 
 /**
  * Convert a string 'boolean' into a actual boolean
+ *
  * @param Mixed $input
  * @return bool|null
  */
@@ -243,6 +270,7 @@ function str2bool($input){
 /**
  * This function will take a mix of inputs, and return a normalized array
  * This is useful to take a CSV or JSON string and get an array back
+ *
  * @param mixed $input
  * @param string $delimiter
  * @return array|mixed
@@ -325,8 +353,9 @@ function unixToDate($time,$format=NULL) {
 }
 
 /**
- * return the string in lowercase 
+ * Alias for strtolower()
  *
+ * @see strtolower()
  * @param string $string
  * @return string
  **/
@@ -335,8 +364,9 @@ function lc($string) {
 }
 
 /**
- * return the string in uppercase 
+ * Alias for strtoupper()
  *
+ * @see strtoupper()
  * @param string $string
  * @return string
  **/
