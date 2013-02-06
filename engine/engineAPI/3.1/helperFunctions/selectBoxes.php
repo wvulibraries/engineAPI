@@ -1,8 +1,22 @@
 <?php
 
-// MultiSelect with Window
-// For this to work it requires engineSelectBoxes.js to be included
-function emod_msww($attPairs,$engine=null) {
+/**
+ * MultiSelect with Window
+ * For this to work it requires engineSelectBoxes.js to be included on the front-end
+ *
+ * @todo Remove deprecated $engine->dbTablesExport() method call
+ * @param array $attPairs
+ *        Array of config items
+ *          select   - fields and conditions for the WHERE clause for generated SQL
+ *          size     - Size of the generated <select> box
+ *          valuecol - The column name where the value is stored
+ *          labelcol - The column name where the label is stored
+ *          table    - The db table to operate on
+ *          orderby  - Optional ORDER BY clause for generated SQL
+ * @return string
+ *         The generated HTML
+ */
+function emod_msww($attPairs){
 	
 	$engine = EngineAPI::singleton();
 	
@@ -67,7 +81,19 @@ function emod_msww($attPairs,$engine=null) {
 	return($output);
 }
 
-function webHelper_listSelect($attPairs,$engine=null) {
+/**
+ * Generate an HTML select box
+ *
+ * @todo Remove deprecated $engine->dbTablesExport() method call
+ * @param array $attPairs
+ *        Array of config items
+ *          select - The selected option? (@todo This looks broken)
+ *          col    - The field containing the values
+ *          type   - If you want a multi-select, set this to 'multi'
+ *          table  - The db table to operate on
+ * @return string
+ */
+function webHelper_listSelect($attPairs) {
 	
 	$engine = EngineAPI::singleton();
 	
@@ -122,7 +148,19 @@ function webHelper_listSelect($attPairs,$engine=null) {
 	return($output);
 }
 
-function webHelper_listCheckbox($attPairs,$engine=null) {
+/**
+ * Generate an HTML checkbox list
+ *
+ * @todo Remove deprecated $engine->dbTablesExport() method call
+ * @param array $attPairs
+ *        Array of config items
+ *          select - The selected options? (@todo This looks broken)
+ *          col    - The field containing the values
+ *          type   - The type of checkbox to generate ('checkbox' or 'radio')
+ *          table  - The db table to operate on
+ * @return string
+ */
+function webHelper_listCheckbox($attPairs) {
 	
 	$engine = EngineAPI::singleton();
 	
