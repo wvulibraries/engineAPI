@@ -1,16 +1,15 @@
 <?php
 
-// Determines if a function exists
+/**
+ * Determines if a function exists
+ *
+ * @todo fix me - There has to be a cleaner way to do this with native functions
+ * @param string $param1
+ * @param null $param2
+ * @return bool
+ */
 function functionExists($param1,$param2=null) {
-
-	$langConstructs = array("die",
-							"echo", "empty", "exit", "eval",
-							"include", "include_once", "isset",
-							"list",
-							"print",
-							"require", "require_once",
-							"unset"
-							);
+	$langConstructs = array("die", "echo", "empty", "exit", "eval", "include", "include_once", "isset", "list", "print", "require", "require_once", "unset");
 
 	// 2 params provided, assume class
 	if (!isnull($param2)) {
@@ -47,28 +46,53 @@ function functionExists($param1,$param2=null) {
 	return(FALSE);
 }
 
+/**
+ * Determine the calling function from the backtrace
+ * @return string
+ */
 function callingFunction(){
 	$backtrace = debug_backtrace();
-	$fn = (isset($backtrace[2]['function'])) ? $backtrace[2]['function'] : 'unknown';
-	return $fn;
+	return isset($backtrace[2]['function'])
+		? (string)$backtrace[2]['function']
+		: 'unknown';
 }
+
+/**
+ * Determine the calling line from the backtrace
+ * @return string
+ */
 function callingLine(){
 	$backtrace = debug_backtrace();
-	$ln = (isset($backtrace[1]['line'])) ? $backtrace[1]['line'] : 'unknown';
-	return $ln;
+	return isset($backtrace[1]['line'])
+		? (string)$backtrace[1]['line']
+		: 'unknown';
 }
+
+/**
+ * Determine the calling file from the backtrace
+ * @param bool $basename
+ *        If TRUE, return the base name of the file [Default: FALSE]
+ * @return string
+ */
 function callingFile($basename=FALSE){
 	$backtrace = debug_backtrace();
-	if(!isset($backtrace[1]['file'])) return 'unknown';
-
-	$file = $backtrace[1]['file'];
-	if ($basename === TRUE) {
-		$file = basename($backtrace[1]['file']);
+	if(isset($backtrace[1]['file'])){
+		return $basename
+			? (string)basename($backtrace[1]['file'])
+			: (string)$backtrace[1]['file'];
+	}else{
+		return 'unknown';
 	}
-	return($file);
 }
 
-// return attribute pairs
+/**
+ * Return attribute pairs
+ *
+ * @todo fix deprecated split() function usage
+ * @todo What is this function for? Is it still needed?
+ * @param $attpairs
+ * @return array
+ */
 function attPairs($attpairs) {
 
 	$attPairs  = split("\" ",$attpairs);
@@ -86,14 +110,37 @@ function attPairs($attpairs) {
 	return($temp);
 }
 
+/**
+ * Not sure...
+ *
+ * @param $qs
+ * @param $var
+ * @return string
+ */
 function removeQueryStringVar($qs, $var) {
 	$qs = preg_replace('/(.*)(?|&)'.$var.'=[^&]+?(&)(.*)/i', '$1$2$4', $qs.'&');
 	$qs = substr($qs, 0, -1);
 	return $qs;
 }
 
-//Check for Performance
-// Engine is no longer used as a parameter. left for backwards compatibility
+/**
+ * Recursively insert a file from the filesystem
+ *
+ * @todo fix deprecated split() function usage
+ * @todo Check for Performance / Cleanup
+ * @param $file
+ * @param string $type
+ *        php  - Includes the target file (and executes)
+ *        url  - Returns a formatted URL
+ *        text - Includes the contents of the target file (no execute)
+ * @param string $regex
+ *        Regular expression to evaluate against $condition
+ * @param string $condition
+ *        The key of $_SERVER to use as a condition.
+ * @param bool $caseInsensitive
+ *        Adds case-insensitive flag to the regex passed via $regex
+ * @return bool|string
+ */
 function recurseInsert($file,$type="php",$regex=NULL,$condition="REQUEST_URI",$caseInsensitive=TRUE) {
 
 	global $engineVars;
@@ -225,10 +272,17 @@ function recurseInsert($file,$type="php",$regex=NULL,$condition="REQUEST_URI",$c
 
 }
 
-// If the browser is a mobile device, make the phone number a clickable link
-// Phone number must be in the format of x-xxx-xxx-xxxx ... fairly limited because that is what is
-// required for a mobile phone to dial it.
-// display is optional. if its there, that's how the number will be displayed.
+/**
+ * Generate the correct HTML to link a phone number for mobile browsers
+ *
+ * @todo Remove deprecated webHelper_() function calls
+ * @todo Look at cleaning up / rewriting
+ * @param $attPairs
+ *        An array of params
+ *        phone   - The Phone number to rewrite
+ *        display - TRUE to display???
+ * @return string
+ */
 function linkPhone($attPairs) {
 
 	if (!isset($attPairs['phone'])) {
@@ -264,6 +318,15 @@ function linkPhone($attPairs) {
 	return($output);
 }
 
+/**
+ * Generate a clean, pretty, file size
+ * @param $filesize
+ *        The filesize to format in Bytes
+ * @param int $base
+ *        The base to use for the calculation.
+ *        (eq: how many bytes in a Kilobyte) [Default: 1000]
+ * @return string
+ */
 function displayFileSize($filesize,$base=1000){
 
 	if (is_numeric($filesize)) {
@@ -283,10 +346,12 @@ function displayFileSize($filesize,$base=1000){
 }
 
 /**
+ * Casts a given input as a new type
+ *
+ * @see http://us2.php.net/manual/en/function.settype.php
  * @param mixed $input
  * @param string $cast
  * @return mixed
- * @see http://us2.php.net/manual/en/function.settype.php
  */
 function castAs($input,$cast){
 	$castable = array('boolean','bool','integer','int','float','double','string','array','object','null');
@@ -294,7 +359,7 @@ function castAs($input,$cast){
 	if(in_array($cast, $castable) and settype($input,$cast)){
 		return $input;
 	}else{
-		// Trigger Error?
+		trigger_error(sprintf("Failed to cast! (%s to %s)", gettype($input), $cast), E_USER_WARNING);
 		return null;
 	}
 }
