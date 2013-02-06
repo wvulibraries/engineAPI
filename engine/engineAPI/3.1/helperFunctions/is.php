@@ -1,9 +1,11 @@
 <?php
 
 /**
- * determines if the passed argument is a function
- * swiped from http://us2.php.net/manual/en/function.create-function.php#96321
- * @param mixed $mixed function | method name to test
+ * Determines if the passed argument is a function
+ *
+ * @see http://us2.php.net/manual/en/function.create-function.php#96321
+ * @param mixed $mixed
+ *        Method name to test
  * @return bool
  */
 function is_function( &$mixed ) {
@@ -18,7 +20,8 @@ function is_function( &$mixed ) {
 }
 
 /**
- * determine if value is Odd (not Even)
+ * Determine if value is Odd (not Even)
+ *
  * @param int $number
  * @return bool
  */
@@ -32,31 +35,32 @@ function is_odd($number) {
 }
 
 /**
- * Replacement for is_int
+ * Replacement for is_int()
  * Tests strings as well, returns true for an integer.
- * 12	TRUE  (String)
- * 5	TRUE  (INT)
- * 005	TRUE  (String)
- * 5.5	FALSE (FLOAT)
- * 5.5	FALSE (String)
- * 0.5	FALSE (String)
- * test	FALSE (String)
- * 1	FALSE (BOOLE Value TRUE)
- * 		FALSE (Empty string)
  *
- * @param mixed $int
+ * @param mixed $var
+ *        The input to test
  * @return bool
  */
-function isint($int) {
-
-	return validate::integer($int);
-
+function isint($var) {
+	return (bool)validate::integer($var);
 }
 
 /**
  * Returns TRUE if string evaluates to "null" as well as normal cases. replacement for is_null()
  * @param mixed $var variable to evaluate
  * @param bool $strict if FALSE uses the built in is_null() php function
+ */
+
+/**
+ * Replacement for is_null()
+ * Returns TRUE if string evaluates to "null" as well as normal cases.
+ *
+ * @param mixed $var
+ *        The input to test
+ * @param bool $strict
+ *        If False, use native is_null() [Defaults to TRUE]
+ * @return bool
  */
 function isnull($var,$strict=TRUE) {
 	if($strict === FALSE){
@@ -80,47 +84,55 @@ function isnull($var,$strict=TRUE) {
 
 /**
  * Alias for is_empty()
- * @param mixed $v
+ *
+ * @see is_empty()
+ * @param mixed $var
+ *        The input to test
  * @param bool $strict
+ *        Pass-through for isnull() [Defaults to TRUE]
  * @return bool
  */
-function isempty($v,$strict=TRUE) {
-	return is_empty($v,$strict);
+function isempty($var,$strict=TRUE) {
+	return is_empty($var, $strict);
 }
 
 /**
- * Replacement for empty(). Does NOT return true when test variable is int 0 or string "0"
- * @param mixed $v
+ * Replacement for empty().
+ * Does NOT return true when test variable is int 0 or string "0"
+ *
+ * @param mixed $var
+ *        The input to test
  * @param bool $strict
+ *        Pass-through for isnull() [Defaults to TRUE]
  * @return bool
  */
-function is_empty($v,$strict=TRUE) {
+function is_empty($var,$strict=TRUE) {
 
-	if (!isset($v)) {
+	if (!isset($var)) {
 		return(TRUE);
 	}
-	if (isnull($v,$strict)) {
+	if (isnull($var,$strict)) {
 		return(TRUE);
 	}
-	if ($v === FALSE) {
+	if ($var === FALSE) {
 		return(TRUE);
 	}
 
-	if (is_array($v) && empty($v)) {
+	if (is_array($var) && empty($var)) {
 		return(TRUE);
 	}
-	else if (is_array($v)) {
+	else if (is_array($var)) {
 		// return array before trim is hit
 		return(FALSE);
 	}
 
-	$v = trim($v);
+	$var = trim($var);
 
-	if ($v == "0" || (is_int($v) && $v == 0)) {
+	if ($var == "0" || (is_int($var) && $var == 0)) {
 		return(FALSE);
 	}
 
-	if (empty($v)) {
+	if (empty($var)) {
 		return(TRUE);
 	}
 
@@ -129,6 +141,7 @@ function is_empty($v,$strict=TRUE) {
 
 /**
  * Returns TRUE if we are running in CLI mode
+ *
  * @return bool
  */
 function isCLI(){
@@ -141,9 +154,9 @@ function isCLI(){
  * Since there is the potential for this function to be used in many places,
  * we'll cache the results of a given version in the static variable $_isPHP
  *
+ * @see https://github.com/EllisLab/CodeIgniter/blob/develop/system/core/Common.php
  * @param $version
  * @return bool
- * @see https://github.com/EllisLab/CodeIgniter/blob/develop/system/core/Common.php
  */
 function isPHP($version){
     static $_isPHP;
@@ -156,6 +169,7 @@ function isPHP($version){
 
 /**
  * Returns TRUE if the string is a PHP serialized string
+ *
  * @param $str
  * @return bool
  */
