@@ -2,23 +2,25 @@
 
 
 /**
- * Shortens mysql_real_escape_string to mres. makes typing a touch easier, plus if we ever 
- * want to use something other than mysql_real_escape_string, its easy to switch.
- * 
+ * Alias for mysql_real_escape_string()
+ * Makes typing a touch easier, plus if we ever plus if we ever want to use something other than mysql_real_escape_string, its easy to switch.
+ *
  * @author Michael Bond
- * @param string $var 
- * @returns string
-*/
-function mres($var) {
-	$var = mysql_real_escape_string($var);
-	return($var);
+ * @see mysql_real_escape_string()
+ * @param string $var
+ * @return string
+ */
+function mres($var){
+	return mysql_real_escape_string($var);
 }
 
-/** 
- * Shamelessly stolen from php.net
+/**
  * Returns a cleaned variable for insertion into mysql
+ *
  * @param mixed $var
- * @return mixed
+ * @param bool $quotes
+ *        TRUE will wrap each var in single quotes [Default: FALSE]
+ * @return array|string
  */
 function dbSanitize($var, $quotes = FALSE) {
 	//run each array item through this function (by reference)
@@ -46,18 +48,20 @@ function dbSanitize($var, $quotes = FALSE) {
 }
 
 /**
- * Sanitize untrusted input for safe HTML output. Uses php htmlentities function, If provided an array, it will sanitize each member of the array. Arrays of arrays are supported. 
+ * Sanitize untrusted input for safe HTML output.
+ * Uses php htmlentities function, If provided an array, it will sanitize each member of the array. Arrays of arrays are supported.
  *
- * @param string|array $var 
- * @param int $quotes see flags options for htmlentities. 
- * @param string $charSet Defaults to "UTF-8" 
- * @param bool $doubleEncode default TRUE, encode existing HTML entities
+ * @see htmlentities()
+ * @param string|array $var
+ * @param int $flags
+ *        Bitwise flags for htmlentities() call
+ * @param string $charSet
+ * @param bool $doubleEncode
+ *        True to encode existing HTML entities [Default: TRUE]
+ * @return array|bool|string
  */
-function htmlSanitize($var, $quotes=ENT_QUOTES, $charSet="UTF-8", $doubleEncode=TRUE) {
-
-	if(!isset($var)) {
-		return(FALSE);
-	}
+function htmlSanitize($var, $flags=ENT_QUOTES, $charSet="UTF-8", $doubleEncode=TRUE) {
+	if(!isset($var)) return(FALSE);
 
 	//run each array item through this function (by reference)
     if (is_array($var)) {         
@@ -66,18 +70,20 @@ function htmlSanitize($var, $quotes=ENT_QUOTES, $charSet="UTF-8", $doubleEncode=
         }
     }
 	else {
-		$var = htmlentities($var,$quotes,$charSet,$doubleEncode);
+		$var = htmlentities($var, $flags, $charSet, $doubleEncode);
 	}
 	
 	return($var);
-
 }
 
-/** 
+/**
  * Sanitize json data structures for either HTML or MYSQL usage.
  *
- * @param array $var array from php function json_decode
- * @param string $type HTML or MYSQL, defaults to mysql
+ * @param array $var
+ *        Array from php function json_decode
+ * @param string $type
+ *        HTML or MYSQL [Default: mysql]
+ * @return array|bool|string
  */
 function jsonSanitize($var,$type="mysql") {
 	
