@@ -1,4 +1,15 @@
 <?php
+/**
+ * General error handling
+ *
+ * This is the central handler for all errors (both native and user-generated)
+ * This is a singleton object designed to be interacted with via its static methods
+ * ================================================================================
+ * @todo Add sample code for error profiles
+ *
+ * To trigger a new error, use the newError() method.
+ * @see errorHandle::newError
+ */
 class errorHandle
 {
     /**
@@ -154,7 +165,13 @@ class errorHandle
         return self::$instance;
     }
 
-    private function __clone(){}
+	/**
+	 * No cloning allowed!
+	 */
+	private function __clone(){}
+	/**
+	 * No wakeup (serialization) allowed!
+	 */
     private function __wakeup(){}
 
     /**
