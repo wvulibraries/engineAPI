@@ -2,10 +2,19 @@
 global $loginFunctions;
 $loginFunctions['ldap'] = "ldapLogin";
 
-function ldapLogin($username,$password,$engine=NULL)
+/**
+ * Process a LDAP login attempt
+ *
+ * @todo Remove deprecated EngineAPI->localVars() method call
+ * @param string $username
+ *        The user's username
+ * @param string $password
+ *        The user's password
+ * @return bool
+ */
+
+function ldapLogin($username,$password)
 {
-	// Load the ldapSearch module
-//	require EngineAPI::$engineDir.'/modules/ldapSearch/ldapSearch.php'; // (I'm not sure if the autoloader is set yet)
     $ldapSearch = new ldapSearch(EngineAPI::singleton()->localVars("domain"));
     if($ldapSearch->login($username,$password)){
         $user = $ldapSearch->findUser($username);
@@ -39,6 +48,15 @@ function ldapLogin($username,$password,$engine=NULL)
     }
 }
 
+/**
+ * Attempts to connect to the given LDAP server
+ *
+ * @todo Is this needed anymore? (I think ldapSearch replaces it)
+ * @param $ldapServer
+ *        The hostname of the LDAP server to connect to
+ * @return bool|resource
+ *         LDAP resource on success, FALSE if error occurred
+ */
 function ldapConnect($ldapServer) {
 
 	$ldapConn = ldap_connect($ldapServer);
@@ -53,6 +71,14 @@ function ldapConnect($ldapServer) {
 	return(FALSE);
 }
 
+/**
+ * Attempts to disconnect from the given LDAP server
+ *
+ * @todo Is this needed anymore? (I think ldapSearch replaces it)
+ * @param $ldapConn
+ *        The LDAP resource provided by ldapConnect()
+ * @return bool
+ */
 function ldapDisconnect($ldapConn) {
 
 	if (is_null($ldapConn)) {
@@ -65,6 +91,13 @@ function ldapDisconnect($ldapConn) {
 
 }
 
+/**
+ * Get the user's LDAP groups
+ *
+ * @todo Merge this with ldapSearch and this is done more efficiently
+ * @param $memberOf
+ * @return array
+ */
 function getGroups($memberOf) {
 	$groups = array();
 	for($I=0;$I<$memberOf["count"];$I++) {
@@ -78,6 +111,13 @@ function getGroups($memberOf) {
 	return($groups);
 }
 
+/**
+ * This looks broken...
+ *
+ * @todo Is this broken?
+ * @param $dn
+ * @return bool
+ */
 function getGroup($dn) {
     global $ldapSearch;
     $cn = $ldapSearch->getAttributes($dn, 'cn');
@@ -88,9 +128,14 @@ function getGroup($dn) {
     }
 }
 
-// This needs to be modified to support nested OUs.
-// We don't have a need for nested OUs, so i'll save it for later.
-// securityOUCheck function will need updated when this is updated
+/**
+ * Get a user's OU
+ *
+ * @todo Merge this with ldapSearch?
+ * @todo This needs to be modified to support nested OUs. (securityOUCheck function will need updated when this is updated)
+ * @param $dn
+ * @return bool
+ */
 function getOU($dn) {
 	
 	$regex = '/.+OU=(.+?)\,.+$/';
@@ -103,6 +148,17 @@ function getOU($dn) {
 	return(FALSE);
 }
 
+/**
+ * Check a user's login credentials
+ *
+ * @todo Merge this with ldapSearch?
+ * @param $username
+ * @param $password
+ * @param $type
+ * @param $ldapconn
+ * @param $ldapDomain
+ * @return bool
+ */
 function securityUserCheck($username,$password,$type,$ldapconn,$ldapDomain)
 {
 
@@ -121,6 +177,14 @@ function securityUserCheck($username,$password,$type,$ldapconn,$ldapDomain)
 	return(FALSE);
 }
 
+/**
+ * Check a user's groups against a requested one
+ *
+ * @todo Merge this with ldapSearch?
+ * @param $group
+ * @param null $userGroups
+ * @return bool
+ */
 function securityGroupCheck($group,$userGroups=NULL) {
 	
 	if (is_null($userGroups) && isset($_SESSION['groups'])) {
@@ -140,8 +204,15 @@ function securityGroupCheck($group,$userGroups=NULL) {
 	return(FALSE);
 }
 
-// OU should be either a string or an array. If an array, assume nested
-// OUs. [0] is parent down to [n] child. 
+/**
+ * Check a user's OU(s) against a requested one
+ *
+ * @todo Merge this with ldapSearch?
+ * @param string|array $ou
+ *        String or array of OU(s) to check
+ * @param null $userOU
+ * @return bool
+ */
 function securityOUCheck($ou,$userOU=NULL) {
 	
 	if (is_null($userOU) && isset($_SESSION['ou'])) {
