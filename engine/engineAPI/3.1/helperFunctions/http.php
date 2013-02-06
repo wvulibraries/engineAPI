@@ -1,4 +1,9 @@
 <?php
+/**
+ * Utility Class - HTTP helpers
+ *
+ * This library provides basic helper methods for interacting with HTTP
+ */
 class http
 {
     /**
