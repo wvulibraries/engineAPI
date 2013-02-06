@@ -4,8 +4,7 @@
  * @param  $array
  * @return array
  */
-function array_unique_recursive($array)
-{
+function array_unique_recursive($array){
     $result = array_map("unserialize", array_unique(array_map("serialize", $array)));
     foreach ($result as $key => $value)
     {
@@ -23,8 +22,7 @@ function array_unique_recursive($array)
  * @param $array2
  * @return array
  */
-function array_diff_assoc_recursive($array1, $array2)
-{
+function array_diff_assoc_recursive($array1, $array2){
     $difference = array();
     foreach($array1 as $key => $value){
         if(is_array($value)){
@@ -46,12 +44,16 @@ function array_diff_assoc_recursive($array1, $array2)
 }
 
 /**
- * Returns the index of the index immediately after $index. 
+ * Returns the index of the index immediately after $index.
  *
- * @param array $array is array to be searched
- * @param string|int $index is the known index
- * @param bool $loop if TRUE, will loop when it gets to the end of the array and continue at beginning
- * @param mixed array index of the next item in the array, NULL if $index is the last in the array, FALSE if $index is not found
+ * @param array $array
+ *        The array to be searched
+ * @param mixed $index
+ *        The known, starting, index
+ * @param bool $loop
+ *        If TRUE, will loop when it gets to the end of the array and continue at beginning
+ * @return mixed
+ *         index of the next item in the array, NULL if $index is the last in the array, FALSE if $index is not found
  */
 function array_nextIndex($array,$index,$loop=FALSE) {
 	
@@ -85,12 +87,16 @@ function array_nextIndex($array,$index,$loop=FALSE) {
 
 
 /**
- * Returns the index of the index immediately before $index. 
+ * Returns the index of the index immediately before $index.
  *
- * @param array $array is array to be searched
- * @param string|int $index is the known index
- * @param bool $loop if TRUE, will loop when it gets to the beginning of the array and continue at end
- * @param mixed array index of the next item in the array, NULL if $index is the first in the array, FALSE if $index is not found
+ * @param array $array
+ *        The array to be searched
+ * @param mixed $index
+ *        The known, starting, index
+ * @param bool $loop
+ *        If TRUE, will loop when it gets to the beginning of the array and continue at end
+ * @return mixed
+ *         index of the next item in the array, NULL if $index is the first in the array, FALSE if $index is not found
  */
 function array_prevIndex($array,$index,$loop=FALSE) {
 	
@@ -124,10 +130,13 @@ function array_prevIndex($array,$index,$loop=FALSE) {
 }
 
 /**
- * returns the first index of the array, otherwise false
- * @param array $array array to search
- * @return mixed Returns the index if found, otherwise FALSE
- */ 
+ * Returns the first index of the array, otherwise false
+ *
+ * @param array $array
+ *        The array to be searched
+ * @return mixed
+ *         Returns the index if found, otherwise FALSE
+ */
 function array_getFirstIndex($array) {
 	if (is_array($array) && count($array) > 0) {
 		reset($array);
@@ -139,9 +148,11 @@ function array_getFirstIndex($array) {
 }
 
 /**
- * returns the last index of the array, otherwise false
- * @param array $array array to search
- * @return mixed Returns the index if found, otherwise FALSE
+ * Returns the last index of the array, otherwise false
+ * @param array $array
+ *        The array to be searched
+ * @return mixed
+ *         Returns the index if found, otherwise FALSE
  */
 function array_getLastIndex($array) {
 
@@ -173,58 +184,24 @@ function buildECMSArray($array) {
 	return($output);
 }
 
-/** 
- * FROM: http://us2.php.net/manual/en/book.simplexml.php#105697
+/**
+ * Convert an XML document to an array
+ * Converts a simpleXML element into an array. Preserves attributes.
+ * You can choose to get your elements either flattened, or stored in a custom index that you define.
  *
- * Converts a simpleXML element into an array. Preserves attributes.<br/> 
- * You can choose to get your elements either flattened, or stored in a custom 
- * index that you define.<br/> 
- * For example, for a given element 
- * <code> 
- * <field name="someName" type="someType"/> 
- * </code> 
- * <br> 
- * if you choose to flatten attributes, you would get: 
- * <code> 
- * $array['field']['name'] = 'someName'; 
- * $array['field']['type'] = 'someType'; 
- * </code> 
- * If you choose not to flatten, you get: 
- * <code> 
- * $array['field']['@attributes']['name'] = 'someName'; 
- * </code> 
- * <br>__________________________________________________________<br> 
- * Repeating fields are stored in indexed arrays. so for a markup such as: 
- * <code> 
- * <parent> 
- *     <child>a</child> 
- *     <child>b</child> 
- *     <child>c</child> 
- * ... 
- * </code> 
- * you array would be: 
- * <code> 
- * $array['parent']['child'][0] = 'a'; 
- * $array['parent']['child'][1] = 'b'; 
- * ...And so on. 
- * </code> 
- * @param simpleXMLElement    $xml            the XML to convert 
- * @param boolean|string    $attributesKey    if you pass TRUE, all values will be 
- *                                            stored under an '@attributes' index. 
- *                                            Note that you can also pass a string 
- *                                            to change the default index.<br/> 
- *                                            defaults to null. 
- * @param boolean|string    $childrenKey    if you pass TRUE, all values will be 
- *                                            stored under an '@children' index. 
- *                                            Note that you can also pass a string 
- *                                            to change the default index.<br/> 
- *                                            defaults to null. 
- * @param boolean|string    $valueKey        if you pass TRUE, all values will be 
- *                                            stored under an '@values' index. Note 
- *                                            that you can also pass a string to 
- *                                            change the default index.<br/> 
- *                                            defaults to null. 
- * @return array the resulting array. 
+ * @see http://us2.php.net/manual/en/book.simplexml.php#105697
+ * @param SimpleXMLElement $xml
+ *        The XML to convert
+ * @param boolean|string $attributesKey
+ *        If you pass TRUE, all values will be stored under an '@attributes' index.
+ *        Note: You can also pass a string to change the default index. [defaults to null]
+ * @param boolean|string $childrenKey
+ *        If you pass TRUE, all values will be stored under an '@children' index.
+ *        Note: You can also pass a string to change the default index. [defaults to null]
+ * @param boolean|string $valueKey
+ *        If you pass TRUE, all values will be stored under an '@values' index.
+ *        Note: You can also pass a string to change the default index. [defaults to null]
+ * @return array
  */
 function simpleXMLToArray(SimpleXMLElement $xml,$attributesKey=null,$childrenKey=null,$valueKey=null){ 
 
@@ -280,7 +257,12 @@ function simpleXMLToArray(SimpleXMLElement $xml,$attributesKey=null,$childrenKey
     return $return; 
 }
 
-// FROM http://www.php.net/manual/en/function.array-merge-recursive.php#104145
+/**
+ * Recursively merge a set of 2 or more arrays
+ *
+ * @see http://www.php.net/manual/en/function.array-merge-recursive.php#104145
+ * @return array
+ */
 function array_merge_recursive_overwrite() {
 
     if (func_num_args() < 2) {
@@ -310,12 +292,15 @@ function array_merge_recursive_overwrite() {
 }
 
 /**
- * Peak into an array without modifying it (Warning: may not play well with objects @todo)
+ * Peak into an array without modifying it (Warning: may not play well with objects)
+ *
+ * @todo Fix so that it is object-safe
  * @param array $arr
+ *        The array to examine
  * @param string $side
  *        Which side of the array are we looking at? (left|front|top or right|end|bottom)
  *        Default: Left
- * @return mixed|null
+ * @return mixed
  */
 function array_peak($arr,$side='TOP'){
     // Make sure we're playing with an array
