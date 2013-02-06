@@ -3,7 +3,15 @@
 global $loginFunctions;
 $loginFunctions['mysql'] = "mysqlLogin";
 
-function mysqlLogin($username,$password,$engine=NULL) { 
+/**
+ * Process a MySQL (Database-based) login attempt
+ * @param string $username
+ *        The user's username
+ * @param string $password
+ *        The user's password
+ * @return bool
+ */
+function mysqlLogin($username,$password) {
 	
 	global $engineDB;
 	global $engineVars;
