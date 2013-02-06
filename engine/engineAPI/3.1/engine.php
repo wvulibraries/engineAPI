@@ -1,70 +1,161 @@
 <?php
-
 $engineVars        = array();
 $engineVarsPrivate = array();
 
-class EngineAPI
-{
+/**
+ * EngineAPI Class
+ *
+ * This is the heart of the EngineAPI system. This is a singleton class where only 1 instance is ever allowed
+ * @see self::singleton()
+ */
+class EngineAPI{
 	const VERSION='3.1';
 
+	/**
+	 * @var self
+	 */
 	private static $instance; // Hold an instance of this object, for use as Singleton
-	public static $engineDir  = NULL;
+	/**
+	 * @var string
+	 */
+	public static $engineDir;
+	/**
+	 * @var array
+	 */
 	public static $engineVars = array();
-    public $errorStack = array();
+	/**
+	 * @var array
+	 */
+	public $errorStack = array();
+	/**
+	 * If set to false, the engine tags will not be processed.
+	 * @var bool
+	 */
+	public $obCallback = TRUE; //
+	/**
+	 * $engineVars['currentTemplate']
+	 * @var string
+	 */
+	public $template = "";
+	/**
+	 * Current working directory
+	 * @var string
+	 */
+	public $cwd = "";
+	/**
+	 * @todo appears unused - Remove?
+	 * @var array
+	 */
+	private $DEBUG = array();
 
-	public $obCallback = TRUE; //  if set to false, the engine tags will not be processed.
-
-    // private $localVars        = array();  // remove in Engine 4.0
-    public  $template         = ""; // $engineVars['currentTemplate'];
-
-    public  $cwd              = "";
-
-    private $DEBUG            = array();
-
-
-	// Cleaned up $_GET and _$POST variables with HTML and MySQL sanitized values
+	# Used for page access/security
+	#############################################################
+	/**
+	 * Sanitized $_GET
+	 * @var array
+	 */
 	public $cleanGet  = array();
+	/**
+	 * Sanitized $_POST
+	 * @var array
+	 */
 	public $cleanPost = array();
 
-	// Used for page access/security
 	private $accessMethods    = "";
 	private $accessExistsTest = TRUE;
 	private $acl              = array();
 	private $aclgroups        = array();
 	private $aclCount         = 0;
 
-	// Used for database connections
+	# Used for database connections
+	#############################################################
+	/**
+	 * Database Username
+	 * @var string
+	 */
 	private $dbUsername = "";
+	/**
+	 * Database Password
+	 * @var string
+	 */
 	private $dbPassword = "";
+	/**
+	 * Database Name
+	 * @var string
+	 */
 	private $dbDatabase = "";
-	private $dbServer   = "";
-	private $dbPort     = "";
-	private $dbTables   = array();
-	private $engineDB   = NULL;
-	public  $openDB     = NULL;
+	/**
+	 * Database Server hostname/ip
+	 * @var string
+	 */
+	private $dbServer = "";
+	/**
+	 * Database Port
+	 * @var string
+	 */
+	private $dbPort = "";
+	/**
+	 * Database table name mappings
+	 * @var array
+	 */
+	private $dbTables = array();
+	/**
+	 * The EngineAPI database object
+	 * @var engineDB
+	 */
+	private $engineDB = NULL;
+	/**
+	 * The database object
+	 * @var engineDB
+	 */
+	public $openDB = NULL;
 
-	// Module Stuffs
-	private $availableModules       = array();
-	public  $library                = array();
-	private $functionExtensions     = array();
+	# Module Stuffs
+	#############################################################
+	/**
+	 * Stack of available modules
+	 * @var array
+	 */
+	private $availableModules = array();
+	/**
+	 * Array of loaded libraries (for auto-loading)
+	 * @var array
+	 */
+	public $library = array();
+	/**
+	 * Function extensions
+	 * @var array
+	 */
+	private $functionExtensions = array();
 
-	//Module Template Mathes and function calls for displayTemplate()
+	# Module Template Mathes and function calls for displayTemplate()
+	###################################################################
 	private static $moduleTemplateEngine   = array();
 	private $recurseCount           = 0; // In module template matches, prevent infinite recursion
 	private $recurseLevel           = 3;
 	private $recurseNeeded          = FALSE;
 	private $displayTemplateOff     = FALSE;
-
 	private $engineVarsPrivate      = array();
 
+	/**
+	 * Cloning is not allowed!
+	 */
 	public function __clone() {
 		trigger_error('Cloning instances of this class is forbidden.', E_USER_ERROR);
 	}
 
+	/**
+	 * Serialization/De-serialization is not allowed!
+	 */
 	public function __wakeup() {
 		trigger_error('Unserializing instances of this class is forbidden.', E_USER_ERROR);
 	}
 
+	/**
+	 * Let us begin...
+	 *
+	 * @param string $site Name of the site config to use
+	 */
 	private function __construct($site="default") {
 		self::$engineDir = dirname(__FILE__);
 
@@ -281,29 +372,18 @@ class EngineAPI
 
 	} // Constructor
 
+	/**
+	 * End of EngineAPI
+	 */
 	function __destruct() {
-
-//		$output = "Destruct Dump:<br /><pre>";
-//		$output .= var_export($this,true);
-//		$output .= "</pre>";
-		//print $output;
-
-		//
-		/*$content = ob_get_contents();
-		$content = "?>".$content;
-
-		print $content;
-
-		ob_start();
-		eval($content);*/
 		ob_flush();
-
 	}
 
     /**
-     * @static
-     * @param string $site
-     * @return EngineAPI
+	 * Get an instance of EngineAPI
+	 *
+     * @param string $site Name of the site config to use
+     * @return self
      */
 	public static function singleton($site="default") {
 		if (!isset(self::$instance)) {
@@ -314,6 +394,12 @@ class EngineAPI
         return self::$instance;
 	}
 
+	/**
+	 * Adds a library
+	 *
+	 * @param string $libraryDir
+	 * @return bool
+	 */
 	public function addLibrary($libraryDir) {
 
 		// Make sure that it is a directory
@@ -342,6 +428,12 @@ class EngineAPI
 		}
 	}
 
+	/**
+	 * Retrieves a private var (if you're allowed)
+	 *
+	 * @param string $varName
+	 * @return mixed|bool
+	 */
 	public function getPrivateVar($varName) {
 		$file     = callingFile();
 		$function = callingFunction();
@@ -365,44 +457,48 @@ class EngineAPI
 		return(FALSE);
 	}
 
-	// Define Template Object Pattern
+	/**
+	 * [Alias] EngineAPI::setItems()
+	 *
+	 * @see self::defTempPatterns()
+	 * @param string $pattern
+	 * @param string $function
+	 * @param string $object
+	 * @return bool Always TRUE
+	 */
 	public function defTempPattern($pattern,$function,$object) {
-
-		self::defTempPatterns($pattern,$function,$object);
-
-		// $class            = get_class($object);
-		//
-		// $temp             = array();
-		//
-		// $temp['pattern']  = $pattern;
-		// $temp['function'] = $function;
-		// $temp['object']   = $object;
-		//
-		// self::$moduleTemplateEngine[$class][] = $temp;
-		//$this->moduleTemplateEngine[$class][] = $temp;
-
+		return self::defTempPatterns($pattern,$function,$object);
 	}
 
-	// static version of the above
+	/**
+	 * Define Template Object Pattern
+	 *
+	 * @param string $pattern
+	 * @param string $function
+	 * @param string $object
+	 * @return bool Always TRUE
+	 */
 	public static function defTempPatterns($pattern,$function,$object) {
-
 		$class            = get_class($object);
-
 		$temp             = array();
-
 		$temp['pattern']  = $pattern;
 		$temp['function'] = $function;
 		$temp['object']   = $object;
-
 		self::$moduleTemplateEngine[$class][] = $temp;
-
 		return(TRUE);
-
 	}
 
+	/**
+	 * Redefine Template Object Pattern
+	 *
+	 * @see self::defTempPatterns()
+	 * @param string $oldPattern
+	 * @param string $newPattern
+	 * @param string $function
+	 * @param string $object
+	 * @return bool Always TRUE
+	 */
 	public function reDefTempPattern($oldPattern,$newPattern,$function,$object) {
-
-
 		foreach (self::$moduleTemplateEngine as $class=>$V) {
 			foreach (self::$moduleTemplateEngine[$class] as $I => $plugin) {
 				if ($plugin['pattern'] == $oldPattern) {
@@ -411,15 +507,20 @@ class EngineAPI
 				}
 			}
 		}
-
 		$this->defTempPattern($newPattern,$function,$object);
-
 		return(TRUE);
-
 	}
 
-	// This function should be combined with defTempPatterns
-	// if $pattern, $function, $class already exist the object should be updated
+	/**
+	 * Um...
+	 * This function should be combined with defTempPatterns
+	 * if $pattern, $function, $class already exist the object should be updated
+	 *
+	 * @param string $pattern
+	 * @param string $function
+	 * @param string $object
+	 * @return bool Always TRUE
+	 */
 	public function reDefTempPatternObject($pattern,$function,$object) {
 		$class = get_class($object);
 		foreach (self::$moduleTemplateEngine[$class] as $I => $plugin) {
@@ -430,12 +531,25 @@ class EngineAPI
 		return(TRUE);
 	}
 
-	// Retrieve Template Object
+	/**
+	 * Retrieve Template Object
+	 *
+	 * @param string $className
+	 * @return mixed
+	 */
 	public function retTempObj($className) {
 		return(self::$moduleTemplateEngine[$className][0]['object']);
 	}
 
-	// set function extensions
+	/**
+	 * Set function extensions
+	 *
+	 * @todo What does $stage control?
+	 * @param string|array $function
+	 * @param string|array $newFunction
+	 * @param string $stage UNKNOWN
+	 * @return bool
+	 */
 	public function setFunctionExtension($function,$newFunction,$stage="after") {
 
 		$class       = (is_array($function))?$function[0]:NULL;
@@ -471,27 +585,28 @@ class EngineAPI
 		return(TRUE);
 	}
 
+	/**
+	 * Get function extensions
+	 *
+	 * @param string $function
+	 * @param string|null $class
+	 * @return array|bool
+	 */
 	public function getFunctionExtension($function,$class=NULL) {
-
 		$functionIndex = $function.((isnull($class))?"":"::".$class);
-
-		// // Debugging
-		// $arrayPrint = debug::obsafe_print_r($functionIndex, TRUE);
-		// $fh = fopen("/tmp/modules5.txt","a");
-		// fwrite($fh,"\n\n=====Autoloader Begin =========\n\n");
-		// fwrite($fh,$functionIndex);
-		// fwrite($fh,"\n\n=====Autoloader END =========\n\n");
-		// fclose($fh);
-
 		if (array_key_exists($functionIndex,$this->functionExtensions)) {
 			return($this->functionExtensions[$functionIndex]);
 		}
-
 		return(FALSE);
-
 	}
 
-	// $stage : before, after
+	/**
+	 * Execute something...
+	 * @param string $function
+	 * @param string $params
+	 * @param string $stage UNKNOWN (before, after)
+	 * @return bool
+	 */
 	public function execFunctionExtension($function,$params,$stage="after") {
 
 		if (!is_array($params)) {
@@ -503,15 +618,6 @@ class EngineAPI
 
 
 		$functions = $this->getFunctionExtension($function,$class);
-
-		// // Debugging
-		// $arrayPrint = debug::obsafe_print_r($this->functionExtensions, TRUE);
-		// $fh = fopen("/tmp/modules5.txt","a");
-		// fwrite($fh,"\n\n=====Autoloader Begin =========\n\n");
-		// fwrite($fh,$function ."::");
-		// fwrite($fh,$class."--");
-		// fwrite($fh,"\n\n=====Autoloader END =========\n\n");
-		// fclose($fh);
 
 		if (!is_array($functions) || count($functions) < 1) {
 			return(FALSE);
@@ -543,8 +649,16 @@ class EngineAPI
 
 	}
 
-	// load == define which tempalte to use. "Default" was setup above
-	// include == fire off the 'header' or the 'footer'
+	/**
+	 * eTemplate() - Not sure what this does
+	 *
+	 * @param $func
+	 * 		  load - define which tempalte to use.
+	 * 		  name - UNKNOWN
+	 * 		  include - fire off the 'header' or the 'footer'
+	 * @param null $value
+	 * @return bool|string
+	 */
 	public function eTemplate($func,$value=NULL) {
 
 		global $engineVars;
@@ -584,12 +698,29 @@ class EngineAPI
 		return(TRUE);
 	}
 
-	// returns the current template directory
+	/**
+	 * Returns the current template directory
+	 *
+	 * @return string
+	 */
 	public function currentTemplate() {
 		return($this->template);
 	}
 
-	// hardbreak causes the function to exit immediately on a FALSE ACL return if set to TRUE
+	/**
+	 * Register ACL rules
+	 * hardbreak causes the function to exit immediately on a FALSE ACL return if set to TRUE
+	 *
+	 * @param $action
+	 *        debugListAll - Prints debug info
+	 *        existsTest - UNKNOWN
+	 *        build - UNKNOWN
+	 *        clear - Clears all acl rules
+	 * @param string|null $value
+	 * @param string|bool $state
+	 * @param bool $hardBreak
+	 * @return bool
+	 */
 	public function accessControl($action,$value=NULL,$state=FALSE,$hardBreak=TRUE) {
 
 		if ($action == "debugListAll") {
@@ -728,6 +859,19 @@ class EngineAPI
 		return(TRUE);
 	}
 
+	/**
+	 * Connect to MySQL Database
+	 *
+	 * @param $action
+	 *        username - Sets the username
+	 *        password - Sets the password
+	 *        port - Sets the port
+	 *        database - Sets the database name
+	 *
+	 * @param string $value
+	 * @param bool $state
+	 * @return bool|engineDB
+	 */
 	public function dbConnect($action,$value,$state=FALSE) {
 		if (!isset($value)) {
 			return(FALSE);
@@ -778,6 +922,13 @@ class EngineAPI
 
 	}
 
+	/**
+	 * dbTables()
+	 * @param $action
+	 * @param string $state
+	 * @param null $value
+	 * @return bool
+	 */
 	public function dbTables($action,$state="prod",$value=NULL) {
 
 		if(!isnull($value)) {
@@ -793,8 +944,11 @@ class EngineAPI
 		return(FALSE);
 	}
 
-	/* Returns the original dbTables array from the Old EngineCMS. This is provided to ease
-	transition into the new system */
+	/**
+	 * Returns the original dbTables array from the Old EngineCMS. This is provided to ease transition into the new system
+	 * @deprecated
+	 * @return array
+	 */
 	public function dbTablesExport() {
 		$dbTablesArray = array();
 
@@ -805,6 +959,13 @@ class EngineAPI
 
 	}
 
+	/**
+	 * Process a login (Is this deprecated?)
+	 *
+	 * @deprecated
+	 * @param $loginType
+	 * @return bool
+	 */
 	public function login($loginType) {
 		if (isset($this->loginFunctions[$loginType])) {
 			if($this->loginFunctions[$loginType](trim($this->cleanPost['RAW']['username']),$this->cleanPost['RAW']['password'])) {
@@ -814,10 +975,12 @@ class EngineAPI
 		return(FALSE);
 	}
 
-	######################################################################
-	#Private Functions
-	######################################################################
-
+	/**
+	 * Adds the given autoload function to the autoload stack
+	 * @internal
+	 * @param mixed $autoload
+	 * @return bool
+	 */
 	function addAutoloader($autoload) {
 
 		if (version_compare(PHP_VERSION, '5.3.0') >= 0) {
@@ -854,40 +1017,18 @@ class EngineAPI
 
 	}
 
+	/**
+	 * Base EngineAPI autoloader
+	 * @param $className
+	 * @return bool
+	 */
 	public static function autoloader($className) {
-		// // Debugging
-		// $fh = fopen("/tmp/modules.txt","a");
-		// fwrite($fh,"\n\n=====Autoloader Begin =========\n\n");
-		// fwrite($fh,$className);
-		// fwrite($fh,"\n\n=====Autoloader END =========\n\n");
-		// fclose($fh);
-
 		$engine = EngineAPI::singleton();
 		if (!class_exists($className, FALSE)) {
-
-
-
 			if (isset($engine->availableModules[$className]) && file_exists($engine->availableModules[$className])) {
-
 				require_once($engine->availableModules[$className]);
 				return(TRUE);
 			}
-
-			// No longer needed, $engine->addLibrary() replaces the need for this.
-			// $filename = NULL;
-			// foreach ($this->library as $I=>$V) {
-			// 	if (file_exists($V."/".$className.".php")) {
-			// 		$filename = $V."/".$className.".php";
-			// 	}
-			// 	else if (file_exists($V."/".$className.".class.php")) {
-			// 		$filename = $V."/".$className.".class.php";
-			// 	}
-			// }
-			//
-			// if (!isnull($filename)) {
-			// 	require_once($filename);
-			// 	return(TRUE);
-			// }
 
 			// Can't throw exceptions in php 5.2 from an autoloader, but you can
 			// catch it from this eval block.
@@ -915,6 +1056,11 @@ class EngineAPI
 		return;
 	}
 
+	/**
+	 * Um... huh?
+	 * @param $referer
+	 * @return null
+	 */
 	private function getHTTP_REFERERServer($referer) {
 
 		$server = NULL;
@@ -926,6 +1072,13 @@ class EngineAPI
 		return($server);
 	}
 
+	/**
+	 * Record a log message to the log table
+	 * @param string $type
+	 * @param null $function
+	 * @param null $message
+	 * @return bool
+	 */
 	private function engineLog($type="access",$function=NULL,$message=NULL) {
 
 		global $engineVars;
@@ -964,6 +1117,9 @@ class EngineAPI
 		return(TRUE);
 	}
 
+	/**
+	 * accessControlDenied()
+	 */
 	private function accessControlDenied() {
 		global $engineVars;
 
@@ -975,10 +1131,13 @@ class EngineAPI
 		//return(FALSE);
 	}
 
-	// This has to be public for the callback to work properly.
-	//
-	// This function needs some performance work.
-	//
+	/**
+	 * Displays the template out to the world
+	 *
+	 * @todo This function needs some performance work.
+	 * @param $content
+	 * @return string
+	 */
 	public static function displayTemplate($content) {
 		global $engineVars;
 
@@ -1030,31 +1189,14 @@ class EngineAPI
 				// If no, try to load the module and create a temporary
 				// instance of it to get the replacement pattern and function
 				preg_match_all("/\{(.+?)(\s(.+?))?\}/",$line,$matches);
-
-					// $fh = fopen("/tmp/modules2.txt","a");
-					// 	fwrite($fh,"\n\n=====Autoloader Begin =========\n\n");
-					// 	fwrite($fh,obsafe_print_r($matches)."\n");
-					// 	fwrite($fh,"\n\n=====Autoloader END =========\n\n");
-					// 	fclose($fh);
-
 				if (isset($matches[1]) && !is_empty($matches[1])) {
-					// $fh = fopen("/tmp/modules2.txt","a");
-					// 	fwrite($fh,"\n\n=====Autoloader Begin =========\n\n");
-					// 	fwrite($fh,$matches[1]."\n");
-					// 	fwrite($fh,"\n\n=====Autoloader END =========\n\n");
-					// 	fclose($fh);
-
 					foreach ($matches[1] as $I=>$className) {
 						if (!class_exists($className, FALSE)) {
 							$className = preg_replace("/[^a-zA-Z0-9_]/", "", $className);
 							try {
-								// if(!class_exists($className,FALSE)){
-								// 	throw new Exception("Class '$className' not found!");
-								// }
 								if (array_key_exists($className,$engine->availableModules)) {
 									$temp = new $className();
 								}
-								// $fh = fopen("/tmp/modules.txt","a");
 							}
 							catch (Exception $e) {
 								// do nothing
@@ -1067,23 +1209,7 @@ class EngineAPI
 				// foreach ($engine->moduleTemplateEngine as $class) {
 				foreach (self::$moduleTemplateEngine as $class) {
 					foreach ($class as $plugin) {
-
-						// $fh = fopen("/tmp/modules.txt","a");
-						// fwrite($fh,"\n\n=====Autoloader Begin =========\n\n");
-						// fwrite($fh,$plugin['pattern']."\n");
-						// fwrite($fh,$plugin['function']."\n");
-						// fwrite($fh,$line."\n");
-						// fwrite($fh,"\n\n=====Autoloader END =========\n\n");
-						// fclose($fh);
-
-
 						if(isset($plugin['pattern']) && isset($plugin['function'])) {
-							// $fh = fopen("/tmp/modules.txt","a");
-							// fwrite($fh,"\n\n=====Autoloader Begin =========\n\n");
-							// fwrite($fh,$plugin['pattern']."\n");
-							// fwrite($fh,"\n\n=====Autoloader END =========\n\n");
-							// fclose($fh);
-
 							// testing
 							$engine->cwd = "hate this";//$plugin['pattern'];
 							$engine->recurseNeeded = TRUE;
@@ -1115,22 +1241,24 @@ class EngineAPI
 		return($content);
 	}
 
-
+	/**
+	 * engineVarMatches() - Not sure
+	 * @todo Things to implement: Email obsfucation, All Uppercase, All Lowercase, Title Case (cap first letter of each word)
+	 * @todo fix readability formatting (Mike)
+	 * @param $matches
+	 * @return string
+	 */
 	public static function engineVarMatches($matches) {
 		global $engineVars;
-
 		$output = (!empty($engineVars[$matches[1]]))?$engineVars[$matches[1]]:"";
-
 		return($output);
-
-		//Things to impliment
-		// Email obsfucation
-		// All Uppercase
-		// All Lowercase
-		// Title Case (cap first letter of each word)
-
 	}
 
+	/**
+	 * Not a clue
+	 * @param $matches
+	 * @return string
+	 */
 	public static function engineDQMatches($matches) {
 		global $engineVars;
 
@@ -1138,18 +1266,14 @@ class EngineAPI
 		return($output);
 	}
 
+	/**
+	 * Something to do with engine matches
+	 * @param $matches
+	 * @return bool|string
+	 */
 	public static function engineMatches($matches) {
-
 		$engine    = EngineAPI::singleton();
-
-		//Debugging Comments
-		//$output = "debug: <pre>".obsafe_print_r($matches)."</pre>";
-
 		$attPairs  = split("\" ",$matches[1]);
-
-		//Debugging Comments
-		//$output .= "debug: <pre>".obsafe_print_r($attPairs)."</pre>";
-		//return($output);
 
 		foreach ($attPairs as $pair) {
 			if (empty($pair)) {
@@ -1158,9 +1282,6 @@ class EngineAPI
 			list($attribute,$value) = split("=",$pair,2);
 			$temp[$attribute] = str_replace("\"","",$value);
 		}
-
-		//$output .= "debug: <pre>".obsafe_print_r($temp)."</pre>";
-		//return($output);
 
 		if (isset($temp['name'])) {
 			$output = $engine->handleMatch($temp);
@@ -1177,6 +1298,13 @@ class EngineAPI
 
 	}
 
+	/**
+	 * Internal handler for engine matches
+	 * @internal
+	 * @see self::engineMatches()
+	 * @param $attPairs
+	 * @return bool
+	 */
 	private function handleMatch($attPairs) {
 
 		global $engineVars;
@@ -1221,59 +1349,30 @@ class EngineAPI
 
 	//** Deprecated functions to be removed in 4.0 **/
 
-	/*
-	Define local variables.
-	if second value is not provided, tries to return that value. False if it doesn't exist
-	*/
+	/**
+	 * Define local variables.
+	 * if second value is not provided, tries to return that value. False if it doesn't exist
+	 *
+	 * @deprecated 4.0
+	 * @param $variable
+	 * @param null $value
+	 * @param bool $null
+	 * @return bool|null|string
+	 */
 	public function localVars($variable,$value=NULL,$null=FALSE) {
-
 		return localvars::variable($variable,$value,$null);
-
-		// if (isnull($value) && $null === TRUE) {
-		// 	$this->localVars[$variable] = "%eapi%1ee6ba19c95e25f677e7963c6ce293b4%api%";
-		// 	return(TRUE);
-		// }
-		//
-		// if(isset($value)) {
-		// 	$this->localVars[$variable] = $value;
-		// 	return(TRUE);
-		// }
-		// else if (isset($this->localVars[$variable])) {
-		// 	if ($this->localVars[$variable] == "%eapi%1ee6ba19c95e25f677e7963c6ce293b4%api%") {
-		// 		return(NULL);
-		// 	}
-		// 	return($this->localVars[$variable]);
-		// }
-		// else {
-		// 	return(FALSE);
-		// }
-		//
-		// return(FALSE);
 	}
 
-	/* Returns an array identical to the original LocalVars arrays */
-	/* This function is only for migration purposes and should be removed */
+
+	/**
+	 * Returns an array identical to the original LocalVars arrays
+	 * This function is only for migration purposes and should be removed in 4.0
+	 *
+	 * @deprecated 4.0
+	 * @return array
+	 */
 	public function localVarsExport() {
-
 		return localvars::export();
-
-		// return($this->localVars);
 	}
-
-	// public static function localMatches($matches) {
-	//
-	// 	$engine    = EngineAPI::singleton();
-	//
-	// 	$output = (isset($engine->localVars[$matches[1]]) && !is_empty($engine->localVars[$matches[1]]))?$engine->localVars[$matches[1]]:"";
-	//
-	// 	return($output);
-	//
-	// 	//Things to impliment
-	// 	// Email obsfucation
-	// 	// All Uppercase
-	// 	// All Lowercase
-	// 	// Title Case (cap first letter of each word)
-	//
-	// }
 }
 ?>
