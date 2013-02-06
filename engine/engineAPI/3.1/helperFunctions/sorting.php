@@ -1,9 +1,19 @@
 <?php
-/* $array         = Array to be sorted
- * $col           = The column in a multi dimensional array.
- * $ignoreSymbols = BOOL, default to TRUE. If True, ignores all symbols in the string while sorting
- * $ignoreCase    = BOOL, default to TRUE. Sorts case insensitively.
-*/
+/**
+ * Perform a natural sort on a given array
+ *
+ * @todo Lookinto rewritting this. Seems very clunky and hacky
+ * @uses  naturalSortCmp()
+ * @param array $array
+ *        Array to be sorted
+ * @param int $col
+ *        The column in a multi dimensional array.
+ * @param bool $ignoreSymbols
+ *        If True, ignores all symbols in the string while sorting [Default: True]
+ * @param bool $ignoreCase
+ *        Sorts case insensitively. [Default: True]
+ * @return array
+ */
 function naturalSort($array,$col=NULL,$ignoreSymbols=TRUE,$ignoreCase=TRUE) {
 
 	global $engineVars;
@@ -22,6 +32,16 @@ function naturalSort($array,$col=NULL,$ignoreSymbols=TRUE,$ignoreCase=TRUE) {
 }
 
 /* Sort function called by natrualSort() */
+/**
+ * Sort function called by natrualSort()
+ *
+ * @todo Remove depreciated use of ereg_replace()
+ * @internal
+ * @used-by naturalSort()
+ * @param string $a
+ * @param string $b
+ * @return int
+ */
 function naturalSortCmp($a, $b) {
 	
 	global $engineVars;
