@@ -13,6 +13,9 @@
 	</style>
 	<link rel="stylesheet" type="text/css" href="/css/distribution/bootstrap-responsive.min.css">
 
+	<script type="text/javascript" src="/javascript/distribution/jquery-1.9.1.min.js"></script>
+	<script type="text/javascript" src="/javascript/distribution/bootstrap.min.js"></script>
+
 	<?php recurseInsert("headerIncludes.php","php") ?>
 
 </head>
@@ -22,17 +25,18 @@
 	<div class="navbar navbar-inverse navbar-fixed-top">
 		<div class="navbar-inner">
 			<div class="container-fluid">
+				<button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+				</button>
 				<a class="brand" href="#">{local var="pageHeader"}</a>
+				<div class="nav-collapse collapse">
+					<?php recurseInsert("topnav.php","php") ?>
+				</div>
 			</div>
 		</div>
 	</div>
 
 	<div class="container-fluid">
 		<div class="row-fluid">
-			<div class="span3">
-				<div class="well sidebar-nav">
-					<?php recurseInsert("leftnav.php","php") ?>
-				</div>
-			</div>
-
-			<div class="span9">
