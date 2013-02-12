@@ -5,13 +5,13 @@
 	<title>{local var="pageTitle"}</title>
 	<meta charset="UTF-8">
 
-	<link rel="stylesheet" type="text/css" href="/templateIncludes/css/bootstrap.min.css">
+	<link rel="stylesheet" type="text/css" href="/css/distribution/bootstrap.min.css">
 	<style type="text/css">
 		body {
 			padding-top: 60px; /* This must be after boostrap and before responsive bootstrap css */
 		}
 	</style>
-	<link rel="stylesheet" type="text/css" href="/templateIncludes/css/bootstrap-responsive.min.css">
+	<link rel="stylesheet" type="text/css" href="/css/distribution/bootstrap-responsive.min.css">
 
 	<?php recurseInsert("headerIncludes.php","php") ?>
 

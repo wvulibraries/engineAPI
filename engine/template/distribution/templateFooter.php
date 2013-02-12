@@ -10,7 +10,7 @@
 	</div> <!-- /.container-fluid -->
 
 	<script type="text/javascript" src="http://code.jquery.com/jquery-latest.min.js"></script>
-	<script type="text/javascript" src="/templateIncludes/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="/js/distribution/bootstrap.min.js"></script>
 	<?php recurseInsert("footerIncludes.php","php") ?>
 
 </body>
