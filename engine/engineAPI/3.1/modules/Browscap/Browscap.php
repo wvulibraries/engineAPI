@@ -180,6 +180,7 @@ class Browscap
 	 * if needed updated the definitions
 	 *
 	 * @param string $cache_dir
+	 * @throws Browscap_Exception
 	 */
 	public function __construct($cache_dir)
 	{
@@ -390,7 +391,7 @@ class Browscap
 	/**
 	 * Loads the cache into object's properties
 	 *
-	 * @return void
+	 * @param string $cache_file
 	 */
 	protected function _loadCache($cache_file)
 	{
