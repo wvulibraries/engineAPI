@@ -5,29 +5,27 @@
 */
 
 /**
- * \brief CKEditor class that can be used to create editor
+ * Brief CKEditor class that can be used to create editor
  * instances in PHP pages on server side.
  * @see http://ckeditor.com
  *
  * Sample usage:
- * @code
  * $CKEditor = new CKEditor();
  * $CKEditor->editor("editor1", "<p>Initial value.</p>");
- * @endcode
  */
 class CKEditor
 {
 	/**
-	 * The version of %CKEditor.
+	 * The version of CKEditor.
 	 */
 	const version = '3.6.2';
 	/**
-	 * A constant string unique for each release of %CKEditor.
+	 * A constant string unique for each release of CKEditor.
 	 */
 	const timestamp = 'B8DJ5M3';
 
 	/**
-	 * URL to the %CKEditor installation directory (absolute or relative to document root).
+	 * URL to the CKEditor installation directory (absolute or relative to document root).
 	 * If not set, CKEditor will try to guess it's path.
 	 *
 	 * Example usage:
@@ -37,7 +35,7 @@ class CKEditor
 	 */
 	public $basePath = "/engineIncludes/CKEditor/";
 	/**
-	 * An array that holds the global %CKEditor configuration.
+	 * An array that holds the global CKEditor configuration.
 	 * For the list of available options, see http://docs.cksource.com/ckeditor_api/symbols/CKEDITOR.config.html
 	 *
 	 * Example usage:
@@ -57,7 +55,7 @@ class CKEditor
 	/**
 	 * Boolean variable indicating whether created code should be printed out or returned by a function.
 	 *
-	 * Example 1: get the code creating %CKEditor instance and print it on a page with the "echo" function.
+	 * Example 1: get the code creating CKEditor instance and print it on a page with the "echo" function.
 	 * @code
 	 * $CKEditor = new CKEditor();
 	 * $CKEditor->returnOutput = true;
@@ -70,13 +68,13 @@ class CKEditor
 	/**
 	 * An array with textarea attributes.
 	 *
-	 * When %CKEditor is created with the editor() method, a HTML &lt;textarea&gt; element is created,
+	 * When CKEditor is created with the editor() method, a HTML textarea element is created,
 	 * it will be displayed to anyone with JavaScript disabled or with incompatible browser.
 	 */
 	public $textareaAttributes = array( "rows" => 8, "cols" => 60 );
 	/**
-	 * A string indicating the creation date of %CKEditor.
-	 * Do not change it unless you want to force browsers to not use previously cached version of %CKEditor.
+	 * A string indicating the creation date of CKEditor.
+	 * Do not change it unless you want to force browsers to not use previously cached version of CKEditor.
 	 */
 	public $timestamp = "B8DJ5M3";
 	/**
@@ -91,7 +89,7 @@ class CKEditor
 	/**
 	 * Main Constructor.
 	 *
-	 *  @param $basePath (string) URL to the %CKEditor installation directory (optional).
+	 *  @param $basePath (string) URL to the CKEditor installation directory (optional).
 	 */
 	function __construct($basePath = null) {
 		if (!empty($basePath)) {
@@ -100,22 +98,20 @@ class CKEditor
 	}
 
 	/**
-	 * Creates a %CKEditor instance.
-	 * In incompatible browsers %CKEditor will downgrade to plain HTML &lt;textarea&gt; element.
+	 * Creates a CKEditor instance
+	 * In incompatible browsers CKEditor will downgrade to plain HTML textarea element
 	 *
-	 * @param $name (string) Name of the %CKEditor instance (this will be also the "name" attribute of textarea element).
-	 * @param $value (string) Initial value (optional).
-	 * @param $config (array) The specific configurations to apply to this editor instance (optional).
-	 * @param $events (array) Event listeners for this editor instance (optional).
+	 * @param $name          Name of the CKEditor instance (this will be also the "name" attribute of textarea element)
+	 * @param string $value  Initial value
+	 * @param array $config  The specific configurations to apply to this editor instance
+	 * @param array $events  Event listeners for this editor instance
+	 * @return string
 	 *
 	 * Example usage:
-	 * @code
 	 * $CKEditor = new CKEditor();
 	 * $CKEditor->editor("field1", "<p>Initial value.</p>");
-	 * @endcode
 	 *
 	 * Advanced example:
-	 * @code
 	 * $CKEditor = new CKEditor();
 	 * $config = array();
 	 * $config['toolbar'] = array(
@@ -126,7 +122,7 @@ class CKEditor
 	 *     alert("Loaded: " + ev.editor.name);
 	 * }';
 	 * $CKEditor->editor("field1", "<p>Initial value.</p>", $config, $events);
-	 * @endcode
+	 * 
 	 */
 	public function editor($name, $value = "", $config = array(), $events = array())
 	{
@@ -158,17 +154,16 @@ class CKEditor
 	}
 
 	/**
-	 * Replaces a &lt;textarea&gt; with a %CKEditor instance.
+	 * Replaces a textarea with a CKEditor instance
+	 * 
+	 * @param string $id     The id or name of textarea element
+	 * @param array $config  The specific configurations to apply to this editor instance
+	 * @param array $events  Event listeners for this editor instance
+	 * @return string
 	 *
-	 * @param $id (string) The id or name of textarea element.
-	 * @param $config (array) The specific configurations to apply to this editor instance (optional).
-	 * @param $events (array) Event listeners for this editor instance (optional).
-	 *
-	 * Example 1: adding %CKEditor to &lt;textarea name="article"&gt;&lt;/textarea&gt; element:
-	 * @code
+	 * Example:
 	 * $CKEditor = new CKEditor();
 	 * $CKEditor->replace("article");
-	 * @endcode
 	 */
 	public function replace($id, $config = array(), $events = array())
 	{
@@ -197,11 +192,11 @@ class CKEditor
 	}
 
 	/**
-	 * Replace all &lt;textarea&gt; elements available in the document with editor instances.
+	 * Replace all textarea elements available in the document with editor instances.
 	 *
 	 * @param $className (string) If set, replace all textareas with class className in the page.
 	 *
-	 * Example 1: replace all &lt;textarea&gt; elements in the page.
+	 * Example 1: replace all textarea elements in the page.
 	 * @code
 	 * $CKEditor = new CKEditor();
 	 * $CKEditor->replaceAll();
@@ -212,6 +207,10 @@ class CKEditor
 	 * $CKEditor = new CKEditor();
 	 * $CKEditor->replaceAll( 'myClassName' );
 	 * @endcode
+	 */
+	/**
+	 * @param null $className
+	 * @return string
 	 */
 	public function replaceAll($className = null)
 	{
@@ -256,7 +255,7 @@ class CKEditor
 
 	/**
 	 * Adds event listener.
-	 * Events are fired by %CKEditor in various situations.
+	 * Events are fired by CKEditor in various situations.
 	 *
 	 * @param $event (string) Event name.
 	 * @param $javascriptCode (string) Javascript anonymous function or function name.
@@ -336,9 +335,9 @@ class CKEditor
 	}
 
 	/**
-	 * Prints javascript code.
-	 *
-	 * @param string $js
+	 * Prints required javascript code.
+	 * @param $js
+	 * @return string
 	 */
 	private function script($js)
 	{
@@ -352,10 +351,12 @@ class CKEditor
 	}
 
 	/**
-	 * Returns the configuration array (global and instance specific settings are merged into one array).
+	 * Returns the configuration array
+	 * (global and instance specific settings are merged into one array).
 	 *
-	 * @param $config (array) The specific configurations to apply to editor instance.
-	 * @param $events (array) Event listeners for editor instance.
+	 * @param array $config  The specific configurations to apply to editor instance.
+	 * @param array $events  Event listeners for editor instance.
+	 * @return array
 	 */
 	private function configSettings($config = array(), $events = array())
 	{
