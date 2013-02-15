@@ -1,7 +1,6 @@
 <?php
 
 class breadCrumbs {
-
 	private $engine  = NULL;
 	public $pattern  = "/\{breadCrumbs\s+(.+?)\}/";
 	public $function = "breadCrumbs::templateMatches";
@@ -11,21 +10,34 @@ class breadCrumbs {
 		$this->engine->defTempPattern($this->pattern,$this->function,$this);
 	}
 
+	/**
+	 * Engine template tag callback
+	 * @param $matches
+	 * @return mixed
+	 */
 	public static function templateMatches($matches) {
 		$engine   = EngineAPI::singleton();
-
 		$obj      = $engine->retTempObj("breadCrumbs");
-
 		$attPairs = attPairs($matches[1]);
-
 		return($obj->breadCrumbs($attPairs));
-
 	}
 
+	/**
+	 * Generate HTML breadcrumbs
+	 *
+	 * @todo Fix use of deprecated use of webHelper_errorMsg()
+	 * @todo Remove use of deprecated global $engineVars
+	 * @param array $attPairs
+	 *        -titlecase  - Automatically convert cases of output to Title Case
+	 *        -ellipse    - Define the ellipse char to use
+	 *        -spacer     - Define the spacer char to use
+	 *        -type       - hierarchical or actual
+	 *        -displayNum - Limit number of crumbs to show
+	 *        -prefixNum  - Unknown
+	 * @return bool|string
+	 */
 	public function breadCrumbs($attPairs) {
-
 		$engine   = EngineAPI::singleton();
-
 		global $engineVars;
 
 		$callingFunction        = array("breadCrumbs","breadCrumbs");
@@ -33,17 +45,10 @@ class breadCrumbs {
 		$tempParams['attPairs'] = $attPairs;
 		$trail                  = $engine->execFunctionExtension($callingFunction,$tempParams,"before");
 
-		if ($trail) {
-			return($trail);
-		}
+		if($trail) return($trail);
 
 		/* setup initial variables */
-		$str2upper = FALSE;
-		if (isset($attPairs['titlecase'])) {
-			if (strtoupper($attPairs['titlecase']) == "TRUE") {
-				$str2upper = TRUE;
-			}
-		}
+		$str2upper = (isset($attPairs['titlecase']) and str2bool($attPairs['titlecase']));
 
 		$ellipse = (isset($engineVars['breadCrumbsEllipse']))?$engineVars['breadCrumbsEllipse']:" &#133; ";
 		$ellipse = (isset($attPairs['ellipse']))?$attPairs['ellipse']:$ellipse;
@@ -52,7 +57,6 @@ class breadCrumbs {
 		$spacer = (isset($attPairs['spacer']))?$attPairs['spacer']:$spacer;
 
 		$type   = (isset($attPairs['type']))?$attPairs['type']:"hierarchical";
-
 		$displayNum = (isset($engineVars['breadCrumbsDisplayNum']))?$engineVars['breadCrumbsDisplayNum']:0;
 		$displayNum = (isset($attPairs['displayNum']))?$attPairs['displayNum']:$displayNum;
 
@@ -70,9 +74,9 @@ class breadCrumbs {
 			$urlCount = count($url);
 			unset($url[--$urlCount]);
 
-			if (isset($attPairs['displayNum'])) {
-				if ($attPairs['displayNum'] < $urlCount) {
-					$start = $urlCount - $attPairs['displayNum'];
+			if ($displayNum) {
+				if ($displayNum < $urlCount) {
+					$start = $urlCount - $displayNum;
 				}
 				if (isset($attPairs['prefixNum'])) {
 					$prefix = $attPairs['prefixNum'];
