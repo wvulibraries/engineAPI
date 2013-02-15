@@ -74,6 +74,7 @@ class engineDB {
 
     /**
      * Class constructor
+	 *
      * @param string $user    - The username to connect with
      * @param string $passwd  - The password to connect with
      * @param string $server  - The server to connect to
@@ -98,6 +99,7 @@ class engineDB {
 
     /**
      * Class destructor (Close the MySQL connection)
+	 *
      * @return void
      */
 	function __destruct() {
@@ -108,6 +110,7 @@ class engineDB {
 
     /**
      * Select a new scheme to interact with
+	 *
      * @param string $db
      * @return bool
      */
@@ -130,6 +133,7 @@ class engineDB {
 
     /**
      * Escape a given string so it is suitable for use in a SQL statement
+	 *
      * @param string $string
      * @return string
      */
@@ -151,6 +155,7 @@ class engineDB {
 
     /**
      * Performs a given SQL query against the selected database
+	 *
      * @param string $query
      * @return array|bool|int|resource
      *
@@ -225,6 +230,7 @@ class engineDB {
 
     /**
      * Add queries to the transaction queue
+	 *
      * Available actions:
      *   + add - Add query to queue
      *   + run - Evaluate what happened
@@ -403,6 +409,7 @@ class engineDB {
 
     /**
      * Rolls back (cancels) the transaction
+	 *
      * @return bool
      */
 	public function transRollback() {
@@ -416,6 +423,7 @@ class engineDB {
 
     /**
      * Commits (saves) the transaction to the database
+	 *
      * @return bool TRUE if transaction will be committed. FALSE if its already set for rollback. 
      */
 	public function transCommit() {
@@ -428,12 +436,18 @@ class engineDB {
 		return FALSE;
 	}
 
-    public function inTransaction(){
+	/**
+	 * Returns TRUE if there's an open transaction
+	 *
+	 * @return bool
+	 */
+	public function inTransaction(){
         return (bool)$this->inTransaction;
     }
 
     /**
      * This method takes a MySQL resource and converts it to a multidimensionalD array
+	 *
      * @param  $result
      * @return array
      */
@@ -447,7 +461,8 @@ class engineDB {
 
     /**
      * This method prints debug info to the screen.
-     * Info printed includes: username,password,database name,sanitize state,quaryArray state
+	 * Info printed includes: username,password,database name,sanitize state,quaryArray state
+	 *
      * @return void
      */
 	function test() {
@@ -461,6 +476,7 @@ class engineDB {
 
     /**
      * Returns true if there is an active database connection
+	 *
      * @param bool $reconnect Set TRUE to attempt reconnect
      * @return bool
      */
@@ -481,6 +497,7 @@ class engineDB {
 
     /**
      * Connect to the specified MySQL database
+	 *
      * @return bool
      */
 	private function connect() {
@@ -503,6 +520,7 @@ class engineDB {
 
     /**
      * Handle failed database connection attempts
+	 *
      * @return bool
      * @see $this->die
      */
@@ -516,6 +534,7 @@ class engineDB {
 
 	/**
 	 * Retrieves a list of all the fields of a given table
+	 *
 	 * @param string $tblName
 	 * @param BOOL $primary -- if FALSE does not return the primary key
 	 * @param BOOL $array -- if set to true returns an array, otherwise comma delimited string
@@ -554,6 +573,7 @@ class engineDB {
 
 	/**
 	 * Retrieves an array breaking down the details of a given table
+	 *
 	 * @param string $tblName
 	 * @return array|null
 	 */
@@ -615,6 +635,7 @@ class engineDB {
 
 	/**
 	 * Retrieves an array of the given table's fields which are marked as being unique
+	 *
 	 * @param string $tblName
 	 * @return array
 	 */
