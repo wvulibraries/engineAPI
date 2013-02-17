@@ -1273,13 +1273,13 @@ class EngineAPI{
 	 */
 	public static function engineMatches($matches) {
 		$engine    = EngineAPI::singleton();
-		$attPairs  = split("\" ",$matches[1]);
+		$attPairs  = explode("\" ",$matches[1]);
 
 		foreach ($attPairs as $pair) {
 			if (empty($pair)) {
 				continue;
 			}
-			list($attribute,$value) = split("=",$pair,2);
+			list($attribute,$value) = explode("=",$pair,2);
 			$temp[$attribute] = str_replace("\"","",$value);
 		}
 

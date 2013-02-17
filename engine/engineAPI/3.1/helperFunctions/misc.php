@@ -88,14 +88,13 @@ function callingFile($basename=FALSE){
 /**
  * Return attribute pairs
  *
- * @todo fix deprecated split() function usage
  * @todo What is this function for? Is it still needed?
  * @param $attpairs
  * @return array
  */
 function attPairs($attpairs) {
 
-	$attPairs  = split("\" ",$attpairs);
+	$attPairs  = explode("\" ",$attpairs);
 
 	$temp = array();
 
@@ -103,7 +102,7 @@ function attPairs($attpairs) {
 		if (empty($pair)) {
 			continue;
 		}
-		list($attribute,$value) = split("=",$pair,2);
+		list($attribute,$value) = explode("=",$pair,2);
 		$temp[trim($attribute)] = trim(str_replace("\"","",$value));
 	}
 
@@ -126,7 +125,6 @@ function removeQueryStringVar($qs, $var) {
 /**
  * Recursively insert a file from the filesystem
  *
- * @todo fix deprecated split() function usage
  * @todo Check for Performance / Cleanup
  * @param $file
  * @param string $type
@@ -185,7 +183,7 @@ function recurseInsert($file,$type="php",$regex=NULL,$condition="REQUEST_URI",$c
 		}
 	}
 
-	$cwd = split("/",$cwd);
+	$cwd = explode("/",$cwd);
 
 	for($I=sizeof($cwd);$I>0;$I--) {
 
