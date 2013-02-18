@@ -102,7 +102,7 @@ function attPairs($attpairs) {
 		if (empty($pair)) {
 			continue;
 		}
-		list($attribute,$value) = preg_split("=",$pair,2);
+		list($attribute,$value) = explode("=",$pair);
 		$temp[trim($attribute)] = trim(str_replace("\"","",$value));
 	}
 

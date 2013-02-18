@@ -1279,7 +1279,7 @@ class EngineAPI{
 			if (empty($pair)) {
 				continue;
 			}
-			list($attribute,$value) = preg_split("=",$pair,2);
+			list($attribute,$value) = explode("=",$pair);
 			$temp[$attribute] = str_replace("\"","",$value);
 		}
 
