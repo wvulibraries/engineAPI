@@ -179,8 +179,17 @@ class errorHandle
      */
     private function __construct()
     {
-        // Set PHP Error Constant => errorHandle Constant mapping
+        /*
+         * Set PHP Error Constant => errorHandle Constant mapping
+         * Note: Some errors cannot be caught at runtime. These include:
+         *   - E_PARSE
+         *   - E_CORE_ERROR
+         *   - E_CORE_WARNING
+         *   - E_COMPILE_ERROR
+         *   - E_COMPILE_WARNING
+         */
         self::$phpErrMapping = array(
+			E_ERROR             => self::HIGH,
             E_WARNING           => self::MEDIUM,
             E_NOTICE            => self::LOW,
             E_USER_ERROR        => self::HIGH,
@@ -189,6 +198,10 @@ class errorHandle
             E_STRICT            => self::MEDIUM,
             E_RECOVERABLE_ERROR => self::MEDIUM,
             'phpException'      => self::HIGH);
+
+		// Add error types added in version 5.3
+		if(defined('E_DEPRECATED'))        self::$phpErrMapping[E_DEPRECATED]        = self::DEBUG;
+		if(defined('E_USER_DEPRECATED'))   self::$phpErrMapping[E_USER_DEPRECATED]   = self::DEBUG;
 
         // Set the default (All but INFO and DEBUG)
         self::$errorReporting = self::E_ALL & ~self::INFO & ~self::DEBUG;
@@ -353,7 +366,11 @@ class errorHandle
             self::$phpErrNo = $errNo;
             if(sizeof(self::$errorProfiles)){
                 if(sizeof(self::$phpErrMapping)){
-                    self::newError($errStr, self::$phpErrMapping[$errNo]);
+					if(isset(self::$phpErrMapping[$errNo])){
+						self::newError($errStr, self::$phpErrMapping[$errNo]);
+					}else{
+						self::newError($errStr, self::CRITICAL);
+					}
                 }else{
                     self::newError($errStr, self::CRITICAL);
                 }
@@ -660,21 +677,32 @@ class errorHandle
      */
     private static function phpErr2Str($errNo)
     {
-        $phpErrors = array(
-            E_WARNING      => 'E_WARNING',
-            E_NOTICE       => 'E_NOTICE',
-            E_USER_ERROR   => 'E_USER_ERROR',
-            E_USER_WARNING => 'E_USER_WARNING',
-            E_USER_NOTICE  => 'E_USER_NOTICE',
-            E_STRICT       => 'E_STRICT');
-        if(defined('E_RECOVERABLE_ERROR')) $phpErrors[E_RECOVERABLE_ERROR] = 'E_RECOVERABLE_ERROR';
-        if(defined('E_DEPRECATED'))        $phpErrors[E_DEPRECATED]        = 'E_DEPRECATED';
-        if(defined('E_USER_DEPRECATED'))   $phpErrors[E_USER_DEPRECATED]   = 'E_USER_DEPRECATED';
+		// PHP Error Constant -> String mapping table
+		$phpErrors = array(
+			E_PARSE             => 'E_PARSE',
+			E_ERROR             => 'E_ERROR',
+			E_WARNING           => 'E_WARNING',
+			E_NOTICE            => 'E_NOTICE',
+			E_CORE_ERROR        => 'E_CORE_ERROR',
+			E_CORE_WARNING      => 'E_CORE_WARNING',
+			E_COMPILE_ERROR     => 'E_COMPILE_ERROR',
+			E_COMPILE_WARNING   => 'E_COMPILE_WARNING',
+            E_USER_ERROR        => 'E_USER_ERROR',
+            E_USER_WARNING      => 'E_USER_WARNING',
+            E_USER_NOTICE       => 'E_USER_NOTICE',
+            E_STRICT            => 'E_STRICT',
+            E_RECOVERABLE_ERROR => 'E_RECOVERABLE_ERROR',
+            E_ALL               => 'E_ALL ');
 
+		// Add error contants added in version 5.3
+        if(defined('E_DEPRECATED'))      $phpErrors[E_DEPRECATED]      = 'E_DEPRECATED';
+        if(defined('E_USER_DEPRECATED')) $phpErrors[E_USER_DEPRECATED] = 'E_USER_DEPRECATED';
+
+		// And now do the mapping
         if(array_key_exists($errNo, $phpErrors)){
             return $phpErrors[$errNo];
         }else{
-            return (string)$errNo;
+            return "UNKNOWN($errNo)";
         }
     }
 
