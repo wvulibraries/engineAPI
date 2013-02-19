@@ -1,4 +1,7 @@
 <?php
+/**
+ * EngineAPI MySQL database layer
+ */
 class engineDB {
 
     /**
@@ -156,21 +159,21 @@ class engineDB {
     /**
      * Performs a given SQL query against the selected database
 	 *
+	 * If $this->queryArray is true, then an array is returned with the following elements:
+	 *  + result       what would be returned if arrayReturn == False
+	 *  + affectedRows Number of affected rows (for UPDATE,DELETE)
+	 *  + errorNumber  Any error number produced
+	 *  + error        Any error message produced
+	 *  + info         Results of mysql_info()
+	 *  + id           Results of insert_if()
+	 *  + query        The original SQL query that was used
+	 * Else the return depends on the SQL query performed:
+	 *  + INSERT - int (insert id)
+	 *  + UPDATE/DELETE/DROP - bool (success)
+	 *  + SELECT/SHOW/DESCRIBE/EXPLAIN - resource
+	 *
      * @param string $query
      * @return array|bool|int|resource
-     *
-     * If $this->queryArray is true, then an array is returned with the following elements:
-     *  + result       what would be returned if arrayReturn == False
-     *  + affectedRows Number of affected rows (for UPDATE,DELETE)
-     *  + errorNumber  Any error number produced
-     *  + error        Any error message produced
-     *  + info         Results of mysql_info()
-     *  + id           Results of insert_if()
-     *  + query        The original SQL query that was used
-     * Else the return depends on the SQL query performed:
-     *  + INSERT - int (insert id)
-     *  + UPDATE/DELETE/DROP - bool (success)
-     *  + SELECT/SHOW/DESCRIBE/EXPLAIN - resource
      */
 	function query($query) {
 
@@ -521,8 +524,8 @@ class engineDB {
     /**
      * Handle failed database connection attempts
 	 *
-     * @return bool
-     * @see $this->die
+	 * @see $this->die
+	 * @return bool
      */
 	public function connectFailed() {
 		if ($this->die === FALSE) {
@@ -536,39 +539,23 @@ class engineDB {
 	 * Retrieves a list of all the fields of a given table
 	 *
 	 * @param string $tblName
-	 * @param BOOL $primary -- if FALSE does not return the primary key
-	 * @param BOOL $array -- if set to true returns an array, otherwise comma delimited string
+	 * @param bool $primary -- if FALSE does not return the primary key
+	 * @param bool $array -- if set to true returns an array, otherwise comma delimited string
 	 * @return array|null
 	 */
 	public function listFields($tblName,$primary=TRUE,$array=TRUE) {
-		// $tblInfo = $this->tableInfo($tblName);
-		// if($tblInfo){
-		// 	return array_keys($tblInfo['fields']);
-		// }else{
-		// 	return NULL;
-		// }
-
 		$sql = sprintf("SELECT GROUP_CONCAT(column_name) FROM information_schema.columns WHERE table_schema = '%s' AND table_name = '%s' %s",
 			$this->database,
 			$tblName,
-			($primary === TRUE)?"":"AND column_key <> 'PRI'"
-			);
+			($primary === TRUE) ? "" : "AND column_key <> 'PRI'"
+		);
+		$sqlResult = $this->query($sql);
 
-		$sqlResult                = $this->query($sql);
-
-		if (!$sqlResult['result']) {
-			return(NULL);
-		}
-
-		$row                      = mysql_fetch_array($sqlResult['result'],  MYSQL_ASSOC);
-
+		if(!$sqlResult['result']) return (NULL);
+		$row = mysql_fetch_array($sqlResult['result'], MYSQL_ASSOC);
 		$fields = $row['GROUP_CONCAT(column_name)'];
-
-		if ($array === TRUE) {
-			$fields = explode(",",$fields);
-		}
-
-		return($fields);
+		if($array === TRUE) $fields = explode(",", $fields);
+		return ($fields);
 	}
 
 	/**
