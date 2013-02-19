@@ -1,7 +1,8 @@
 <?php
-
+/**
+ * Date helper functions for engine template tags
+ */
 class date {
-
 	public $pattern  = "/\{date\s+(.+?)\}/";
 	public $function = "date::templateMatches";
 
@@ -10,12 +11,16 @@ class date {
 		$engine->defTempPattern($this->pattern,$this->function,$this);
 	}
 
-	// Template Date
-	// $attPairs['time'] == unix time, Option, current time if not provided
-	// $attPairs['format'] for date();
+	/**
+	 * Template Date
+	 *
+	 * @param $matches
+	 *        Matches as passed by the template handler
+	 *          - time: unix time, Option, current time if not provided
+	 *          - format: Format string to pass to date()
+	 * @return bool|string
+	 */
 	public static function templateMatches($matches) {
-
-		$engine   = EngineAPI::singleton();
 		$attPairs = attPairs($matches[1]);
 
 		if (isset($attPairs['time'])) {
@@ -29,21 +34,25 @@ class date {
 		return(date($attPairs['format']));
 	}
 
-	// formname : the name of the form element. Will be usd 3 times followed by _month, _day, and _year
-    // makearray : Add [] onto the end of the formname
-    // disabled : Make the selects disabled
-    // prompts : Include prompts
-	// separator : string used to separator month/day/year values. defaults to " / "
-	// monthdformat : How the month is displayed. "month" or "mon" or "m". Default "m"
-	// monthvformat : How the month is valued. "month" or "mon" or "m". Default "m"
-	// startyear : 4 digit year, start of the year range. Default = 2000
-	// endyear : 4 digit year, end of the year range. Default = 2015
-	// defaultyear : year that is selected if no date is given. Default = current year
-	// setdate : unix time stamp to set the dropdown too
-	public function dateDropDown($attPairs,$engine=null) {
-
-		$engine = EngineAPI::singleton();
-
+	/**
+	 * Generate an HTML date dropdown menu
+	 *
+	 * @param $attPairs
+	 *          - formname:     The name of the form element. Will be usd 3 times followed by _month, _day, and _year
+	 *          - makearray:    Add [] onto the end of the formname
+	 *          - disabled:     Make the selects disabled
+	 *          - prompts:      Include prompts
+	 *          - separator:    String used to separator month/day/year values. defaults to " / "
+	 *          - monthdformat: How the month is displayed. "month" or "mon" or "m". Default "m"
+	 *          - monthvformat: How the month is valued. "month" or "mon" or "m". Default "m"
+	 *          - startyear:    4 digit year, start of the year range. Default = 2000
+	 *          - endyear:      4 digit year, end of the year range. Default = 2015
+	 *          - defaultyear:  Year that is selected if no date is given. Default = current year
+	 *          - setdate:      Unix time stamp to set the dropdown too
+	 * @return string
+	 *         The generated HTML
+	 */
+	public function dateDropDown($attPairs){
 		$monArray = array("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec");
 		$monthArray = array("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December");
 		$mArray = array("1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12");
@@ -158,19 +167,21 @@ class date {
 
 	}
 
-
-	// formname : the name of the form element. Will be usd 3 times followed by _hour, _minute, and _ampm
-    // makearray : Add [] onto the end of the formname
-    // disabled : Make the selects disabled
-    // prompts : Include prompts
-	// separator : string used to separator hour and minute values. defaults to " : "
-	// hourformat : 12 or 24 hour format. Default: "12"
-	// mininterval : How the minutes are spaced. Default is "1" (01,02,03,...) - "15" would be (00,15,30,45)
-	// settime : unix time stamp to set the dropdown too
-	public function timeDropDown($attPairs,$engine=null) {
-
-		$engine = EngineAPI::singleton();
-
+	/**
+	 * Generate HTML time dropdown menu
+	 *
+	 * @param $attPairs
+	 *   - formname:    The name of the form element. Will be usd 3 times followed by _hour, _minute, and _ampm
+	 *   - makearray:   Add [] onto the end of the formname
+	 *   - disabled:    Make the selects disabled
+	 *   - prompts:     Include prompts
+	 *   - separator:   String used to separator hour and minute values. defaults to " : "
+	 *   - hourformat:  12 or 24 hour format. Default: "12"
+	 *   - mininterval: How the minutes are spaced. Default is "1" (01,02,03,...) - "15" would be (00,15,30,45)
+	 *   - settime:     Unix time stamp to set the dropdown too
+	 * @return string
+	 */
+	public function timeDropDown($attPairs) {
 		$localtime = localtime(time(), true);
 		$chour     = $localtime['tm_hour'];
 		$cmin      = $localtime['tm_min'];
@@ -274,9 +285,6 @@ class date {
 		}
 
 		return($output);
-
 	}
-
 }
-
 ?>
