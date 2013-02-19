@@ -2,24 +2,16 @@
 
 class fileHandler {
 
-	private $engine            = NULL;
 	private $database          = NULL;
-	private $file              = array();
 	private $allowedExtensions = array();
-
 	public $maxSize            = 2000000; // 2mb
 	public $basePath           = NULL;
 	public $debug              = FALSE; // Must be FALSE in Production
 
 
 	function __construct($database=NULL) {
-
 		$engine         = EngineAPI::singleton();
 		$this->database = ($database instanceof engineDB) ? $database : $engine->openDB;
-
-	}
-
-	function __destruct() {
 	}
 
 	/**
@@ -30,32 +22,19 @@ class fileHandler {
 	 * @return bool|string
 	 **/
 	public function validate($files,$i) {
-
-		if (empty($files['name'][$i])) {
+		if(empty($files['name'][$i])){
 			return errorHandle::errorMsg("File skipped: No File Name");
-		}
-		else {
-
+		}else{
 			$fileSize = dbSanitize($files['size'][$i]);
 			$fileName = dbSanitize($files['name'][$i]);
 
 			// file not uploaded correctly, display PHP error
-			if ($files['error'][$i] == 1) {
-				return errorHandle::errorMsg("File skipped: ".$fileName." exceeds the maximum file size set in PHP.");
-			}
-
-			if ($fileSize > $this->maxSize) {
-				return errorHandle::errorMsg("File skipped: ".$fileName." (".displayFileSize($fileSize).") exceeds size limit of ".displayFileSize($this->maxSize).".");
-			}
-
-			if (($output = $this->checkAllowedExtensions($fileName)) !== TRUE) {
-				return errorHandle::errorMsg("File skipped: ".$output);
-			}
-
+			if($files['error'][$i] == 1)                                      return errorHandle::errorMsg("File skipped: ".$fileName." exceeds the maximum file size set in PHP.");
+			if($fileSize > $this->maxSize)                                    return errorHandle::errorMsg("File skipped: ".$fileName." (".displayFileSize($fileSize).") exceeds size limit of ".displayFileSize($this->maxSize).".");
+			if(($output = $this->checkAllowedExtensions($fileName)) !== TRUE) return errorHandle::errorMsg("File skipped: ".$output);
 		}
 
 		return TRUE;
-
 	}
 
 	/**
@@ -68,18 +47,14 @@ class fileHandler {
 	 * @return bool|array
 	 **/
 	public function retrieve($type,$name,$location,$fields=NULL) {
-
 		switch(strtolower($type)) {
 			case "database":
 				return $this->retrieveFromDB($name,$location,$fields);
-
 			case "folder":
 				return $this->retrieveFromFolder($name,$location);
-
 			default:
 				return FALSE;
 		}
-
 	}
 
 	/**
@@ -92,20 +67,15 @@ class fileHandler {
 	 * @return bool|array
 	 **/
 	public function store($type,$files,$location,$fields=NULL) {
-
 		$files = $this->normalizeArrayFormat($files);
-
 		switch(strtolower($type)) {
 			case "database":
 				return $this->storeInDB($files,$location,$fields);
-
 			case "folder":
 				return $this->storeInFolder($files,$location);
-
 			default:
 				return FALSE;
 		}
-
 	}
 
 	/**
@@ -115,7 +85,6 @@ class fileHandler {
 	 * @return array
 	 **/
 	private function normalizeArrayFormat($files) {
-
 		if (!is_array($files['name'])) {
 			$tmp = array();
 			foreach ($files as $key => $val) {
@@ -123,9 +92,7 @@ class fileHandler {
 			}
 			$files = $tmp;
 		}
-
 		return $files;
-
 	}
 
 	/**
@@ -136,35 +103,30 @@ class fileHandler {
 	 * @return bool|array
 	 **/
 	private function retrieveFromFolder($name,$location) {
-
 		$filePath = $this->basePath."/".$location.'/'.$name;
-
-		if (!file_exists($filePath)) {
-			if ($this->debug === TRUE) {
+		if(!file_exists($filePath)){
+			if($this->debug === TRUE){
 				errorHandle::newError("File does not exist: ".$filePath,errorHandle::DEBUG);
 			}
 			return FALSE;
 		}
 
-		$content = file_get_contents($filePath);
-		$type = $this->getMimeType($filePath);
-
+		$content        = file_get_contents($filePath);
+		$type           = $this->getMimeType($filePath);
 		$output['name'] = utf8_encode($name);
 		$output['type'] = $type;
 		$output['data'] = $content;
-
 		return $output;
-
 	}
 
 	/**
 	 * Retrieve a file from a database table
 	 *
-	 * @param string $name      The file name, as a string
-	 * @param string $location  The table name where the file can be found, as a string
-	 * @param array  $fields    The field names that the database table uses, as an array
-	 * @return bool|array
-	 **/
+	 * @param $name   The file name, as a string
+	 * @param $table  The table name where the file can be found, as a string
+	 * @param $fields The field names that the database table uses, as an array
+	 * @return bool
+	 */
 	private function retrieveFromDB($name,$table,$fields) {
 
 		$select = "";
@@ -241,13 +203,8 @@ class fileHandler {
 
 		}
 
-		if (!isnull($errorMsg)) {
-			return $errorMsg;
-		}
-		else {
-			return TRUE;
-		}
-
+		if(!isnull($errorMsg)) return $errorMsg;
+		return TRUE;
 	}
 
 	/**
@@ -297,13 +254,8 @@ class fileHandler {
 
 		}
 
-		if (!isnull($errorMsg)) {
-			return $errorMsg;
-		}
-		else {
-			return TRUE;
-		}
-
+		if(!isnull($errorMsg)) return $errorMsg;
+		return TRUE;
 	}
 
 	/**
@@ -334,7 +286,15 @@ class fileHandler {
 		return $output;
 	}
 
-	// What is this even being used for?
+	/**
+	 * dbInsert() - Unknown
+	 *
+	 * @todo What is this even being used for?
+	 * @deprecated
+	 * @param $table
+	 * @param $fields
+	 * @return bool|string
+	 */
 	public function dbInsert($table,$fields) {
 
 		$sqlStr = NULL;
@@ -472,12 +432,12 @@ class fileHandler {
 	/**
 	 * Generate a new file name based on a given ID
 	 *
-	 * @param string $oldTable       The source table name, as a string
-	 * @param string $newTable       The destination table name, as a string
-	 * @param array  $fields         Field names and values for the tables, as an array
-	 * @param bool   $mysqlFileName  Whether or not to regenerate the file name stored in the new table, as a boolean
-	 * @return bool|array
-	 **/
+	 * @param string $table  The source table name, as a string
+	 * @param string $fields The destination table name, as a string
+	 * @param string $ID     Field names and values for the tables, as an array
+	 * @param bool $updateDB Whether or not to regenerate the file name stored in the new table, as a boolean
+	 * @return array|bool
+	 */
 	public function genMysqlFileName($table,$fields,$ID,$updateDB=TRUE) {
 
 		$paddedID = str_pad($ID, 3, "0", STR_PAD_LEFT);
@@ -600,28 +560,26 @@ class fileHandler {
 	/**
 	 * Display an inline file
 	 *
-	 * @param array  $file  The file name, type, and data, as an array
+	 * @param $file The file name, type, and data, as an array
+	 * @param $id
 	 * @return string
-	 **/
+	 */
 	private function displayFileInline($file,$id) {
-
-		if (strpos($file['type'],'image') !== FALSE) {
+		if(strpos($file['type'],'image') !== FALSE){
 			$output = '<img src="'.EngineAPI::$engineVars['downloadPage'].'?id='.$id.'" />';
-		}
-		else {
+		}else{
 			$output = $file['data'];
 		}
 
 		return $output;
-
 	}
 
 	/**
 	 * Display a search form
 	 *
-	 * @param array  $extentions  A list of extensions to display in the form, as an array
+	 * @param array $extensions A list of extensions to display in the form, as an array
 	 * @return string
-	 **/
+	 */
 	public function displaySearchForm($extensions=array()) {
 
 		$engine = EngineAPI::singleton();
@@ -1012,7 +970,6 @@ class fileHandler {
 				return "unknown/" . trim($fileSuffix[0], ".");
 		}
 	}
-
 }
 
 ?>
