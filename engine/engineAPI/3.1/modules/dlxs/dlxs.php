@@ -1,5 +1,7 @@
 <?php
-
+/**
+ * @todo Add phpDoc blocks
+ */
 class dlxs {
 	
 	public $viewType = NULL; // this needs to be set to private after display.php is cleaned up
