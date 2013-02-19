@@ -1,16 +1,30 @@
 <?php
-
+/**
+ * Debug library
+ * @todo Is this still used?
+ */
 class debug {
+	/**
+	 * @var self
+	 */
+	private static $instance;
 	
-	private static $instance; // Hold an instance of this object, for use as Singleton
-	
-	private $debug   = array();
-	
-	// $password : Password, set by application author, for displaying debug infromation
-	// $getPassword : password passed to application via query string (debugPassword),
-	//     compared to $password
-	public $password     = NULL;
-	private $getPassword = NULL;
+	private $debug = array();
+
+	/**
+	 * Password, set by application author, for displaying debug infromation
+	 *
+	 * @todo Should this be public?
+	 * @var string
+	 */
+	public $password;
+
+	/**
+	 * password passed to application via query string (debugPassword) compared to $password
+	 *
+	 * @var string
+	 */
+	private $getPassword;
 	
 	private function __construct() {
 		$this->engine = EngineAPI::singleton();
@@ -22,9 +36,6 @@ class debug {
 		}
 	}
 	
-	function __destruct() {
-	}
-
 	public static function create() {
 		if (!isset(self::$instance)) {
 			$c = __CLASS__;
@@ -33,34 +44,27 @@ class debug {
 
 		return self::$instance;
 	}
-	
-	public function needed($type) {
 
-		if (isnull($this->password) || isnull($this->getPassword)) {
-			return(FALSE);
-		}
-		
-		if ($this->password != $this->getPassword) {
-			return(FALSE);
-		}
-
-		if (isset($this->debug[$type]) || isset($this->debug["all"])) {
-			return(TRUE);
-		}
-
-		return(FALSE);
-		
+	public function needed($type){
+		if(isnull($this->password) || isnull($this->getPassword)) return (FALSE);
+		if($this->password != $this->getPassword) return (FALSE);
+		if(isset($this->debug[$type]) || isset($this->debug["all"])) return (TRUE);
+		return (FALSE);
 	}
-	
+
+	/**
+	 * Print the EngineAPI environment
+	 * Prints te EngineAPI EngineVars and LocalVars
+	 *
+	 * @todo Remove use of deprecated use of localVarsExport()
+	 * @todo Remove usage of global $engineVars
+	 * @todo Look at cleanup / rewrite
+	 * @return bool
+	 */
 	public static function printENV() {
-		
-		$engine = EngineAPI::singleton();
-
-		if(isnull($engine)) {
-			return(FALSE);
-		}
-
 		global $engineVars;
+		$engine = EngineAPI::singleton();
+		if(isnull($engine)) return(FALSE);
 
 		print "<p><strong>Engine Variables:</strong>:<br />";
 		foreach ($engineVars as $key => $value) {
@@ -76,13 +80,19 @@ class debug {
 		}
 		print "</p>";
 
-		return;
-		
+		return TRUE;
 	}
 	
-	/* Stolen from: http://de.php.net/manual/en/function.print-r.php#75872 */
-	/* Modified to suite our needs */
-	/* This function still needs a lot of work */
+	/**
+	 * Output Butter save version of print_r()
+	 *
+	 * @todo This function still needs a lot of work
+	 * @see http://de.php.net/manual/en/function.print-r.php#75872
+	 * @param $var
+	 * @param bool $return
+	 * @param int $level
+	 * @return string
+	 */
 	public static function obsafe_print_r($var, $return = TRUE, $level = 0) {
 		$html = false;
 		$spaces = "";
@@ -116,7 +126,6 @@ class debug {
 		else echo $output;
 		return;
 	}
-	
 }
 
 ?>
