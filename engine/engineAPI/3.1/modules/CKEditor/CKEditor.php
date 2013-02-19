@@ -401,6 +401,8 @@ class CKEditor
 
 	/**
 	 * Return global event handlers.
+	 *
+	 * @return string
 	 */
 	private function returnGlobalEvents()
 	{
@@ -431,6 +433,8 @@ class CKEditor
 
 	/**
 	 * Initializes CKEditor (executed only once).
+	 *
+	 * @return string
 	 */
 	private function init()
 	{
@@ -475,6 +479,8 @@ class CKEditor
 
 	/**
 	 * Return path to ckeditor.js.
+	 *
+	 * @return mixed|null|string
 	 */
 	private function ckeditorPath()
 	{
