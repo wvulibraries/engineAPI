@@ -287,8 +287,11 @@ class mailSender {
 	/**
 	 * Prepare to send the email to each recipient individually, at a timed interval
 	 *
-	 * @return mixed
-	 **/
+	 * @param $sendID
+	 * @param $emails
+	 * @param $dbInfo
+	 * @return mixed|void
+	 */
 	public function sendEmailBulk($sendID,$emails,$dbInfo) {
 
 		// Populate table with emails
@@ -345,8 +348,10 @@ class mailSender {
 	/**
 	 * Send the email to each recipient individually, at a timed interval
 	 *
-	 * @return mixed
-	 **/
+	 * @param $sendID
+	 * @param $dbInfo
+	 * @return string
+	 */
 	private function performBulkSend($sendID,$dbInfo) {
 
 		$sendID = escapeshellarg($sendID);
@@ -369,26 +374,51 @@ class mailSender {
 
 	}
 
+	/**
+	 * Clear recipients (TO) list
+	 * @return bool Always true
+	 */
 	public function clearRecipients() {
 		$this->to = array();
 		return TRUE;
 	}
 
+	/**
+	 * Clear recipients (CC) list
+	 * @return bool Always true
+	 */
 	public function clearCCs() {
 		$this->cc = array();
 		return TRUE;
 	}
 
+	/**
+	 * Clear recipients (BCC) list
+	 * @return bool Always true
+	 */
 	public function clearBCCs() {
 		$this->bcc = array();
 		return TRUE;
 	}
 
+	/**
+	 * Clear ReplyTo list
+	 * @return bool Always true
+	 */
 	public function clearReplyTos() {
 		$this->replyTo = array();
 		return TRUE;
 	}
 
+	/**
+	 * Clear all recipients
+	 * Equivalent to calling each of these
+	 *   - $this->clearRecipients();
+	 *   - $this->clearCCs();
+	 *   - $this->clearBCCs();
+	 *   - $this->clearReplyTos();
+	 * @return bool Always true
+	 */
 	public function clearAllAddresses() {
 		$this->clearRecipients();
 		$this->clearCCs();
@@ -397,11 +427,14 @@ class mailSender {
 		return TRUE;
 	}
 
+	/**
+	 * Clear attachments list
+	 * @return bool Always true
+	 */
 	public function clearAttachments() {
 		$this->attachment = array();
 		return TRUE;
 	}
-
 }
 
 ?>
