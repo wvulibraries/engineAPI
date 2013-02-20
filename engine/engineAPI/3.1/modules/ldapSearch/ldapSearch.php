@@ -88,6 +88,7 @@ class ldapSearch
 
     /**
      * Connect, and bind, to an LDAP server
+	 *
      * @param array $params
      * @return null|resource
      */
@@ -114,6 +115,7 @@ class ldapSearch
 
     /**
      * Disconnect from the LDAP server
+	 *
      * @return bool The result of ldap_unbind()
      */
     public function disconnect()
@@ -128,6 +130,7 @@ class ldapSearch
 
     /**
      * Login (bind) to the LDAP server
+	 *
      * @param string $username
      * @param string $password
      * @return bool
@@ -154,6 +157,7 @@ class ldapSearch
 
     /**
      * Logoug (unbind) from the LDAP server
+	 *
      * @return bool
      */
     public function logout()
@@ -164,6 +168,7 @@ class ldapSearch
     /**
      * Checks a user's credentials against the LDAP server.
      * This is done by creating a new connection to the LDAP server (using the passed credentials to bind to the server)
+	 *
      * @param string $username
      * @param string $password
      * @param array $connectParams
@@ -187,6 +192,7 @@ class ldapSearch
 
     /**
      * Sets the Base DN. Returns the old value
+	 *
      * @param string $dn
      * @return string
      */
@@ -199,6 +205,7 @@ class ldapSearch
 
     /**
      * Returns the Base DN
+	 *
      * @return string
      */
     public function getBaseDN()
@@ -208,6 +215,7 @@ class ldapSearch
 
     /**
      * Retrieve a single entry from the LDAP server
+	 *
      * @param string $dn
      *        The Distinguished Name of the entry we are retrieving
      *
@@ -424,6 +432,7 @@ class ldapSearch
 
     /**
      * Formats the results of getEntry() and search() and returns a cleaned version
+	 *
      * @param array $entries
      *        An array of entries straight from ldap_get_entries()
      * @param array $attributes
@@ -489,6 +498,7 @@ class ldapSearch
 
     /**
      * Returns all user accounts in LDAP stating at the Base DN
+	 *
      * @param int $userType
      * @param array $searchParams
      * @return array
@@ -514,6 +524,7 @@ class ldapSearch
 
     /**
      * Returns all user groups in LDAP stating at the Base DN
+	 *
      * @param int $groupType
      *        Bitwise into of groups to be returned
      *        Default: All security groups
@@ -546,6 +557,7 @@ class ldapSearch
 
     /**
      * Returns all OUs (Organizational Units) starting at the Base DN
+	 *
      * @param array $searchParams
      * @return array
      */
@@ -590,6 +602,7 @@ class ldapSearch
 
     /**
      * Search for an OU based on its name. Returns the OU's DN (if it exists)
+	 *
      * @param string $ou
      * @param bool $recursive
      * @param array $searchParams
@@ -604,6 +617,7 @@ class ldapSearch
 
     /**
      * Search for a group based on its name. Returns the group's DN (if it exists)
+	 *
      * @param string $group
      * @param bool $recursive
      * @param array $searchParams
@@ -621,6 +635,7 @@ class ldapSearch
 
     /**
      * Search for a user based on their username. Returns the user's DN (if it exists)
+	 *
      * @param string $username
      * @param bool $recursive
      * @param array $searchParams
@@ -638,6 +653,7 @@ class ldapSearch
 
     /**
      * Returns the DNs for all the users in a given OU
+	 *
      * @param string $ouDN
      *        Parent Organizational Unit DN
      * @param int $userType
@@ -661,6 +677,7 @@ class ldapSearch
 
     /**
      * Returns the DNs for all the users in a given Group
+	 *
      * @param string $groupDN
      *        Parent group DN
      * @param int $userType
@@ -690,13 +707,9 @@ class ldapSearch
         return $result;
     }
 
-
-
-
-
-
     /**
      * Returns the DNs for all the groups in a given OU
+	 *
      * @param string $ouDN
      *        Parent Organizational Unit DN
      * @param int $groupType
@@ -720,6 +733,7 @@ class ldapSearch
 
     /**
      * Returns the DNs for all the groups in a given group
+	 *
      * @param string $groupDN
      *        Parent group DN
      * @param int $groupType
@@ -754,6 +768,7 @@ class ldapSearch
 
     /**
      * Returns the DN of the group which a given group is in (if one exists)
+	 *
      * @param string $groupDN
      * @return null
      */
@@ -773,6 +788,7 @@ class ldapSearch
 
     /**
      * Returns the DNs for all the OUs in a given OU
+	 *
      * @param  $ouDN
      * @param null $searchParams
      * @return array
@@ -792,6 +808,7 @@ class ldapSearch
 
     /**
      * Get the user groups of a given user
+	 *
      * @param string $userDN
      *        The distinguished name of the user account
      * @param bool $recursive
@@ -833,6 +850,7 @@ class ldapSearch
 
     /**
      * Helper method of getGroupsFromUser()
+	 *
      * @param string $groupDN
      *        The distinguished name of the potential child group
      * @param int $groupTypes
@@ -857,6 +875,7 @@ class ldapSearch
 
     /**
      * Returns TRUE ifs the DN is a user account
+	 *
      * @param string $dn
      * @return bool
      */
@@ -868,6 +887,7 @@ class ldapSearch
 
     /**
      * Returns TRUE if the DN is a user account, and is an active account
+	 *
      * @param string $dn
      * @return bool
      */
@@ -882,6 +902,7 @@ class ldapSearch
 
     /**
      * Returns TRUE if the DN is an OU (Organizational Unit)
+	 *
      * @param  $dn
      * @return bool
      */
@@ -893,6 +914,7 @@ class ldapSearch
 
     /**
      * Returns TRUE if the DN is Group
+	 *
      * @param string $dn
      * @return bool
      */
@@ -904,6 +926,7 @@ class ldapSearch
 
     /**
      * Returns the type of a given group
+	 *
      * @param string $dn
      * @return int|null
      *         null: Not a group, or an unknown group type
@@ -956,6 +979,7 @@ class ldapSearch
 
     /**
      * Retrieves a requested item from the ldapConfig. If no config is set, will return NULL)
+	 *
      * @param  $name
      * @return null|mixed
      */
@@ -985,6 +1009,7 @@ class ldapSearch
 
     /**
      * Internal working method for self::buildFilterString()
+	 *
      * @todo This needs a good bit of work. (It's hardly bullet-proof)
      * @static
      * @see self::buildFilterString()
@@ -1053,23 +1078,40 @@ class ldapSearch
 
 
 
-    ######################################################################
-    # Microsoft AD Hack - MS AD fails to return the user's Primary Group #
-    ######################################################################
-    # Used in: ldapSearch->getGroupsFromUser()                           #
-    #          ldapSearch->formatSearchResults()                         #
-    # References: http://support.microsoft.com/kb/321360                 #
-    #             http://support.microsoft.com/kb/297951                 #
-    #             http://us2.php.net/manual/en/ref.ldap.php#46984        #
-    ######################################################################
-    private function littleEndian($hex){
+	/**
+	 * Microsoft AD Hack - littleEndian()
+	 * MS AD fails to return the user's Primary Group
+	 *
+	 * Used in: ldapSearch->getGroupsFromUser()
+	 *          ldapSearch->formatSearchResults()
+	 * References: http://support.microsoft.com/kb/321360
+	 *             http://support.microsoft.com/kb/297951
+	 *             http://us2.php.net/manual/en/ref.ldap.php#46984
+	 *
+	 * @param $hex
+	 * @return string
+	 */
+	private function littleEndian($hex){
         $result='';
         for ($x=strlen($hex)-2; $x >= 0; $x=$x-2) {
             $result .= substr($hex,$x,2);
         }
         return $result;
     }
-    private function binSIDtoText($binsid) {
+
+	/**
+	 * Microsoft AD Hack - binSIDtoText()
+	 * MS AD fails to return the user's Primary Group
+	 *
+	 * Used in: ldapSearch->getGroupsFromUser()
+	 *          ldapSearch->formatSearchResults()
+	 * @see http://support.microsoft.com/kb/321360
+	 * @see http://support.microsoft.com/kb/297951
+	 * @see http://us2.php.net/manual/en/ref.ldap.php#46984
+	 * @param $binsid
+	 * @return string
+	 */
+	private function binSIDtoText($binsid) {
         $hex_sid=bin2hex($binsid);
         $rev = hexdec(substr($hex_sid,0,2));
         $subcount = hexdec(substr($hex_sid,2,2));
@@ -1082,14 +1124,16 @@ class ldapSearch
         return $result;
     }
 
-    ###################################################################################
-    # Helper Function                                                                 #
-    #   This converts the binary GID is search results to a usable hex value          #
-    ###################################################################################
-    # Used in: ldapSearch->formatSearchResults()                                      #
-    # References: http://us2.php.net/manual/en/function.ldap-get-values-len.php#73198 #
-    ###################################################################################
-    private function binGIDtoText($object_guid) {
+	/**
+	 * Helper Function - Convert binary GID to hex version
+	 * This converts the binary GID is search results to a usable hex value
+	 *
+	 * Used in: ldapSearch->formatSearchResults()
+	 * @see http://us2.php.net/manual/en/function.ldap-get-values-len.php#73198
+	 * @param $object_guid
+	 * @return string
+	 */
+	private function binGIDtoText($object_guid) {
         $hex_guid = bin2hex($object_guid);
         $hex_guid_to_guid_str = '';
         for($k = 1; $k <= 4; ++$k) {
