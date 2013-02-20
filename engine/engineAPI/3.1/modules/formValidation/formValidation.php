@@ -1,14 +1,34 @@
 <?php
 
 class formValidation {
+	/**
+	 * @var array
+	 */
+	private $fields = array();
 
-	private $fields  = array();
-	private $type    = NULL;
+	/**
+	 * @var string
+	 */
+	private $type;
 
+	/**
+	 * The "type" in engine's cleanGet and cleanPort. RAW, HTML, MYSQL
+	 * @var string
+	 */
 	public $sanType = "RAW"; // the "type" in engine's cleanGet and cleanPort. RAW, HTML, MYSQL
-	public $strict  = TRUE;  // when TRUE, validate will look at each POST and GET variable. If they are not defined it will return FALSE
-							 // When true, even submit buttons and the like need to be defined. But, makes sure that nothing that isn't supposed to be passed in is.
 
+	/**
+	 * when TRUE, validate will look at each POST and GET variable. If they are not defined it will return FALSE
+	 * When true, even submit buttons and the like need to be defined. But, makes sure that nothing that isn't supposed to be passed in is.
+	 * @var bool
+	 */
+	public $strict = TRUE;
+
+
+	/**
+	 * Class constructor
+	 * @param string $type post,get
+	 */
 	function __construct($type=NULL) {
 
 		$this->fields['get']  = array();
@@ -27,10 +47,15 @@ class formValidation {
 	function __destruct() {
 	}
 
-	// $field is array
-	// Required: type -- POST or GET
-	// Required: var -- variable name
-	// Required: validate -- type of validation to perform. If set to NULL, does not perform validation
+	/**
+	 * Adds a field to the validation
+	 *
+	 * @param array $field
+	 *   - type:     post or get
+	 *   - var:      variable name
+	 *   - validate: type of validation to perform. If set to NULL, does not perform validation
+	 * @return bool
+	 */
 	public function addField($field) {
 
 		if (!isset($field['type']) || (lc($field['type']) != "post" && lc($field['type']) != "get")) {
@@ -62,7 +87,14 @@ class formValidation {
 
 	}
 
-	// if bool = TRUE, function returns bool TRUE or FALSE. else returns an array with specifics
+	/**
+	 * Do validation
+	 *
+	 * @param bool $bool
+	 *        If TRUE, return is boolean for 'is valid'
+	 *        else return is an array with specifics
+	 * @return array|bool
+	 */
 	public function validate($bool=TRUE) {
 
 		$engine = EngineAPI::Singleton();
@@ -171,6 +203,11 @@ class formValidation {
 
 	}
 
+	/**
+	 * Unknown
+	 *
+	 * @return bool
+	 */
 	private function validateSanType() {
 		$engine = EngineAPI::Singleton();
 
