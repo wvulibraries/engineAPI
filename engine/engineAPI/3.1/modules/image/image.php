@@ -9,7 +9,13 @@ class image{
     private $imgInfo;
     private $imgGdType;
 
-    public function __construct($imgSrc, $imgFilename=NULL){
+	/**
+	 * Class constructor
+	 *
+	 * @param string $imgSrc
+	 * @param string $imgFilename
+	 */
+	public function __construct($imgSrc, $imgFilename=NULL){
         // If a manual filename was given, copy the src (which will be a file) to the manual filename
         if(isset($imgFilename) and is_readable($imgSrc)){
             copy($imgSrc,$imgFilename);
@@ -32,6 +38,7 @@ class image{
 
     /**
      * Load an image into the class
+	 *
      * @param $filename
      */
     private function load($filename){
@@ -69,6 +76,7 @@ class image{
 
     /**
      * @param null $imgFilename
+	 *
      * @return mixed
      */
     private function refreshImageInfo($imgFilename=NULL){
@@ -99,6 +107,7 @@ class image{
 
     /**
      * Returns image info
+	 *
      * @param string $name
      * @param mixed $default
      * @return mixed
@@ -112,6 +121,7 @@ class image{
     /**
      * Returns the original img filename
      * Note: this will only exist if this object was instatiated from a filename
+	 *
      * @return string
      */
     public function getFilename(){
@@ -120,6 +130,7 @@ class image{
 
     /**
      * Returns the bar (binary) image data
+	 *
      * @return string
      */
     public function rawImage(){
@@ -132,6 +143,7 @@ class image{
 
     /**
      * Output the image to either the browser, or a local file
+	 *
      * @param int $imgType
      * @param string $filename
      *        If set, output the image to the filename. Otherwise, output the image to the browser
@@ -162,33 +174,72 @@ class image{
         }
     }
 
-    public function getWidth(){
+	/**
+	 * Get the width
+	 *
+	 * @return int
+	 */
+	public function getWidth(){
         return imagesx($this->img);
     }
 
-    public function getHeight(){
+	/**
+	 * Get the height
+	 *
+	 * @return int
+	 */
+	public function getHeight(){
         return imagesy($this->img);
     }
 
-    public function resizeToHeight($height, $returnObject=FALSE){
+	/**
+	 * Resize the image to the specified height (maintains ratio)
+	 *
+	 * @param int $height
+	 * @param bool $returnObject
+	 * @return bool|image
+	 */
+	public function resizeToHeight($height, $returnObject=FALSE){
         $ratio = $height / $this->getHeight();
         $width = $this->getWidth() * $ratio;
         return $this->resize($width,$height, $returnObject);
     }
 
-    public function resizeToWidth($width, $returnObject=FALSE){
+	/**
+	 * Resize the image to the specified width (maintains ratio)
+	 *
+	 * @param int $width
+	 * @param bool $returnObject
+	 * @return bool|image
+	 */
+	public function resizeToWidth($width, $returnObject=FALSE){
         $ratio = $width / $this->getWidth();
         $height = $this->getheight() * $ratio;
         return $this->resize($width, $height, $returnObject);
     }
 
-    public function scale($scale, $returnObject=FALSE){
+	/**
+	 * Scale the image
+	 *
+	 * @param int $scale
+	 * @param bool $returnObject
+	 * @return bool|image
+	 */
+	public function scale($scale, $returnObject=FALSE){
         $width = $this->getWidth() * $scale;
         $height = $this->getheight() * $scale;
         return $this->resize($width, $height, $returnObject);
     }
 
-    public function resize($width, $height, $returnObject=FALSE){
+	/**
+	 * Resize the image to the given width and height
+	 *
+	 * @param int $width
+	 * @param int $height
+	 * @param bool $returnObject
+	 * @return bool|image
+	 */
+	public function resize($width, $height, $returnObject=FALSE){
         $new_image = imagecreatetruecolor($width, $height);
         imagecopyresampled($new_image, $this->img, 0, 0, 0, 0, $width, $height, $this->getWidth(), $this->getHeight());
         if($returnObject){
