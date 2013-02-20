@@ -1,42 +1,39 @@
 <?php
-
 class fileList {
-	
+
 	public $directory = NULL;
 	public $sortType  = NULL;
 	public $files     = array();
-	
+
 	private $xmlFile  = FALSE;
 	private $xmlArray = NULL;
-	
+
 	private $currentFile = NULL;
 	private $urlBase     = NULL;
-	
+
 	private $engine      = NULL;
-	
+
+	/**
+	 * @todo Remove deprecated use of global $engineVars
+	 * @param $directory
+	 */
 	function __construct($directory) {
-		
-		$this->engine = EngineAPI::singleton();
-		
 		global $engineVars;
-		
+		$this->engine = EngineAPI::singleton();
 		$xml = $engineVars['fileListings']."/".(preg_replace('/\//','.',$directory)).".xml";
-		
 		if(file_exists($xml)) {
 			$this->xmlFile  = simplexml_load_file($xml);
 			$this->xmlArray = $this->parseXML();
 		}
-		else {
-		}
-		
 		$this->urlBase = "/".$directory;
-		
 	}
-	
-	function __destruct() {
-		
-	}
-	
+
+	/**
+	 * Print a debug for the file array
+	 *
+	 * @deprecated
+	 * @return string
+	 */
 	public function printObject() {
 		$output  = "<pre>";
 		$output .= obsafe_print_r($this->files);
@@ -45,6 +42,13 @@ class fileList {
 		return($output);
 	}
 
+	/**
+	 * Apply a template
+	 *
+	 * @todo Why is $template default to NULL if that's an error?
+	 * @param string $template
+	 * @return bool|string
+	 */
 	public function applyTemplate($template=NULL) {
 		if(is_null($template) || !file_exists($template)) {
 			return(FALSE);
@@ -68,7 +72,18 @@ class fileList {
 		return($output);
 		
 	}
-	
+
+	/**
+	 * Get some attributes
+	 *
+	 * @param array $attPairs
+	 *   - type:      rowcolor,rowclass,count,zeroCount,url,directory
+	 *   - oddcolor:  asd
+	 *   - evencolor: asd
+	 *   - oddclass:  asd
+	 *   - evenclass: asd
+	 * @return string
+	 */
 	public function getAttribute($attPairs) {
 		global $engineVars;
 		
@@ -115,7 +130,11 @@ class fileList {
 		}
 		return($output);
 	}
-	
+
+	/**
+	 * Parse some XML
+	 * Uses $this->xmlFile and Modifies $this->files
+	 */
 	private function parseXML() {
 		
 		for($I=0;$I<count($this->xmlFile->file);$I++) {
@@ -137,23 +156,6 @@ class fileList {
 		usort($this->files, array($this, "compareValues"));
 		
 	}
-	
-	private function compareValues($a, $b){
-		
-		$sort = $this->sortType;
-		
-		if (!isset($a[$sort]) || !isset($b[$sort])) {
-			return(0);
-		}
-		
-        $al = strtolower($a[$sort]);
-        $bl = strtolower($b[$sort]);
-        if ($al == $bl) {
-            return 0;
-        }
-        return ($al > $bl) ? 1 : -1;
-    }
-	
 }
 
 ?>
