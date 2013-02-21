@@ -18,24 +18,27 @@ class photoAlbum {
 	public $groupImages = TRUE; 
 	
 	private $photos = array();
-	
+
+	/**
+	 * Class constructor
+	 * @param string $directory
+	 *        The directory where the photos are
+	 */
 	function __construct($directory=NULL) {
-		
-		if (isnull($directory) || !file_exists($directory)) {
-			return(FALSE);
-		}
-		
 		global $engineVars;
-		
+
+		if(isnull($directory) || !file_exists($directory)) return(FALSE);
 		include_once($engineVars['phpthumb']);
 		
-		$this->engine      = EngineAPI::singleton();
-		$this->dir         = $directory;
+		$this->engine = EngineAPI::singleton();
+		$this->dir    = $directory;
 	}
-	
-	function __destruct() {
-	}
-	
+
+	/**
+	 * Generates HTML for image thumbnails
+	 *
+	 * @return string
+	 */
 	public function displayThumbnails() {
 		$output = "";
 		foreach ($this->photos as $I=>$V) {
@@ -54,7 +57,12 @@ class photoAlbum {
 		}
 		return($output);
 	}
-	
+
+	/**
+	 * Look through a directory grabbing images
+	 *
+	 * @param string $directory
+	 */
 	public function scanDir($directory=NULL) {
 		global $engineVars;
 		
