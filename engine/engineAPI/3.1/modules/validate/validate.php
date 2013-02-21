@@ -1,6 +1,32 @@
 <?php
 class validate {
 
+	// Method names that should not be returned as validationMethods
+	private static $ignoredMethods = array("validationMethods", "csvValue");
+
+	// returns all the valid validation methods
+	public static function validationMethods() {
+		$methods = get_class_methods(__CLASS__);
+
+		foreach ($methods as $I=>$V) {
+			if (in_array($V,self::$ignoredMethods)) {
+				unset($methods[$I]);
+			}
+		}
+		
+		return($methods);
+	}
+
+	public static function isValidMethod($validationType) {
+
+		if (in_array($validationType,self::validationMethods())) {
+			return(TRUE);
+		}
+
+		return(FALSE);
+
+	}
+
     public static function csvValue($testName, $string){
         $testName = strtolower($testName);
         $classMethods = array_map('strtolower', get_class_methods(__CLASS__));
