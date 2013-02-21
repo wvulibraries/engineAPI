@@ -30,7 +30,8 @@ class permissionObject {
 		$this->engine   = EngineAPI::singleton();
 		$this->database = ($database instanceof engineDB) ? $database : $this->engine->openDB;
 
-		$sql = sprintf("SELECT value FROM `%s` ORDER BY value + 0", $this->database->escape($this->table));
+		$sql = sprintf("SELECT value FROM `%s` ORDER BY value + 0",
+			$this->database->escape($this->table));
 		$sqlResult = $this->database->query($sql);
 
 		if(!$sqlResult['result']) return webHelper_errorMsg("Error pulling permissions from table in Constructor");
@@ -50,7 +51,9 @@ class permissionObject {
 	public function insert($function) {
 
 		// Check for Duplicates
-		$sql = sprintf("SELECT * FROM `%s` WHERE name='%s'", $this->engine->dbTables($this->table), $this->database->escape($function));
+		$sql = sprintf("SELECT * FROM `%s` WHERE name='%s'",
+			$this->engine->dbTables($this->table),
+			$this->database->escape($function));
 		$sqlResult = $this->database->query($sql);
 
 		if(!$sqlResult['result']) return(FALSE);
@@ -107,7 +110,8 @@ class permissionObject {
 	 * @return string
 	 */
 	public function buildFormChecklist($permissions) {
-		$sql = sprintf("SELECT * FROM `%s`", $this->database->escape($this->engine->dbTables("permissions")));
+		$sql = sprintf("SELECT * FROM `%s`",
+			$this->database->escape($this->engine->dbTables("permissions")));
 		$sqlResult = $this->database->query($sql);
 
 		if(!$sqlResult['result']) return webHelper_errorMsg("Error pulling permissions from table.");
@@ -135,7 +139,8 @@ class permissionObject {
 	 * @return string
 	 */
 	private function generateNextNumber() {
-		$sql = sprintf("SELECT value FROM `%s`", $this->database->escape($this->engine->dbTables($this->table)));
+		$sql = sprintf("SELECT value FROM `%s`",
+			$this->database->escape($this->engine->dbTables($this->table)));
 		$sqlResult = $this->database->query($sql);
 
 		$count = "0";
