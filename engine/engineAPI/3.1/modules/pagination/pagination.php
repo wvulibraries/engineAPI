@@ -13,18 +13,21 @@ class pagination {
 	public $displayedPages	= 7;
 	public $displayPrevNext	= "yes";
 
-	private $cleanGet = NULL;
+	/**
+	 * @var array
+	 */
+	private $cleanGet;
 
 	function __construct($total) {
-
 		$engine = EngineAPI::singleton();
-
 		$this->cleanGet = $engine->cleanGet;
-
 		$this->totalItems = $total;
-
 	}
 
+	/**
+	 * Generate HTML navBar for pagination
+	 * @return string
+	 */
 	public function nav_bar() {
 
 		$output = "";
@@ -139,6 +142,13 @@ class pagination {
 	}
 
 
+	/**
+	 * Returns an array with the page limits
+	 *
+	 * @return array
+	 *   - lowLimit:
+	 *   - highLimit:
+	 */
 	public function getLimits() {
 
 		$output = array();
