@@ -1,25 +1,35 @@
 <?php
 class validate {
 
-	// Method names that should not be returned as validationMethods
-	private static $ignoredMethods = array("validationMethods", "csvValue");
+	// method names and their 'human readable' versions
+	private static $availableMethods = array(
+		"regexp"               => "Regular Expression",
+		"phoneNumber"          => "Phone Number",
+		"ipAddr"               => "ipAddr",
+		"ipAddrRange"          => "ipAddrRange",
+		"optionalURL"          => "URL (Optional)",
+		"url"                  => "URL",
+		"emailAddr"            => "Email",
+		"internalEmailAddr"    => "Email (Internal)",
+		"integer"              => "Integer",
+		"integerSpaces"        => "Integer (w/ Spaces)",
+		"alphaNumeric"         => "Alpha Numeric",
+		"alphaNumericNoSpaces" => "Alpha/Numeric (No Spaces)",
+		"alpha"                => "Alphabetic Only",
+		"alphaNoSpaces"        => "Alphabetic Only (No Spaces)",
+		"noSpaces"             => "No Spaces",
+		"noSpecialChars"       => "No Special Characters",
+		"date"                 => "date"
+		);
 
 	// returns all the valid validation methods
 	public static function validationMethods() {
-		$methods = get_class_methods(__CLASS__);
-
-		foreach ($methods as $I=>$V) {
-			if (in_array($V,self::$ignoredMethods)) {
-				unset($methods[$I]);
-			}
-		}
-		
-		return($methods);
+		return(self::$availableMethods);
 	}
 
 	public static function isValidMethod($validationType) {
 
-		if (in_array($validationType,self::validationMethods())) {
+		if (array_key_exists($validationType,self::validationMethods())) {
 			return(TRUE);
 		}
 
