@@ -5,17 +5,18 @@ class localvars {
 	private static $localvars = array();
 	
 	function __construct() {		
-
 		EngineAPI::defTempPatterns("/\{local\s+(.+?)\}/","localvars::templateMatches",$this);
 	}
-	
-	function __destruct() {
-	}
-	
+
+	/**
+	 * Engine tag handler
+	 * @param $matches
+	 *        Matches passed by template handler
+	 * @return string
+	 */
 	public static function templateMatches($matches) {
-		
-		$engine        = EngineAPI::singleton();
-		$eapi_function = $engine->retTempObj("eapi_function");
+//		$engine        = EngineAPI::singleton();
+//		$eapi_function = $engine->retTempObj("eapi_function");
 		$attPairs      = attPairs($matches[1]);
 		
 		if (isset(self::$localvars[$attPairs['var']]) && !is_empty(self::$localvars[$attPairs['var']])) {
@@ -25,7 +26,16 @@ class localvars {
 		return("");
 		
 	}
-	
+
+	/**
+	 * Add a localvar
+	 *
+	 * @deprecated
+	 * @param string $var
+	 * @param mixed $value
+	 * @param bool $null
+	 * @return bool
+	 */
 	public static function add($var,$value,$null=FALSE) {
 		
 		if (isnull($value) && $null === TRUE) {
@@ -41,7 +51,15 @@ class localvars {
 		return(FALSE);
 		
 	}
-	
+
+	/**
+	 * Let a local var
+	 *
+ 	 * @deprecated
+	 * @param string $var
+	 * @param string $default
+	 * @return mixed
+	 */
 	public static function get($var,$default="") {
 		
 		if (array_key_exists($var,self::$localvars)) {
@@ -54,7 +72,14 @@ class localvars {
 		return($default);
 		
 	}
-	
+
+	/**
+	 * Delete a localvar
+	 *
+	 * @deprecated
+	 * @param string $var
+	 * @return bool
+	 */
 	public static function del($var) {
 		
 		if (array_key_exists($var,self::$localvars)) {
@@ -65,7 +90,21 @@ class localvars {
 		return(FALSE);
 		
 	}
-	
+
+	/**
+	 * Smartly set/get localvar
+	 * If only $var is passed, will get $var
+	 * Else will set $var to $value
+	 *
+	 * @see self::add();
+	 * @see self::get();
+	 * @deprecated
+	 * @param string $var
+	 * @param mixed $value
+	 * @param bool $null
+	 *        Pass-through to self::add()
+	 * @return mixed
+	 */
 	public static function variable($var,$value=NULL,$null=FALSE) {
 		
 		if (isnull($value) && $null === FALSE) {
@@ -75,14 +114,21 @@ class localvars {
 		return self::add($var,$value,$null);
 		
 	}
-	
+
+	/**
+	 * Return array of all localvars
+	 *
+	 * @deprecated
+	 * @return array
+	 */
 	public static function export() {
 		return self::$localvars;
 	}
 
     /**
      * This will import a key->value database table into local vars (very useful for a 'settings' table)
-     * @static
+	 *
+	 * @deprecated
      * @param $tblName      - The database table
      * @param $nameField    - The table field holding the setting name
      * @param $valueField   - The table field holding the setting value
