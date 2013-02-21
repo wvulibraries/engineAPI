@@ -164,6 +164,5 @@ class pagination {
 
 		return $output;
 	}
-
 }
 ?>
