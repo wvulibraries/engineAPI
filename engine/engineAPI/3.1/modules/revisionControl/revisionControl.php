@@ -1,28 +1,68 @@
 <?php
 
 class revisionControl {
+	/**
+	 * Display controls to revert to revision
+	 * @var bool
+	 */
+	public $displayRevert = TRUE;
+	/**
+	 * Display controls to compare 2 revisions
+	 * @var bool
+	 */
+	public $displayCompare = TRUE;
 
-	public $displayRevert  = TRUE; // Display controls to revert to revision
-	public $displayCompare = TRUE; // Display controls to compare 2 revisions
-	
-	private $productionTable = NULL;
-	private $revisionTable   = NULL;
-	private $primaryID 	 	 = NULL; // Key in production table
-	private $secondID 	 	 = NULL; // secondary key in revision table, will usually be a modified date
-	
-	private $engine = NULL;
-	private $openDB = NULL;
+	/**
+	 * Production table name
+	 * @var string
+	 */
+	private $productionTable;
 
+	/**
+	 * Revision table name
+	 * @var
+	 */
+	private $revisionTable;
+
+	/**
+	 * Database column which is the primary key for the production table
+	 * @var string
+	 */
+	private $primaryID;
+
+	/**
+	 * Database column which is the secondary key for the production table
+	 * (will usually be a modified date)
+	 * @var string
+	 */
+	private $secondID;
+
+	/**
+	 * @var EngineAPI
+	 */
+
+	private $engine;
+	/**
+	 * @var engineDB
+	 */
+	private $openDB;
+
+	/**
+	 * Class constructor
+	 *
+	 * @param string $productionTable
+	 * @param string $revisionTable
+	 * @param string $primaryID
+	 * @param string $secondID
+	 * @param engineDB $database
+	 */
 	function __construct($productionTable,$revisionTable,$primaryID,$secondID,$database=NULL) {
 		$this->engine = EngineAPI::singleton();
-		
-		if (!is_null($database) && $database instanceof engineDB) {
-			$this->openDB = $database;
-		}
-		else {
-			$this->openDB = $this->engine->openDB;
-		}
-		
+
+		$this->openDB = $database instanceof engineDB
+			? $database
+			: $this->engine->openDB;
+
 		$this->productionTable = $productionTable;
 		$this->revisionTable   = $revisionTable;
 		$this->primaryID 	   = $primaryID;
@@ -30,24 +70,26 @@ class revisionControl {
 		
 	}
 	
-	function __destruct() {
-	}
-
-
-	// $primary : Primary key field name in $toTable
-	// $ID : value of $primary
+	/**
+	 * Add new revision
+	 *
+	 * $primary: Primary key field name in $toTable
+	 * $ID: value of $primary
+	 *
+	 * @todo Figure out what $ID and $ID2 are
+	 * @param $ID
+	 * @param $ID2
+	 * @return bool
+	 */
 	public function insertRevision($ID,$ID2 = NULL) {
-
-
-		// check to see if this revision is already in the table. 
+		// check to see if this revision is already in the table.
 		// if so, don't try to insert again	
 		if (isnull($ID2)) {
-			$sql       = sprintf("SELECT %s FROM %s WHERE %s='%s'",
+			$sql = sprintf("SELECT %s FROM %s WHERE %s='%s'",
 				$this->openDB->escape($this->secondID),
 				$this->openDB->escape($this->productionTable),
 				$this->openDB->escape($this->primaryID),
-				$this->openDB->escape($ID)
-				);
+				$this->openDB->escape($ID));
 			$sqlResult = $this->openDB->query($sql);
 
 			if (!$sqlResult['result']) {
@@ -74,16 +116,12 @@ class revisionControl {
 			return(FALSE);
 		}
 
-		$row       = mysql_fetch_array($sqlResult['result'],  MYSQL_ASSOC);
+		$row = mysql_fetch_array($sqlResult['result'],  MYSQL_ASSOC);
 
-		if ($row["COUNT(*)"] > 0) {
-			return(TRUE);
-		}
-
+		if($row["COUNT(*)"] > 0) return(TRUE);
 		/* ** End Count Check ** */
 
 		// Do the insert
-		
 		$sql = sprintf("INSERT INTO %s (SELECT * FROM %s WHERE %s='%s' AND %s='%s' LIMIT 1)",
 			$this->openDB->escape($this->revisionTable),
 			$this->openDB->escape($this->productionTable),
@@ -101,25 +139,27 @@ class revisionControl {
 		}
 		
 		return(TRUE);
-		
 	}
 
-	// $fromTable : revision table
-	// $toTable : primary table
-	// $ID : value of $primary
-	// $ID2 : value of $secondary
+	/**
+	 * Revert a revision
+	 *
+	 * @todo figure out params
+	 * @param $ID
+	 *        value of $primary
+	 * @param $ID2
+	 *        value of $secondary
+	 * @return bool
+	 */
 	public function revert2Revision($ID,$ID2) {
-		
 		$sql = sprintf("REPLACE INTO %s (SELECT * FROM %s WHERE %s='%s' AND %s='%s' LIMIT 1)",
 			$this->openDB->escape($this->productionTable),
 			$this->openDB->escape($this->revisionTable),
 			$this->openDB->escape($this->primaryID),
 			$this->openDB->escape($ID),
 			$this->openDB->escape($this->secondID),
-			$this->openDB->escape($ID2)
-		);
-
-		$sqlResult                = $this->openDB->query($sql);
+			$this->openDB->escape($ID2));
+		$sqlResult = $this->openDB->query($sql);
 		
 		if (!$sqlResult['result']) {
 			errorHandle::newError("Error copying revision to production table. sql: ".$sql." sql Error = ".$sqlResult['error'], errorHandle::CRITICAL);
@@ -130,12 +170,20 @@ class revisionControl {
 		
 	}
 
-	// $ID : value of the $primaryIDField. NOT SANITIZED, Expects clean value.
-	// $revisionDisplayFields is an array that contains inforamtion about each field to be displayed in the
-	// 	revision table. Indexes are "field", "label", and "translation". Field is the field name in the actual table.
-	// 	label is the heading for that field in the display table. Translation is optional. if present it must be either
-	// 	and array or a function. if an array, each index of the array must corrispond do a potential value. if a function
-	//	that function must take an argument, which is the value of the field.
+	/**
+	 * Generate HMTL revision table
+	 * @param $ID
+	 *        value of the $primaryIDField. NOT SANITIZED, Expects clean value.
+	 * @param $revisionDisplayFields
+	 *        Array of display fields
+	 *        Keys:
+	 *          - field: field name in the actual table
+	 *          - label: heading for that field in the display table
+	 *          - translation: [optional] if present it must be either an array or a function
+	 *            if an array, each index of the array must corrispond do a potential value.
+	 *            if a function chat function must take an argument, which is the value of the field.
+	 * @return bool|string
+	 */
 	public function generateRevistionTable($ID,$revisionDisplayFields) {
 	
 		$sql = sprintf("SELECT * FROM %s WHERE %s='%s'",
@@ -217,6 +265,13 @@ class revisionControl {
 
 	}
 
+	/**
+	 * Process a submission from the revision table
+	 *
+	 * @param $ID
+	 * @param $ID2
+	 * @return bool
+	 */
 	public function revertSubmit($ID,$ID2) {
 	
 		// begin database transactions
