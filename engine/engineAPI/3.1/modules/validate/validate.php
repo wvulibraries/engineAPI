@@ -1,7 +1,11 @@
 <?php
 class validate {
 
-	// method names and their 'human readable' versions
+	/**
+	 * Mapping of available validators and their human-readable names
+	 * Format: "method_name" => "Human readable name"
+	 * @var array
+	 */
 	private static $availableMethods = array(
 		"regexp"               => "Regular Expression",
 		"phoneNumber"          => "Phone Number",
@@ -22,11 +26,22 @@ class validate {
 		"date"                 => "date"
 		);
 
-	// returns all the valid validation methods
+	/**
+	 * Returns the mapping array available validators
+	 *
+	 * @see self::$availableMethods
+	 * @return array
+	 */
 	public static function validationMethods() {
 		return(self::$availableMethods);
 	}
 
+	/**
+	 * Returns true if if validationType is a valid validator
+	 *
+	 * @param $validationType
+	 * @return bool
+	 */
 	public static function isValidMethod($validationType) {
 
 		if (array_key_exists($validationType,self::validationMethods())) {
@@ -37,7 +52,18 @@ class validate {
 
 	}
 
-    public static function csvValue($testName, $string){
+	/**
+	 * Applies a supplied testName validation to members of a CSV string
+	 *
+	 * @todo This looks broken around line 'if(!self::$stringPart($stringPart)) return FALSE;'
+	 * @todo Look at some code improvements to make it more stable
+	 * @param string $testName
+	 *        The validation method to apply to the members of @string
+	 * @param string $string
+	 *        A CSV of value(s) to which $testName validatioin is applied
+	 * @return bool
+	 */
+	public static function csvValue($testName, $string){
         $testName = strtolower($testName);
         $classMethods = array_map('strtolower', get_class_methods(__CLASS__));
         if(!$classMethods) $classMethods = array();
@@ -53,6 +79,17 @@ class validate {
         }
     }
 
+	/**
+	 * Validates against a regular expression
+	 *
+	 * @param string $regexp
+	 *        The regular expression
+	 * @param string $test
+	 *        The value to test
+	 * @return bool|null
+	 *         Boolean: Regex matched or didn't match
+	 *         Null: Regex returned an error
+	 */
 	public static function regexp($regexp,$test) {
 		$match = @preg_match($regexp,$test);
 		
@@ -74,25 +111,40 @@ class validate {
 		return(FALSE);
 	}
 	
-	// Matches the following
-	// [+]CountryCode Delimiter [(]AreaCode[)] Delimiter Exchange Delimiter Number [x|ext|extension]delimiter extension
-	// country code is optional (plus sign is optional)
-	// Area code is required
-	// Delimiters between numbers are required, and can be "-", ".", or " "
-	// Extension is optional (ext or extension), delimiter, after word, is required and can be "." or ":"
+	/**
+	 * Validate as a phone number
+	 * Roughly matches: [+]CountryCode Delimiter [(]AreaCode[)] Delimiter Exchange Delimiter Number [x|ext|extension]delimiter extension
+	 *   - Area code is required
+	 *   - Delimiters are required and can be '-', '.', or ' '
+	 *   - Extension is optional as 'ext' or 'extension' followed by a delim of '.' or ':'
+	 *
+	 * @todo Could probably use a little work to accept other formats?
+	 * @param $number
+	 * @return bool|null
+	 */
 	public static function phoneNumber($number) {
 		$phoneRegex = "/^\s*(\+?\d+\s*(\-|\ |\.)\s*)?\(?\d{3}\)?\s*(\-|\ |\.)\s*\d{3}\s*(\-|\ |\.)\s*\d{4}(\s*(\s|ext(\.|\:)?|extension\:?|x(\.|\:)?)\s*\d+)?$/";
 		
 		return(self::regexp($phoneRegex,$number));
 	}
 	
-	// Checks against regex for valid IP. 
+	/**
+	 * Validate as an IP Address
+	 *
+	 * @param string $ip
+	 * @return bool|null
+	 */
 	public static function ipAddr($ip) {
 		$ipRegex = "/^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/";
 		return(self::regexp($ipRegex,$ip));
 	}
 	
-	// Checks against regex for valid IP Range.
+	/**
+	 * Validate as an IP range
+	 *
+	 * @param string $ip
+	 * @return bool|null
+	 */
 	public static function ipAddrRange($ip) {
 		$ipAddr  = "(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)";
         $ipGroup = "(?:$ipAddr|$ipAddr-$ipAddr|\*)";
@@ -100,7 +152,13 @@ class validate {
 		return(self::regexp("/^$ipRange$/",$ip));
 	}
 
-	// Allow just about anything, but if it appears to be a URL it must be a valid URL
+	/**
+	 * Validate as a potential URL
+	 * Allow just about anything, but if it appears to be a URL it must be a valid URL
+	 *
+	 * @param string $url
+	 * @return bool|null
+	 */
 	public static function optionalURL($url) {
 		$urlCheckRegex = "/^(https?|ftp|ssh|telnet)\:\/\/.+/";
 		$urlTest       = self::regexp($urlCheckRegex,$url);
@@ -111,7 +169,13 @@ class validate {
 
 		return(TRUE);
 	}
-	
+
+	/**
+	 * Validate as URL
+	 *
+	 * @param string $url
+	 * @return bool|null
+	 */
 	public static function url($url) {
 		
 		// Regex stolen from
@@ -120,7 +184,16 @@ class validate {
 
 		return(self::regexp($urlregex,$url));
 	}
-	
+
+	/**
+	 * Validate as email address
+	 *
+	 * @see self::internalEmailAddr()
+	 * @param string $email
+	 * @param bool $internal
+	 *        If true, also validate against self::internalEmailAddr()
+	 * @return bool
+	 */
 	public static function emailAddr($email,$internal=FALSE) {
 
 		if(filter_var($email, FILTER_VALIDATE_EMAIL)) {
@@ -136,6 +209,13 @@ class validate {
 		return(FALSE);
 	}
 
+	/**
+	 * Validate as an 'internal' email address
+	 * Runs the email through regex's in $engineVars['internalEmails'] for a match
+	 *
+	 * @param string $email
+	 * @return bool
+	 */
 	public static function internalEmailAddr($email) {
 		global $engineVars;
 
@@ -147,7 +227,14 @@ class validate {
 
 		return(FALSE);
 	}
-	
+
+	/**
+	 * Validate as an integer
+	 * (ex: '1234')
+	 *
+	 * @param int $test
+	 * @return bool|null
+	 */
 	public static function integer($test) {
 
 		if (is_numeric($test) === FALSE) {
@@ -161,42 +248,99 @@ class validate {
 		$regexp = "/^[0-9]+$/";
 		return(self::regexp($regexp,$test));
 	}
-	
+
+	/**
+	 * Validates as an integer with spaces allowed
+	 * (ex: '12 34')
+	 *
+	 * @param string $test
+	 * @return bool|null
+	 */
 	public static function integerSpaces($test) {
 		$regexp = "/^[0-9\ ]+$/";
 		return(self::regexp($regexp,$test));
 	}
-	
+
+	/**
+	 * Validates as alpha-numerical with spaces allowed
+	 * (ex: 'abc123def456')
+	 *
+	 * @param string $test
+	 * @return bool|null
+	 */
 	public static function alphaNumeric($test) {
 		$regexp = "/^[a-zA-Z0-9\-\_\ ]+$/";
 		return(self::regexp($regexp,$test));
 	}
-	
+
+	/**
+	 * Validates as alpha-numerical
+	 * (ex: 'abc123')
+	 *
+	 * @param string $test
+	 * @return bool|null
+	 */
 	public static function alphaNumericNoSpaces($test) {
 		$regexp = "/^[a-zA-Z0-9\-\_]+$/";
 		return(self::regexp($regexp,$test));
 	}
-	
+
+	/**
+	 * Validates as alphabetical with spaces allowed
+	 * (ex: 'abc def')
+	 *
+	 * @param string $test
+	 * @return bool|null
+	 */
 	public static function alpha($test) {
 		$regexp = "/^[a-zA-Z\ ]+$/";
 		return(self::regexp($regexp,$test));
 	}
-	
+
+	/**
+	 * Validates as alphabetical
+	 * (ex: 'abcdef')
+	 *
+	 * @param string $test
+	 * @return bool|null
+	 */
 	public static function alphaNoSpaces($test) {
 		$regexp = "/^[a-zA-Z]+$/";
 		return(self::regexp($regexp,$test));
 	}
-	
+
+	/**
+	 * Validates as text with no spaces
+	 * (ex: fails for 'abc 123')
+	 *
+	 * @param string $test
+	 * @return bool|null
+	 */
 	public static function noSpaces($test) {
 		$regexp = "/^[^\ ]+$/";
 		return(self::regexp($regexp,$test));
 	}
-	
+
+	/**
+	 * Validates as no special characters
+	 *
+	 * @param $test
+	 * @return bool|null
+	 */
 	public static function noSpecialChars($test) {
 		$regexp = "/^[^\W]+$/";
 		return(self::regexp($regexp,$test));
 	}
-	
+
+	/**
+	 * Validates as a valid date format
+	 *
+	 * @todo Add more flexibility with something like strtotime()
+	 * @todo Add valid date checking (not just valid format) with checkdate()
+	 * @param $test
+	 * @param string $delim
+	 * @return bool|null
+	 */
 	public static function date($test,$delim="/") {
 		
 		if ($delim == "/") {
@@ -207,8 +351,13 @@ class validate {
 		return(self::regexp($regexp,$test));
 	}
 
-	// Stolen from php.net 
-	// http://us1.php.net/manual/en/function.unserialize.php#85097
+	/**
+	 * Validates as serialized string
+	 *
+	 * @see http://us1.php.net/manual/en/function.unserialize.php#85097
+	 * @param $str
+	 * @return bool
+	 */
 	public static function serialized($str) {
 		return ($str == serialize(false) || @unserialize($str) !== false);
 	}
