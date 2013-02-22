@@ -12,7 +12,13 @@ class rss {
 	public $description   = NULL;
 	public $lastBuildDate = NULL;
 	public $language      = "en-us";
-	
+
+	/**
+	 * Class constructor
+	 *
+	 * @param string $type
+	 *        Type of RSS (Right now only rss2.0 is supported)
+	 */
 	function __construct($type = "rss2.0") {
 		global $engineVars;
 		
@@ -27,7 +33,16 @@ class rss {
 		$this->template = $this->builtTemplate($this->templateFile);
 		
 	}
-	
+
+	/**
+	 * Add an item to the RSS feed
+	 *
+	 * @param $title
+	 * @param $link
+	 * @param $guid
+	 * @param $pubDate
+	 * @param $description
+	 */
 	public function addItem($title,$link,$guid,$pubDate,$description) {
 		
 		$tArray = array();
@@ -40,7 +55,14 @@ class rss {
 		$this->rssItems[] = $tArray;
 		
 	}
-	
+
+	/**
+	 * Build the RSS feed
+	 *
+	 * @param bool $html
+	 *        If true, passes the results through htmlentities()
+	 * @return string
+	 */
 	public function buildRSS($html = FALSE) {
 		
 		$rss = "";
@@ -80,7 +102,13 @@ class rss {
 		return($rss);
 		
 	}
-	
+
+	/**
+	 * Build RSS template
+	 *
+	 * @param string $file
+	 * @return array
+	 */
 	private function builtTemplate($file) {
 		$temp = file($file);
 		
@@ -116,9 +144,6 @@ class rss {
 		return($template);
 		
 	}
-	
-	
-	
 }
 
 ?>
