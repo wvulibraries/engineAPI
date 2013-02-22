@@ -1,4 +1,7 @@
 <?php
+/**
+ * Legacy search module
+ */
 class search {
 
 	private $engine         = NULL;
@@ -30,10 +33,14 @@ class search {
 		}
 	}
 
-	function __destruct() {
-	}
-
-
+	/**
+	 * Creates working temp table to operate on
+	 *
+	 * @param string $table
+	 *        The name to be used for the temp table.
+	 *        Will be prefixed with $this->tempTablePrefix
+	 * @return string
+	 */
 	public function createTable($table) {
 
 		if (empty($this->fields)) {
@@ -140,14 +147,26 @@ class search {
 
 	}
 
+	/**
+	 * Add a field to the fields list
+	 * @param $attPairs
+	 */
 	public function addField($attPairs) {
 		$this->fields[] = $attPairs;
 	}
 
+	/**
+	 * Add a link (eg for a JOIN) to the links list
+	 * @param $attPairs
+	 */
 	public function addLink($attPairs) {
 		$this->links[] = $attPairs;
 	}
 
+	/**
+	 * Reset table definitions
+	 * Clears: fields, links, whereClause, and orderBy
+	 */
 	private function destroyTableDefs() {
 
 		unset($this->fields);
@@ -161,7 +180,11 @@ class search {
 
 	}
 
-
+	/**
+	 * Perform search
+	 *
+	 * @return string
+	 */
 	public function submit() {
 
 		$engine  = EngineAPI::singleton();
@@ -236,7 +259,11 @@ class search {
 
 	}
 
-
+	/**
+	 * Display the results of a search operation
+	 * @param $results
+	 * @return string
+	 */
 	private function displayResults($results) {
 
 		if (count($results) ==0) {
@@ -332,6 +359,12 @@ class search {
 
 	}
 
+	/**
+	 * Recursively makes sure items of an array are unique
+	 *
+	 * @param $array
+	 * @return array
+	 */
 	private function super_unique($array) {
 		$result = array_map("unserialize", array_unique(array_map("serialize", $array)));
 
@@ -343,6 +376,10 @@ class search {
 		return $result;
 	}
 
+	/**
+	 * Create the search array
+	 * @return array
+	 */
 	private function createSearchArray() {
 
 		$engine        = EngineAPI::singleton();
@@ -373,6 +410,10 @@ class search {
 
 	}
 
+	/**
+	 * @param $searchStr
+	 * @return array
+	 */
 	private function searchStringToArray($searchStr) {
 
 		$keywords = array();
@@ -413,6 +454,10 @@ class search {
 	}
 
 
+	/**
+	 * @param null $searchArray
+	 * @return string
+	 */
 	private function convertSearchArrayToBoolForm($searchArray=NULL) {
 
 		if (isnull($searchArray)) {
@@ -585,7 +630,14 @@ class search {
 
 	}
 
-
+	/**
+	 * Display HTML search form
+	 * @param int $rows
+	 *        Number of rows to display
+	 * @param bool $addGet
+	 *        If true, current server QUERY_STRING will be added to form action
+	 * @return string
+	 */
 	public function displayForm($rows=1,$addGet=TRUE) {
 
 		$engine = EngineAPI::singleton();
