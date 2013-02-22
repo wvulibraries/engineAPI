@@ -17,7 +17,14 @@ class Snippet {
 	
 	public $pattern           = "/\{snippet\s+(.+?)\}/";
 	public $function          = "Snippet::templateMatches";
-	
+
+	/**
+	 * @param string $table
+	 *        Database table where snippets are stored
+	 * @param string $field
+	 *        Database table field where snippets are stored
+	 *
+	 */
 	function __construct($table,$field=NULL) {
 		$this->engine    = EngineAPI::singleton();
 		
@@ -39,7 +46,12 @@ class Snippet {
 	
 	function __destruct() {
 	}
-	
+
+	/**
+	 * Engine template tag handler for {snippet id="" field=""}
+	 * @param $matches
+	 * @return string
+	 */
 	public static function templateMatches($matches) {
 
 		$engine   = EngineAPI::singleton();
@@ -56,14 +68,23 @@ class Snippet {
 
 	}
 	
-	/* valid Types:
-	 ol = ordered List
-	 ul = unordered List
-	 li = list elements (no parent OL or UL tags)
-	 br = <br /> seperated <a>'s 
-	
-	class is the class that is applied to the snippet list. 
-	*/
+	/**
+	 * Generate an HTML list of snippets
+	 *
+	 * @param string $class
+	 *        The CSS class that is applied to the snippet list.
+	 * @param string $type
+	 *        Type of list to generate
+	 *          - ol: ordered List
+	 *          - ul: unordered List
+	 *          - li: list elements (no parent OL or UL tags)
+	 *          - br: <br /> separated <a>'s
+	 * @param bool $collapse
+	 *        If True, will generate collapsible snippets
+	 * @param bool $showURL
+	 *
+	 * @return string
+	 */
 	public function insertSnippetList($class="we_snippetList",$type="ul",$collapse=FALSE,$showURL=FALSE) {
 		
 		global $engineVars;
@@ -192,7 +213,16 @@ class Snippet {
 
 		return($output);
 	}
-	
+
+	/**
+	 * Display a snippet from the database
+	 *
+	 * @todo optimize SQL
+	 * @todo Remove usage of deprecated webHelper_successMsg()
+	 * @param $id
+	 * @param $field
+	 * @return string
+	 */
 	public function display($id,$field) {
 		
 		$sql = sprintf("SHOW INDEXES FROM %s",
@@ -225,7 +255,15 @@ class Snippet {
 		
 		return($row[$field]);
 	}
-	
+
+	/**
+	 * Delete a snippet from the database
+	 *
+	 * @todo optimize SQL
+	 * @todo Remove usage of deprecated webHelper_successMsg()
+	 * @param $id
+	 * @return string
+	 */
 	public function delete($id) {
 
 		$sql = sprintf("SHOW INDEXES FROM %s",
