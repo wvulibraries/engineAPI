@@ -1,4 +1,9 @@
 <?php
+/**
+ * Search driver for the Solr Search Engine
+ * WARNING: This object is not finished, and has been abandoned for the moment
+ * @todo Finish the object
+ */
 class searchSolr implements searchProvider
 {
 	/**
@@ -19,6 +24,7 @@ class searchSolr implements searchProvider
 
 	/**
 	 * Class constructor
+	 * WARNING: This object is not finished, and has been abandoned for the moment
 	 * @param array $cfg
 	 */
 	public function __construct($cfg){
