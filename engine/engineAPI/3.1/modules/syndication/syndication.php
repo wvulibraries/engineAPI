@@ -2,18 +2,40 @@
 
 class syndication {
 
-	// Template Variables
-	private $templateDir = NULL; // The EngineAPI defined syndication template directory
-	public  $template    = NULL; // May be modified directly or with the switchTemplate method
+	/**
+	 * The EngineAPI defined syndication template directory
+	 * @var null
+	 */
+	private $templateDir = NULL;
+	/**
+	 * May be modified directly or with the switchTemplate method
+	 * @var null|string
+	 */
+	public  $template = NULL;
 
-	// Items
-	private $itemFields  = array(); 
-	private $items       = array();
+	/**
+	 * Items
+	 * @var array
+	 */
+	private $itemFields = array();
+	/**
+	 * Items
+	 * @var array
+	 */
+	private $items = array();
 
-	// General
+	/**
+	 * General
+	 * @var array
+	 */
 	private $syndicationMetadata = array();
 
-	// Template - Optional, string, template to use (located in EngineAPI syndication template directory)
+	/**
+	 * Class constructor
+	 *
+	 * @param string $template
+	 *        Template to use (located in EngineAPI syndication template directory)
+	 */
 	function __construct($template=NULL) {
 
 		$engine = EngineAPI::singleton();
@@ -26,14 +48,17 @@ class syndication {
 
 	}
 
-	/*
-	expects: 
-	$template - string, the filename of the template to be used
-	$dir - optional, string, the directory where the template is located. If it is located in the EngineAPI syndication directory, dir may be omitted.
-
-	Returns:
-	Bool - TRUE if the file exists and is readable, false otherwise.
-	*/
+	/**
+	 * Switches the active syndication template
+	 *
+	 * @param string $template
+	 *        The filename of the template to be used
+	 * @param string $dir
+	 *        The directory where the template is located.
+	 *        If it is located in the EngineAPI syndication directory, dir may be omitted.
+	 * @return bool
+	 *         TRUE if the file exists and is readable, false otherwise.
+	 */
 	public function switchTemplate($template,$dir=NULL) {
 
 		if (isnull($dir)) {
@@ -57,7 +82,13 @@ class syndication {
 
 	}
 
-
+	/**
+	 * Add an itemField to the syndication
+	 *
+	 * @param string $name
+	 * @param bool $optional
+	 * @return bool
+	 */
 	public function addItemField($name,$optional=FALSE) {
 
 		$this->itemFields[$name]             = array();
@@ -68,9 +99,12 @@ class syndication {
 
 	}
 
-	/*
-	Expects: array
-	*/
+	/**
+	 * Add an item to the syndication
+	 *
+	 * @param array $item
+	 * @return bool
+	 */
 	public function addItem($item) {
 
 		$itemTemp = array();
@@ -96,11 +130,24 @@ class syndication {
 	}
 
 
+	/**
+	 * Add metadata to the syndication
+	 *
+	 * @param string $name
+	 * @param mixed $data
+	 * @return bool
+	 */
 	public function syndicationMetadata($name,$data) {
 		$this->syndicationMetadata[$name] = $data;
 		return(TRUE);
 	}
 
+	/**
+	 * Build the XML
+	 *
+	 * @param bool $html
+	 * @return bool|string
+	 */
 	public function buildXML($html = FALSE) {
 
 		$template = $this->buildTemplate();
@@ -146,6 +193,16 @@ class syndication {
 
 	}
 
+
+	/**
+	 * Get a file and return it as SimpleXMLElement
+	 * This applies caching to the requested file
+	 *
+	 * @param string $url
+	 * @param int $cache
+	 * @param string $cacheDir
+	 * @return bool|SimpleXMLElement
+	 */
 	public static function get($url,$cache=NULL,$cacheDir=NULL) {
 
 		$cacheUpdate = (!isnull($cache) && validate::integer($cache))?$cache:EngineAPI::$engineVars['syndicationCache'];
@@ -157,7 +214,7 @@ class syndication {
 
 		$fromCache   = FALSE;
 
-	// Check to see if we should use the current cached download
+		// Check to see if we should use the current cached download
 		if (is_readable($filename) && $currentTime - filemtime($filename) < $cacheUpdate) {
 			$url = $filename;
 			$fromCache = TRUE;
@@ -177,6 +234,11 @@ class syndication {
 
 	}
 
+	/**
+	 * Build template
+	 *
+	 * @return array|bool
+	 */
 	private function buildTemplate() {
 
 		if (isnull($this->template)) {
@@ -221,10 +283,7 @@ class syndication {
 		}
 				
 		return($template);
-
-
 	}
-
 }
 
 ?>
