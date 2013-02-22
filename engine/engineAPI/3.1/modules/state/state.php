@@ -1,15 +1,36 @@
 <?php
-
+/**
+ * I think this is a generic state machine
+ */
 class state {
-	
-	private $name = NULL; // name of the "thing" calling state
-	private $id   = NULL; // ID under name in the session
-	
-	private $states = NULL; // states and the functions that they should run
+	/**
+	 * Name of the "thing" calling state
+	 * @var string
+	 */
+	private $name = NULL;
+	/**
+	 * ID under name in the session
+	 * @var int
+	 */
+	private $id = NULL;
+	/**
+	 * States and the functions that they should run
+	 * @var array
+	 */
+	private $states = NULL;
 	private $stateVarName = "stateModule_state";
-	
-	private $vars   = array(); // all of the variables and metadata that we will be storing in the session 
-	
+
+	/**
+	 * All of the variables and metadata that we will be storing in the session
+	 * @todo this doesn't appear to be used
+	 * @var array
+	 */
+	private $vars = array();
+
+	/**
+	 * @param string $name
+	 * @param int $id
+	 */
 	function __construct($name,$id=NULL) {
 
 		$this->name = $name;
@@ -17,7 +38,15 @@ class state {
 
 	}
 	
-	// if data is null, reserves the spot in the session. 
+	/**
+	 * Set a variable in the session
+	 *
+	 * @todo Why is this public?
+	 * @param string $var
+	 * @param mixed $data
+	 *        If data is null, reserves the spot in the session.
+	 * @return bool
+	 */
 	public function setVariable($var,$data = NULL) {
 	
 		$varArray = $this->genVarArray($var);
@@ -25,7 +54,13 @@ class state {
 		
 	}
 	
-	// returns the data stored in $var
+	/**
+	 * Returns the data stored in $var from the session
+	 *
+	 * @todo Why is this public?
+	 * @param $var
+	 * @return mixed|null
+	 */
 	public function getVariable($var) {
 
 		$varArray = $this->genVarArray($var);
@@ -33,13 +68,14 @@ class state {
 		
 	}
 	
-	/*
-	$states is an array of 
-	("statename" => reference_to_function)
-	
-	should be in the order of execution
-	
-	*/
+	/**
+	 * Sets the internal states array to the passes array
+	 *
+	 * @param array $states
+	 *        An array of states like
+	 *        "statename" => reference_to_function
+	 * @return bool
+	 */
 	public function setStates($states) {
 		if ($this->states = $states) {
 			return(TRUE);
@@ -47,22 +83,41 @@ class state {
 		return(FALSE);
 	}
 	
-	// Set the current state of the application to a specific state. Useful for flow control
-	// that is out of the scope of simple linear operations
+	/**
+	 * Set the current state of the application
+	 * Useful for flow control that is out of the scope of simple linear operations
+	 *
+	 * @param string $state
+	 */
 	public function setCurrentState($state) {
 		$this->setVariable($this->stateVarName,$state);
 	}
-	
+
+	/**
+	 * Clears the current state
+	 *
+	 * @return bool
+	 */
 	public function resetCurrentState() {
 		$varArray = $this->genVarArray($this->stateVarName);
 		return(sessionDelete($varArray));
 	}
-	
+
+	/**
+	 * Gets the current state
+	 *
+	 * @return mixed|null
+	 */
 	public function getCurrentState() {
 		return($this->getVariable($this->stateVarName));
 	}
 	
-	// returns whatever the callback function returns, false is that function does not exist
+	/**
+	 * Executes the function assigned to the current state
+	 * Returns whatever the callback function returns, false if that function does not exist
+	 *
+	 * @return bool|mixed
+	 */
 	public function execute() {
 		
 		$prevState = $this->getCurrentState();
@@ -84,18 +139,34 @@ class state {
 		return($output);
 		
 	}
-	
+
+	/**
+	 * Generate a unique id
+	 *
+	 * @param int $id
+	 * @return int
+	 */
 	private function genID($id) {
 		$id = (is_null($id))?time():$id;
 		return($id);
 	}
-	
+
+	/**
+	 * Gets the current ID
+	 *
+	 * @return int
+	 */
 	public function getID() {
 		return($this->id);
 	}
 	
-	// generates the array that gets passes to sessionSet or sessionGet 
-	// for setting/retrieving variables
+	/**
+	 * Generates the array that gets passes to sessionSet or sessionGet for setting/retrieving variables
+	 *
+	 * @todo Doesn't actually generate an array???
+	 * @param $var
+	 * @return string
+	 */
 	private function genVarArray($var) {
 		
 		// sending back a string, the array was getting replaced incorrectly
