@@ -7,25 +7,52 @@ class revisionControlSystem {
 	public  $digitalObjectsFieldName = "digitalObjects";
 
 	// Variables to configure the Revision Table
-	public 	$displayRevert           = TRUE; // display the revert buttons. Otherwise its a "view only" table
-	public  $displayCompare          = TRUE; // display the radio buttons for comparing items
+	/**
+	 * Display the revert buttons (otherwise its a "view only" table)
+	 * @var bool
+	 */
+	public $displayRevert = TRUE;
+	/**
+	 * display the radio buttons for comparing items
+	 * @var bool
+	 */
+	public  $displayCompare = TRUE;
 
 	private $productionTable = NULL;
 	private $revisionTable   = NULL;
-	private $primaryID 	 	 = NULL; // Key in production table
-	private $secondaryID 	 = NULL; // secondary key in revision table, will usually be a modified date
-									 // secondary key must exist in both the primary and secondary tables
+	/**
+	 * Key in production table
+	 * @var string
+	 */
+	private $primaryID = NULL;
+	/**
+	 * secondary key in revision table, will usually be a modified date
+	 * Note: secondary key must exist in both the primary and secondary tables
+	 * @var string
+	 */
+	private $secondaryID = NULL;
 
+	/**
+	 * @var engineDB
+	 */
 	private $openDB          = NULL;
 	private $excludeFields   = array();
 	private $relatedMappings = array();
 
-	//**
-	//$productionTable = Table where production data is being stored
-	//$revisionTable   = Table where revision information is being stored
-	//$primaryID       = field name of the primary key in the production table
-	//$secondaryID     = field name of the secondary key in the revision table
-	//$database        = optional, engineAPI database object to use instead of $this->openDB
+	/**
+	 * Class constructor
+	 *
+	 * @param $productionTable
+	 *        Table where production data is being stored
+	 * @param $revisionTable
+	 *        Table where revision information is being stored
+	 * @param $primaryID
+	 *        Field name of the primary key in the production table
+	 * @param $secondaryID
+	 *        Field name of the secondary key in the revision table
+	 * @param engineDB $database
+	 *        engineAPI database object to use instead of $this->openDB
+	 */
 	function __construct($productionTable,$revisionTable,$primaryID,$secondaryID,$database=NULL) {
 
 		$engine = EngineAPI::singleton();
@@ -48,8 +75,13 @@ class revisionControlSystem {
 
 	}
 
-	//**
-	//$primaryIDValue = The primary ID of the item that we will be inserting into the revision table
+	/**
+	 * Add a new revision to the database
+	 *
+	 * @param $primaryIDValue
+	 *        The primary ID of the item that we will be inserting into the revision table
+	 * @return bool
+	 */
 	public function insertRevision($primaryIDValue) {
 
 		/* ** Begin Insert Check ** */
@@ -58,7 +90,7 @@ class revisionControlSystem {
 		// Determined by checking the modified date. It is assumed that the developer is checking,
 		// on the application level, if the data should have been inserted or not (that is, if the
 		// update button was clicked abut nothing was changed, the modified date wasn't updated)
-		
+
 		// Get the value of the secondary key
 		$sql       = sprintf("SELECT %s FROM %s WHERE %s='%s'",
 			$this->openDB->escape($this->secondaryID),
@@ -74,7 +106,7 @@ class revisionControlSystem {
 		}
 
 		$row              = mysql_fetch_array($sqlResult['result'],  MYSQL_ASSOC);
-		$secondaryIDValue = $row[$this->secondaryID]; 
+		$secondaryIDValue = $row[$this->secondaryID];
 
 		// Check to see if the secondary / primary key pair exists in the revision table already
 		$sql = sprintf("SELECT COUNT(*) FROM %s WHERE `primaryID`='%s' AND `secondaryID`='%s'",
@@ -108,7 +140,7 @@ class revisionControlSystem {
 			);
 
 		$sqlResult = $this->openDB->query($sql);
-		
+
 		if (!$sqlResult['result']) {
 			errorHandle::newError(__METHOD__."() -Error getting data from primary table, sql Error = ".$sqlResult['error'], errorHandle::CRITICAL);
 			return(FALSE);
@@ -134,7 +166,7 @@ class revisionControlSystem {
 		// excluded from being managed in revision control, we skip them here. 
 		foreach ($this->excludeFields as $I=>$V) {
 			unset($row[$V]);
-		} 
+		}
 
 		$metaDataArray = base64_encode(serialize($row));
 
@@ -171,7 +203,7 @@ class revisionControlSystem {
 		// The Revision Control system will automatically find duplicate data in each of the 3 arrays
 		// and link to the last occurrence of the data. 
 		// Note: We don't care where the data comes from, if its the same its the same. 
-		
+
 		// Find for metaDataArray
 		$sql       = sprintf("SELECT ID FROM %s WHERE metaData='%s' LIMIT 1",
 			$this->openDB->escape($this->revisionTable),
@@ -184,7 +216,7 @@ class revisionControlSystem {
 			return(FALSE);
 		}
 
-		$row       = mysql_fetch_array($sqlResult['result'],  MYSQL_ASSOC); 
+		$row       = mysql_fetch_array($sqlResult['result'],  MYSQL_ASSOC);
 
 		if (isset($row['ID']) && !isempty($row['ID'])) {
 			$metaDataArray = $row['ID'];
@@ -203,7 +235,7 @@ class revisionControlSystem {
 				return(FALSE);
 			}
 
-			$row       = mysql_fetch_array($sqlResult['result'],  MYSQL_ASSOC); 
+			$row       = mysql_fetch_array($sqlResult['result'],  MYSQL_ASSOC);
 
 			if (isset($row['ID']) && !isempty($row['ID'])) {
 				$digitalObjectArray = $row['ID'];
@@ -224,7 +256,7 @@ class revisionControlSystem {
 				return(FALSE);
 			}
 
-			$row       = mysql_fetch_array($sqlResult['result'],  MYSQL_ASSOC); 
+			$row       = mysql_fetch_array($sqlResult['result'],  MYSQL_ASSOC);
 
 			if (isset($row['ID']) && !isempty($row['ID'])) {
 				$relatedDataArray = $row['ID'];
@@ -251,6 +283,13 @@ class revisionControlSystem {
 		return(TRUE);
 	}
 
+	/**
+	 * Revert to a past revision
+	 *
+	 * @param $primaryIDValue
+	 * @param $secondaryIDValue
+	 * @return bool
+	 */
 	public function revert2Revision($primaryIDValue,$secondaryIDValue) {
 
 		//Begin database Transactions
@@ -271,7 +310,7 @@ class revisionControlSystem {
 			// roll back database transaction
 			$this->openDB->transRollback();
 			$this->openDB->transEnd();
-			
+
 			return(FALSE);
 		}
 
@@ -294,7 +333,7 @@ class revisionControlSystem {
 		}
 		else if ($sqlResult['numrows'] < 1) {
 			errorHandle::newError(__METHOD__."() - Requested Revision not found in system", errorHandle::DEBUG);
-			
+
 			// roll back database transaction
 			$this->openDB->transRollback();
 			$this->openDB->transEnd();
@@ -316,7 +355,7 @@ class revisionControlSystem {
 				);
 
 			$sqlResult = $this->openDB->query($sql);
-			
+
 			if (!$sqlResult['result']) {
 				errorHandle::newError(__METHOD__."() - ", errorHandle::DEBUG);
 
@@ -326,7 +365,7 @@ class revisionControlSystem {
 
 				return(FALSE);
 			}
-			
+
 			$row2               = mysql_fetch_array($sqlResult['result'],  MYSQL_ASSOC);
 			$row['digitalObjects'] = $row2['digitalObjects'];
 
@@ -361,7 +400,7 @@ class revisionControlSystem {
 			$setString
 			);
 		$sqlResult = $this->openDB->query($sql);
-		
+
 		if (!$sqlResult['result']) {
 			errorHandle::newError(__METHOD__."() - Restoring.". $sqlResult['error']."SQL: ".$sql, errorHandle::DEBUG);
 
@@ -374,7 +413,7 @@ class revisionControlSystem {
 
 		// Restore Related Data
 		foreach ($row['relatedData'] as $table=>$rows) {
-			
+
 			// Delete the current set of data in the related table
 			$sql       = sprintf("DELETE FROM %s WHERE `%s`='%s'",
 				$this->openDB->escape($table),
@@ -382,7 +421,7 @@ class revisionControlSystem {
 				$this->openDB->escape($primaryIDValue)
 				);
 			$sqlResult = $this->openDB->query($sql);
-			
+
 			if (!$sqlResult['result']) {
 				errorHandle::newError(__METHOD__."() - Error deleting from related data table, ".$table.", with error: ".$sqlResult['error'], errorHandle::DEBUG);
 
@@ -411,32 +450,40 @@ class revisionControlSystem {
 					$temp
 					);
 				$sqlResult = $this->openDB->query($sql);
-				
+
 				if (!$sqlResult['result']) {
 					errorHandle::newError(__METHOD__."() - Restoring related Data to table, ".$table.", with error: ".$sqlResult['error'], errorHandle::DEBUG);
 					return(FALSE);
 				}
-		
+
 			}
-			
+
 		}
 
 		// commit database transactions
 		$this->openDB->transCommit();
 		$this->openDB->transEnd();
-		
+
 		errorHandle::successMsg("Successfully reverted to revision.");
 
 		return(TRUE);
 
 	}
 
-	// $primaryIDValue : value of the $primaryIDField. NOT SANITIZED, Expects clean value.
-	// $displayFields is an array that contains inforamtion about each field to be displayed in the
-	// 	revision table. Indexes are "field", "label", and "translation". Field is the field name in the actual table.
-	// 	label is the heading for that field in the display table. Translation is optional. if present it must be either
-	// 	and array or a function. if an array, each index of the array must corrispond do a potential value. if a function
-	//	that function must take an argument, which is the value of the field.
+	/**
+	 * Generate HTML revision table
+	 *
+	 * @param $primaryIDValue
+	 *        Value of the $primaryIDField. NOT SANITIZED, Expects clean value.
+	 * @param $displayFields
+	 *        An array that contains information about each field to be displayed in the revision table.
+	 *          - field: Field is the field name in the actual table.
+	 *          - label: the heading for that field in the display table.
+	 *          - translation: if present it must be either and array or a function.
+	 *                         if an array, each index of the array must corrispond do a potential value.
+	 *                         if a function that function must take an argument, which is the value of the field.
+	 * @return bool|string
+	 */
 	public function generateRevisionTable($primaryIDValue,$displayFields) {
 
 		$sql = sprintf("SELECT * FROM `%s` WHERE `productionTable`='%s' AND `primaryID`='%s'",
@@ -452,7 +499,7 @@ class revisionControlSystem {
 			errorHandle::errorMsg("Error retrieving revision information.");
 			return(FALSE);
 		}
-		
+
 		if ($sqlResult['numRows'] == 0) {
 			$error = TRUE;
 			errorHandle::errorMsg("No Revisions found for this item.");
@@ -462,7 +509,7 @@ class revisionControlSystem {
 		$tableHeaders = array();
 		$firstItem    = TRUE;
 
-		if ($this->displayRevert === TRUE) { 
+		if ($this->displayRevert === TRUE) {
 			$tableHeaders[] = "Revert";
 		}
 
@@ -471,23 +518,23 @@ class revisionControlSystem {
 			$tableHeaders[] = "Compare 2";
 		}
 
-		while ($row = mysql_fetch_array($sqlResult['result'],  MYSQL_ASSOC)) { 
+		while ($row = mysql_fetch_array($sqlResult['result'],  MYSQL_ASSOC)) {
 
 			$metadata = $this->getMetadataForID($row['ID']);
 
 			$temp     = array();
 
 			if ($this->displayRevert === TRUE) {
-				$temp["Revert"]    = '<input type="radio" name="revert"   value='.$row['secondaryID'].' />'; 
+				$temp["Revert"]    = '<input type="radio" name="revert"   value='.$row['secondaryID'].' />';
 			}
 
 			if ($this->displayCompare === TRUE) {
-				$temp["Compare 1"] = '<input type="radio" name="compare1" value='.$row['secondaryID'].' />'; 
-				$temp["Compare 2"] = '<input type="radio" name="compare2" value='.$row['secondaryID'].' />'; 
+				$temp["Compare 1"] = '<input type="radio" name="compare1" value='.$row['secondaryID'].' />';
+				$temp["Compare 2"] = '<input type="radio" name="compare2" value='.$row['secondaryID'].' />';
 			}
-			
+
 			foreach ($displayFields as $I=>$V) { // foreach 1
-					
+
 				if ($firstItem === TRUE) {
 					$tableHeaders[] = $V['label'];
 				}
@@ -512,13 +559,13 @@ class revisionControlSystem {
 							$value = $V['translation']($value);
 						}
 					}
-					
+
 					$temp[$V['label']] = $value;
 			} // foreach 1
 			$revArray[] = $temp;
 			$firstItem  = FALSE;
 		} // while 1
-			
+
 		$table = new tableObject("array");
 
 		$table->summary = "Revisions Table";
@@ -529,18 +576,26 @@ class revisionControlSystem {
 
 	}
 
-	// Display the comparison of the 2 provided revision IDs
-	// $primaryIDValue_1   = primary id of first item to compare
-	// $secondaryIDValue_1 = secondary id of first item to compare
-	// $primaryIDValue_2   = primary id of second item to compare
-	// $secondaryIDValue_2 = secondary id of second item to compare
-	// $fields = array of how to compare the fields. If nothing is provided, just displays the fields side by side with default diff tool
-	// 
-	// $fields['metadata']['fieldName']['display'] = create_function(); // used to display data (takes 1 arg)
-	// $fields['metadata']['fieldName']['diff']    = create_function(); // used to perform diff (takes 2 args)
-	// $fields['relatedData']['fieldName'] = create_function(); // used to translate value (takes 1 arg)
-	// $fields['digitalObjects'] = create_function(); // used to display the digital object (or provide links), takes 1 arg
-	// note: custom diff function is NOT run through htmlSanitize before display, return from function should be sanitized
+	/**
+	 * Display the comparison of the 2 provided revision IDs
+	 *
+	 * @param $primaryIDValue_1
+	 *        Primary id of first item to compare
+	 * @param $secondaryIDValue_1
+	 *        Secondary id of first item to compare
+	 * @param $primaryIDValue_2
+	 *        Primary id of second item to compare
+	 * @param $secondaryIDValue_2
+	 *        Secondary id of second item to compare
+	 * @param array $fields
+	 *        Array of how to compare the fields. If nothing is provided, just displays the fields side by side with default diff tool
+ 	 *        $fields['metadata']['fieldName']['display'] = create_function(); // used to display data (takes 1 arg)
+	 *        $fields['metadata']['fieldName']['diff']    = create_function(); // used to perform diff (takes 2 args)
+	 *        $fields['relatedData']['fieldName']         = create_function(); // used to translate value (takes 1 arg)
+	 *        $fields['digitalObjects']                   = create_function(); // used to display the digital object (or provide links), takes 1 arg
+	 *        Note: custom diff function is NOT run through htmlSanitize before display, return from function should be sanitized
+	 * @return bool|string
+	 */
 	public function compare($primaryIDValue_1, $secondaryIDValue_1, $primaryIDValue_2, $secondaryIDValue_2, $fields=NULL) {
 
 		// Get the first item
@@ -551,12 +606,12 @@ class revisionControlSystem {
 			$secondaryIDValue_1
 			);
 		$sqlResult = $this->openDB->query($sql);
-		
+
 		if (!$sqlResult['result']) {
 			errorHandle::newError(__METHOD__."() - Error retrieving first item", errorHandle::DEBUG);
 			return(FALSE);
 		}
-		
+
 		$row_1                   = mysql_fetch_array($sqlResult['result'],  MYSQL_ASSOC);
 		$row_1['metadata']       = $this->getMetadataForID($row_1['ID']);
 		$row_1['relatedData']    = $this->getMetadataForID($row_1['ID'],"relatedData");
@@ -570,12 +625,12 @@ class revisionControlSystem {
 			$secondaryIDValue_2
 			);
 		$sqlResult = $this->openDB->query($sql);
-		
+
 		if (!$sqlResult['result']) {
 			errorHandle::newError(__METHOD__."() - Error retrieving second item", errorHandle::DEBUG);
 			return(FALSE);
 		}
-		
+
 		$row_2                   = mysql_fetch_array($sqlResult['result'],  MYSQL_ASSOC);
 		$row_2['metadata']       = $this->getMetadataForID($row_2['ID']);
 		$row_2['relatedData']    = $this->getMetadataForID($row_2['ID'],"relatedData");
@@ -584,7 +639,7 @@ class revisionControlSystem {
 		$output  = sprintf('<table class="engineRCSCompareTable" id="engineRCSCompareTable_%s">',
 			htmlSanitize($this->productionTable)
 			);
-		
+
 		$output .= '<tr>';
 		$output .= '<th>Field Name</th>';
 		$output .= sprintf('<th>%s</th>',date("m/d/Y H:i:s",$row_1['secondaryID']));
@@ -672,7 +727,7 @@ class revisionControlSystem {
 			$output .= '<td class="fieldName">Related Data</td>';
 			$output .= sprintf('<td>%s</td>',$relatedData_1);
 			$output .= sprintf('<td>%s</td>',$relatedData_2);
-			$output .= '</tr>';	
+			$output .= '</tr>';
 		}
 
 		if (!isempty($row_1['digitalObjects']) || !isempty($row_2['digitalObjects'])) {
@@ -690,7 +745,7 @@ class revisionControlSystem {
 			$output .= '<td class="fieldName">Digital Objects</td>';
 			$output .= sprintf('<td>%s</td>',$digitalObjects_1);
 			$output .= sprintf('<td>%s</td>',$digitalObjects_2);
-			$output .= '</tr>';	
+			$output .= '</tr>';
 		}
 
 		$output .= '</table>';
@@ -698,13 +753,23 @@ class revisionControlSystem {
 		return($output);
 	}
 
+	/**
+	 * Add a field to be excluded
+	 *
+	 * @param string $fieldName
+	 * @return bool
+	 */
 	public function addExcludedField($fieldName) {
-
 		$this->excludeFields[] = $fieldName;
 		return(TRUE);
-
 	}
 
+	/**
+	 * Remove a field from the excluded list
+	 *
+	 * @param $fieldName
+	 * @return bool
+	 */
 	public function removeExcludedField($fieldName) {
 		if (isset($this->excludeFields[$fieldName])) {
 			unset($this->excludeFields[$fieldName]);
@@ -713,16 +778,26 @@ class revisionControlSystem {
 		return(FALSE);
 	}
 
+	/**
+	 * Clear list of excluded fields
+	 *
+	 * @return bool
+	 */
 	public function clearExcludedFields() {
 		unset($this->excludeFields);
 		$this->excludeFields = array();
 		return(TRUE);
 	}
 
-	// Related data allows revision control to keep track of revisions in other tables. 
-	// 
-	// $table = the table where the related data is stored
-	// $primaryKey = this is where the primary key of the main object (as passed into insertRevision)
+	/**
+	 * Related data allows revision control to keep track of revisions in other tables.
+	 *
+	 * @param $table
+	 *        The table where the related data is stored
+	 * @param $primaryKey
+	 *        This is where the primary key of the main object (as passed into insertRevision)
+	 * @return bool
+	 */
 	public function addRelatedDataMapping($table,$primaryKey) {
 
 		// does the table exist?
@@ -730,7 +805,7 @@ class revisionControlSystem {
 			$this->openDB->escape($table)
 			);
 		$sqlResult = $this->openDB->query($sql);
-		
+
 		if (!$sqlResult['result']) {
 			errorHandle::newError(__METHOD__."() - Invalid table", errorHandle::DEBUG);
 			return(FALSE);
@@ -745,22 +820,37 @@ class revisionControlSystem {
 
 	}
 
-	// renames production tables in the revision table in the event that the name of a production
-	// table changes
+	/**
+	 * Renames production tables in the revision table in the event that the name of a production
+	 * WARNING: This method is not yet implemented!
+	 *
+	 * @todo finish the method
+	 * @param $oldTableName
+	 * @param $newTableName
+	 */
 	public function updateTableName($oldTableName,$newTableName) {
 
 	}
 
-	// Value commands:
-	// 		deleteField
-	// 		undeleteField
-	// 		renameField
-	// 		addField
+	/**
+	 * @todo finish the method
+	 * @param $table
+	 * @param $command
+	 * @param $search
+	 * @param $replace
+	 */
 	public function updateRevisionTableStructure($table,$command,$search,$replace) {
 
 	}
 
-	// returns empty string if nothing is found
+	/**
+	 * Retrieved metadata for given revision
+	 * @param $revisionID
+	 * @param string $type
+	 * @param bool $decode
+	 * @return bool|mixed|string
+	 *         Returns empty string if nothing is found
+	 */
 	private function getMetadataForID($revisionID,$type="metadata",$decode=TRUE) {
 
 		if (!validate::integer($revisionID)) {
@@ -774,12 +864,12 @@ class revisionControlSystem {
 			$this->openDB->escape($revisionID)
 			);
 		$sqlResult = $this->openDB->query($sql);
-		
+
 		if (!$sqlResult['result']) {
 			errorHandle::newError(__METHOD__."() - retrieving row ".$type, errorHandle::DEBUG);
 			return(FALSE);
 		}
-		
+
 		$row       = mysql_fetch_array($sqlResult['result'],  MYSQL_ASSOC);
 
 		// Retrieve metaData if it is a link
@@ -791,7 +881,7 @@ class revisionControlSystem {
 				);
 
 			$sqlResult = $this->openDB->query($sql);
-			
+
 			if (!$sqlResult['result']) {
 				errorHandle::newError(__METHOD__."() - retrieving linked ".$type, errorHandle::DEBUG);
 
@@ -801,7 +891,7 @@ class revisionControlSystem {
 
 				return(FALSE);
 			}
-			
+
 			$row2             = mysql_fetch_array($sqlResult['result'],  MYSQL_ASSOC);
 			$row[$type]  = $row2[$type];
 
