@@ -1,20 +1,36 @@
 <?php
 
 class tabList {
+	/**
+	 * @var EngineAPI
+	 */
+	private $engine = NULL;
 
-	private $engine       = NULL;
-	private $table        = NULL;
+	/**
+	 * @todo This doesn't look used
+	 * @var null
+	 */
+	private $table = NULL;
 
+	/**
+	 * Class constructor
+	 *
+	 * @see $this->table
+	 * @param $table
+	 */
 	function __construct($table) {
 
 		$this->table  = $table;
 		$this->engine = EngineAPI::singleton();
 		
 	}
-	
-	function __destruct() {
-	}	
-	
+
+	/**
+	 * Builds an HTML tab list (think breadcrumbs)
+	 * @param array $range
+	 * @param string $current
+	 * @return string
+	 */
 	public function buildList($range,$current) {
 		
 		if (isset($this->engine->cleanGet['HTML']['currentTabItem'])) {
