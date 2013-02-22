@@ -2,35 +2,114 @@
 
 class tableObject {
 
+	/**
+	 * @var EngineAPI
+	 */
 	private $engine         = NULL;
-	private $numColumns     = NULL;
-	private $colHeaders     = NULL;
-	private $colFooters     = NULL;
-	
-	// $tableType denotes how and where the object gets its data from.
-	// "array" : Default -- Data comes in as an array of arrays. Each index is a row of data for the table
-	// "mysql" : a mysql query is provided. each row of data returned from the query is a row of data for the table
- 	private $tableType      = "array";
-	
-	public $class           = NULL; // CSS Class for the table
-	public $id              = NULL; // CSS ID for the Table
-	                                // If you have more than 1 table on a page, ID is highly recommended. 
-									// Many items will prefix
-	                                // id to other classes/IDs if it is available 
-	public $classTD         = FALSE; // Prints the column number as a class on each TD in the Table
-	public $title           = NULL; // HTML5 Title Attribute
-	public $summary         = NULL; // Table Summary, required for accessibility. Will print an error if not provided
-	public $summaryErrorMsg = TRUE; // if no summary is provided, print a reminder message
-	
-	public $rowStriping     = TRUE; // Zebtra stripe the edit table
-	public $numberRows      = FALSE; // Rows are numbered on the far left
-	public $sortable        = FALSE; // Edit Table is sortable by click on headers
-	
-	public $layout          = FALSE; // When true, add thead, tbody, and tfoot elements to the table
-	
-	public $groupBy         = NULL; // if groupby is not null, the array of rows will be examined and grouped by this column
-	                                // this is the index number of the column, starting with 0
 
+	/**
+	 * @todo This doesn't look used
+	 * @var int
+	 */
+	private $numColumns     = NULL;
+
+	/**
+	 * Array of column headers
+	 * @var string[]
+	 */
+	private $colHeaders     = NULL;
+
+	/**
+	 * Array of column footers
+	 * @var string[]
+	 */
+	private $colFooters = NULL;
+
+	/**
+	 * Denotes how and where the object gets its data from.
+	 *   - array: [Default] Data comes in as an array of arrays. Each index is a row of data for the table
+	 *   - mysql: A mysql query is provided. each row of data returned from the query is a row of data for the table
+	 * @var string
+	 */
+	private $tableType = "array";
+
+	/**
+	 * CSS Class for the table
+	 * @var string
+	 */
+	public $class = NULL;
+
+	/**
+	 * CSS ID for the Table
+	 * If you have more than 1 table on a page, ID is highly recommended.
+	 * Many items will prefix id to other classes/IDs if it is available
+	 * @var string
+	 */
+	public $id = NULL;
+
+	/**
+	 * Prints the column number as a class on each TD in the Table
+	 * @var bool
+	 */
+	public $classTD = FALSE;
+
+	/**
+	 * HTML5 Title Attribute
+	 * @var string
+	 */
+	public $title = NULL;
+
+	/**
+	 * Table Summary
+	 * Required for accessibility - will print an error if not provided
+	 * @var null
+	 */
+	public $summary = NULL;
+
+	/**
+	 * If no summary is provided, print a reminder message
+	 * @var bool
+	 */
+	public $summaryErrorMsg = TRUE;
+
+	/**
+	 * Zebra stripe the edit table
+	 * @var bool
+	 */
+	public $rowStriping = TRUE;
+
+	/**
+	 * Rows are numbered on the far left
+	 * @var bool
+	 */
+	public $numberRows = FALSE;
+
+	/**
+	 * Edit Table is sortable by click on headers
+	 * @var bool
+	 */
+	public $sortable = FALSE;
+
+	/**
+	 * When true, add thead, tbody, and tfoot elements to the table
+	 * @var bool
+	 */
+	public $layout = FALSE;
+
+	/**
+	 * If groupby is not null, the array of rows will be examined and grouped by this column
+	 * this is the index number of the column, starting with 0
+	 * @var int
+	 */
+	public $groupBy = NULL;
+
+	/**
+	 * Class constructor
+	 *
+	 * @param null $type
+	 *   - array: [Default] Data comes in as an array of arrays. Each index is a row of data for the table
+	 *   - mysql: A mysql query is provided. each row of data returned from the query is a row of data for the table
+	 */
 	function __construct($type=NULL) {
 
 		$this->engine = EngineAPI::singleton();
@@ -44,13 +123,14 @@ class tableObject {
 
 	}
 	
-	function __destruct() {
-	}
-	
-	// $header can be a string or an array. If it is a string it will be pushed onto the 
-	// $colHeaders array. If it is an array, same thing ;-). 
-	//
-	// Returns TRUE on success, FALSE otherwise. 
+	/**
+	 * Add column header(s)
+	 *
+	 * @param string|array $header
+	 *        Item(s) will be pushed onto the $colHeaders array
+	 * @return bool
+	 *         TRUE on success, FALSE otherwise.
+	 */
 	public function headers($header) {
 		
 		if (is_string($header)) {
@@ -76,10 +156,14 @@ class tableObject {
 		
 	}
 	
-	// $footer can be a string or an array. If it is a string it will be pushed onto the 
-	// $colfooters array. If it is an array, same thing ;-). 
-	//
-	// Returns TRUE on success, FALSE otherwise. 
+	/**
+	 * Add column footer(s)
+	 *
+	 * @param string|array $footer
+	 *        Item(s) will be pushed onto the $colHeaders array
+	 * @return bool
+	 *         TRUE on success, FALSE otherwise.
+	 */
 	public function footers($footer) {
 		
 		if (is_string($footer)) {
@@ -104,7 +188,16 @@ class tableObject {
 		return(FALSE);
 		
 	}
-	
+
+	/**
+	 * Generates HTML table
+	 *
+	 * @todo Remove usage of deprecated webhelper_errorMsg()
+	 * @param string|array $data
+	 *        if tableType is 'array' $data must be an array or arrays (rows=>columns)
+	 *        if tableType is 'mysql' $data must be a SQL string
+	 * @return string
+	 */
 	public function display($data) {
 		
 		$this->data = array();
@@ -272,8 +365,15 @@ class tableObject {
 	
 		return($output);		
 	}
-	
-	
+
+
+	/**
+	 * Get MySQL data from database to build the table with
+	 *
+	 * @param string $data
+	 *        SQL query string
+	 * @return array|bool
+	 */
 	private function getMySQLdata($data) {
 		if (!is_string($data)) {
 			return FALSE;
