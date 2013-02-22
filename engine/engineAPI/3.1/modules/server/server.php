@@ -1,5 +1,7 @@
 <?php
-
+/**
+ * Engine template tag handler for {server var=""} tags
+ */
 class server {
 	
 	// For template matching
@@ -10,7 +12,14 @@ class server {
 		$engine   = EngineAPI::singleton();
 		$engine->defTempPattern($this->pattern,$this->function,$this);
 	}
-	
+
+	/**
+	 * Engine template tag handler
+	 * @param $matches
+	 *        regex matches from the engine template handler
+	 *          - var: the variable to return from $_SERVER
+	 * @return string
+	 */
 	public static function templateMatches($matches) {
 		$engine   = EngineAPI::singleton();
 		$obj      = $engine->retTempObj("server");
