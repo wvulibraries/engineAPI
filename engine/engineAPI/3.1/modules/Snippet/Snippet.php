@@ -49,7 +49,7 @@ class Snippet {
 
 	/**
 	 * Engine template tag handler for {snippet id="" field=""}
-	 * @param $matches
+	 * @param array $matches
 	 * @return string
 	 */
 	public static function templateMatches($matches) {
@@ -219,8 +219,8 @@ class Snippet {
 	 *
 	 * @todo optimize SQL
 	 * @todo Remove usage of deprecated webHelper_successMsg()
-	 * @param $id
-	 * @param $field
+	 * @param int $id
+	 * @param string $field
 	 * @return string
 	 */
 	public function display($id,$field) {
@@ -261,7 +261,7 @@ class Snippet {
 	 *
 	 * @todo optimize SQL
 	 * @todo Remove usage of deprecated webHelper_successMsg()
-	 * @param $id
+	 * @param int $id
 	 * @return string
 	 */
 	public function delete($id) {
