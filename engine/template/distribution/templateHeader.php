@@ -14,7 +14,6 @@
 	<link rel="stylesheet" type="text/css" href="/javascript/distribution/bootstrap/css/bootstrap-responsive.min.css">
 
 	<script type="text/javascript" src="/javascript/distribution/jquery-1.9.1.min.js"></script>
-	<script type="text/javascript" src="/javascript/distribution/bootstrap/js/bootstrap.min.js"></script>
 
 	<?php recurseInsert("headerIncludes.php","php") ?>
 
