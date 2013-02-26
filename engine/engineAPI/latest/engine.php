@@ -9,7 +9,7 @@ $engineVarsPrivate = array();
  * @see self::singleton()
  */
 class EngineAPI{
-	const VERSION='3.1';
+	const VERSION='4.0';
 
 	/**
 	 * @var self
