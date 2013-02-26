@@ -355,6 +355,7 @@ function unixToDate($time,$format=NULL) {
 /**
  * Alias for strtolower()
  *
+ * @deprecated
  * @see strtolower()
  * @param string $string
  * @return string
@@ -366,6 +367,7 @@ function lc($string) {
 /**
  * Alias for strtoupper()
  *
+ * @deprecated
  * @see strtoupper()
  * @param string $string
  * @return string
