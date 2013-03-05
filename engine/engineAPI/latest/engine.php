@@ -157,6 +157,7 @@ class EngineAPI{
 	 * @param string $site Name of the site config to use
 	 */
 	private function __construct($site="default") {
+		echo '<pre><tt>'.print_r(debug_backtrace(),true).'</tt></pre><hr>';
 		self::$engineDir = dirname(__FILE__);
 
 		// make sure the session cookie is only accessible via HTTP
@@ -198,7 +199,6 @@ class EngineAPI{
 			}
 		}
 
-		require_once(self::$engineDir."/sessionManagement.php");
 		require_once(self::$engineDir."/userInfo.php");
 
 		// Setup Current Working Directory
@@ -392,6 +392,16 @@ class EngineAPI{
         }
 
         return self::$instance;
+	}
+
+	/**
+	 * Returns the instance of EngineAPI
+	 * This is similar to singleton() but no instantiation occurs.
+	 *
+	 * @return EngineAPI
+	 */
+	public static function getInstance(){
+		return self::$instance;
 	}
 
 	/**
