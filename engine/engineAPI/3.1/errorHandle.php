@@ -222,7 +222,16 @@ class errorHandle
         set_exception_handler(array(__CLASS__, 'phpException'));
     }
 
-    /**
+	/**
+	 * Restore PHP's native error and exception handlers
+	 * Since we're about to die, we need to hand-off error handling back to PHP
+	 */
+	public function __destruct(){
+		restore_error_handler();
+		restore_exception_handler();
+	}
+
+	/**
      * This method will reset the instance back to it's vanilla state (ready for a new error)
      * @static
      * @return void
