@@ -395,16 +395,6 @@ class EngineAPI{
 	}
 
 	/**
-	 * Returns the instance of EngineAPI
-	 * This is similar to singleton() but no instantiation occurs.
-	 *
-	 * @return EngineAPI
-	 */
-	public static function getInstance(){
-		return self::$instance;
-	}
-
-	/**
 	 * Adds a library
 	 *
 	 * @param string $libraryDir
