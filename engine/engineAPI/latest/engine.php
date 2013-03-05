@@ -165,19 +165,19 @@ class EngineAPI{
 		// ob_start('EngineAPI::displayTemplate');
 
 		// setup private config variables
-		require_once(self::$engineDir."/config/defaultPrivate.php");
+		require_once self::$engineDir."/config/defaultPrivate.php";
 		if($site != "default" && $site != "defaultPrivate"){
 			$siteConfigFile = self::$engineDir."/config/".$site."Private.php";
-			require_once($siteConfigFile);
+			require_once $siteConfigFile;
 		}
 		$this->engineVarsPrivate = $engineVarsPrivate;
 		unset($engineVarsPrivate);
 
 		// setup $engineVars
-		require_once(self::$engineDir."/config/default.php");
+		require_once self::$engineDir."/config/default.php";
 		if($site != "default" && $site != "defaultPrivate"){
 			$siteConfigFile = self::$engineDir."/config/".$site.".php";
-			require_once($siteConfigFile);
+			require_once $siteConfigFile;
 		}
 		self::$engineVars = $engineVars;
 
@@ -193,12 +193,12 @@ class EngineAPI{
 				$fileChunks = array_reverse(explode(".", $file));
 				$ext= $fileChunks[0];
 				if ($ext == "php") {
-					require_once($engineVars['helperFunctions']."/".$file);
+					require_once $engineVars['helperFunctions']."/".$file;
 				}
 			}
 		}
 
-		require_once(self::$engineDir."/userInfo.php");
+		require_once self::$engineDir."/userInfo.php";
 
 		// Setup Current Working Directory
 		$this->cwd = getcwd();
@@ -301,7 +301,7 @@ class EngineAPI{
 		}
 
 		// Startup engines database connection
-		require_once(self::$engineDir."/modules/database/engineDB.php");
+		require_once self::$engineDir."/modules/database/engineDB.php";
 		$this->engineDB = new engineDB($this->engineVarsPrivate['mysql']['username'],$this->engineVarsPrivate['mysql']['password'],$this->engineVarsPrivate['mysql']['server'],$this->engineVarsPrivate['mysql']['port'],$engineVars['logDB'],FALSE);
 
 		// Start up the logging
@@ -366,7 +366,7 @@ class EngineAPI{
 		}
 
         // Last thing we need to do is load, and initialize the errorHandle class (the error handler)
-        require_once(self::$engineDir."/errorHandle.php");
+        require_once self::$engineDir."/errorHandle.php";
         errorHandle::singleton();
         ob_start('EngineAPI::displayTemplate');
 
@@ -404,18 +404,18 @@ class EngineAPI{
 
 		// Make sure that it is a directory
 		if (is_dir($libraryDir) === FALSE) {
-			return(FALSE);
+			return FALSE;
 		}
 
 		// Make sure that we can read it
 		if (is_readable($libraryDir) === FALSE) {
-			return(FALSE);
+			return FALSE;
 		}
 
 		$dirHandle = @opendir($libraryDir);
 
 		if ($dirHandle === FALSE) {
-			return(FALSE);
+			return FALSE;
 		}
 
 		while (false !== ($file = readdir($dirHandle))) {
@@ -446,7 +446,7 @@ class EngineAPI{
 		if (isset($this->engineVarsPrivate['privateVars'][$varName])) {
 			foreach ($this->engineVarsPrivate['privateVars'][$varName] as $I=>$V) {
 				if (basename($file) == $V['file'] && $engineDir === TRUE && $V['function'] == $function) {
-					return($this->$varName);
+					return $this->$varName;
 				}
 			}
 		}
@@ -454,7 +454,7 @@ class EngineAPI{
 		// Record this denial for debugging
 		errorHandle::newError(__METHOD__."() - Access Denied to privateVar '$varName' for file '$file' and function '$function'!", errorHandle::DEBUG);
 
-		return(FALSE);
+		return FALSE;
 	}
 
 	/**
@@ -505,7 +505,7 @@ class EngineAPI{
 		$temp['function'] = $function;
 		$temp['object']   = $object;
 		self::$moduleTemplateEngine[$class][] = $temp;
-		return(TRUE);
+		return TRUE;
 	}
 
 	/**
@@ -528,7 +528,7 @@ class EngineAPI{
 			}
 		}
 		$this->defTempPattern($newPattern,$function,$object);
-		return(TRUE);
+		return TRUE;
 	}
 
 	/**
@@ -548,7 +548,7 @@ class EngineAPI{
 				self::$moduleTemplateEngine[$class][$I]['object'] = $object;
 			}
 		}
-		return(TRUE);
+		return TRUE;
 	}
 
 	/**
@@ -558,7 +558,7 @@ class EngineAPI{
 	 * @return mixed
 	 */
 	public function retTempObj($className) {
-		return(self::$moduleTemplateEngine[$className][0]['object']);
+		return self::$moduleTemplateEngine[$className][0]['object'];
 	}
 
 	/**
@@ -580,14 +580,14 @@ class EngineAPI{
 		// check if the function/method exists
 
 		if (isnull($newClass) && functionExists($newFunction) === FALSE) {
-			return(FALSE);
+			return FALSE;
 		}
 		else if (isnull($newClass) && $newFunction == "recurseInsert") {
 			// can't define the system recurseInsert as the function.
-			return(FALSE);
+			return FALSE;
 		}
 		else if (!isnull($newClass) && functionExists($newClass,$newFunction) === FALSE) {
-			return(FALSE);
+			return FALSE;
 		}
 
 		$functionIndex = $function.((isnull($class))?"":"::".$class);
@@ -602,7 +602,7 @@ class EngineAPI{
 
 		$this->functionExtensions[$functionIndex][$stage][] = $temp;
 
-		return(TRUE);
+		return TRUE;
 	}
 
 	/**
@@ -615,9 +615,9 @@ class EngineAPI{
 	public function getFunctionExtension($function,$class=NULL) {
 		$functionIndex = $function.((isnull($class))?"":"::".$class);
 		if (array_key_exists($functionIndex,$this->functionExtensions)) {
-			return($this->functionExtensions[$functionIndex]);
+			return $this->functionExtensions[$functionIndex];
 		}
-		return(FALSE);
+		return FALSE;
 	}
 
 	/**
@@ -630,7 +630,7 @@ class EngineAPI{
 	public function execFunctionExtension($function,$params,$stage="after") {
 
 		if (!is_array($params)) {
-			return(FALSE);
+			return FALSE;
 		}
 
 		$class     = (is_array($function))?$function[0]:NULL;
@@ -640,18 +640,18 @@ class EngineAPI{
 		$functions = $this->getFunctionExtension($function,$class);
 
 		if (!is_array($functions) || count($functions) < 1) {
-			return(FALSE);
+			return FALSE;
 		}
 
 		if (!array_key_exists($stage, $functions)) {
-			return(FALSE);
+			return FALSE;
 		}
 
 		$output = FALSE;
 
 
 
-		// return(FALSE);
+		// return FALSE;
 		foreach($functions[$stage] as $I=>$function) {
 			if (array_key_exists('class',$function) && !isnull($function['class'])) {
 				$obj    = new $function['class'];
@@ -665,7 +665,7 @@ class EngineAPI{
 			}
 		}
 
-		return($output);
+		return $output;
 
 	}
 
@@ -686,7 +686,7 @@ class EngineAPI{
 		if ($func == "load") {
 
 			if(isnull($value)) {
-				return(FALSE);
+				return FALSE;
 			}
 
 			if (file_exists($engineVars['tempDir']."/".$value)) {
@@ -694,11 +694,11 @@ class EngineAPI{
 				$engineVars['currentTemplate'] = $this->template;
 			}
 			else {
-				return(FALSE);
+				return FALSE;
 			}
 		}
 		if ($func == "name") {
-			return(basename($this->template));
+			return basename($this->template);
 		}
 		if ($func == "include") {
 			switch($value) {
@@ -711,11 +711,11 @@ class EngineAPI{
 					break;
 
 				default:
-				    return(FALSE);
+				    return FALSE;
 				    break;
 			}
 		}
-		return(TRUE);
+		return TRUE;
 	}
 
 	/**
@@ -724,7 +724,7 @@ class EngineAPI{
 	 * @return string
 	 */
 	public function currentTemplate() {
-		return($this->template);
+		return $this->template;
 	}
 
 	/**
@@ -747,15 +747,15 @@ class EngineAPI{
 			print "<pre>";
 			var_dump($this->acl);
 			print "</pre>";
-			return(TRUE);
+			return TRUE;
 		}
 
 		if ($action == "existsTest") {
 			if ($value === TRUE || $value === FALSE) {
 				$this->accessExistsTest = $value;
-				return(TRUE);
+				return TRUE;
 			}
-			return(FALSE);
+			return FALSE;
 		}
 
 		if ($action == "build") {
@@ -783,7 +783,7 @@ class EngineAPI{
 				$count++;
 
 				if ($action == "allowAll") {
-					return(TRUE);
+					return TRUE;
 				}
 
 
@@ -840,28 +840,28 @@ class EngineAPI{
 			}
 
 			if ($auth === TRUE) {
-				return(TRUE);
+				return TRUE;
 			}
 
 
 			$this->accessControlDenied();
 			exit;
 
-			return($auth);
+			return $auth;
 		}
 
 		if ($action == "clear") {
 			unset($this->acl);
 			$this->acl = array();
 			$aclCount  = 0;
-			return(TRUE);
+			return TRUE;
 		}
 
 		if(!isset($this->accessMethods[$action])) {
 			if ($this->accessExistsTest === TRUE) {
 				die("Access Control $action is undefined. Exiting.\n");
 			}
-			return(FALSE);
+			return FALSE;
 		}
 
 		$this->acl[$this->aclCount]['action']     = $action;
@@ -876,7 +876,7 @@ class EngineAPI{
 
 		$this->aclCount++;
 
-		return(TRUE);
+		return TRUE;
 	}
 
 	/**
@@ -894,7 +894,7 @@ class EngineAPI{
 	 */
 	public function dbConnect($action,$value,$state=FALSE) {
 		if (!isset($value)) {
-			return(FALSE);
+			return FALSE;
 		}
 
 		if ($action == "username") {
@@ -923,22 +923,22 @@ class EngineAPI{
 				$dbObject = new engineDB($this->dbUsername,$this->dbPassword,$this->dbServer,$this->dbPort,$this->dbDatabase);
 
 				if ($state === FALSE) {
-					return($dbObject);
+					return $dbObject;
 				}
 				else {
 					$this->openDB = $dbObject;
-					return(TRUE);
+					return TRUE;
 				}
 
 			}
 			else {
 				$this->openDB = null;
-				return(FALSE);
+				return FALSE;
 			}
 
 		}
 
-		return(TRUE);
+		return TRUE;
 
 	}
 
@@ -953,15 +953,15 @@ class EngineAPI{
 
 		if(!isnull($value)) {
 			$this->dbTables[$action][$state] = $value;
-			return(TRUE);
+			return TRUE;
 		}
 		else {
 			if (isset($this->dbTables[$action][$state])) {
-				return($this->dbTables[$action][$state]);
+				return $this->dbTables[$action][$state];
 			}
 		}
 
-		return(FALSE);
+		return FALSE;
 	}
 
 	/**
@@ -975,7 +975,7 @@ class EngineAPI{
 		$dbTablesArray                             = $this->dbTables;
 		$dbTablesArray["engineDBInfo"]["database"] = $this->dbDatabase;
 
-		return($dbTablesArray);
+		return $dbTablesArray;
 
 	}
 
@@ -989,10 +989,10 @@ class EngineAPI{
 	public function login($loginType) {
 		if (isset($this->loginFunctions[$loginType])) {
 			if($this->loginFunctions[$loginType](trim($this->cleanPost['RAW']['username']),$this->cleanPost['RAW']['password'])) {
-				return(TRUE);
+				return TRUE;
 			}
 		}
-		return(FALSE);
+		return FALSE;
 	}
 
 	/**
@@ -1005,35 +1005,35 @@ class EngineAPI{
 
 		if (version_compare(PHP_VERSION, '5.3.0') >= 0) {
 			$return = spl_autoload_register($autoload,TRUE,TRUE);
-			return($return);
+			return $return;
 		}
 
 		$functions = spl_autoload_functions();
 
 		if ($functions === FALSE) {
 			$return = spl_autoload_register($autoload);
-			return($return);
+			return $return;
 		}
 
 		foreach ($functions as $I=>$V) {
 			$return = spl_autoload_unregister($V);
 			if ($return === FALSE) {
-				return(FALSE);
+				return FALSE;
 			}
 		}
 
 		$return = spl_autoload_register($autoload);
 		if ($return === FALSE) {
-			return(FALSE);
+			return FALSE;
 		}
 		foreach ($functions as $I=>$V) {
 			$return = spl_autoload_register($V);
 			if ($return === FALSE) {
-				return(FALSE);
+				return FALSE;
 			}
 		}
 
-		return($return);
+		return $return;
 
 	}
 
@@ -1046,8 +1046,8 @@ class EngineAPI{
 		$engine = EngineAPI::singleton();
 		if (!class_exists($className, FALSE)) {
 			if (isset($engine->availableModules[$className]) && file_exists($engine->availableModules[$className])) {
-				require_once($engine->availableModules[$className]);
-				return(TRUE);
+				require_once $engine->availableModules[$className];
+				return TRUE;
 			}
 
 			// Can't throw exceptions in php 5.2 from an autoloader, but you can
@@ -1055,7 +1055,7 @@ class EngineAPI{
 
 			if (preg_match('/^[^a-zA-Z_\x7f-\xff]/',$className)) {
 				eval("throw new Exception('Class $className not found', 1001);");
-				return(FALSE);
+				return FALSE;
 			}
 
 			eval("
@@ -1070,7 +1070,7 @@ class EngineAPI{
 				}
 				");
 
-			return(FALSE);
+			return FALSE;
 		}
 
 		return;
@@ -1089,7 +1089,7 @@ class EngineAPI{
 			$server = $matches[1];
 		}
 
-		return($server);
+		return $server;
 	}
 
 	/**
@@ -1105,7 +1105,7 @@ class EngineAPI{
 		$engineDB = $this->engineDB;
 
 		if (!$engineVars['log'] || $engineDB->status === FALSE) {
-			return(FALSE);
+			return FALSE;
 		}
 
 		// setup the variables
@@ -1134,7 +1134,7 @@ class EngineAPI{
 		$engineDB->sanitize = FALSE;
 		$results = $engineDB->query($query);
 
-		return(TRUE);
+		return TRUE;
 	}
 
 	/**
@@ -1148,7 +1148,7 @@ class EngineAPI{
 		ob_end_clean();
 		header( 'Location: '.$engineVars['loginPage'].'?page='.$_SERVER['PHP_SELF']."&qs=".(urlencode($_SERVER['QUERY_STRING'])) ) ;
 		//die("No Access Here");
-		//return(FALSE);
+		//return FALSE;
 	}
 
 	/**
@@ -1164,13 +1164,13 @@ class EngineAPI{
 		$engine = EngineAPI::singleton();
 
 		if ($engine->obCallback === FALSE) {
-			return($content);
+			return $content;
 		}
 
 		// Todo this should be configurable:
 		if (strlen($content) > 1000000) {
 			trigger_error(__METHOD__.'() - Cannot parse output (too large)', E_USER_WARNING);
-			return($content);
+			return $content;
 		}
 
 		$contentArray = preg_split('/<!-- engine Instruction break -->/',$content);
@@ -1258,7 +1258,7 @@ class EngineAPI{
 
 
 
-		return($content);
+		return $content;
 	}
 
 	/**
@@ -1271,7 +1271,7 @@ class EngineAPI{
 	public static function engineVarMatches($matches) {
 		global $engineVars;
 		$output = (!empty($engineVars[$matches[1]]))?$engineVars[$matches[1]]:"";
-		return($output);
+		return $output;
 	}
 
 	/**
@@ -1283,7 +1283,7 @@ class EngineAPI{
 		global $engineVars;
 
 		$output = $matches[1].'"'.$engineVars['replaceDQCharacter'].'"'.$matches[3];
-		return($output);
+		return $output;
 	}
 
 	/**
@@ -1308,13 +1308,13 @@ class EngineAPI{
 			if ($output === FALSE) {
 				$output = $matches[0];
 			}
-			return($output);
+			return $output;
 		}
 		else {
-			return("name attribute missing");
+			return "name attribute missing";
 		}
 
-		return("Error");
+		return "Error";
 
 	}
 
@@ -1364,7 +1364,7 @@ class EngineAPI{
 			default:
 			    $output = FALSE;
 		}
-		return($output);
+		return $output;
 	}
 
 	//** Deprecated functions to be removed in 4.0 **/
