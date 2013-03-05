@@ -249,4 +249,41 @@ $engineVars['mediaSite']['authLen']  = "30";
 
 // File Handler
 $engineVars['mimeFilename'] = NULL;
+
+$engineVars['session'] = array(
+	// Default session name
+	'name' => 'EngineAPI',
+	/*
+	 * Default session drivers
+	 * This also controls the order in which they will be used (with the others as fall-backs
+	 */
+	'driver' => array(
+		'database'   => array(), // See sessionDriverDatabase for list of options
+		'filesystem' => array(), // See sessionDriverFilesystem for list of options
+		'native'     => array(), // See sessionDriverNative for list of options
+	),
+	// Automatically start the session w/o having to call session::start()
+	'autoStart' => TRUE,
+	// Array or CSV of nodes of $_SERVER which will be used to calculate the browser fingerprint
+	'fingerprintAttrs' => 'HTTP_USER_AGENT,REMOTE_ADDR',
+	// Length of time after which a csrf token will no longer be accepted (will have no effect if cookieLifetime is less)
+	'csrfTimeout' => 86400,
+	// Length of time the session's cookie should live
+	'cookieLifetime' => '',
+	// The session cookie's path param (controls what paths the cookie is visible on)
+	'cookiePath' => '',
+	// The session cookie's domain param (controls what domain the cookie is visible on)
+	'cookieDomain' => '',
+	// If TRUE, the cookie will only be valid over https
+	'cookieSecure' => FALSE,
+	// If TRUE, the cookie will have the httponly flag set (making it visible only on the http(s) protocol)
+	'cookieHttpOnly' => TRUE,
+	// The probability of garbage collection running (will be the numerator for the probability)
+	'gcProbability' => 1,
+	// The divisor of probability for garbage collection (ex: 100 sets gcProbability to be %'s of 100)
+	'gcDivisor' => 100,
+	// At what point does the garbage collector see old data as 'garbage' (This should never be less than cookieLifetime)
+	'gcMaxlifetime' => 604800
+
+);
 ?>

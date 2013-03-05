@@ -157,7 +157,6 @@ class EngineAPI{
 	 * @param string $site Name of the site config to use
 	 */
 	private function __construct($site="default") {
-		echo '<pre><tt>'.print_r(debug_backtrace(),true).'</tt></pre><hr>';
 		self::$engineDir = dirname(__FILE__);
 
 		// make sure the session cookie is only accessible via HTTP
@@ -288,9 +287,6 @@ class EngineAPI{
 			$this->loginFunctions[$type] = $function;
 		}
 
-		//Start the Session
-		sessionStart();
-
 		// Sets up a clean PHP_SELF variable to use.
 		$phpself             = basename($_SERVER['SCRIPT_FILENAME']);
 		$_SERVER['PHP_SELF'] = substr($_SERVER['PHP_SELF'], 0, strpos($_SERVER['PHP_SELF'],$phpself)).$phpself;
@@ -313,21 +309,25 @@ class EngineAPI{
 			$this->engineLog(); // access log
 		}
 
+		// Initialize the session and if we are not in CLI mode start the session
+		require_once __DIR__."/modules/session/session.php";
+		session::singlton(NULL,$this);
+		if(!isCLI() and !session::started()) session::start();
+
 		// Cross Site Request Forgery Check
-		if(!empty($_POST)) {
-			if(!isset($_POST["engineCSRFCheck"])) {
-				error_log("CSRF Check Failed. Not Defined!");
-				echo "CSRF Check Failed. Not Defined! ";
-				exit;
+		if(!empty($_POST)){
+			if(!isset($_POST['csrfToken']) or !isset($_POST['csrfID'])){
+				$msg = "Engine Security - CSRF Check Failed - No token/id provided";
+				error_log($msg);
+				die($msg);
 			}
-			if(!sessionCheckCSRF($_POST["engineCSRFCheck"])) {
-				error_log("CSRF Check Failed. Possible Cross Site Request Forgery Attack!");
-				echo "CSRF Check Failed. Possible Cross Site Request Forgery Attack!";
-				exit;
+			if(!session::csrfTokenCheck($_POST['csrfID'], $_POST['csrfToken'])){
+				$msg = "Engine Security - CSRF Check Failed - Invalid token/id provided";
+				error_log($msg);
+				die($msg);
 			}
 
 			$server = $this->getHTTP_REFERERServer($_SERVER['HTTP_REFERER']);
-
 			if($server != $engineVars['server']) {
 				error_log("HTTP Referer check failed. Possible Cross Site Request Forgery Attack!");
 				echo "HTTP Referer check failed. Possible Cross Site Request Forgery Attack!<br />";
