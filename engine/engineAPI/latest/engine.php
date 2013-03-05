@@ -458,6 +458,26 @@ class EngineAPI{
 	}
 
 	/**
+	 * Returns the internal engineDB object
+	 * Restricted to EngineAPI and its modules
+	 *
+	 * @return engineDB|bool
+	 */
+	public function getEngineDB(){
+		$callingFile = realpath(callingFile());
+		$engineDir   = realpath(self::$engineDir);
+		if(0 === strpos($callingFile, $engineDir)){
+			// Valid
+			return $this->engineDB;
+		}else{
+			// Invalid
+			$callingFile = callingFunction();
+			errorHandle::newError(__METHOD__."() - Access denied to getEngineDB '".callingFunction()."()' in $callingFile", errorHandle::DEBUG);
+			return FALSE;
+		}
+	}
+
+	/**
 	 * [Alias] EngineAPI::setItems()
 	 *
 	 * @see self::defTempPatterns()
