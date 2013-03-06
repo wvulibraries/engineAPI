@@ -1,5 +1,8 @@
 <?php
-
+/**
+ * EngineAPI syndication module
+ * @package EngineAPI\modules\syndication
+ */
 class syndication {
 
 	/**
