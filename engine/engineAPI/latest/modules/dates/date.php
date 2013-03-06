@@ -1,6 +1,8 @@
 <?php
 /**
- * Date helper functions for engine template tags
+ * EngineAPI date module
+ * Helper functions for engine template tags
+ * @package EngineAPI\modules\date
  */
 class date {
 	public $pattern  = "/\{date\s+(.+?)\}/";
