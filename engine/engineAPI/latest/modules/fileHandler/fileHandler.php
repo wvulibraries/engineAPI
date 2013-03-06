@@ -1,14 +1,40 @@
 <?php
-
+/**
+ * EngineAPI fileHandler Module
+ * @package EngineAPI\modules\fileHandler
+ */
 class fileHandler {
-
-	private $database          = NULL;
+	/**
+	 * Instance of engienDB
+	 * @var engineDB
+	 */
+	private $database;
+	/**
+	 * Array of allowed file extensions
+	 * @var array
+	 */
 	private $allowedExtensions = array();
-	public $maxSize            = 2000000; // 2mb
-	public $basePath           = NULL;
-	public $debug              = FALSE; // Must be FALSE in Production
+	/**
+	 * Maximum file size (in bytes)
+	 * @var int
+	 */
+	public $maxSize = 2000000;
+	/**
+	 * Base filepath
+	 * @var null
+	 */
+	public $basePath;
+	/**
+	 * Boolean debug flag
+	 * Must be FALSE in Production
+	 * @var bool
+	 */
+	public $debug = FALSE;
 
-
+	/**
+	 * Class constructor
+	 * @param engineDB $database
+	 */
 	function __construct($database=NULL) {
 		$engine         = EngineAPI::singleton();
 		$this->database = ($database instanceof engineDB) ? $database : $engine->openDB;
