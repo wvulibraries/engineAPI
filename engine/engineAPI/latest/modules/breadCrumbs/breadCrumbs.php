@@ -1,5 +1,8 @@
 <?php
-
+/**
+ * EngineAPI Breadcrumbs module
+ * @package EngineAPI\modules\breadcrumbs
+ */
 class breadCrumbs {
 	private $engine  = NULL;
 	public $pattern  = "/\{breadCrumbs\s+(.+?)\}/";
