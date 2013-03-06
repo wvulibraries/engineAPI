@@ -1,8 +1,13 @@
 <?php
 /**
+ * EngineAPI Helper Functions - http
+ */
+
+/**
  * Utility Class - HTTP helpers
  *
  * This library provides basic helper methods for interacting with HTTP
+ * @package Helper Functions\http
  */
 class http
 {
