@@ -1,9 +1,18 @@
 <?php
-
+/**
+ * EngineAPI localvars module
+ * @package EngineAPI\modules\localvars
+ */
 class localvars {
-
+	/**
+	 * Array of localVars
+	 * @var array
+	 */
 	private static $localvars = array();
-	
+
+	/**
+	 * Class constructor
+	 */
 	function __construct() {		
 		EngineAPI::defTempPatterns("/\{local\s+(.+?)\}/","localvars::templateMatches",$this);
 	}
