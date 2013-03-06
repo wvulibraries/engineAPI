@@ -1,6 +1,7 @@
 <?php
 /**
- * I think this is a generic state machine
+ * EngineAPI state module
+ * @package EngineAPI\modules\state
  */
 class state {
 	/**
