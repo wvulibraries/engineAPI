@@ -1,4 +1,8 @@
 <?php
+/**
+ * EngineAPI default private config
+ * @package EngineAPI
+ */
 
 // This file should be set to be readable only by the web server user and the system administrator (or root)
 
