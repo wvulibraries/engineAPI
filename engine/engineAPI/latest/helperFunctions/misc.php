@@ -1,4 +1,8 @@
 <?php
+/**
+ * EngineAPI Helper Functions - misc
+ * @package Helper Functions\misc
+ */
 
 /**
  * Determines if a function exists
