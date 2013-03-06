@@ -1,6 +1,8 @@
 <?php
 /**
+ * EngineAPI email module
  * Helper class for email
+ * @package EngineAPI\modules\email
  */
 class email {
 	/**
