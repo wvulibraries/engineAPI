@@ -1,9 +1,22 @@
 <?php
+/**
+ * EngineAPI ACL - MySQL Database
+ * MySQL Database acl tools
+ *
+ * @package EngineAPI
+ */
 
 global $accessControl;
 $accessControl['MYSQLuser']   = "accessControl_mysql_user";
 $accessControl['MYSQLauth']   = "accessControl_mysql_auth";
 
+/**
+ * Check MySQL username
+ *
+ * @param string $value
+ * @param bool $state
+ * @return bool|null
+ */
 function accessControl_mysql_user($value,$state=FALSE) {
 	$returnValue = mySQLcheckLoginStatus();
 	if ($returnValue === FALSE) {
@@ -22,6 +35,13 @@ function accessControl_mysql_user($value,$state=FALSE) {
 	return(NULL);
 }
 
+/**
+ * Check MySQL auth
+ *
+ * @param string $value [NOT USED]
+ * @param bool $state
+ * @return bool
+ */
 function accessControl_mysql_auth($value,$state=FALSE) {	
 
 	$returnValue = mySQLcheckLoginStatus();
@@ -46,6 +66,10 @@ function accessControl_mysql_auth($value,$state=FALSE) {
 	return(FALSE);
 }
 
+/**
+ * Check MySQL login status
+ * @return bool
+ */
 function mySQLcheckLoginStatus() {
 	
 	$authType   = sessionGet("authType");
