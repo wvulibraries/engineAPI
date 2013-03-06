@@ -1,7 +1,6 @@
 <?php
 /**
  * EngineAPI - Error Handler
- * @package EngineAPI
  */
 
 /**
@@ -9,11 +8,11 @@
  *
  * This is the central handler for all errors (both native and user-generated)
  * This is a singleton object designed to be interacted with via its static methods
- * ================================================================================
- * @todo Add sample code for error profiles
  *
  * To trigger a new error, use the newError() method.
  * @see errorHandle::newError
+ * @package EngineAPI\errorHandle
+ * @todo Add sample code for error profiles
  */
 class errorHandle
 {
