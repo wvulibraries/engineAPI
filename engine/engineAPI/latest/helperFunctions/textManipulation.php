@@ -1,4 +1,8 @@
 <?php
+/**
+ * EngineAPI Helper Functions - textManipulation
+ * @package Helper Functions\textManipulation
+ */
 
 /**
  * Returns a string with, space delimited, with $wordCount number of words.
