@@ -1,6 +1,8 @@
 <?php
 /**
+ * EngineAPI DLXS Module
  * @todo Add phpDoc blocks
+ * @package EngineAPI\modules\dlxs
  */
 class dlxs {
 	
