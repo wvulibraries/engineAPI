@@ -1,6 +1,7 @@
 <?php
 /**
  * EngineAPI MySQL database layer
+ * @package EngineAPI\modules\engineDB
  */
 class engineDB {
 
