@@ -1,5 +1,9 @@
 <?php
-
+/**
+ * EngineAPI listManagement module
+ * @todo Add phpDoc blocks
+ * @package EngineAPI\modules\listManagement
+ */
 class listManagement {
 
 	private $engine        = NULL;
