@@ -1,16 +1,53 @@
 <?php
-
+/**
+ * EngineAPI pagination module
+ * @package EngineAPI\modules\pagination
+ */
 class pagination {
-
-	public $urlVar	= "page";
-	public $prev	= "&#171";
-	public $next	= "&#187;";
-	public $spacer	= "&#8230;";
-
-	public $totalItems		= NULL;
-	public $currentPage		= 1;
-	public $itemsPerPage	= 100;
-	public $displayedPages	= 7;
+	/**
+	 * URL GET var to use
+	 * @var string
+	 */
+	public $urlVar= "page";
+	/**
+	 * Text to use for 'previous' link
+	 * @var string
+	 */
+	public $prev = "&#171";
+	/**
+	 * Text to use for 'next' link
+	 * @var string
+	 */
+	public $next = "&#187;";
+	/**
+	 * Text to use for spacer
+	 * @var string
+	 */
+	public $spacer = "&#8230;";
+	/**
+	 * Total number of things to show
+	 * @var int
+	 */
+	public $totalItems;
+	/**
+	 * The current page
+	 * @var int
+	 */
+	public $currentPage	= 1;
+	/**
+	 * Number of items to show per page
+	 * @var int
+	 */
+	public $itemsPerPage = 100;
+	/**
+	 * Maximum number of page to show
+	 * @var int
+	 */
+	public $displayedPages = 7;
+	/**
+	 * Show 'previous' and 'next' links
+	 * @var string 'yes' to show, anything else to not show
+	 */
 	public $displayPrevNext	= "yes";
 
 	/**
@@ -18,6 +55,10 @@ class pagination {
 	 */
 	private $cleanGet;
 
+	/**
+	 * Class constructor
+	 * @param int $total Total number of things to show
+	 */
 	function __construct($total) {
 		$engine = EngineAPI::singleton();
 		$this->cleanGet = $engine->cleanGet;
