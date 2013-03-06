@@ -1,5 +1,10 @@
 <?php
 /**
+ * EngineAPI Helper Functions - array
+ * @package Helper Functions\array
+ */
+
+/**
  * @see http://us2.php.net/manual/en/function.array-unique.php#97285
  * @param  $array
  * @return array
