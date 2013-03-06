@@ -1,4 +1,9 @@
 <?php
+/**
+ * EngineAPI MySQL Login
+ * @package EngineAPI\Login
+ */
+
 global $loginFunctions;
 $loginFunctions['ldap'] = "ldapLogin";
 
@@ -6,13 +11,13 @@ $loginFunctions['ldap'] = "ldapLogin";
  * Process a LDAP login attempt
  *
  * @todo Remove deprecated EngineAPI->localVars() method call
+ * @todo Remove deprecated use of lc() function
  * @param string $username
  *        The user's username
  * @param string $password
  *        The user's password
  * @return bool
  */
-
 function ldapLogin($username,$password)
 {
     $ldapSearch = new ldapSearch(EngineAPI::singleton()->localVars("domain"));
