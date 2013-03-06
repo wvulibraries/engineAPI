@@ -3,7 +3,7 @@
  * Implements threading in PHP
  * (Modified from original source)
  *
- * @package <none>
+ * @package thread
  * @version 1.0.0 - stable
  * @author Tudor Barbu <miau@motane.lu>
  * @copyright MIT
