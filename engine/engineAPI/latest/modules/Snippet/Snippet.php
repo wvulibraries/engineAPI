@@ -1,5 +1,10 @@
 <?php
-
+/**
+ * EngineAPI Snippet module
+ *
+ * @todo Add phpDoc blocks
+ * @package EngineAPI\modules\Snippet
+ */
 class Snippet {
 	
 	private $engine           = NULL;
