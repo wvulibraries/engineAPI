@@ -1,14 +1,13 @@
 <?php
-/*
-* Copyright (c) 2003-2011, CKSource - Frederico Knabben. All rights reserved.
-* For licensing, see LICENSE.html or http://ckeditor.com/license
-*/
-
 /**
  * Brief CKEditor class that can be used to create editor
  * instances in PHP pages on server side.
- * @see http://ckeditor.com
- *
+ * @package CKEditor
+ * @author     Frederico Knabben
+ * @copyright  Copyright (c) 2003-2011 Frederico Knabben
+ * @license    http://ckeditor.com/license
+ * @link       http://ckeditor.com
+
  * Sample usage:
  * $CKEditor = new CKEditor();
  * $CKEditor->editor("editor1", "<p>Initial value.</p>");
