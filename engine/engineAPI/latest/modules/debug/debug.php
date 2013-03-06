@@ -1,7 +1,8 @@
 <?php
 /**
- * Debug library
+ * EngineAPI debug module
  * @todo Is this still used?
+ * @package EngineAPI\modules\debug
  */
 class debug {
 	/**
