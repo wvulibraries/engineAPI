@@ -1,7 +1,15 @@
 <?php
+/**
+ * EngineAPI revisionControlSystem
+ * @package EngineAPI\modules\revisionControlSystem
+ */
 
 require("simplediff.php");
 
+/**
+ * EngineAPI revisionControlSystem module
+ * @package EngineAPI\modules\revisionControlSystem
+ */
 class revisionControlSystem {
 
 	public  $digitalObjectsFieldName = "digitalObjects";
