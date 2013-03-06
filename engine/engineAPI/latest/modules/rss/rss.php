@@ -1,17 +1,54 @@
 <?php
-
+/**
+ * EngineAPI RSS module
+ * @package EngineAPI\modules\rss
+ */
 class rss {
-	
-	private $templateFile = NULL;
-	private $template     = array();
-	private $rssItems     = array();
-	private $output       = NULL;
-	
-	public $title         = NULL;
-	public $link          = NULL;
-	public $description   = NULL;
-	public $lastBuildDate = NULL;
-	public $language      = "en-us";
+	/**
+	 * Template file to use
+	 * @var string
+	 */
+	private $templateFile;
+	/**
+	 * Final, built, template
+	 * @var array
+	 */
+	private $template = array();
+	/**
+	 * @var array
+	 */
+	private $rssItems = array();
+	/**
+	 * Output
+	 * @todo This dosen't look used
+	 * @var string
+	 */
+	private $output;
+	/**
+	 * RSS feed title
+	 * @var string
+	 */
+	public $title;
+	/**
+	 * RSS feed link
+	 * @var string
+	 */
+	public $link;
+	/**
+	 * RSS feed description
+	 * @var string
+	 */
+	public $description;
+	/**
+	 * Last build date
+	 * @var string
+	 */
+	public $lastBuildDate;
+	/**
+	 * RSS feed language
+	 * @var string
+	 */
+	public $language = "en-us";
 
 	/**
 	 * Class constructor
