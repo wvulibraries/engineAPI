@@ -1,5 +1,10 @@
 <?php
 /**
+ * EngineAPI - Error Handler
+ * @package EngineAPI
+ */
+
+/**
  * General error handling
  *
  * This is the central handler for all errors (both native and user-generated)
@@ -280,7 +285,7 @@ class errorHandle
      *         + exec - Execute a 3rdParty script/applications via PHP's exec()
      *         + fatal - Abort site execution at the conclusion of this profile.
      *
-     *  @param bool $replace
+     * @param bool $replace
      *         Will replace any existing error profile with the same conditions, otherwise will combine the actions
      *
      * @return string
@@ -988,22 +993,53 @@ class errorHandle
         }
     }
 
-    public static function errorMsg($msg)
+	/**
+	 * Record an error message and return HTML message
+	 *
+	 * @deprecated
+	 * @param string $msg
+	 * @return string
+	 */
+	public static function errorMsg($msg)
     {
         self::errorStack(self::ERROR,$msg);
         return sprintf('<%s class="%s">%s</%s>', self::$uiSpanElement, self::$uiClassError, $msg, self::$uiSpanElement);
     }
+
+	/**
+	 * Record an success message and return HTML message
+	 *
+	 * @deprecated
+	 * @param string $msg
+	 * @return string
+	 */
     public static function successMsg($msg)
     {
         self::errorStack(self::SUCCESS,$msg);
         return sprintf('<%s class="%s">%s</%s>', self::$uiSpanElement, self::$uiClassSuccess, $msg, self::$uiSpanElement);
     }
+
+	/**
+	 * Record an warning message and return HTML message
+	 *
+	 * @deprecated
+	 * @param string $msg
+	 * @return string
+	 */
     public static function warningMsg($msg)
     {
         self::errorStack(self::WARNING,$msg);
         return sprintf('<%s class="%s">%s</%s>', self::$uiSpanElement, self::$uiClassWarning, $msg, self::$uiSpanElement);
     }
-    public static function prettyPrint($type="all")
+
+	/**
+	 * Generates an HTML list of error/success/warning messages
+	 *
+	 * @deprecated
+	 * @param string $type Type of message to generate (all, error, success, warning)
+	 * @return bool|string
+	 */
+	public static function prettyPrint($type="all")
     {
         if(!class_exists('EngineAPI', FALSE)){
             // There's no EngineAPI to read the errorStacks from, so there's no point trying
@@ -1065,7 +1101,16 @@ class errorHandle
 		$output .= '</ul>';
 		return($output);
 	}
-    private function errorStack($type,$message)
+
+	/**
+	 * Adds a message onto an errorStack inside EngineAPI
+	 *
+	 * @deprecated
+	 * @param string $type Type of message
+	 * @param string $message
+	 * @return string
+	 */
+	private function errorStack($type,$message)
     {
         if(!class_exists('EngineAPI', FALSE)){
             // There's no EngineAPI to push this error onto, so there's no point trying
