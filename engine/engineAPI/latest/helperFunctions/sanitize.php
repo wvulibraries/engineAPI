@@ -1,4 +1,8 @@
 <?php
+/**
+ * EngineAPI Helper Functions - sanitize
+ * @package Helper Functions\sanitize
+ */
 
 
 /**
