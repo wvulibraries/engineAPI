@@ -2,11 +2,18 @@
 /**
  * Legacy EngineAPI stuff
  * @deprecated
+ * @package EngineAPI\modules\eapi_includes
  */
 class eapi_includes {
-
-	//Template Stuff
+	/**
+	 * Template tag pattern
+	 * @var string
+	 */
 	private $pattern = "/\{eapi_include\s+(.+?)\}/";
+	/**
+	 * Template tag callback
+	 * @var string
+	 */
 	private $function = "eapi_includes::templateMatches";
 	
 	function __construct() {		
