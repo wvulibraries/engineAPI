@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Browscap.ini parsing class with caching and update capabilities
  *
