@@ -1,16 +1,25 @@
 <?php
+/**
+ * EngineAPI search
+ * @package EngineAPI\modules\search
+ */
 
 require_once dirname(__FILE__).'/searchSolr.php';
 
 /**
- * Search front-end object
+ * EngineAPI search module
  * This object serves as a factory for multiple available back-end drivers
  * WARNING: This object is not finished, and has been abandoned for the moment
+ *
  * @todo Finish the object and backend driver(s)
+ * @package EngineAPI\modules\search
  */
-class search
-{
-    private static $_clients = array();
+class search{
+	/**
+	 * Array of available search client
+	 * @var array
+	 */
+	private static $_clients = array();
     /**
      * Retrieve a fully instantiated SolrClient object
 	 *
@@ -59,7 +68,10 @@ class search
     }
 }
 
-// This is the common interface to ensure all search providers are providing the same interface
+/**
+ * This is the common interface to ensure all search providers are providing the same interface
+ * @package EngineAPI\modules\search
+ */
 interface searchProvider{
 	// It's empty for the moment until we establish a 'baseline' for the searchSolr object
 }
