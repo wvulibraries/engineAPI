@@ -1,4 +1,8 @@
 <?php
+/**
+ * EngineAPI Helper Functions - validate
+ * @package Helper Functions\validate
+ */
 
 /**
  * Validate a phone number
