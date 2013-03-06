@@ -1,5 +1,9 @@
 <?php
 /**
+ * EngineAPI Helper Functions - sorting
+ * @package Helper Functions\sorting
+ */
+/**
  * Perform a natural sort on a given array
  *
  * @todo Lookinto rewritting this. Seems very clunky and hacky
