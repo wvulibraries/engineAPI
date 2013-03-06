@@ -1,5 +1,8 @@
 <?php
-
+/**
+ * EngineAPI formValidation Module
+ * @package EngineAPI\modules\formValidation
+ */
 class formValidation {
 	/**
 	 * @var array
