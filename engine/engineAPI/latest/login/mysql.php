@@ -1,4 +1,9 @@
 <?php
+/**
+ * EngineAPI MySQL Login
+ * @package EngineAPI\Login
+ */
+
 
 global $loginFunctions;
 $loginFunctions['mysql'] = "mysqlLogin";
