@@ -3,7 +3,7 @@
  * EngineAPI ACL - MySQL Database
  * MySQL Database acl tools
  *
- * @package EngineAPI
+ * @package EngineAPI\AccessControl
  */
 
 global $accessControl;
