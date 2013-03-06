@@ -1,23 +1,94 @@
 <?php
-
+/**
+ * mailSender Library
+ * @package EngineAPI\modules\email
+ */
 class mailSender {
-
+	/**
+	 * Hold the sender info
+	 * @see self::addSender()
+	 * @var null
+	 */
 	private $from        = NULL;
+	/**
+	 * Array of recipients
+	 * @see self::addRecipient()
+	 * @var array
+	 */
 	private $to          = array();
+	/**
+	 * Array of CC'd recipients
+	 * @see self::addCC()
+	 * @var array
+	 */
 	private $cc          = array();
+	/**
+	 * Array of BCC's recipients
+	 * @see self::addBCC()
+	 * @var array
+	 */
 	private $bcc         = array();
+	/**
+	 * Array of replyTo addresses
+	 * @see self::addReplyTo()
+	 * @var array
+	 */
 	private $replyTo     = array();
+	/**
+	 * The email's subject line
+	 * @see self::addSubject()
+	 * @var string
+	 */
 	private $subject     = NULL;
+	/**
+	 * The email's main body
+	 * @see self::addBody()
+	 * @var string
+	 */
 	private $body        = NULL;
+	/**
+	 * The email's alternate body
+	 * @see self::addBody()
+	 * @var string
+	 */
 	private $altbody     = NULL;
+	/**
+	 * Boolean flag telling if body is HTML
+	 * @see self::isHTML()
+	 * @var bool
+	 */
 	private $htmlMessage = FALSE;
+	/**
+	 * Array of email attachments
+	 * @see self::addAttachment()
+	 * @var array
+	 */
 	private $attachment  = array();
+	/**
+	 * The instance of EngineAPI
+	 * @var EngineAPI
+	 */
 	private $engine      = NULL;
+	/**
+	 * The instance of engineDB
+	 * @var engineDB
+	 */
 	private $database    = NULL;
-
+	/**
+	 * An array of email addresses to ignore
+	 * @var array
+	 */
 	public $ignoredEmail = array("dev@null.com");
+	/**
+	 * Boolean debug flag
+	 * @var bool
+	 */
 	public $debug        = FALSE; // Must be FALSE in Production
 
+	/**
+	 * Class constructor
+	 * @param engineDB $database
+	 */
 	function __construct($database=NULL) {
 
 		$this->engine   = EngineAPI::singleton();
