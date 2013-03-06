@@ -1,4 +1,8 @@
 <?php
+/**
+ * EngineAPI validate module
+ * @package EngineAPI\modules\validate
+ */
 class validate {
 
 	/**
