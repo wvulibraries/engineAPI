@@ -1,8 +1,16 @@
 <?php
+/**
+ * Native PHP driver for session manager
+ * @package EngineAPI\modules\session\drivers
+ */
+
 // Make sure we have the interface loaded
 require_once __DIR__.DIRECTORY_SEPARATOR."sessionDriverInterface.php";
 
-// And now for the driver itself
+/**
+ * Native PHP driver for session manager
+ * @package EngineAPI\modules\session\drivers
+ */
 class sessionDriverNative implements sessionDriverInterface{
 	private $isReady=FALSE;
 
