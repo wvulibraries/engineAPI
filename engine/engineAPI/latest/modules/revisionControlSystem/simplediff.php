@@ -1,10 +1,6 @@
 <?php
 /**
  * Paul's Simple Diff Algorithm v 0.1
- * @author  Paul Butler
- * @license May be used and distributed under the zlib/libpng license
- * @link    http://www.paulbutler.org
- * @package simpleDiff
  *
  * This code is intended for learning purposes; it was written with short
  * code taking priority over performance. It could be used in a practical
@@ -17,6 +13,11 @@
  * htmlDiff is a wrapper for the diff command, it takes two strings and
  * returns the differences in HTML. The tags used are <ins> and <del>,
  * which can easily be styled with CSS.
+ *
+ * @author  Paul Butler
+ * @license May be used and distributed under the zlib/libpng license
+ * @link    http://www.paulbutler.org
+ * @package simpleDiff
  */
 
 /**
