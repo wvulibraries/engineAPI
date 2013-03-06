@@ -1,4 +1,8 @@
 <?php
+/**
+ * EngineAPI default config
+ * @package EngineAPI
+ */
 
 $engineVersion = "3.0";
 
