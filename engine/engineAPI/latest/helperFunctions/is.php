@@ -1,4 +1,8 @@
 <?php
+/**
+ * EngineAPI Helper Functions - is
+ * @package Helper Functions\is
+ */
 
 /**
  * Determines if the passed argument is a function
