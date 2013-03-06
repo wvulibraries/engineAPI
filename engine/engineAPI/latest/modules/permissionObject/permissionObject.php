@@ -1,19 +1,28 @@
 <?php
-
 /**
- * Legacy permissions object
+ * EngineAPI permissionObject module
  * This system uses the bitwise system where each permission is assigned a unique int
+ *
+ * @package EngineAPI\modules\permissionObject
  */
 class permissionObject {
-
-	/*
-	$table is the mySQL table where permissions are stored. Expected fields are:
-	ID (int, unsigned);
-	name (varchar(75); name of the function/action that will be tested against);
-	value (int, unsigned; value that we are checking against)
-	*/
+	/**
+	 * MySQL table where permissions are stored
+	 * Expected fields are:
+	 *  - ID (int, unsigned)    - Primary Key
+	 *  - name (varchar(75))    - Name of the function/action that will be tested against
+	 *  - value (int, unsigned) - Value that we are checking against
+	 * @var string
+	 */
 	private $table     = NULL;
+	/**
+	 * Instance of EngineAPI
+	 * @var EngineAPI
+	 */
 	private $engine    = NULL;
+	/**
+	 * @var array
+	 */
 	private $permsList = array();
 
 	/**
