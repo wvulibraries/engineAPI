@@ -1,4 +1,9 @@
 <?php
+/**
+ * revisionControlSystem example usage
+ * @package EngineAPI\modules\revisionControlSystem
+ * @ignore
+ */
 
 function relatedDataTranslation($value) {
 	switch($value) {
