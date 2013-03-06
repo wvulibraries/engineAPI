@@ -2,13 +2,20 @@
 /**
  * Legacy eapi_function()
  * @deprecated
+ * @package EngineAPI\modules\eapi_function
  */
 class eapi_function {
-	
-	//Template Stuff
+	/**
+	 * Template tag pattern
+	 * @var string
+	 */
 	private $pattern = "/\{eapi_function\s+(.+?)\}/";
+	/**
+	 * Template tag callback
+	 * @var string
+	 */
 	private $function = "eapi_function::templateMatches";
-	
+
 	function __construct() {
 		EngineAPI::defTempPatterns($this->pattern,$this->function,$this);
 		EngineAPI::defTempPatterns("/\{engine name=\"function\"\s+(.+?)\}/",$this->function,$this);
