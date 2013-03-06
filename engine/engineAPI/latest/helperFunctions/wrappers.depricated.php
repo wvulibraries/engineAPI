@@ -1,4 +1,8 @@
 <?php
+/**
+ * EngineAPI Helper Functions - wrappers
+ * @package Helper Functions\wrappers
+ */
 
 /**
  * Determine if an email is internal
