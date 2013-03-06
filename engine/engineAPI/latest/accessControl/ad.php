@@ -3,7 +3,7 @@
  * EngineAPI ACL - Active Directory
  * Active Directory ACL tools
  *
- * @package EngineAPI
+ * @package EngineAPI\AccessControl
  */
 
 global $accessControl;
