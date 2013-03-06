@@ -1,8 +1,19 @@
 <?php
-
+/**
+ * EngineAPI mobileBrowsers module
+ * @package EngineAPI\modules\mobileBrowsers
+ */
 class mobileBrowsers {
-	private static $uaResult = NULL;
+	/**
+	 * Store the UA results for parsing
+	 * @var string
+	 */
+	private static $uaResult;
 
+	/**
+	 * Class constructor
+	 * @return bool
+	 */
 	private static function construct() {
 		if(!isnull(self::$uaResult) && self::$uaResult !== FALSE) return(TRUE);
 		require_once(dirname(__FILE__)."/tobie-ua-parser-php/UAParser.php");
