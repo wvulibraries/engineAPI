@@ -1,6 +1,7 @@
 <?php
 /**
  * Legacy search module
+ * @package EngineAPI\modules\search
  */
 class search {
 
