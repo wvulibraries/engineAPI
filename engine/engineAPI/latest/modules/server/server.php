@@ -1,13 +1,25 @@
 <?php
 /**
+ * EngineAPI server module
  * Engine template tag handler for {server var=""} tags
+ *
+ * @package EngineAPI\modules\server
  */
 class server {
-	
-	// For template matching
+	/**
+	 * Template tag pattern
+	 * @var string
+	 */
 	public $pattern  = "/\{server\s+(.+?)\}/";
+	/**
+	 * Template tag callback
+	 * @var string
+	 */
 	public $function = "server::templateMatches";
-	
+
+	/**
+	 * Class constructor
+	 */
 	function __construct() {
 		$engine   = EngineAPI::singleton();
 		$engine->defTempPattern($this->pattern,$this->function,$this);
