@@ -1,7 +1,18 @@
 <?php
-
+/**
+ * EngineAPI phpself module
+ * @package EngineAPI\modules\phpself
+ */
 class phpself {
+	/**
+	 * Template tag pattern
+	 * @var string
+	 */
 	public $pattern  = "/\{phpself\s+(.+?)\}/";
+	/**
+	 * Template tag callback
+	 * @var string
+	 */
 	public $function = "phpself::templateMatches";
 
 	/**
