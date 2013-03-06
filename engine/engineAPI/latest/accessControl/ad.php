@@ -1,4 +1,10 @@
 <?php
+/**
+ * EngineAPI ACL - Active Directory
+ * Active Directory ACL tools
+ *
+ * @package EngineAPI
+ */
 
 global $accessControl;
 $accessControl['ADdomain'] = "accessControl_ad_domain";
@@ -7,10 +13,13 @@ $accessControl['ADgroup']  = "accessControl_ad_group";
 $accessControl['ADou']     = "accessControl_ad_ou";
 $accessControl['ADauth']   = "accessControl_ad_auth";
 
-/* 
-Functions ad_user and ADcheckLoginStatus should be more generalized. They could be used
-for any authentication method
-*/
+/**
+ * Check the AD user
+ *
+ * @param string $value The username to check for
+ * @param bool $state
+ * @return bool
+ */
 function accessControl_ad_user($value,$state=FALSE) {
 	$returnValue = ADcheckLoginStatus();
 	if ($returnValue === FALSE) {
@@ -29,6 +38,13 @@ function accessControl_ad_user($value,$state=FALSE) {
 	return(FALSE);
 }
 
+/**
+ * Check that the user auth'd through AD
+ *
+ * @param $value
+ * @param bool $state
+ * @return bool
+ */
 function accessControl_ad_auth($value,$state=FALSE) {	
 
 	$returnValue = ADcheckLoginStatus();
@@ -53,6 +69,13 @@ function accessControl_ad_auth($value,$state=FALSE) {
 	return(FALSE);
 }
 
+/**
+ * Check AD group
+ *
+ * @param string $value
+ * @param bool $state
+ * @return bool
+ */
 function accessControl_ad_group($value,$state=FALSE) {
 	$returnValue = ADcheckLoginStatus();
 	if ($returnValue === FALSE) {
@@ -74,6 +97,13 @@ function accessControl_ad_group($value,$state=FALSE) {
 	return(FALSE);
 }
 
+/**
+ * Check AD OU (Org Unit)
+ *
+ * @param string $value
+ * @param bool $state
+ * @return bool
+ */
 function accessControl_ad_ou($value,$state=FALSE) {
 
 	$returnValue = ADcheckLoginStatus();
@@ -93,6 +123,10 @@ function accessControl_ad_ou($value,$state=FALSE) {
 	return(FALSE);
 }
 
+/**
+ * Check user's login status
+ * @return bool
+ */
 function ADcheckLoginStatus() {
 	
 	$authType   = sessionGet("authType");
@@ -105,6 +139,12 @@ function ADcheckLoginStatus() {
 	}
 }
 
+/**
+ * Check AD security group
+ *
+ * @param $group
+ * @return bool|null
+ */
 function checkGroup($group) {
 
 	$usergroups = sessionGet("groups");
@@ -120,6 +160,11 @@ function checkGroup($group) {
 	return(FALSE);
 }
 
+/**
+ * Check AD OUs
+ * @param $ous
+ * @return bool|null
+ */
 function checkOUs($ous) {
 
 	$userou = sessionGet("ou");
