@@ -1,5 +1,8 @@
 <?php
-
+/**
+ * EngineAPI tableObject module
+ * @package EngineAPI\modules\tableObject
+ */
 class tableObject {
 
 	/**
