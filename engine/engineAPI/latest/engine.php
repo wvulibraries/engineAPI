@@ -1,4 +1,15 @@
 <?php
+/**
+ * EngineAPI
+ *
+ * EngineAPI core object. This is the root of the entire EngineAPI framework
+ * Required PHP Version: 5.3
+ *
+ * @author  WVU Library Systems
+ * @license http://systems.lib.wvu.edu/engineapi/license.php WVU Open Source License
+ * @link    http://systems.lib.wvu.edu/engineapi/
+ * @package EngineAPI
+ */
 $engineVars        = array();
 $engineVarsPrivate = array();
 
@@ -12,18 +23,27 @@ class EngineAPI{
 	const VERSION='4.0';
 
 	/**
+	 * The EngineAPI instance
 	 * @var self
 	 */
 	private static $instance; // Hold an instance of this object, for use as Singleton
 	/**
+	 * The root directory for EngineAPI and its modules
 	 * @var string
 	 */
 	public static $engineDir;
 	/**
+	 * The engine config items
 	 * @var array
 	 */
 	public static $engineVars = array();
 	/**
+	 * Private engine config vars
+	 * @var array
+	 */
+	private $engineVarsPrivate = array();
+	/**
+	 * The error stack
 	 * @var array
 	 */
 	public $errorStack = array();
@@ -43,6 +63,7 @@ class EngineAPI{
 	 */
 	public $cwd = "";
 	/**
+	 * Unknown - Remove?
 	 * @todo appears unused - Remove?
 	 * @var array
 	 */
@@ -54,18 +75,37 @@ class EngineAPI{
 	 * Sanitized $_GET
 	 * @var array
 	 */
-	public $cleanGet  = array();
+	public $cleanGet = array();
 	/**
 	 * Sanitized $_POST
 	 * @var array
 	 */
 	public $cleanPost = array();
-
-	private $accessMethods    = "";
+	/**
+	 * Access Methods
+	 * @var string
+	 */
+	private $accessMethods = "";
+	/**
+	 * Unknown
+	 * @var bool
+	 */
 	private $accessExistsTest = TRUE;
-	private $acl              = array();
-	private $aclgroups        = array();
-	private $aclCount         = 0;
+	/**
+	 * ACL items
+	 * @var array
+	 */
+	private $acl = array();
+	/**
+	 * ACL groups
+	 * @var array
+	 */
+	private $aclgroups = array();
+	/**
+	 * ACL count
+	 * @var int
+	 */
+	private $aclCount = 0;
 
 	# Used for database connections
 	#############################################################
@@ -130,12 +170,32 @@ class EngineAPI{
 
 	# Module Template Mathes and function calls for displayTemplate()
 	###################################################################
-	private static $moduleTemplateEngine   = array();
-	private $recurseCount           = 0; // In module template matches, prevent infinite recursion
-	private $recurseLevel           = 3;
-	private $recurseNeeded          = FALSE;
+	/**
+	 * Unknown
+	 * @var array
+	 */
+	private static $moduleTemplateEngine = array();
+	/**
+	 * Recursive counter for template renderer
+	 * In module template matches, prevent infinite recursion
+	 * @var int
+	 */
+	private $recurseCount = 0;
+	/**
+	 * Recursive level for template renderer
+	 * @var int
+	 */
+	private $recurseLevel = 3;
+	/**
+	 * Flag to trigger recursion
+	 * @var bool
+	 */
+	private $recurseNeeded = FALSE;
+	/**
+	 * Flag to turn off templates
+	 * @var bool
+	 */
 	private $displayTemplateOff     = FALSE;
-	private $engineVarsPrivate      = array();
 
 	/**
 	 * Cloning is not allowed!
