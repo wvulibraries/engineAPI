@@ -1,8 +1,22 @@
 <?php
+/**
+ * EngineAPI ACL - IP Address
+ * IP Address acl tools
+ *
+ * @package EngineAPI
+ */
 
 global $accessControl;
 $accessControl['IP'] = "accessControl_ip_checkIPAddr";
 
+/**
+ * Check IP Address
+ *
+ * @param string $value
+ * @param bool $state
+ * @return bool|null
+ *         Bool FALSE if check fails. NULL if it passes
+ */
 function accessControl_ip_checkIPAddr($value,$state=FALSE) {
 	
 	$remoteAddr = array();
