@@ -1,22 +1,59 @@
 <?php
-
-// Initial Creation: 11/01/2010
-// Very basic functionality.
-// To do: metadata, slide shows, 
+/**
+ * EngineAPI photoAlbum module
+ *
+ * @package EngineAPI\modules\photoAlbum
+ * @todo  metadata and slide shows
+ */
 class photoAlbum {
-	
-	private $engine     = NULL;
-	private $dir        = NULL;
-	
-	public $thumbWidth  = "100";
+	/**
+	 * Instance of EngineAPI
+	 * @var EngineAPI
+	 */
+	private $engine;
+	/**
+	 * Directory where the images are
+	 * @var string
+	 */
+	private $dir;
+	/**
+	 * Width to use when generating thumbnails
+	 * @var string
+	 */
+	public $thumbWidth = "100";
+	/**
+	 * Height to use when generating thumbnails
+	 * @var string
+	 */
 	public $thumbHeight = "100";
-	public $start       = 1;
-	public $perPage     = 10;
-	public $next        = NULL;
-	
-	public $lightbox    = TRUE;
-	public $groupImages = TRUE; 
-	
+	/**
+	 * Starting image
+	 * @var int
+	 */
+	public $start = 1;
+	/**
+	 * Images per page
+	 * @var int
+	 */
+	public $perPage = 10;
+	/**
+	 * @var
+	 */
+	public $next;
+	/**
+	 * Boolean flag to use lightbox
+	 * @var bool
+	 */
+	public $lightbox = TRUE;
+	/**
+	 * Boolean flag for grouping images
+	 * @var bool
+	 */
+	public $groupImages = TRUE;
+	/**
+	 * Array of images
+	 * @var array
+	 */
 	private $photos = array();
 
 	/**
