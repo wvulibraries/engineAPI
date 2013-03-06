@@ -1,7 +1,9 @@
 <?php
 /**
- * @todo [Added Functionality] blame() - Determine 'why' something happened. ("I'm denied because 'this' authorization on 'this' object)
+ * EngineAPI user authorization module
+ * @package EngineAPI\modules\auth
  *
+ * @todo [Added Functionality] blame() - Determine 'why' something happened. ("I'm denied because 'this' authorization on 'this' object)
  *
  * Terms:
  *   + Entity     - The user object, either a user (uid:1) or a group (gid:2)
@@ -33,7 +35,6 @@
  *   + permission - The named permission to check
  *
  */
-
 class auth extends authCommon{
 	const REGEX_ENTITY       = '/([g|u])(?:id)?:(\d+)/i';
 	const REGEX_ENTITY_GROUP = '/g(?:id)?:(\d+)/i';
