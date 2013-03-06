@@ -1,8 +1,11 @@
 <?php
 /**
+ * EngineAPI searchSolr module
  * Search driver for the Solr Search Engine
  * WARNING: This object is not finished, and has been abandoned for the moment
+ *
  * @todo Finish the object
+ * @package EngineAPI\modules\search\searchSolr
  */
 class searchSolr implements searchProvider
 {
