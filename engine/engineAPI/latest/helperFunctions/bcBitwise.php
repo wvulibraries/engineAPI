@@ -1,11 +1,16 @@
 <?php
 /**
+ * EngineAPI Helper Functions - bcBitwise
+ */
+
+/**
  * Utility Class - bcmath bitwise implementation
  * 
  * This library provides arbitrary precision AND, OR, XOR, leftshift and rightshift for use with
  * PHP with the bcmath extension enabled.
  * 
  * @see http://www.nirvani.net/software/bc_bitwise/bc_bitwise-0.9.0.inc.php.asc
+ * @package Helper Functions\bcBitwise
  */
 class bcBitwise
 {
