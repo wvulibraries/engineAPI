@@ -7,6 +7,7 @@
  * All session operations should be done though this module such as session::set() and session::get()
  * Any direct manipulation of $_SESSION will not be preserved between requests.
  *
+ * @package EngineAPI\modules\session
  */
 class session{
 	/**
