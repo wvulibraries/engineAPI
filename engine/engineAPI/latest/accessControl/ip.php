@@ -3,7 +3,7 @@
  * EngineAPI ACL - IP Address
  * IP Address acl tools
  *
- * @package EngineAPI
+ * @package EngineAPI\AccessControl
  */
 
 global $accessControl;
