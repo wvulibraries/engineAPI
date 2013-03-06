@@ -1,4 +1,9 @@
 <?php
+/**
+ * EngineAPI Helper Functions - mimeType
+ * @package Helper Functions\mimeType
+ */
+
 
 /*
  * The following commented code can be uncommented if you wish
