@@ -1,13 +1,33 @@
 <?php
+/**
+ * EngineAPI image module
+ * @package EngineAPI\modules\image
+ */
 class image{
     const GIF  = IMAGETYPE_GIF;
     const JPEG = IMAGETYPE_JPEG;
     const PNG  = IMAGETYPE_PNG;
     const WBMP = IMAGETYPE_WBMP;
-    private $img;
-    private $imgFilename;
-    private $imgInfo;
-    private $imgGdType;
+	/**
+	 * The image data
+	 * @var string
+	 */
+	private $img;
+	/**
+	 * The image's filename
+	 * @var string
+	 */
+	private $imgFilename;
+	/**
+	 * The image's metadata
+	 * @var
+	 */
+	private $imgInfo;
+	/**
+	 * @todo This doesn't look used
+	 * @var
+	 */
+	private $imgGdType;
 
 	/**
 	 * Class constructor
