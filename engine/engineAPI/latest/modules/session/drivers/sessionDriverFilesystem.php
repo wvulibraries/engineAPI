@@ -1,8 +1,16 @@
 <?php
+/**
+ * Filesystem driver for session manager
+ * @package EngineAPI\modules\session\drivers
+ */
+
 // Make sure we have the interface loaded
 require_once __DIR__.DIRECTORY_SEPARATOR."sessionDriverInterface.php";
 
-// And now for the driver itself
+/**
+ * Filesystem driver for session manager
+ * @package EngineAPI\modules\session\drivers
+ */
 class sessionDriverFilesystem implements sessionDriverInterface{
 	/**
 	 * @var bool
