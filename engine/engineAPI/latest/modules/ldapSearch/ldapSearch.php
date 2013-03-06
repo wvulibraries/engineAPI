@@ -1,4 +1,8 @@
 <?php
+/**
+ * EngineAPI ldapSearch module
+ * @package EngineAPI\modules\ldapSearch
+ */
 class ldapSearch
 {
     /**
