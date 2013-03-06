@@ -1,5 +1,10 @@
 <?php
 /**
+ * General user functions
+ * @package EngineAPI\userInfo
+ */
+
+/**
  * $ipRanges is an array of valid IP ranges, same type that is used for security
  * $checkIP is option, if provided it checks against checkip, otherise it uses the clients remote_addr
  *
@@ -39,8 +44,10 @@ function userInfoIPRangeCheckArray($ipRanges,$checkIP = NULL) {
 }
 
 /**
- * @param $ip
- * @param string|null $checkIP The IP address to check
+ * userInfo IP Range Check
+ *
+ * @param string $ip
+ * @param string $checkIP The IP address to check
  * @return bool
  */
 function userInfoIPRangeCheck($ip,$checkIP = NULL) {
@@ -94,6 +101,8 @@ function userInfoIPRangeCheck($ip,$checkIP = NULL) {
 }
 
 /**
+ * IP range check
+ *
  * @param $ipRanges
  * @param string|null $checkIP The IP address to check
  * @return bool
@@ -106,9 +115,9 @@ function ipRangeCheck($ipRanges,$checkIP = NULL) {
 }
 
 /**
- * Returns TRUE if the IP is an 'onCampus' IP
- * onCampus is defined in engine config
- * @param null $checkIP
+ * Determine if the user is on or off campus
+ *
+ * @param string $checkIP The IP to check, defaults to $_SERVER['REMOTE_ADDR']
  * @return bool
  */
 function onCampus($checkIP = NULL) {
