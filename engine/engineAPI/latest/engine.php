@@ -17,7 +17,7 @@ $engineVarsPrivate = array();
  * EngineAPI Class
  *
  * This is the heart of the EngineAPI system. This is a singleton class where only 1 instance is ever allowed
- * @see self::singleton()
+ * @package EngineAPI
  */
 class EngineAPI{
 	const VERSION='4.0';
