@@ -1,5 +1,8 @@
 <?php
-
+/**
+ * EngineAPI tabList module
+ * @package EngineAPI\modules\tabList
+ */
 class tabList {
 	/**
 	 * @var EngineAPI
