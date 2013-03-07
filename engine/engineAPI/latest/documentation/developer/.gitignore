@@ -1,0 +1,3 @@
+# Want to ignore all the generated phpDocumentor documentation so it dosen't go back up into Git
+################################################################################################
+*
