@@ -22,3 +22,7 @@ dwsync.xml
 # JetBrains IDE stuff
 #####################
 .idea
+
+# phpDocumentor developer config file
+#####################################
+phpdoc.xml
