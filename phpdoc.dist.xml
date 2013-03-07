@@ -4,6 +4,8 @@
 	<files>
 		<directory>engine/engineAPI/latest/*</directory>
 		<ignore>engine/engineAPI/latest/documentation/*</ignore>
+		<ignore>engine/engineAPI/latest/modules/mobileBrowsers/dmolsen-ua-parser-php.old/*</ignore>
+		<ignore>engine/engineAPI/latest/modules/mobileBrowsers/tobie-ua-parser-php/*</ignore>
 	</files>
 	<logging>
 		<level>warn</level>
