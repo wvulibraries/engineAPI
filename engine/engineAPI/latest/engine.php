@@ -6,6 +6,7 @@
  * Required PHP Version: 5.3
  *
  * @author  WVU Library Systems
+ * @version 4.0
  * @license http://systems.lib.wvu.edu/engineapi/license.php WVU Open Source License
  * @link    http://systems.lib.wvu.edu/engineapi/
  * @package EngineAPI
