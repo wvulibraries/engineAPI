@@ -230,6 +230,48 @@ class engineDB {
 		return(($result)?$result:$resultArray);
 	}
 
+    /**
+	* Performs a given SQL query against the selected database, returns the resulting value for select statements
+	*
+	* If $this->queryArray is true, then an array is returned with the following elements:
+	* + result what would be returned if arrayReturn == False
+	* + affectedRows Number of affected rows (for UPDATE,DELETE)
+	* + errorNumber Any error number produced
+	* + error Any error message produced
+	* + info Results of mysql_info()
+	* + id Results of insert_if()	
+	* + query The original SQL query that was used
+	* Else the return depends on the SQL query performed:
+	* + INSERT - int (insert id)
+	* + UPDATE/DELETE/DROP - bool (success)
+	* + SELECT/SHOW/DESCRIBE/EXPLAIN - resource
+	*
+	* @param string $query
+	* @return array|bool|int|resource
+	*/
+	public function sqlResult($query) {
+		$sqlResult = $this->query($query);
+		
+		if (!$sqlResult['result']) {
+			errorHandle::newError(__METHOD__."() - Error: ".$sqlResult['error'], errorHandle::DEBUG);
+			errorHandle::newError(__METHOD__."() - Query: ".$query, errorHandle::DEBUG);
+			return FALSE;
+		}
+		
+		if (!isnull($sqlResult['numrows']) && $sqlResult['numrows'] > 1) {
+			$temp = array();
+			while($row = mysql_fetch_array($sqlResult['result'],  MYSQL_ASSOC)) {
+				$temp[] = $row;
+			}
+			$sqlResult['result'] = $temp;
+		}
+		else if (!isnull($sqlResult['numrows'])) {
+			$sqlResult['result'] = mysql_fetch_array($sqlResult['result'],  MYSQL_ASSOC);
+		}
+
+		return($sqlResult);
+
+	}
 
     /**
      * Add queries to the transaction queue
