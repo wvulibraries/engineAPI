@@ -1,7 +1,9 @@
 <?php
 /**
- * Database driver for session manager
- * @package EngineAPI\modules\session\drivers
+ * EngineAPI session manager
+ * @author David Gersting
+ * @version 1.0
+ * @package EngineAPI\modules\session
  */
 
 // Make sure we have the interface loaded
@@ -10,6 +12,8 @@ require_once __DIR__.DIRECTORY_SEPARATOR."sessionDriverInterface.php";
 /**
  * Database driver for session manager
  * @package EngineAPI\modules\session\drivers
+ * @author David Gersting
+ * @version 1.0
  */
 class sessionDriverDatabase implements sessionDriverInterface{
 	/**
@@ -36,21 +40,22 @@ class sessionDriverDatabase implements sessionDriverInterface{
 	/**
 	 * Class constructor
 	 *
-	 * Note: If no dbObject object nor db credentials (dbUser,dbPass,dbHost,dbPort,dbName) given, will use engineAPI's EngineDB via EngineAPI->getEngineDB()
-	 * For setup SQL see: sessionDriverDatabase.sql
+	 * @param session $session The session instance
+	 * @param array   $options Array of options
 	 *
-	 * @see sessionDriverDatabase.sql
-	 * @param session $session
-	 * @param array $options
-	 *        Array of options for Filesystem driver
-	 *          - tableName: The database table that stores the sessions
-	 *          - idField:   The table field that's used as the primary key which will be the session's id (which is an alpha string)
-	 *          - dbObject:  An instance of engineDB to be used (This takes precedence)
-	 *          - dbUser:    The username to use (will create a local instance of engineDB)
-	 *          - dbPass:    The password to use
-	 *          - dbHost:    The host to connect to
-	 *          - dbPort:    The port to connect to
-	 *          - dbName:    The database name where the session table is
+	 * ###Available Options:
+	 * - tableName: The database table that stores the sessions
+	 * - idField:   The table field that's used as the primary key which will be the session's id (which is an alpha string)
+	 * - dbObject:  An instance of engineDB to be used (This takes precedence)
+	 * - dbUser:    The username to use (will create a local instance of engineDB)
+	 * - dbPass:    The password to use
+	 * - dbHost:    The host to connect to
+	 * - dbPort:    The port to connect to
+	 * - dbName:    The database name where the session table is
+	 *
+	 * ####Note:
+	 * If no dbObject object nor db credentials (dbUser,dbPass,dbHost,dbPort,dbName) given, will use engineAPI's EngineDB via EngineAPI->getEngineDB()
+	 * For setup SQL see: sessionDriverDatabase.sql
 	 */
 	public function __construct($session,$options=array()){
 		$this->session = $session;

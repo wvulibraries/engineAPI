@@ -1,7 +1,9 @@
 <?php
 /**
- * Filesystem driver for session manager
- * @package EngineAPI\modules\session\drivers
+ * EngineAPI session manager
+ * @author David Gersting
+ * @version 1.0
+ * @package EngineAPI\modules\session
  */
 
 // Make sure we have the interface loaded
@@ -32,19 +34,17 @@ class sessionDriverFilesystem implements sessionDriverInterface{
 	/**
 	 * Class constructor
 	 *
+	 * ###Available Options:
+	 * - savePath: The directory to save the files to<br>(Will use session_save_path() as default)
+	 * - filename: The filename template to use (default: 'sess_{SessionID}')
+	 *    - The following placeholders are available:<br>
+	 *      {SessionID}:   The session's id<br>
+	 *      {SessionName}: The session's name<br>
+	 *      {fingerprint}: The browser fingerprint
+
 	 * @throws RuntimeException
-	 * @param session $session
-	 * @param array $options
-	 *        Array of options for Filesystem driver
-	 *          - savePath:
-	 *            The directory to save the files to
-	 *            Will use session_save_path() as default
-	 *          - filename:
-	 *            The filename template to use (default: 'sess_{SessionID}')
-	 *              The following placeholders are available: (these are case sensitive)
-	 *                - {SessionID}:   The session's id
-	 *                - {SessionName}: The session's name
-	 *                - {fingerprint}: The browser fingerprint
+	 * @param session $session The session instance
+	 * @param array $options   Array of options
 	 */
 	public function __construct($session,$options=array()){
 		$this->session = $session;
@@ -127,23 +127,28 @@ class sessionDriverFilesystem implements sessionDriverInterface{
 	}
 
 	/**
-	 * The open callback works like a constructor in classes and is executed when the session is being opened.
+	 * Open the session
 	 *
 	 * @param $savePath
 	 * @param $sessionName
+	 * @return bool
 	 */
 	public function open($savePath, $sessionName){
 		// We just need to save the session name for when we read/write the session data
 		$this->sessionName = $sessionName;
+		return TRUE;
 	}
 
 	/**
-	 * The close callback works like a destructor in classes and is executed after the session write callback has been called.
+	 * Close the session
+	 * @return bool
 	 */
-	public function close(){}
+	public function close(){
+		return TRUE;
+	}
 
 	/**
-	 * The read callback must always return a session encoded (serialized) string, or an empty string if there is no data to read.
+	 * Read session data from the session file
 	 *
 	 * @param $sessionId
 	 * @return string
@@ -158,7 +163,7 @@ class sessionDriverFilesystem implements sessionDriverInterface{
 	}
 
 	/**
-	 * The write callback is called when the session needs to be saved and closed.
+	 * Write session data to the session file
 	 *
 	 * @param $sessionId
 	 * @param $data
@@ -168,8 +173,9 @@ class sessionDriverFilesystem implements sessionDriverInterface{
 	}
 
 	/**
-	 * This callback is executed when a session is destroyed with session_destroy() or with session_regenerate_id() with the destroy parameter set to TRUE.
-	 * Return value should be TRUE for success, FALSE for failure.
+	 * Destroy (delete) a session from the filesystem
+	 *
+	 * This action can not be undone as the session's file will be deleted from the filesystem.
 	 *
 	 * @param $sessionId
  	 * @return bool
@@ -179,9 +185,9 @@ class sessionDriverFilesystem implements sessionDriverInterface{
 	}
 
 	/**
-	 * The garbage collector callback is invoked internally by PHP periodically in order to purge old session data.
-	 * The frequency is controlled by session.gc_probability and session.gc_divisor. The value of lifetime which is passed to this callback can be set in session.gc_maxlifetime.
-	 * Return value should be TRUE for success, FALSE for failure.
+	 * Session garbage collection
+	 *
+	 * This will look through all the session files and destroy all that haven't been modified in the given amount of time.
 	 *
 	 * @param $lifetime
 	 * @return bool
@@ -198,8 +204,7 @@ class sessionDriverFilesystem implements sessionDriverInterface{
 	}
 
 	/**
-	 * Returns the full filename for the session
-	 *
+	 * Build the full filepath to the session file for the given sessionId
 	 * @param $sessionId
 	 * @return string
 	 */

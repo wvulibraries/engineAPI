@@ -1,9 +1,18 @@
 <?php
 /**
  * EngineAPI session manager
- * This object will manage the PHP session for any EngineAPI application
+ * @author David Gersting
+ * @version 1.0
+ * @package EngineAPI\modules\session
+ */
+
+/**
+ * EngineAPI session manager
  *
- * Important Note:
+ * This is the class that the developer will use to directly interact with the session
+ * This interaction is done through a set of static methods on this class, which allows the class to be used globally without needing to pass around an instance of it
+ *
+ * ##Important Note:
  * All session operations should be done though this module such as session::set() and session::get()
  * Any direct manipulation of $_SESSION will not be preserved between requests.
  *
@@ -63,47 +72,8 @@ class session{
 	/**
 	 * Class constructor
 	 *
-	 * @author David Gersting
-	 * @param array $options
-	 *        Array of config options for the session handler to use
-	 *         - name:             Default session name
-	 *         - driver:           List of back-end drivers to use for session data storage (see expanded docs below)
-	 *         - autoStart:        Automatically start the session w/o having to call session::start()
-	 *         - fingerprintAttrs: Array or CSV of nodes of $_SERVER which will be used to calculate the browser fingerprint
-	 *         - csrfTimeout:      Length of time after which a csrf token will no longer be accepted (will have no effect if cookieLifetime is less)
-	 *         - cookieLifetime:   Length of time the session's cookie should live
-	 *                             @see http://us2.php.net/manual/en/session.configuration.php#ini.session.cookie-lifetime
-	 *         - cookiePath:       The session cookie's path param (controls what paths the cookie is visible on)
-	 *                             @see http://us2.php.net/manual/en/session.configuration.php#ini.session.cookie-path
-	 *         - cookieDomain:     The session cookie's domain param (controls what domain the cookie is visible on)
-	 *                             @see http://us2.php.net/manual/en/session.configuration.php#ini.session.cookie-domain
-	 *         - cookieSecure:     If TRUE, the cookie will only be valid over https
-	 *                             @see http://us2.php.net/manual/en/session.configuration.php#ini.session.cookie-secure
-	 *         - cookieHttpOnly:   If TRUE, the cookie will have the httponly flag set (making it visible only on the http(s) protocol)
-	 *                             @see http://us2.php.net/manual/en/session.configuration.php#ini.session.cookie-httponly
-	 *         - gcProbability:    The probability of garbage collection running (will be the numerator for the probability)
-	 *                             @see http://us2.php.net/manual/en/session.configuration.php#ini.session.gc-probability
-	 *         - gcDivisor:        The divisor of probability for garbage collection (ex: 100 sets gcProbability to be %'s of 100)
-	 *                             @see http://us2.php.net/manual/en/session.configuration.php#ini.session.gc-divisor
-	 *         - gcMaxlifetime:    At what point does the garbage collector see old data as 'garbage' (This should never be less than cookieLifetime)
-	 *                             @see http://us2.php.net/manual/en/session.configuration.php#ini.session.gc-maxlifetime
+	 * @param array $options Array of options
 	 * @param EngineAPI $engineAPI
-	 *
-	 * Driver Options:
-	 *   - You can specify one or more drivers which will act as fall-backs in case of failure with the order they are listed being the order they are tried
-	 *   - Currently, the following drivers are available: native,filesystem,database
-	 *       - Native:
-	 *         PHP's native session handler
-	 *         [No options available]
-	 *
-	 *       - Filesystem:
-	 *         Custom flat-file based storage system where each session is contained within a single file stored on the hard dist
-	 *         @see sessionDriverFilesystem::__construct()
-	 *
-	 *       - Database:
-	 *         MySQL Database backend
-	 *         @see sessionDriverDatabase::__construct()
-	 *
 	 */
 	private function __construct($options,$engineAPI=NULL){
 		self::$engine         = isset($engineAPI) ? $engineAPI : EngineAPI::singleton();
@@ -203,10 +173,33 @@ class session{
 
 	/**
 	 * Initialize the session handler
-	 * Note: This object is a singleton
 	 *
-	 * @author David Gersting
-	 * @param array $options
+	 * ## Available Options:
+	 * - name:             Default session name
+	 * - driver:           List of back-end drivers to use for session data storage (see expanded docs below)
+	 * - autoStart:        Automatically start the session w/o having to call session::start()
+	 * - fingerprintAttrs: Array or CSV of nodes of $_SERVER which will be used to calculate the browser fingerprint
+	 * - csrfTimeout:      Length of time after which a csrf token will no longer be accepted (will have no effect if cookieLifetime is less)
+	 * - cookieLifetime:   Length of time the session's cookie should live
+	 * - cookiePath:       The session cookie's path param (controls what paths the cookie is visible on)
+	 * - cookieDomain:     The session cookie's domain param (controls what domain the cookie is visible on)
+	 * - cookieSecure:     If TRUE, the cookie will only be valid over https
+	 * - cookieHttpOnly:   If TRUE, the cookie will have the httponly flag set (making it visible only on the http(s) protocol)
+	 * - gcProbability:    The probability of garbage collection running (will be the numerator for the probability)
+	 * - gcDivisor:        The divisor of probability for garbage collection (ex: 100 sets gcProbability to be %'s of 100)
+	 * - gcMaxlifetime:    At what point does the garbage collector see old data as 'garbage' (This should never be less than cookieLifetime)
+	 *
+	 * ## Driver Options:
+	 * - You can specify one or more drivers which will act as fall-backs in case of failure with the order they are listed being the order they are tried
+	 * - Currently, the following drivers are available: native,filesystem,database
+	 *   - Native: PHP's native session handler
+	 *      - [No options available]
+	 *   - Filesystem: Custom flat-file based storage system
+	 *      - [Options listed in docs for sessionDriverFilesystem]
+	 *   - Database: MySQL Database backend
+	 *      - [Options listed in docs for sessionDriverDatabase]
+	 *
+	 * @param array $options Array of options
 	 * @param EngineAPI $engineAPI
 	 * @return session
 	 */
@@ -218,7 +211,6 @@ class session{
 	/**
 	 * Returns the instance of the session manager
 	 *
-	 * @author David Gersting
 	 * @return session
 	 */
 	public static function getInstance(){
@@ -228,7 +220,6 @@ class session{
 	/**
 	 * Returns the instance of the session manager
 	 *
-	 * @author David Gersting
 	 * @return session
 	 */
 	public static function getEngine(){
@@ -238,7 +229,6 @@ class session{
 	/**
 	 * EngineAPI template tag handler
 	 *
-	 * @author David Gersting
 	 * @param array $matches
 	 * @return string
 	 */
@@ -266,7 +256,6 @@ class session{
 	/**
 	 * EngineAPI csrf template tag handler
 	 *
-	 * @author David Gersting
 	 * @return string
 	 */
 	public static function templateHandler_csrf(){
@@ -279,7 +268,6 @@ class session{
 	/**
 	 * EngineAPI csrfToken template tag handler
 	 *
-	 * @author David Gersting
 	 * @param array $matches
 	 * @return string
 	 */
@@ -290,7 +278,6 @@ class session{
 	/**
 	 * EngineAPI csrfID template tag handler
 	 *
-	 * @author David Gersting
 	 * @param array $matches
 	 * @return string
 	 */
@@ -301,7 +288,6 @@ class session{
 		/**
 	 * Restore a previous session
 	 *
-	 * @author David Gersting
 	 * @see self::__construct()
 	 * @param string $sessionID
 	 * @param string $sessionKey
@@ -326,7 +312,6 @@ class session{
 	/**
 	 * Returns the back-end session driver
 	 *
-	 * @author David Gersting
 	 * @return sessionDriverInterface
 	 */
 	public static function getDriver(){
@@ -336,8 +321,6 @@ class session{
 	/**
 	 * Manually triggers session save method
 	 * This might be a little expensive depending on the driver as a full write/read cycle will occur in the driver
-	 *
-	 * @author David Gersting
 	 */
 	public static function save(){
 		session_write_close();
@@ -346,8 +329,6 @@ class session{
 
 	/**
 	 * Syncs internal data store to external $_SESSION super-global
-	 *
-	 * @author David Gersting
 	 */
 	public static function sync(){
 		$_SESSION = self::$sessionData;
@@ -356,7 +337,6 @@ class session{
 	/**
 	 * Starts the session
 	 *
-	 * @author David Gersting
 	 * @param string $sessionKey
 	 * @return bool
 	 */
@@ -419,8 +399,6 @@ class session{
 
 	/**
 	 * Stops the session
-	 *
-	 * @author David Gersting
 	 */
 	public static function stop(){
 		self::sync();
@@ -430,8 +408,6 @@ class session{
 
 	/**
 	 * Has the session been started?
-	 *
-	 * @author David Gersting
 	 * @return bool
 	 */
 	public static function started(){
@@ -440,8 +416,6 @@ class session{
 
 	/**
 	 * Returns the session's ID
-	 *
-	 * @author David Gersting
 	 * @return string
 	 */
 	public static function id(){
@@ -450,8 +424,6 @@ class session{
 
 	/**
 	 * Returns the session's name
-	 *
-	 * @author David Gersting
 	 * @return string
 	 */
 	public static function name(){
@@ -460,8 +432,6 @@ class session{
 
 	/**
 	 * Returns the browser fingerprint
-	 *
-	 * @author David Gersting
 	 * @return string
 	 */
 	public static function browserFingerprint(){
@@ -471,8 +441,6 @@ class session{
 	/**
 	 * Requests a new csrf token/id pair
 	 * Will return an array with the id in index 0 and the token in index 1
-	 *
-	 * @author David Gersting
 	 * @return array
 	 */
 	public static function csrfTokenRequest(){
@@ -489,7 +457,6 @@ class session{
 	/**
 	 * Checks a given CSRF token against the correct one in the session
 	 *
-	 * @author David Gersting
 	 * @param string $id
 	 * @param string $token
 	 * @return bool
@@ -519,8 +486,6 @@ class session{
 
 	/**
 	 * Clears all session data
-	 *
-	 * @author David Gersting
 	 */
 	public static function clear(){
 		self::$sessionData['data']  = array();
@@ -533,7 +498,6 @@ class session{
 	/**
 	 * Reset the session
 	 *
-	 * @author David Gersting
 	 * @todo Reset 'private' data as well (needs way to re-init it after the reset)
 	 * @param bool $keepData
 	 */
@@ -556,7 +520,6 @@ class session{
 	/**
 	 * Does the requested setting exist in the session?
 	 *
-	 * @author David Gersting
 	 * @param string $name
 	 *        Name of the value to retrieve
 	 * @param string $location
@@ -590,16 +553,14 @@ class session{
 
 	/**
 	 * Get a value from the session
-	 * If no $location is provided will search 'private' then 'data' then 'flash' for $name
 	 *
-	 * @author David Gersting
 	 * @param string $name
 	 *        Name of the value to retrieve (Case insensitive)
 	 * @param mixed $default
 	 *        The default value if the requested name doesn't exist
 	 * @param string $location
-	 *        You can explicitly define the location to look for $name
-	 *        Valid locations: 'private', 'data', 'flash'
+	 *        You can explicitly define the location('private', 'data', or 'flash') to look for $name<br>
+	 *        If no location is provided will search 'private' then 'data' then 'flash' for $name
 	 * @return mixed
 	 */
 	public static function get($name,$default=NULL,$location=NULL){
@@ -639,7 +600,6 @@ class session{
 	/**
 	 * Set a value into the session
 	 *
-	 * @author David Gersting
 	 * @param string $name
 	 *        Name of the value to set
 	 * @param mixed $value
@@ -649,7 +609,7 @@ class session{
 	 *        Flash data will only live for one request
 	 * @param bool $isPrivate
 	 *        Is this 'private' data
-	 *        Only EngineAPI and its modules can use this
+	 *        (Only EngineAPI and its modules can use this)
 	 * @return bool
 	 *         Was the setting successful?
 	 */
@@ -690,8 +650,6 @@ class session{
 
 	/**
 	 * Destroy (delete) an item from the session data
-	 *
-	 * @author David Gersting
 	 * @param $name
 	 */
 	public static function destroy($name){
@@ -702,7 +660,6 @@ class session{
 	/**
 	 * Causes flash data to last for one more request
 	 *
-	 * @author David Gersting
 	 * @param array|string $names
 	 *        Either an array or CSV of names of settings to copy over
 	 *        (Array is more efficient)
@@ -734,7 +691,6 @@ class session{
 	/**
 	 * Moves flash data to persistent session data
 	 *
-	 * @author David Gersting
 	 * @param array|string $names
 	 *        Either an array or CSV of names of settings to copy over
 	 *        (Array is more efficient)
@@ -781,8 +737,6 @@ class session{
 
 	/**
 	 * Perform garbage collection for this session
-	 *
-	 * @author David Gersting
 	 */
 	public static function gc(){
 		// Kill off old csrf tokens
@@ -799,7 +753,6 @@ class session{
 	/**
 	 * Normalize the name used for a session var
 	 *
-	 * @author David Gersting
 	 * @param string $name
 	 * @return string
 	 */
