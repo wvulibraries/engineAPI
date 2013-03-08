@@ -1,5 +1,18 @@
 <?php
+/**
+ * Helper functions for listManagement
+ * @package EngineAPI\modules\listManagement
+ * @todo Review these functions - Are they needed, can be cleaned up, etc
+ */
 
+/**
+ * Generate HTML multi-select box form (Add)
+ *
+ * @todo Figure out attrPairs
+ * @param $attPairs
+ * @param EngineAPI $engine NOT USED
+ * @return string
+ */
 function webHelper_listMultiAdd($attPairs,$engine=null) {
 	
 	$engine = EngineAPI::singleton();
@@ -37,6 +50,15 @@ function webHelper_listMultiAdd($attPairs,$engine=null) {
 	
 }
 
+/**
+ * Generate HTML multi-select box form (Insert)
+ *
+ * @param $table
+ * @param $label NOT USED
+ * @param $cols
+ * @param EngineAPI $engine NOT USED
+ * @return string
+ */
 function webHelper_listMultiInsert($table,$label,$cols,$engine=null) {
 	
 	$engine = EngineAPI::singleton();
@@ -83,6 +105,12 @@ function webHelper_listMultiInsert($table,$label,$cols,$engine=null) {
 	return webHelper_errorMsg("Something went horribly wrong. listManagement.pl -- webHelper_listInsert()");
 }
 
+/**
+ * Generate HTML multi-select col form (Insert)
+ * @param $cols
+ * @param EngineAPI $engine NOT USED
+ * @return string
+ */
 function webHelper_listMultiColInsert($cols,$engine=null) {
 	
 	$engine = EngineAPI::singleton();
@@ -96,6 +124,12 @@ function webHelper_listMultiColInsert($cols,$engine=null) {
 	
 }
 
+/**
+ * Generate HTML multi-select val form (Insert)
+ * @param $cols
+ * @param EngineAPI $engine NOT USED
+ * @return string
+ */
 function webHelper_listMultiValInsert($cols,$engine=null) {
 	
 	$engine = EngineAPI::singleton();
@@ -109,6 +143,12 @@ function webHelper_listMultiValInsert($cols,$engine=null) {
 	
 }
 
+/**
+ * Generate HTML multi-select box form (Edit)
+ * @param $attPairs
+ * @param EngineAPI $engine NOT USED
+ * @return string
+ */
 function webHelper_listMultiEditList($attPairs,$engine=null) {
 	
 	$engine = EngineAPI::singleton();
@@ -174,6 +214,13 @@ function webHelper_listMultiEditList($attPairs,$engine=null) {
 	return($output); 
 }
 
+/**
+ * Generate HTML multi-select box form (Update)
+ * @param $table
+ * @param $cols
+ * @param EngineAPI $engine NOT USED
+ * @return string
+ */
 function webHelper_listMultiUpdate($table,$cols,$engine=null) {
 	
 	$engine = EngineAPI::singleton();
@@ -262,6 +309,13 @@ function webHelper_listMultiUpdate($table,$cols,$engine=null) {
 	return($output);
 }
 
+/**
+ * Generate HTML multi-select col form (Update)
+ * @param $cols
+ * @param $row
+ * @param EngineAPI $engine NOT USED
+ * @return string
+ */
 function webHelper_listMulticolUpdate($cols,$row,$engine=null) {
 	
 	$engine = EngineAPI::singleton();
@@ -275,6 +329,14 @@ function webHelper_listMulticolUpdate($cols,$row,$engine=null) {
 	
 }
 
+/**
+ * Duplicate check for multi-select helper functions?
+ * @param $new
+ * @param $table
+ * @param $col
+ * @param EngineAPI $engine NOT USED
+ * @return bool
+ */
 function webHelper_listMultiDupeCheck($new,$table,$col,$engine=null) {
 	
 	$engine = EngineAPI::singleton();
