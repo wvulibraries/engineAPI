@@ -1,6 +1,18 @@
 <?php
+/**
+ * Helper functions for listManagement
+ * @package EngineAPI\modules\listManagement
+ * @todo Review these functions - Are they needed, can be cleaned up, etc
+ */
 
-//$_GET['type'] needs documented
+/**
+ * Generate HTML add form
+ *
+ * @todo Figure out attrPairs
+ * @param $attPairs
+ * @param EngineAPI $engine NOT USED
+ * @return string
+ */
 function webHelper_listAdd($attPairs,$engine=null) {
 	
 	$engine = EngineAPI::singleton();
@@ -25,6 +37,14 @@ function webHelper_listAdd($attPairs,$engine=null) {
 	
 }
 
+/**
+ * Generate HTML insert form
+ * @param $table
+ * @param $label
+ * @param EngineAPI $engine NOT USED
+ * @param bool $emailCheck
+ * @return string
+ */
 function webHelper_listInsert($table,$label,$engine,$emailCheck=FALSE) {
 	
 	$engine = EngineAPI::singleton();
@@ -65,6 +85,12 @@ function webHelper_listInsert($table,$label,$engine,$emailCheck=FALSE) {
 	return webHelper_errorMsg("Something went horribly wrong. listManagement.pl -- webHelper_listInsert()");
 }
 
+/**
+ * Generate HTML edit form
+ * @param $attPairs
+ * @param EngineAPI $engine NOT USED
+ * @return string
+ */
 function webHelper_listEditList($attPairs,$engine=null) {
 	
 	$engine = EngineAPI::singleton();
@@ -117,6 +143,13 @@ function webHelper_listEditList($attPairs,$engine=null) {
 	return($output); 
 }
 
+/**
+ * Generate HTML update form
+ * @param $table
+ * @param EngineAPI $engine NOT USED
+ * @param bool $emailCheck
+ * @return string
+ */
 function webHelper_listUpdate($table,$engine,$emailCheck=FALSE) {
 	
 	$engine = EngineAPI::singleton();
@@ -215,7 +248,13 @@ function webHelper_listUpdate($table,$engine,$emailCheck=FALSE) {
 }
 
 
-
+/**
+ * Duplicate check helper for list object helpers?
+ * @param $new
+ * @param $table
+ * @param EngineAPI $engine NOT USED
+ * @return bool
+ */
 function webHelper_listDupeCheck($new,$table,$engine) {
 	
 	$engine = EngineAPI::singleton();
