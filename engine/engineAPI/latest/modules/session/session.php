@@ -759,13 +759,6 @@ class session{
 	private static function normalizeName($name){
 		return str_replace(' ','_',strtolower(trim($name)));
 	}
-
-	/**
-	 * @todo REMOVE BEFORE FLIGHT
-	 */
-	public static function debug(){
-		echo "<pre><tt>Session data for sid '".session::id()."'\n".print_r($_SESSION,true)."</tt></pre><hr>";
-	}
 }
 
 ?>
