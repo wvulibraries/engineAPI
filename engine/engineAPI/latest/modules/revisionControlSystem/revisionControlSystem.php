@@ -481,15 +481,17 @@ class revisionControlSystem {
 	/**
 	 * Generate HTML revision table
 	 *
+     * ###Display Fields:
+     * - field: Field is the field name in the actual table.
+     * - label: the heading for that field in the display table.
+     * - translation: if present it must be either and array or a function.
+     *   - if an array, each index of the array must corrispond do a potential value.
+     *   - if a function that function must take an argument, which is the value of the field.
+     *
 	 * @param $primaryIDValue
 	 *        Value of the $primaryIDField. NOT SANITIZED, Expects clean value.
 	 * @param $displayFields
 	 *        An array that contains information about each field to be displayed in the revision table.
-	 *          - field: Field is the field name in the actual table.
-	 *          - label: the heading for that field in the display table.
-	 *          - translation: if present it must be either and array or a function.
-	 *                         if an array, each index of the array must corrispond do a potential value.
-	 *                         if a function that function must take an argument, which is the value of the field.
 	 * @return bool|string
 	 */
 	public function generateRevisionTable($primaryIDValue,$displayFields) {
@@ -587,21 +589,25 @@ class revisionControlSystem {
 	/**
 	 * Display the comparison of the 2 provided revision IDs
 	 *
-	 * @param $primaryIDValue_1
+     * ###Fields Array:
+     * Array of how to compare the fields. If nothing is provided, just displays the fields side by side with default diff tool<br>
+     * Note: custom diff function is NOT run through htmlSanitize before display, return from function should be sanitized
+     *
+     * - $fields['metadata']['fieldName']['display'] = create_function(); // used to display data (takes 1 arg)
+     * - $fields['metadata']['fieldName']['diff']    = create_function(); // used to perform diff (takes 2 args)
+     * - $fields['relatedData']['fieldName']         = create_function(); // used to translate value (takes 1 arg)
+     * - $fields['digitalObjects']                   = create_function(); // used to display the digital object (or provide links), takes 1 arg
+     *
+	 * @param string $primaryIDValue_1
 	 *        Primary id of first item to compare
-	 * @param $secondaryIDValue_1
+	 * @param string $secondaryIDValue_1
 	 *        Secondary id of first item to compare
-	 * @param $primaryIDValue_2
+	 * @param string $primaryIDValue_2
 	 *        Primary id of second item to compare
-	 * @param $secondaryIDValue_2
+	 * @param string $secondaryIDValue_2
 	 *        Secondary id of second item to compare
 	 * @param array $fields
-	 *        Array of how to compare the fields. If nothing is provided, just displays the fields side by side with default diff tool
- 	 *        $fields['metadata']['fieldName']['display'] = create_function(); // used to display data (takes 1 arg)
-	 *        $fields['metadata']['fieldName']['diff']    = create_function(); // used to perform diff (takes 2 args)
-	 *        $fields['relatedData']['fieldName']         = create_function(); // used to translate value (takes 1 arg)
-	 *        $fields['digitalObjects']                   = create_function(); // used to display the digital object (or provide links), takes 1 arg
-	 *        Note: custom diff function is NOT run through htmlSanitize before display, return from function should be sanitized
+	 *        Array of how to compare the fields. *See section above*
 	 * @return bool|string
 	 */
 	public function compare($primaryIDValue_1, $secondaryIDValue_1, $primaryIDValue_2, $secondaryIDValue_2, $fields=NULL) {
@@ -762,7 +768,7 @@ class revisionControlSystem {
 	}
 
 	/**
-	 * Add a field to be excluded
+	 * Add a field to be excluded from revision control
 	 *
 	 * @param string $fieldName
 	 * @return bool
