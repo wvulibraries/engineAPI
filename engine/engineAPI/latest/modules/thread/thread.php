@@ -204,11 +204,13 @@ class thread
         }
     }
 
-    /**
-     * alias of stop();
-     * @see stop()
-     */
-    public function kill($_signal = SIGKILL, $_wait = false)
+	/**
+	 * alias of stop();
+	 * @see stop()
+	 * @param int $_signal
+	 * @param bool $_wait
+	 */
+	public function kill($_signal = SIGKILL, $_wait = false)
     {
         return $this->stop($_signal, $_wait);
     }
