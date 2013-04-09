@@ -405,7 +405,7 @@ class errorHandle
     public static function phpException(Exception $e)
     {
         self::$errorType = 'phpException';
-        self::newError($e->getMessage(), self::$phpErrMapping['phpException']);
+        self::newError("{$e->getMessage()} at {$e->getFile()}:{$e->getLine()}", self::$phpErrMapping['phpException']);
     }
 
     /**
