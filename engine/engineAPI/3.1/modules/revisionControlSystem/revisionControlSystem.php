@@ -909,6 +909,169 @@ class revisionControlSystem {
 
 	}
 
+    /**
+     * Retrieves an array of secondaryIDs
+     *
+     * This method will return an array of the recorded secondary IDs for a given production object.
+     *
+     * @author David Gersting
+     * @param string $primaryID
+     *        The primary ID of the object
+     * @param string $orderByDirection
+     *        The ORDER BY direction to apply (Valid: ASC or DESC)
+     * @param string $where
+     *        An optional WHERE clause to be added to the SQL call
+     * @return array
+     */
+    public function getSecondaryIDs($primaryID,$orderByDirection='ASC',$where=NULL){
+        $results = array();
+        $where   = (isset($where) and !empty($where)) ? " AND ($where)" : '';
+
+        // Format and validate $orderByDirection
+        $orderByDirection = trim(strtoupper($orderByDirection));
+        if($orderByDirection != 'ASC' and $orderByDirection != 'DESC'){
+            errorHandle::newError(__METHOD__."() - Invalid param for orderByDirection: '$orderByDirection' (Only 'ASC' and 'DESC' allowed)", errorHandle::DEBUG);
+            $orderByDirection = 'ASC';
+        }
+
+        // Build and run SQL
+        $sql = sprintf("SELECT secondaryID FROM `%s` WHERE (productionTable='%s' AND primaryID='%s') %s ORDER BY secondaryID %s",
+            $this->openDB->escape($this->revisionTable),
+            $this->openDB->escape($this->productionTable),
+            $this->openDB->escape($primaryID),
+            $this->openDB->escape($where),
+            $this->openDB->escape($orderByDirection)
+        );
+        $sqlResult = $this->openDB->query($sql);
+
+        // Did it work?
+        if(!$sqlResult['result']){
+            errorHandle::newError(__METHOD__."() - SQL Error: ".$sqlResult['error'], errorHandle::DEBUG);
+        }else{
+            while($row = mysql_fetch_assoc($sqlResult['result'])){
+                $results[] = $row['secondaryID'];
+            }
+        }
+        return $results;
+    }
+
+    /**
+     * Returns a given revision
+     *
+     * This method will return the specified revision from the revisions table.<br>
+     * This is useful when needing to 'preview' a revision before reverting to it
+     *
+     * @author David Gersting
+     * @param string $primaryID
+     *        The primary ID for the object under revision control
+     * @param string $secondaryID
+     *        The secondary ID for the object under revision control
+     * @param bool $returnRaw
+     *        If set to TRUE, will return the raw table row from the revisions table.<br>
+     *        Else will return an unserialized array of the original object's fields
+     * @return array|bool
+     */
+    public function getRevision($primaryID,$secondaryID,$returnRaw=FALSE){
+        // Build and run SQL
+        $sql = sprintf("SELECT * FROM `%s` WHERE productionTable='%s' AND primaryID='%s' AND secondaryID='%s' LIMIT 1",
+            $this->openDB->escape($this->revisionTable),
+            $this->openDB->escape($this->productionTable),
+            $this->openDB->escape($primaryID),
+            $this->openDB->escape($secondaryID)
+        );
+        $sqlResult = $this->openDB->query($sql);
+
+        // Did it work?
+        if(!$sqlResult['result']){
+            errorHandle::newError(__METHOD__."() - SQL Error: ".$sqlResult['error'], errorHandle::DEBUG);
+            return FALSE;
+        }else{
+            $row = mysql_fetch_assoc($sqlResult['result']);
+            return $returnRaw
+                ? $row
+                : unserialize(base64_decode($row['metadata']));
+        }
+    }
+
+    /**
+     * Returns TRUE if there are revisions for an object
+     *
+     * This method return TRUE if there are any revisions (count > 0) available for a given production objects
+     *
+     * @author David Gersting
+     * @param string $primaryID
+     * @return bool
+     */
+    public function hasRevisions($primaryID){
+        $count = $this->countRevisions($primaryID);
+        return $count > 0;
+    }
+
+    /**
+     * Counts the revisions for a given object
+     *
+     * Returns the number of available revisions available for a given production object
+     *
+     * @author David Gersting
+     * @param string $primaryID
+     * @return int
+     */
+    public function countRevisions($primaryID){
+        // Build and run SQL
+        $sql = sprintf("SELECT COUNT(ID) AS i FROM `%s` WHERE productionTable='%s' AND primaryID='%s'",
+            $this->openDB->escape($this->revisionTable),
+            $this->openDB->escape($this->productionTable),
+            $this->openDB->escape($primaryID)
+        );
+        $sqlResult = $this->openDB->query($sql);
+
+        // Did it work?
+        if(!$sqlResult['result']){
+            errorHandle::newError(__METHOD__."() - SQL Error: ".$sqlResult['error'], errorHandle::DEBUG);
+            return 0;
+        }else{
+            return (int)mysql_result($sqlResult['result'],0,'i');
+        }
+    }
+
+
+    /**
+     * Manually diff two fields
+     * This method will calculate the diff of left and right values
+     *
+     * @author David Gersting
+     * @param string $left
+     * @param string $right
+     * @param string $mode
+     *        The diff mode to use. (Valid: text,image)<br>
+     *        If NULL, auto-detect mode based on $left
+     * @return bool|string
+     */
+    public function manualDiff($left,$right,$mode=NULL){
+        // If mode is NULL, auto-detect mode
+        if(is_null($mode)){
+            $fi = new finfo(FILEINFO_MIME_TYPE);
+            $mimeType = $fi->buffer($left);
+            list($mimeTypeGeneral,$mimeTypeSpecific) = explode('/', $mimeType);
+            $mode = $mimeTypeGeneral;
+        }
+
+        // Make sure $mode is a valid mode
+        $mode = trim(strtolower($mode));
+        if(!in_array($mode, array('text','image'))){
+            errorHandle::newError(__METHOD__."() - Invalid mode! (Valid: text,image | Provided: $mode)", errorHandle::DEBUG);
+            return FALSE;
+        }
+
+        switch($mode){
+            case 'text':
+                return htmlDiff($left,$right);
+                break;
+            case 'image':
+                return 'TODO';
+                break;
+        }
+    }
 }
 
 ?>

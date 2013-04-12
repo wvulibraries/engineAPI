@@ -30,7 +30,6 @@ class localvars {
 	/**
 	 * Add a localvar
 	 *
-	 * @deprecated
 	 * @param string $var
 	 * @param mixed $value
 	 * @param bool $null
@@ -55,7 +54,6 @@ class localvars {
 	/**
 	 * Let a local var
 	 *
- 	 * @deprecated
 	 * @param string $var
 	 * @param string $default
 	 * @return mixed
@@ -76,7 +74,6 @@ class localvars {
 	/**
 	 * Delete a localvar
 	 *
-	 * @deprecated
 	 * @param string $var
 	 * @return bool
 	 */
@@ -98,7 +95,6 @@ class localvars {
 	 *
 	 * @see self::add();
 	 * @see self::get();
-	 * @deprecated
 	 * @param string $var
 	 * @param mixed $value
 	 * @param bool $null
@@ -128,7 +124,6 @@ class localvars {
     /**
      * This will import a key->value database table into local vars (very useful for a 'settings' table)
 	 *
-	 * @deprecated
      * @param $tblName      - The database table
      * @param $nameField    - The table field holding the setting name
      * @param $valueField   - The table field holding the setting value
