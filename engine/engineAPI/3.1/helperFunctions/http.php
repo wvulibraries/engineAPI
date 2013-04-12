@@ -13,6 +13,48 @@ class http
     {}
 
     /**
+     * Sets a variable in cleanGet. Sanitizes variables for clean MYSQL and HTML
+     *
+     * @author  Michael Bond
+     * @param string $var variable to set
+     * @param string $value value of variable to set. Will be converted to string
+     *
+     * @return BOOL TRUE
+     */
+    public static function setGet($var,$value) {
+
+        $engine = EngineAPI::singleton();
+        $value  = (string)$value;
+        
+        $engine->cleanGet['MYSQL'][$var] = $engine->openDB->escape($value);
+        $engine->cleanGet['HTML'][$var]  = htmlSanitize($value);
+        $engine->cleanGet['RAW'][$var]   = $value;
+
+        return TRUE;
+    }
+
+    /**
+     * Sets a variable in cleanPost. Sanitizes variables for clean MYSQL and HTML
+     *
+     * @author  Michael Bond
+     * @param string $var variable to set
+     * @param string $value value of variable to set. Will be converted to string
+     *
+     * @return BOOL TRUE
+     */
+    public static function setPost($var,$value) {
+
+        $engine = EngineAPI::singleton();
+        $value  = (string)$value;
+        
+        $engine->cleanPost['MYSQL'][$var] = $engine->openDB->escape($value);
+        $engine->cleanPost['HTML'][$var]  = htmlSanitize($value);
+        $engine->cleanPost['RAW'][$var]   = $value;
+
+        return TRUE;
+    }
+
+    /**
      * Redirect the browser to the given URL.
      * (Warning: This will terminate script execution)
      *
