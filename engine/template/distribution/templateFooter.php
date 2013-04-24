@@ -9,7 +9,7 @@
 	</div> <!-- /.container-fluid -->
 
 	<?php recurseInsert("footerIncludes.php","php") ?>
-	<script type="text/javascript" src="/javascript/distribution/bootstrap/js/bootstrap.min.js"></script>
+	
 
 </body>
 </html>
