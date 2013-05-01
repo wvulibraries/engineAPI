@@ -8,8 +8,7 @@
 
 	</div> <!-- /.container-fluid -->
 
+	<script type="text/javascript" src="/javascript/distribution/bootstrap/js/bootstrap.min.js"></script>
 	<?php recurseInsert("footerIncludes.php","php") ?>
-	
-
 </body>
 </html>
