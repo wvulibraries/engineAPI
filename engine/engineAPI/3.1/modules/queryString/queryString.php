@@ -17,6 +17,9 @@ class queryString {
 		$attPairs      = attPairs($matches[1]);
 
 		if (isset($engine->cleanGet['HTML'][$attPairs['var']]) && !is_empty($engine->cleanGet['HTML'][$attPairs['var']])) {
+			if (isset($attPairs['decode']) && $attPairs['decode'] == "true") {
+				$engine->cleanGet['HTML'][$attPairs['var']] = urldecode($engine->cleanGet['HTML'][$attPairs['var']]);
+			}
 			return($engine->cleanGet['HTML'][$attPairs['var']]);
 		}
 
