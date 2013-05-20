@@ -339,20 +339,23 @@ class validate {
 	/**
 	 * Validates as a valid date format
 	 *
-	 * @todo Add more flexibility with something like strtotime()
-	 * @todo Add valid date checking (not just valid format) with checkdate()
-	 * @param $test
-	 * @param string $delim
-	 * @return bool|null
+	 * @param string $test
+	 * @return bool
 	 */
-	public static function date($test,$delim="/") {
-		
-		if ($delim == "/") {
-			$delim = "\/";
-		}
-		
-		$regexp = "/^\d\d".$delim."\d\d".$delim."\d\d\d\d$/";
-		return(self::regexp($regexp,$test));
+	public static function date($test) {
+		// Parse the date
+		$parseData = date_parse($test);
+
+		// If there were any errors or warnings during parse, date failed!
+		if($parseData['warning_count'] || $parseData['error_count']) return FALSE;
+
+		// Now we need to check both to catch both MM/DD/YYYY and DD/MM/YYYY
+		$chkDate1 = checkdate($parseData['month'],$parseData['day'],$parseData['year']);
+		$chkDate2 = checkdate($parseData['day'],$parseData['month'],$parseData['year']);
+		if(!$chkDate1 and !$chkDate2) return FALSE;
+
+		// If we get here, the date is valid
+		return TRUE;
 	}
 
 	/**
