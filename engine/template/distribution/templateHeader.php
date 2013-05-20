@@ -26,7 +26,7 @@
 					<span class="icon-bar"></span>
 					<span class="icon-bar"></span>
 				</button>
-				<a class="brand" href="#">{local var="pageHeader"}</a>
+				<a class="brand" href="{local var="siteRoot"}">{local var="pageHeader"}</a>
 				<div class="nav-collapse collapse">
 					<?php recurseInsert("topnav.php","php") ?>
 				</div>
