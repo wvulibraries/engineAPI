@@ -1,0 +1,7 @@
+http://ckeditor.com/license
+
+CKEditor is distributed under the GPL, LGPL, and MPL Open Source licenses. This triple copyleft licensing model is flexible and allows you to choose the license that is best suited for your needs. The Open Source licenses are intended for:
+
+Integrating CKEditor into Open Source software.
+Personal and educational use of CKEditor.
+Integrating CKEditor in commercial software while at the same time satisfying the terms of the Open Source license.
