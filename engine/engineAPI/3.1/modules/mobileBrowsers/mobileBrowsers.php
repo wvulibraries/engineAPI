@@ -6,6 +6,12 @@ class mobileBrowsers {
 	private static function construct() {
 		if(!isnull(self::$uaResult) && self::$uaResult !== FALSE) return(TRUE);
 		require_once(dirname(__FILE__)."/tobie-ua-parser-php/UAParser.php");
+
+		// Get regexes.yaml file if needed
+		if (!file_exists(dirname(__FILE__)."/tobie-ua-parser-php/resources/regexes.yaml")) {
+			exec("php ".dirname(__FILE__)."/tobie-ua-parser-php/uaparser-cli.php -g -s");
+		}
+
 		self::$uaResult = UA::parse();
 
 		if(self::$uaResult === FALSE) return(FALSE);
