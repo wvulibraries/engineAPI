@@ -166,7 +166,7 @@ class ldapSearch
      */
     public function logout()
     {
-        return ldap_unbind($this->ldap);
+        return !isnull($this->ldap) ? ldap_unbind($this->ldap) : TRUE;
     }
 
     /**
