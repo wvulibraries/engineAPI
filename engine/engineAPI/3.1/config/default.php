@@ -186,14 +186,12 @@ $engineVars['domains']['wvulibs']['attributes'] = array("memberof","displayname"
 
 // LDAP Authoritative Sources
 // As many active directories/LDAPs can be defined as needed here.
-
-$engineVars['ldapDomain']['wvu-ad']['ldapServer']     = "ldap://domain.com";         // URL of the ldap server
-$engineVars['ldapDomain']['wvu-ad']['ldapServerPort'] = 389;                              // IP port on which the LDAP server is listening
-$engineVars['ldapDomain']['wvu-ad']['ldapDomain']     = "domain.com";             // The name of this domain
-$engineVars['ldapDomain']['wvu-ad']['baseDN']         = "DC=domain,DC=com";    // The DN to use as a base for all searching
-//$engineVars['ldapDomain']['wvu-ad']['bindUsername']   = NULL;                             // A static username to bing with
-//$engineVars['ldapDomain']['wvu-ad']['bindPassword']   = NULL;                             // A static password to bind with
-$engineVars['domains']['domain'] = $engineVars['ldapDomain']['domain'];               // BACKWARD COMPATIBILITY
+$engineVars['ldapDomain']['wvu-ad']['ldapServer']     = "ldap://domain.com"; // URL of the ldap server
+$engineVars['ldapDomain']['wvu-ad']['ldapServerPort'] = 389;                 // IP port on which the LDAP server is listening
+$engineVars['ldapDomain']['wvu-ad']['ldapDomain']     = "domain.com";        // The name of this domain
+$engineVars['ldapDomain']['wvu-ad']['baseDN']         = "DC=domain,DC=com";  // The DN to use as a base for all searching
+//$engineVars['ldapDomain']['wvu-ad']['bindUsername']   = NULL;              // A static username to bing with
+//$engineVars['ldapDomain']['wvu-ad']['bindPassword']   = NULL;              // A static password to bind with
 
 
 // User Authorization module settings (these override in-module defaults)
