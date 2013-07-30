@@ -15,6 +15,8 @@ class mailSender {
 	private $engine      = NULL;
 	private $database    = NULL;
 
+	public $smtpServer   = 'smtp.wvu.edu';
+	public $smtpDebugLvl = 2; // 1 = client messages | 2 = client and server messages
 	public $ignoredEmail = array("dev@null.com");
 	public $debug        = FALSE; // Must be FALSE in Production
 
@@ -233,11 +235,25 @@ class mailSender {
 		$PHPMailer = new PHPMailer($this->debug);
 
 		// Set PHPMailer to use smtp and sets settings
-		$PHPMailer->IsSMTP();
-		$PHPMailer->Hostname  = "smtp.wvu.edu";
-		$PHPMailer->Host      = "smtp.wvu.edu";
-		$PHPMailer->Port      = 25;
-		// $PHPMailer->SMTPDebug = $this->debug;
+		if($this->smtpServer){
+			$PHPMailer->IsSMTP();
+
+			$urlParts = parse_url($this->smtpServer);
+
+			// Catch the case where the host will be the path. (this happens for example with 'smtp.example.com')
+			if(!isset($urlParts['host']) and isset($urlParts['path'])) $urlParts['host'] = $urlParts['path'];
+
+			// Set the SMTP server host
+			$PHPMailer->Host = $urlParts['host'];
+
+			// If there's a port in the smtpServer, set it
+			if(isset($urlParts['port'])) $PHPMailer->Port = $urlParts['port'];
+
+			// If debugging is enabled, set it
+			if($this->debug and $this->smtpDebugLvl){
+				$PHPMailer->SMTPDebug = $this->smtpDebugLvl;
+			}
+		}
 
 		$PHPMailer->Subject = $this->subject;
 		
