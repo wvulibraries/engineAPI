@@ -260,8 +260,10 @@ function str2bool($input){
         case is_string($input):
             switch(strtolower(trim($input))){
                 case 'true':
+                case 'yes':
                     return TRUE;
                 case 'false':
+                case 'no':
                     return FALSE;
                 default:
                     return NULL;
