@@ -59,8 +59,15 @@ if (isset($engine->cleanPost['HTML']['loginSubmit'])) {
 				// if (debugNeeded("login")) {
 				// 	debugDisplay("login","\$_SESSION",1,"Contents of the \$_SESSION array.",$_SESSION);
 				// }
-				if (isset($page)) {
-					header("Location: ".$page."?".$qs );
+				if (sessionGet("page")) {
+					$url = sprintf("%s?%s",
+						sessionGet("page"),
+						sessionGet("qs")
+						);
+
+					header("Location: ".$url );
+
+					exit;
 				}
 				else {
 					header("Location: ".$engineVars['WEBROOT'] );
