@@ -29,17 +29,17 @@ $engine->localVars("domain","wvu-ad");
 $authFail  = FALSE; // Authorization to the current resource .. we may end up not using this
 $loginFail = FALSE; // Login Success/Failure
  
-if (isset($engine->cleanGet['HTML']['page'])) {
-	$page = $engine->cleanGet['HTML']['page'];
-	if (isset($engine->cleanGet['HTML']['qs'])) {
-		$qs = urldecode($engine->cleanGet['HTML']['qs']);
-		$qs = preg_replace('/&amp;amp;/','&',$qs);
-		$qs = preg_replace('/&amp;/','&',$qs);
-	}
-	else {
-		$qs = "";
-	}
-}
+// if (isset($engine->cleanGet['HTML']['page'])) {
+// 	$page = $engine->cleanGet['HTML']['page'];
+// 	if (isset($engine->cleanGet['HTML']['qs'])) {
+// 		$qs = urldecode($engine->cleanGet['HTML']['qs']);
+// 		$qs = preg_replace('/&amp;amp;/','&',$qs);
+// 		$qs = preg_replace('/&amp;/','&',$qs);
+// 	}
+// 	else {
+// 		$qs = "";
+// 	}
+// }
  
 //Login processing:
 if (isset($engine->cleanPost['HTML']['loginSubmit'])) {
@@ -59,8 +59,15 @@ if (isset($engine->cleanPost['HTML']['loginSubmit'])) {
 				// if (debugNeeded("login")) {
 				// 	debugDisplay("login","\$_SESSION",1,"Contents of the \$_SESSION array.",$_SESSION);
 				// }
-				if (isset($page)) {
-					header("Location: ".$page."?".$qs );
+				if (sessionGet("page")) {
+					$url = sprintf("%s?%s",
+						sessionGet("page"),
+						sessionGet("qs")
+						);
+
+					header("Location: ".$url );
+
+					exit;
 				}
 				else {
 					header("Location: ".$engineVars['WEBROOT'] );

@@ -1126,6 +1126,13 @@ class EngineAPI{
 		$engineVars['loginPage'] = EngineAPI::$engineVars['loginPage'];
 
 		ob_end_clean();
+
+		sessionSet("page",$_SERVER['PHP_SELF']);
+
+		//@TODO : this query_String shouldn't be straight html sanitized, so that the &'s dont get screwed
+		sessionSet("qs",preg_replace('/&#039;/',"'",urldecode(html_entity_decode($_SERVER['QUERY_STRING']))));
+
+
 		header( 'Location: '.$engineVars['loginPage'].'?page='.$_SERVER['PHP_SELF']."&qs=".(urlencode($_SERVER['QUERY_STRING'])) ) ;
 		//die("No Access Here");
 		//return(FALSE);
