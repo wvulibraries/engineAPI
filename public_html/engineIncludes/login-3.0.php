@@ -3,15 +3,19 @@
 #$loginType = "mysql";
 $loginType = "ldap";
 
-require "/home/library/phpincludes/engine/engineAPI/3.0/engine.php";
-$engine = EngineAPI::singleton();
+require_once("/home/library/public_html/includes/engineHeader.php");
+
+
+					// $fh = fopen('/tmp/foo2.txt', 'w');	
+					// fwrite($fh,sessionGet("qs"));
+					// fclose($fh);
 
 // print "<pre>";
 // var_dump($engine->cleanGet);
 // print "</pre>";
 
 //$engineDir = "/home/library/phpincludes/engine/engineAPI";
-//include($engineDir ."/engine.php");
+//include($engineDir ."/engine.php"); 
 //$engine = EngineAPI::singleton();
 
 // if($engineVars['forceSSLLogin'] === TRUE && (!isset($_SERVER['HTTPS']) or is_empty($_SERVER['HTTPS']))){
@@ -21,16 +25,19 @@ $engine = EngineAPI::singleton();
 // }
 
 
-$localVars['pageTitle'] = "Login Page";
+localvars::add('pageTitle',"Login Page");
+// localvars::add("excludeToolbar","TRUE");
 
 // Domain for ldap login
-$engine->localVars("domain","wvu-ad");
+localvars::add("domain","wvu-ad");
+
+
 
 $authFail  = FALSE; // Authorization to the current resource .. we may end up not using this
 $loginFail = FALSE; // Login Success/Failure
 
-if (isset($engine->cleanGet['HTML']['page'])) {
-	$page = $engine->cleanGet['HTML']['page'];
+if (!sessionGet("page") && isset($engine->cleanGet['HTML']['page'])) {
+	$page = $engine->cleanGet['HTML']['page']; 
 	if (isset($engine->cleanGet['HTML']['qs'])) {
 		$qs = urldecode($engine->cleanGet['HTML']['qs']);
 		$qs = preg_replace('/&amp;amp;/','&',$qs);
@@ -39,6 +46,10 @@ if (isset($engine->cleanGet['HTML']['page'])) {
 	else {
 		$qs = "";
 	}
+
+	sessionSet("page",$page);
+	sessionSet("qs",$qs);
+
 }
 
 //Login processing:
@@ -55,7 +66,7 @@ if (isset($engine->cleanPost['HTML']['loginSubmit'])) {
 				header("Location: ".$engine->cleanGet['HTML']['URL'] ) ;
 			}
 			else {
-
+				
 				// if (debugNeeded("login")) {
 				// 	debugDisplay("login","\$_SESSION",1,"Contents of the \$_SESSION array.",$_SESSION);
 				// }
@@ -78,12 +89,12 @@ if (isset($engine->cleanPost['HTML']['loginSubmit'])) {
 		else {
 			$loginFail = TRUE;
 		}
-
+		
 	}
 
 }
 
-
+$engine->eTemplate("load","library2012.1col");
 $engine->eTemplate("include","header");
 ?>
 
@@ -92,11 +103,10 @@ $engine->eTemplate("include","header");
 // if (debugNeeded("login")) {
 // 	debugDisplay("login","\$_SESSION",1,"Contents of the \$_SESSION array.",$_SESSION);
 // }
-
 ?>
 
 
-<h2>Login</h2>
+<h1>Login</h1>
 
 <?php
 if($loginFail) {
@@ -110,9 +120,9 @@ if(isset($page)) {
 }
 ?>
 
-<form name="loginForm" action="{phpself query="false"}<?php if(isset($page)){ echo "?page=".$page; if(isset($qs)) { echo "&qs=".(urlencode($qs)); } } ?>" method="post">
+<form name="loginForm" action="<?php print $_SERVER['PHP_SELF']?><?php if(isset($page)){ echo "?page=".$page; if(isset($qs)) { echo "&qs=".(urlencode($qs)); } } ?>" method="post">
 	{engine name="insertCSRF"}
-
+	
 	<table>
 		<tr>
 			<td>
@@ -123,7 +133,7 @@ if(isset($page)) {
 			</td>
 		</tr>
 		<tr>
-			<td>
+			<td>	
 				<label for="password">Password:</label>
 			</td>
 			<td>
@@ -131,9 +141,9 @@ if(isset($page)) {
 			</td>
 		</tr>
 	</table>
-
+	
 	<br />
-
+	
 	<input type="submit" name="loginSubmit" value="Login" />
 </form>
 
