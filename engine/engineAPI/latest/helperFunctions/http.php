@@ -66,7 +66,7 @@ class http
      * @param string $url
      * @param int $statusCode
      */
-    public static function redirect($url, $statusCode=307) {
+    public static function redirect($url, $statusCode=301) {
         $statusCode = (int)$statusCode;
         $validCodes = array(201,301,304,305,307);
         if(!in_array($statusCode, $validCodes)){
