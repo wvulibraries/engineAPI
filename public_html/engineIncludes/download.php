@@ -1,5 +1,5 @@
 <?php
-require_once("/home/library/phpincludes/engine/engineAPI/3.0/engine.php");
+require_once("/home/ereserves/phpincludes/engine/engineAPI/latest/engine.php");
 $engine = EngineAPI::singleton();
 
 // Tells Engine not to parse output
@@ -14,7 +14,9 @@ $display  = isset($_SESSION['fileHandler_'.$id]['display'])  ? $_SESSION['fileHa
 
 ob_end_clean();
 
-if (empty($fileName) || empty($fileType) || empty($fileData)) {
+if (is_empty($fileName) || is_empty($fileType) || is_empty($fileData)) {
+	header("HTTP/1.0 404 Not Found");
+	print 'File not found.';
 	exit;
 }
 
