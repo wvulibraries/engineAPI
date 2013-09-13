@@ -29,7 +29,7 @@ function wordSubStr($str,$wordCount=NULL) {
  * Key Words in Context (Highlights $str1 in $str2)
  * @param string $str1
  * @param string $str2
- * @return mixed
+ * @return string
  */
 function kwic($str1,$str2) {
 
