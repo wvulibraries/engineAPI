@@ -1,13 +1,8 @@
 <?php
 /**
- * EngineAPI Helper Functions - http
- */
-
-/**
  * Utility Class - HTTP helpers
  *
  * This library provides basic helper methods for interacting with HTTP
- * @package Helper Functions\http
  */
 class http
 {
@@ -29,7 +24,7 @@ class http
     public static function setGet($var,$value) {
 
         $engine = EngineAPI::singleton();
-        if (!is_array($value)) $value  = (string)$value;
+        $value  = (string)$value;
         
         $engine->cleanGet['MYSQL'][$var] = $engine->openDB->escape($value);
         $engine->cleanGet['HTML'][$var]  = htmlSanitize($value);
@@ -66,7 +61,8 @@ class http
      * @param string $url
      * @param int $statusCode
      */
-    public static function redirect($url, $statusCode=301) {
+    public static function redirect($url, $statusCode=307)
+    {
         $statusCode = (int)$statusCode;
         $validCodes = array(201,301,304,305,307);
         if(!in_array($statusCode, $validCodes)){
@@ -85,7 +81,8 @@ class http
      * @param int $statusCode
      * @param boolean $replace
      */
-    public static function sendStatus($statusCode, $replace=true) {
+    public static function sendStatus($statusCode, $replace=true)
+    {
         // Clean params
         $statusCode = (int)$statusCode;
         $replace = (bool)$replace;
@@ -159,7 +156,8 @@ class http
      * @param mixed $data
      * @return string
      */
-    public static function compressData($data) {
+    public static function compressData($data)
+    {
         return strtr(base64_encode(addslashes(gzcompress(serialize($data),9))), '+/=', '-_,');
     }
 
@@ -169,7 +167,8 @@ class http
      * @param string $string
      * @return mixed
      */
-    public static function decompressData($string) {
+    public static function decompressData($string)
+    {
         return unserialize(gzuncompress(stripslashes(base64_decode(strtr($string, '-_,', '+/=')))));
     }
 }
