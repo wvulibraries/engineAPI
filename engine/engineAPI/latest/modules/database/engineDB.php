@@ -152,8 +152,14 @@ class engineDB {
 		else if (is_bool($string)) {
 	        $string = ($string) ? 1 : 0;
 	    }
-	    // wth is this doing here?!?!
-		// if(is_array($string)) echo '<pre><tt>'.print_r(debug_backtrace(), true).'</tt></pre>';
+	    else if (is_array($string)) {
+	    	foreach ($string as &$val) {
+	    		$val = mysql_real_escape_string(&$val);
+	    	}
+
+	    	return($string);
+	    }
+
 		return(mysql_real_escape_string($string,$this->dbLink));
 	}
 
