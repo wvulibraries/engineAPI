@@ -24,7 +24,7 @@ class http
     public static function setGet($var,$value) {
 
         $engine = EngineAPI::singleton();
-        $value  = (string)$value;
+        if (!is_array($value)) $value  = (string)$value;
         
         $engine->cleanGet['MYSQL'][$var] = $engine->openDB->escape($value);
         $engine->cleanGet['HTML'][$var]  = htmlSanitize($value);
@@ -45,7 +45,7 @@ class http
     public static function setPost($var,$value) {
 
         $engine = EngineAPI::singleton();
-        $value  = (string)$value;
+        if (!is_array($value)) $value  = (string)$value;
         
         $engine->cleanPost['MYSQL'][$var] = $engine->openDB->escape($value);
         $engine->cleanPost['HTML'][$var]  = htmlSanitize($value);
