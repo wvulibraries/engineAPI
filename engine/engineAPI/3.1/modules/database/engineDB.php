@@ -137,7 +137,7 @@ class engineDB {
     /**
      * Escape a given string so it is suitable for use in a SQL statement
 	 *
-     * @param string $string
+     * @param mixed $string
      * @return string
      */
 	function escape($string) {
@@ -151,6 +151,14 @@ class engineDB {
 		else if (is_bool($string)) {
 	        $string = ($string) ? 1 : 0;
 	    }
+	    else if (is_array($string)) {
+	    	foreach ($string as &$val) {
+	    		$val = mysql_real_escape_string(&$val);
+	    	}
+
+	    	return($string);
+	    }
+
 	    // wth is this doing here?!?!
 		// if(is_array($string)) echo '<pre><tt>'.print_r(debug_backtrace(), true).'</tt></pre>';
 		return(mysql_real_escape_string($string,$this->dbLink));
@@ -573,7 +581,9 @@ class engineDB {
 		if ($this->die === FALSE) {
 			return(FALSE);
 		}
-
+		errorHandle::newError(__METHOD__."() - Database Name:". $this->database, errorHandle::DEBUG);
+		errorHandle::newError(__METHOD__."() - Username: ".$this->username, errorHandle::DEBUG);
+		errorHandle::newError(__METHOD__."() - Password: ".$this->password, errorHandle::DEBUG);
 		die("MYSQL Error, Connecting ...");
 	}
 
