@@ -161,12 +161,12 @@ class ldapSearch
 
     /**
      * Logoug (unbind) from the LDAP server
-	 *
+     * 
      * @return bool
      */
     public function logout()
     {
-        return !isnull($this->ldap) ? ldap_unbind($this->ldap) : TRUE;
+        return is_resource($this->ldap) ? ldap_unbind($this->ldap) : TRUE;
     }
 
     /**
