@@ -49,15 +49,16 @@ class pagination {
 			$this->displayedPages += 2;
 		}
 
-		$urlVarStr = "";
-		if (!empty($this->cleanGet)) {
-			foreach ($this->cleanGet['MYSQL'] as $key => $val) {
-				if ($key != $this->urlVar) {
-					$urlVarStr .= (empty($urlVarStr)?"?":"&amp;").urlencode($key)."=".urlencode($val);
-				}
-			}
+		// Rebuild correct URL base (this correctly handles mod_rewrite URLs and random query params)
+		$urlVar = urlencode($this->urlVar);
+		$url = parse_url($_SERVER['REQUEST_URI']);
+		if(isset($url['query'])){
+			parse_str($url['query'], $query);
+			if(isset($query[$urlVar])) unset($query[$urlVar]);
 		}
-		$linkURL = $_SERVER['PHP_SELF'].(empty($urlVarStr)?"?":$urlVarStr."&amp;").urlencode($this->urlVar)."=";
+		$linkURL = (isset($query) and sizeof($query))
+			? $url['path'].'?'.http_build_query($query)."&$urlVar="
+			: $url['path']."?$urlVar=";
 
 
 		$output .= '<div class="pagination_bar">';
