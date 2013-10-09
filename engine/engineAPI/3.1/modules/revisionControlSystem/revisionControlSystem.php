@@ -957,44 +957,6 @@ class revisionControlSystem {
     }
 
     /**
-     * Returns a given revision
-     *
-     * This method will return the specified revision from the revisions table.<br>
-     * This is useful when needing to 'preview' a revision before reverting to it
-     *
-     * @author David Gersting
-     * @param string $primaryID
-     *        The primary ID for the object under revision control
-     * @param string $secondaryID
-     *        The secondary ID for the object under revision control
-     * @param bool $returnRaw
-     *        If set to TRUE, will return the raw table row from the revisions table.<br>
-     *        Else will return an unserialized array of the original object's fields
-     * @return array|bool
-     */
-    public function getRevision($primaryID,$secondaryID,$returnRaw=FALSE){
-        // Build and run SQL
-        $sql = sprintf("SELECT * FROM `%s` WHERE productionTable='%s' AND primaryID='%s' AND secondaryID='%s' LIMIT 1",
-            $this->openDB->escape($this->revisionTable),
-            $this->openDB->escape($this->productionTable),
-            $this->openDB->escape($primaryID),
-            $this->openDB->escape($secondaryID)
-        );
-        $sqlResult = $this->openDB->query($sql);
-
-        // Did it work?
-        if(!$sqlResult['result']){
-            errorHandle::newError(__METHOD__."() - SQL Error: ".$sqlResult['error'], errorHandle::DEBUG);
-            return FALSE;
-        }else{
-            $row = mysql_fetch_assoc($sqlResult['result']);
-            return $returnRaw
-                ? $row
-                : unserialize(base64_decode($row['metadata']));
-        }
-    }
-
-    /**
      * Returns a revision ID number
      *
      * This method will return the specified revision ID from the revisions table.<br>
