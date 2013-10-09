@@ -20,6 +20,7 @@ class revisionControlSystem {
 
 	private $productionTable = NULL;
 	private $revisionTable   = NULL;
+
 	/**
 	 * Key in production table
 	 * @var string
@@ -851,7 +852,7 @@ class revisionControlSystem {
 	 * @return bool|mixed|string
 	 *         Returns empty string if nothing is found
 	 */
-	private function getMetadataForID($revisionID,$type="metadata",$decode=TRUE) {
+	public function getMetadataForID($revisionID,$type="metadata",$decode=TRUE) {
 
 		if (!validate::integer($revisionID)) {
 			errorHandle::newError(__METHOD__."() - invalid ID passed for revisionID", errorHandle::DEBUG);
@@ -992,6 +993,61 @@ class revisionControlSystem {
                 : unserialize(base64_decode($row['metadata']));
         }
     }
+
+    /**
+     * Returns a revision ID number
+     *
+     * This method will return the specified revision ID from the revisions table.<br>
+     *
+     * @author Michael Bond
+     * @param string $primaryID
+     *        The primary ID for the object under revision control
+     * @param string $secondaryID
+     *        The secondary ID for the object under revision control
+     * @return array|bool
+     */
+    public function getRevisionID($primaryID,$secondaryID) {
+
+    	$sql = sprintf("SELECT `ID` FROM `%s` WHERE productionTable='%s' AND primaryID='%s' AND secondaryID='%s' LIMIT 1",
+            $this->openDB->escape($this->revisionTable),
+            $this->openDB->escape($this->productionTable),
+            $this->openDB->escape($primaryID),
+            $this->openDB->escape($secondaryID)
+        );
+        $sqlResult = $this->openDB->query($sql);
+
+        if(!$sqlResult['result']) {
+            errorHandle::newError(__METHOD__."() - SQL Error: ".$sqlResult['error'], errorHandle::DEBUG);
+            return FALSE;
+        }
+        else {
+            $row = mysql_fetch_assoc($sqlResult['result']);
+            return $row['ID'];
+        }
+
+        return FALSE;
+
+    }
+
+    /**
+     * Returns the revision table
+     *
+     * @author Michael Bond
+     * @return string
+     */
+    public function getRevisionTable() {
+		return $this->revisionTable;
+	}
+
+    /**
+     * Returns the production table
+     *
+     * @author Michael Bond
+     * @return string
+     */
+	public function getProductionTable() {
+		return $this->productionTable;
+	}
 
     /**
      * Returns TRUE if there are revisions for an object
