@@ -67,7 +67,17 @@ class tabList {
 			
 			$output .= "<li";
 			$output .= ($classStr != 'class=""')?$classStr:"";
-			$output .= '><a href="'.$_SERVER['PHP_SELF'].'?'.$queryString.'&amp;currentTabItem='.$item.'">'.(($item == "@")?"#":$item).'</a></li>';
+			
+			// Rebuild correct URL base (this correctly handles mod_rewrite URLs and random query params)
+			$url = parse_url($_SERVER['REQUEST_URI']);
+			if(isset($url['query'])){
+				parse_str($url['query'], $query);
+				if(isset($query['currentTabItem'])) unset($query['currentTabItem']);
+			}
+			$linkURL = (isset($query) and sizeof($query))
+				? $url['path'].'?'.http_build_query($query)."&currentTabItem=$item"
+				: $url['path']."?currentTabItem=$item";
+			$output .= '><a href="'.$linkURL.'">'.(($item == "@")?"#":$item).'</a></li>';
 		}
 		$output .= "</ul>";
 		
