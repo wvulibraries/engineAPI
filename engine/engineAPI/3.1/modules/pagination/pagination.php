@@ -1,16 +1,53 @@
 <?php
-
+/**
+ * EngineAPI pagination module
+ * @package EngineAPI\modules\pagination
+ */
 class pagination {
-
-	public $urlVar	= "page";
-	public $prev	= "&#171";
-	public $next	= "&#187;";
-	public $spacer	= "&#8230;";
-
-	public $totalItems		= NULL;
-	public $currentPage		= 1;
-	public $itemsPerPage	= 100;
-	public $displayedPages	= 7;
+	/**
+	 * URL GET var to use
+	 * @var string
+	 */
+	public $urlVar= "page";
+	/**
+	 * Text to use for 'previous' link
+	 * @var string
+	 */
+	public $prev = "&#171";
+	/**
+	 * Text to use for 'next' link
+	 * @var string
+	 */
+	public $next = "&#187;";
+	/**
+	 * Text to use for spacer
+	 * @var string
+	 */
+	public $spacer = "&#8230;";
+	/**
+	 * Total number of things to show
+	 * @var int
+	 */
+	public $totalItems;
+	/**
+	 * The current page
+	 * @var int
+	 */
+	public $currentPage	= 1;
+	/**
+	 * Number of items to show per page
+	 * @var int
+	 */
+	public $itemsPerPage = 100;
+	/**
+	 * Maximum number of page to show
+	 * @var int
+	 */
+	public $displayedPages = 7;
+	/**
+	 * Show 'previous' and 'next' links
+	 * @var string 'yes' to show, anything else to not show
+	 */
 	public $displayPrevNext	= "yes";
 
 	/**
@@ -18,10 +55,84 @@ class pagination {
 	 */
 	private $cleanGet;
 
+	/**
+	 * Class constructor
+	 * @param int $total Total number of things to show
+	 */
 	function __construct($total) {
 		$engine = EngineAPI::singleton();
 		$this->cleanGet = $engine->cleanGet;
 		$this->totalItems = $total;
+	}
+
+	/**
+	 * Generate HTML dropdown with number of elements = number of pages
+	 * intended for use for switching pages faster
+	 * @param string name name of select element
+	 * @param string id ID for select element
+	 * @param string class class for select element
+	 * @return string
+	 */
+	public function dropdown($name="paginationPageDropdown",$id="paginationPageDropdownID",$class="paginationPageDropdownClass") {
+
+		$output = sprintf('<select name="%s" id="%s" class="%s">',
+			htmlSanitize($name),
+			htmlSanitize($id),
+			htmlSanitize($class)
+			);
+
+
+		for($I=1;$I<=$this->totalPages();$I++) {
+			$output .= sprintf('<option value="%s">%s</option>',
+				$I,
+				$I);
+		}
+
+		$output .= "</select>";
+
+		return $output;
+
+	}
+
+	/**
+	 * Generate HTML dropdown for number of records per paginated page
+	 * 
+	 * @param  int maxPerPage the max number of records to display per page
+	 * @param int leastPerPage Least number of records to display per page
+	 * @param  int divisor Increment from max per page to least per page
+	 * @param string name name of select element
+	 * @param string id ID for select element
+	 * @param string class class for select element
+	 * @return string
+	 */
+	public function recordsPerPageDropdown($maxPerPage=500,$leastPerPage=25,$divisor=100, $name="paginationRecordsPerPageDropdown",$id="paginationRecordsPerPageDropdownID",$class="paginationRecordsPerPageDropdownClass") {
+		
+		if ($maxPerPage <= $leastPerPage) return "maxPerPage must be greater than leastPerPage";
+
+		$output = sprintf('<select name="%s" id="%s" class="%s">',
+			htmlSanitize($name),
+			htmlSanitize($id),
+			htmlSanitize($class)
+			);
+
+
+		for($I=$maxPerPage;$I>=$leastPerPage;$I-=$divisor) {
+			$output .= sprintf('<option value="%s"%s>%s</option>',
+				$I,
+				($I == $this->itemsPerPage)?' selected="selected"':"",
+				$I);
+		} 
+
+		$output .= sprintf('<option value="%s"%s>%s</option>',
+			$leastPerPage,
+			($this->itemsPerPage == $leastPerPage)?' selected="selected"':"",
+			$leastPerPage
+			);
+
+		$output .= "</select>";
+
+		return $output;
+
 	}
 
 	/**
@@ -31,7 +142,7 @@ class pagination {
 	public function nav_bar() {
 
 		$output = "";
-		$totalPages = ceil($this->totalItems/$this->itemsPerPage);
+		$totalPages = $this->totalPages();
 
 		if ($this->currentPage < 1) {
 			$this->currentPage = 1;
@@ -49,9 +160,8 @@ class pagination {
 			$this->displayedPages += 2;
 		}
 
-		// Rebuild correct URL base (this correctly handles mod_rewrite URLs and random query params)
 		$urlVar = urlencode($this->urlVar);
-		$url = parse_url($_SERVER['REQUEST_URI']);
+		$url    = parse_url($_SERVER['REQUEST_URI']);
 		if(isset($url['query'])){
 			parse_str($url['query'], $query);
 			if(isset($query[$urlVar])) unset($query[$urlVar]);
@@ -59,7 +169,6 @@ class pagination {
 		$linkURL = (isset($query) and sizeof($query))
 			? $url['path'].'?'.http_build_query($query)."&$urlVar="
 			: $url['path']."?$urlVar=";
-
 
 		$output .= '<div class="pagination_bar">';
 		$output .= '<ul>';
@@ -142,6 +251,14 @@ class pagination {
 		return $output;
 	}
 
+	/**
+	 * Returns an integer of the total number of pages
+	 *
+	 * @return int
+	 */
+	private function totalPages() {
+		return ceil($this->totalItems/$this->itemsPerPage);
+	}
 
 	/**
 	 * Returns an array with the page limits
