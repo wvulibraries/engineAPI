@@ -203,3 +203,14 @@ There will be an unknown number (but at least 1) of these drivers, with each imp
 ## dbStatement_{type}
 
 This is the underlying database statement object and represents a single 'statement' made against a given database. (a sinle SQL call, etc)
+
+## directory structure
+
+* modules/db
+* modules/db/drivers
+* modules/db/db.php
+* modules/db/dbDriver.php
+* modules/db/dbStatement.php
+* modules/db/drivers/driver{Type}
+* modules/db/drivers/driver{Type}/dbDriver_{type}
+* modules/db/drivers/driver{Type}/dbStatement_{type}
