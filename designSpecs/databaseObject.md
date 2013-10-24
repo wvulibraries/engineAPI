@@ -205,11 +205,11 @@ This is the underlying database statement object and represents a single 'statem
 
 ## directory structure
 
-* modules/db
-* modules/db/drivers
+* modules/db/
 * modules/db/db.php
 * modules/db/dbDriver.php
 * modules/db/dbStatement.php
-* modules/db/drivers/driver{Type}
+* modules/db/drivers/
+* modules/db/drivers/driver{Type}/
 * modules/db/drivers/driver{Type}/dbDriver_{type}
 * modules/db/drivers/driver{Type}/dbStatement_{type}
