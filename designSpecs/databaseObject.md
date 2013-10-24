@@ -96,7 +96,8 @@ Rollback and end the current transaction (assuming we're on the 'root' transacti
 Return `TRUE` if we're inside a transaction, `FALSE` otherwise
 
 
-***Nested Transactions**<br>
+***Nested Transactions**
+
 We will use the same system as Doctrine uses for nested transactions. We keep an internal counter on the driver, which is incremented on `beginTransaction()` and decremented on `commit()` and `rollback()`. When this counter transitions from `0`->`1` We set the underlying connection into 'transaction mode' and when the counter transitions from `1`->`0` we either commit or rollback the underlying connection. If at any point `rollback()` is called we flag the overall transaction for 'Rollback only' mode where the transactioin will be rolled back no matter what. (See: http://docs.doctrine-project.org/projects/doctrine-dbal/en/latest/reference/transactions.html#transaction-nesting)
 
 
@@ -141,7 +142,8 @@ Returns the number of affected rows
 Returns the insertID from an INSERT operation
 
 #### fetch([fetchMode])
-Fetch one row at a time from the result setup according to the current fetch mode.<br>
+Fetch one row at a time from the result setup according to the current fetch mode.
+
 Fetchmode corrisponds to PDO's Fetch modes (which control stuff like numeric-key array, string-key array, object, etc)
 
 #### fetchAll([fetchMode])
