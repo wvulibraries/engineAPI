@@ -60,14 +60,6 @@ This method removes all registered aliases from an object
 
 This method parses the drivers dir and returns an array of all available drivers.
 
-### readOnly()
-
-Sets the current object to read only. Only select statements can be called.
-
-### destroy()
-
-Closes the connection to the database and destroys the object
-
 ---
 ## dbDriver
 
@@ -112,6 +104,13 @@ Rollback and end the current transaction (assuming we're on the 'root' transacti
 
 Return `TRUE` if we're inside a transaction, `FALSE` otherwise
 
+### readOnly()
+
+Sets the current object to read only. Only select statements can be called.
+
+### destroy()
+
+Closes the connection to the database and destroys the object
 
 ***Nested Transactions***
 
