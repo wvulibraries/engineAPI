@@ -19,7 +19,7 @@ function webHelper_listMultiAdd($attPairs,$engine=null) {
 	
 	$queryString = "";
 	if (!empty($attPairs['addget']) && $attPairs['addget'] == "true") {
-		foreach ($engine->cleanGet['HTML'] as $var=>$val) {
+		foreach ($_GET['HTML'] as $var=>$val) {
 			$queryString .= ((!empty($queryString))?"&amp;":"?").$var."=".$val;
 		}
 	}
@@ -63,7 +63,7 @@ function webHelper_listMultiInsert($table,$label,$cols,$engine=null) {
 	
 	$engine = EngineAPI::singleton();
 		
-	if (empty($engine->cleanPost['MYSQL'][$cols[1]["table"]])) {
+	if (empty($_POST['MYSQL'][$cols[1]["table"]])) {
 		return webHelper_errorMsg($cols[1]["label"] ." was left blank.");
 	}
 	else {
@@ -71,16 +71,16 @@ function webHelper_listMultiInsert($table,$label,$cols,$engine=null) {
 		//Do the Email Check
 		foreach ($cols as $I) {
 			if (isset($I["email"]) && $I["email"] === TRUE) {
-				if(!empty($engine->cleanPost['MYSQL'][$I["table"]]) && !validateEmailAddr($engine->cleanPost['MYSQL'][$I["table"]])) {
-					return webHelper_errorMsg("Invalid E-Mail Address: ". $engine->cleanPost['MYSQL'][$I["table"]]);
+				if(!empty($_POST['MYSQL'][$I["table"]]) && !validateEmailAddr($_POST['MYSQL'][$I["table"]])) {
+					return webHelper_errorMsg("Invalid E-Mail Address: ". $_POST['MYSQL'][$I["table"]]);
 				}
 			}
 		}
 		
 		// Check for duplicates
 		// Dupe checks on col1 
-		if (webHelper_listMultiDupeCheck($engine->cleanPost['MYSQL'][$cols[1]['table']],$table,$cols[1]['table'],$engine)) {
-			return webHelper_errorMsg("Entry, ".$engine->cleanPost['HTML'][$cols[1]["table"]].", already in database.");
+		if (webHelper_listMultiDupeCheck($_POST['MYSQL'][$cols[1]['table']],$table,$cols[1]['table'],$engine)) {
+			return webHelper_errorMsg("Entry, ".$_POST['HTML'][$cols[1]["table"]].", already in database.");
 		}
 				
 		$sql = sprintf("INSERT INTO %s (%s) VALUES(%s)",
@@ -97,7 +97,7 @@ function webHelper_listMultiInsert($table,$label,$cols,$engine=null) {
 			return webHelper_errorMsg("SQL Error:".$sqlResult['error']);
 		}
 		else {
-			return webHelper_successMsg("Entry, ".$engine->cleanPost['HTML'][$cols[1]["table"]].", successfully added to the database.");
+			return webHelper_successMsg("Entry, ".$_POST['HTML'][$cols[1]["table"]].", successfully added to the database.");
 		}
 		
 	}
@@ -136,7 +136,7 @@ function webHelper_listMultiValInsert($cols,$engine=null) {
 	
 	$temp = array();
 	foreach ($cols as $I) {
-		$temp[] = "'".$engine->cleanPost['MYSQL'][$I["table"]]."'";
+		$temp[] = "'".$_POST['MYSQL'][$I["table"]]."'";
 	}
 	$output = implode(",",$temp);
 	return($output);
@@ -157,7 +157,7 @@ function webHelper_listMultiEditList($attPairs,$engine=null) {
 	
 	$queryString = "";
 	if (!empty($attPairs['addget']) && $attPairs['addget'] == "true") {
-		foreach ($engine->cleanGet['HTML'] as $var=>$val) {
+		foreach ($_GET['HTML'] as $var=>$val) {
 			$queryString .= ((!empty($queryString))?"&amp;":"?").$var."=".$val;
 		}
 	}
@@ -229,8 +229,8 @@ function webHelper_listMultiUpdate($table,$cols,$engine=null) {
 	
 	$output = "";
 	
-	if (isset($engine->cleanPost['MYSQL']['delete'])) {
-		foreach($engine->cleanPost['MYSQL']['delete'] as $value) {
+	if (isset($_POST['MYSQL']['delete'])) {
+		foreach($_POST['MYSQL']['delete'] as $value) {
 
 			$sql = sprintf("DELETE FROM %s WHERE ID=%s",
 				$engine->openDB->escape($dbTables[$table]["prod"]),
@@ -260,8 +260,8 @@ function webHelper_listMultiUpdate($table,$cols,$engine=null) {
 	
 	while ($row = mysql_fetch_array($sqlResult['result'], MYSQL_BOTH)) {
 		
-		if (isset($engine->cleanPost['MYSQL'][$cols[1]["table"].'_'.$row[0]])) {
-			$temp = $engine->cleanPost['MYSQL'][$cols[1]["table"].'_'.$row[0]];
+		if (isset($_POST['MYSQL'][$cols[1]["table"].'_'.$row[0]])) {
+			$temp = $_POST['MYSQL'][$cols[1]["table"].'_'.$row[0]];
 		}
 		else {
 			continue;
@@ -274,8 +274,8 @@ function webHelper_listMultiUpdate($table,$cols,$engine=null) {
 		//Do the Email Check
 		foreach ($cols as $I) {
 			if (isset($I["email"]) && $I["email"] === TRUE) {
-				if(!empty($engine->cleanPost['MYSQL'][$I["table"].'_'.$row[0]]) && !validateEmailAddr($engine->cleanPost['MYSQL'][$I["table"].'_'.$row[0]])) {
-					$output .= webHelper_errorMsg("Invalid E-Mail Address: ". $engine->cleanPost['MYSQL'][$I["table"].'_'.$row[0]]);
+				if(!empty($_POST['MYSQL'][$I["table"].'_'.$row[0]]) && !validateEmailAddr($_POST['MYSQL'][$I["table"].'_'.$row[0]])) {
+					$output .= webHelper_errorMsg("Invalid E-Mail Address: ". $_POST['MYSQL'][$I["table"].'_'.$row[0]]);
 					continue 2;
 				}
 			}
@@ -322,7 +322,7 @@ function webHelper_listMulticolUpdate($cols,$row,$engine=null) {
 	
 	$temp = array();
 	foreach ($cols as $I) {
-		$temp[] = $engine->openDB->escape($I["table"])."='".$engine->cleanPost['MYSQL'][$I["table"]."_".$row]."'";
+		$temp[] = $engine->openDB->escape($I["table"])."='".$_POST['MYSQL'][$I["table"]."_".$row]."'";
 	}
 	$output = implode(",",$temp);
 	return($output);
