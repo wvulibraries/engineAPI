@@ -72,11 +72,7 @@ class EngineAPI{
 
 	# Used for page access/security
 	#############################################################
-	/**
-	 * Sanitized $_GET
-	 * @var array
-	 */
-	public $cleanGet = array();
+
 	/**
 	 * Sanitized $_POST
 	 * @var array
@@ -411,15 +407,7 @@ class EngineAPI{
 		}
 
 		// Get clean $_GET
-		if(isset($_GET)) {
-			foreach ($_GET as $key => $value) {
-				$cleanKey                           = htmlSanitize($key);
-				$this->cleanGet['HTML'][$cleanKey]  = htmlSanitize($value);
-				$this->cleanGet['MYSQL'][$cleanKey] = dbSanitize($value);
-				$this->cleanGet['RAW'][$cleanKey]   = $value;
-			}
-			unset($_GET);
-		}
+		http::cleanGet();
 
 		// kill off $_REQUEST and force everything through cleanGet and cleanPost
 		if (isset($_REQUEST)) {

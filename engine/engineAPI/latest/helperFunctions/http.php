@@ -12,6 +12,31 @@ class http
     public function  __construct()
     {}
 
+
+    /**
+     * rebuilds the $_GET variable with sanitized HTML, MYSQL, and unsanitized raw values.
+     * Builds a pre EngineAPI 4.0 cleanGET array in the $_GET variable
+     * @return BOOL Always returns TRUE
+     */
+    public static function cleanGet() {
+        if(isset($_GET)) {
+
+            $temp = array();
+
+            foreach ($_GET as $key => $value) {
+                $cleanKey                 = htmlSanitize($key);
+                $temp['HTML'][$cleanKey]  = htmlSanitize($value);
+                $temp['MYSQL'][$cleanKey] = dbSanitize($value);
+                $temp['RAW'][$cleanKey]   = $value;
+            }
+            unset($_GET);
+
+            $_GET = $temp;
+        }    
+
+        return TRUE;
+    }
+
     /**
      * Sets a variable in cleanGet. Sanitizes variables for clean MYSQL and HTML
      *
