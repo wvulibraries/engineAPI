@@ -39,7 +39,7 @@ class http
 
     /**
      * rebuilds the $_POST variable with sanitized HTML, MYSQL, and unsanitized raw values.
-     * Builds a pre EngineAPI 4.0 cleanGET array in the $_POST variable
+     * Builds a pre EngineAPI 4.0 cleanPost array in the $_POST variable
      * @return BOOL Always returns TRUE
      */
     public static function cleanPost() {
@@ -72,12 +72,11 @@ class http
      */
     public static function setGet($var,$value) {
 
-        $engine = EngineAPI::singleton();
         $value  = (string)$value;
         
-        $engine->cleanGet['MYSQL'][$var] = $engine->openDB->escape($value);
-        $engine->cleanGet['HTML'][$var]  = htmlSanitize($value);
-        $engine->cleanGet['RAW'][$var]   = $value;
+        $_GET['MYSQL'][$var] = $engine->openDB->escape($value);
+        $_GET['HTML'][$var]  = htmlSanitize($value);
+        $_GET['RAW'][$var]   = $value;
 
         return TRUE;
     }
@@ -93,12 +92,11 @@ class http
      */
     public static function setPost($var,$value) {
 
-        $engine = EngineAPI::singleton();
         if (!is_array($value)) $value  = (string)$value;
         
-        $engine->cleanPost['MYSQL'][$var] = $engine->openDB->escape($value);
-        $engine->cleanPost['HTML'][$var]  = htmlSanitize($value);
-        $engine->cleanPost['RAW'][$var]   = $value;
+        $_POST['MYSQL'][$var] = $engine->openDB->escape($value);
+        $_POST['HTML'][$var]  = htmlSanitize($value);
+        $_POST['RAW'][$var]   = $value;
 
         return TRUE;
     }
