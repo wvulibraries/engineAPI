@@ -73,11 +73,7 @@ class EngineAPI{
 	# Used for page access/security
 	#############################################################
 
-	/**
-	 * Sanitized $_POST
-	 * @var array
-	 */
-	public $cleanPost = array();
+
 	/**
 	 * Access Methods
 	 * @var string
@@ -215,6 +211,8 @@ class EngineAPI{
 	 */
 	private function __construct($site="default") {
 		self::$engineDir = dirname(__FILE__);
+
+		require_once self::$engineDir."/helperFunctions/http.php";
 
 		// make sure the session cookie is only accessible via HTTP
 		ini_set("session.cookie_httponly", 1);
@@ -396,15 +394,7 @@ class EngineAPI{
 		}
 
 		// Get clean $_POST
-		if(isset($_POST)) {
-			foreach ($_POST as $key => $value) {
-				$cleanKey                            = htmlSanitize($key);
-				$this->cleanPost['HTML'][$cleanKey]  = htmlSanitize($value);
-				$this->cleanPost['MYSQL'][$cleanKey] = dbSanitize($value);
-				$this->cleanPost['RAW'][$cleanKey]   = $value;
-			}
-			unset($_POST);
-		}
+		http::cleanPost();
 
 		// Get clean $_GET
 		http::cleanGet();
@@ -1037,7 +1027,7 @@ class EngineAPI{
 	 */
 	public function login($loginType) {
 		if (isset($this->loginFunctions[$loginType])) {
-			if($this->loginFunctions[$loginType](trim($this->cleanPost['RAW']['username']),$this->cleanPost['RAW']['password'])) {
+			if($this->loginFunctions[$loginType](trim($_POST['RAW']['username']),$_POST['RAW']['password'])) {
 				return TRUE;
 			}
 		}
