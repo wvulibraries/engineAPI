@@ -19,7 +19,7 @@ function webHelper_listAdd($attPairs,$engine=null) {
 		
 	$queryString = "";
 	if (!empty($attPairs['addget']) && $attPairs['addget'] == "true") {
-		foreach ($engine->cleanGet['HTML'] as $var=>$val) {
+		foreach ($_GET['HTML'] as $var=>$val) {
 			$queryString .= ((!empty($queryString))?"&amp;":"?").$var."=".$val;
 		}
 	}
@@ -49,25 +49,25 @@ function webHelper_listInsert($table,$label,$engine,$emailCheck=FALSE) {
 	
 	$engine = EngineAPI::singleton();
 		
-	if (empty($engine->cleanPost['MYSQL']['newListItem'])) {
+	if (empty($_POST['MYSQL']['newListItem'])) {
 		return webHelper_errorMsg($label ." was left blank.");
 	}
 	else {
 
 		if ($emailCheck === TRUE) {
-			if(!validateEmailAddr($engine->cleanPost['MYSQL']['newListItem'])) {
-				return webHelper_errorMsg("Invalid E-Mail Address: ". $engine->cleanPost['MYSQL']['newListItem']);
+			if(!validateEmailAddr($_POST['MYSQL']['newListItem'])) {
+				return webHelper_errorMsg("Invalid E-Mail Address: ". $_POST['MYSQL']['newListItem']);
 			}
 		}
 		
 		// Check for duplicates
-		if (webHelper_listDupeCheck($engine->cleanPost['MYSQL']['newListItem'],$table,$engine)) {
-			return webHelper_errorMsg("Entry, ".$engine->cleanPost['HTML']['newListItem'].", already in database.");
+		if (webHelper_listDupeCheck($_POST['MYSQL']['newListItem'],$table,$engine)) {
+			return webHelper_errorMsg("Entry, ".$_POST['HTML']['newListItem'].", already in database.");
 		}
 				
 		$sql = sprintf("INSERT INTO %s (name) VALUES('%s')",
 			$engine->openDB->escape($table),
-			$engine->cleanPost['MYSQL']['newListItem']
+			$_POST['MYSQL']['newListItem']
 			);
 
 		$engine->openDB->sanitize = FALSE;
@@ -77,7 +77,7 @@ function webHelper_listInsert($table,$label,$engine,$emailCheck=FALSE) {
 			return webHelper_errorMsg("SQL Error:".$sqlResult['error']);
 		}
 		else {
-			return webHelper_successMsg("Entry, ".$engine->cleanPost['HTML']['newListItem'].", successfully added to the database.");
+			return webHelper_successMsg("Entry, ".$_POST['HTML']['newListItem'].", successfully added to the database.");
 		}
 		
 	}
@@ -99,7 +99,7 @@ function webHelper_listEditList($attPairs,$engine=null) {
 		
 	$queryString = "";
 	if (!empty($attPairs['addget']) && $attPairs['addget'] == "true") {
-		foreach ($engine->cleanGet['HTML'] as $var=>$val) {
+		foreach ($_GET['HTML'] as $var=>$val) {
 			$queryString .= ((!empty($queryString))?"&amp;":"?").$var."=".$val;
 		}
 	}
@@ -159,8 +159,8 @@ function webHelper_listUpdate($table,$engine,$emailCheck=FALSE) {
 	$output = "";
 	
 	$sqlTable = NULL;
-	if (isset($engine->cleanGet['MYSQL']['type'])) {
-		$sqlTable = $dbTables[$engine->cleanGet['MYSQL']['type']]["prod"];
+	if (isset($_GET['MYSQL']['type'])) {
+		$sqlTable = $dbTables[$_GET['MYSQL']['type']]["prod"];
 	}
 	else if (isset($table)) {
 		$sqlTable = $engine->openDB->escape($dbTables[$table]["prod"]);
@@ -171,8 +171,8 @@ function webHelper_listUpdate($table,$engine,$emailCheck=FALSE) {
 		return($output);
 	}
 	
-	if (isset($engine->cleanPost['MYSQL']['delete'])) {
-		foreach($engine->cleanPost['MYSQL']['delete'] as $value) {
+	if (isset($_POST['MYSQL']['delete'])) {
+		foreach($_POST['MYSQL']['delete'] as $value) {
 
 			$sql = sprintf("DELETE FROM %s WHERE ID=%s",
 				$sqlTable,
@@ -201,16 +201,16 @@ function webHelper_listUpdate($table,$engine,$emailCheck=FALSE) {
 	}
 	
 	while ($row = mysql_fetch_array($sqlResult['result'], MYSQL_NUM)) {
-		if (isset($engine->cleanPost['MYSQL']['title_'.$row[0]])) {
-			$temp = $engine->cleanPost['MYSQL']['title_'.$row[0]];
+		if (isset($_POST['MYSQL']['title_'.$row[0]])) {
+			$temp = $_POST['MYSQL']['title_'.$row[0]];
 		}
 		else {
 			continue;
 		}
 
 		if ($emailCheck === TRUE) {
-			if(!validateEmailAddr($engine->cleanPost['MYSQL']['title_'.$row[0]])) {
-				$output .= webHelper_errorMsg("Invalid E-Mail Address: ". $engine->cleanPost['MYSQL']['title_'.$row[0]]);
+			if(!validateEmailAddr($_POST['MYSQL']['title_'.$row[0]])) {
+				$output .= webHelper_errorMsg("Invalid E-Mail Address: ". $_POST['MYSQL']['title_'.$row[0]]);
 				continue;
 			}
 		}
