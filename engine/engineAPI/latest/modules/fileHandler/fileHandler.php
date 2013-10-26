@@ -608,8 +608,6 @@ class fileHandler {
 	 */
 	public function displaySearchForm($extensions=array()) {
 
-		$engine = EngineAPI::singleton();
-
 		if (is_empty($extensions)) {
 			$extensions = $this->getExtensionsInFolder();
 			natcasesort($extensions);
@@ -617,13 +615,13 @@ class fileHandler {
 
 		$limits = array(1=>"Bytes", 1000=>"KB", 1000000=>"MB", 1000000000=>"GB");
 
-		$lowSizeLimit  = isset($engine->cleanPost['HTML']['lowSizeLimit'])  ? $engine->cleanPost['HTML']['lowSizeLimit']  : NULL;
-		$lowSizeUnit   = isset($engine->cleanPost['HTML']['lowSizeUnit'])   ? $engine->cleanPost['HTML']['lowSizeUnit']   : 1000;
-		$highSizeLimit = isset($engine->cleanPost['HTML']['highSizeLimit']) ? $engine->cleanPost['HTML']['highSizeLimit'] : NULL;
-		$highSizeUnit  = isset($engine->cleanPost['HTML']['highSizeUnit'])  ? $engine->cleanPost['HTML']['highSizeUnit']  : 1000;
+		$lowSizeLimit  = isset($_POST['HTML']['lowSizeLimit'])  ? $_POST['HTML']['lowSizeLimit']  : NULL;
+		$lowSizeUnit   = isset($_POST['HTML']['lowSizeUnit'])   ? $_POST['HTML']['lowSizeUnit']   : 1000;
+		$highSizeLimit = isset($_POST['HTML']['highSizeLimit']) ? $_POST['HTML']['highSizeLimit'] : NULL;
+		$highSizeUnit  = isset($_POST['HTML']['highSizeUnit'])  ? $_POST['HTML']['highSizeUnit']  : 1000;
 
-		$fileName = isset($engine->cleanPost['HTML']['fileName']) ? $engine->cleanPost['HTML']['fileName'] : NULL;
-		$fileType = isset($engine->cleanPost['HTML']['fileType']) ? $engine->cleanPost['HTML']['fileType'] : NULL;
+		$fileName = isset($_POST['HTML']['fileName']) ? $_POST['HTML']['fileName'] : NULL;
+		$fileType = isset($_POST['HTML']['fileType']) ? $_POST['HTML']['fileType'] : NULL;
 
 		$output  = '<form action="'.$_SERVER['PHP_SELF'].'?'.$_SERVER['QUERY_STRING'].'" method="post">';
 		$output .= '<table>';

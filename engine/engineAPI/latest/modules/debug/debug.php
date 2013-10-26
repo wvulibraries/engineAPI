@@ -28,11 +28,10 @@ class debug {
 	private $getPassword;
 	
 	private function __construct() {
-		$this->engine = EngineAPI::singleton();
-		if(isset($this->engine->cleanGet['HTML']['debug'])) {
-			$this->debug[$this->engine->cleanGet['HTML']['debug']] = TRUE;
-			if(isset($this->engine->cleanGet['HTML']['debugPassword']) && !is_empty($this->engine->cleanGet['HTML']['debugPassword'])) {
-				$this->getPassword = $this->engine->cleanGet['HTML']['debugPassword'];
+		if(isset($_GET['HTML']['debug'])) {
+			$this->debug[$_GET['HTML']['debug']] = TRUE;
+			if(isset($_GET['HTML']['debugPassword']) && !is_empty($_GET['HTML']['debugPassword'])) {
+				$this->getPassword = $_GET['HTML']['debugPassword'];
 			}
 		}
 	}

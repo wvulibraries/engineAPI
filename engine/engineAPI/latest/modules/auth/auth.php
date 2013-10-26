@@ -535,8 +535,7 @@ class auth extends authCommon{
 	 */
 	public static function callback_createGroup()
 	{
-		$eAPI = EngineAPI::singleton();
-		return self::createGroup($eAPI->cleanPost['HTML']['name_insert'], $eAPI->cleanPost['HTML']['description_insert'], $eAPI->cleanPost['HTML']['ldapDN_insert']);
+		return self::createGroup($_POST['HTML']['name_insert'], $_POST['HTML']['description_insert'], $_POST['HTML']['ldapDN_insert']);
 	}
 
 	/**
@@ -953,8 +952,7 @@ class auth extends authCommon{
 	 */
 	public static function callback_createPermission()
 	{
-		$eAPI = EngineAPI::singleton();
-		return self::createPermission($eAPI->cleanPost['HTML']['object_insert'],$eAPI->cleanPost['HTML']['name_insert'],$eAPI->cleanPost['HTML']['description_insert']);
+		return self::createPermission($_POST['HTML']['object_insert'],$_POST['HTML']['name_insert'],$_POST['HTML']['description_insert']);
 	}
 
 	/**
