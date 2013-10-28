@@ -1236,8 +1236,6 @@ class EngineAPI{
 			}
 
 			if ($engine->displayTemplateOff === FALSE) {
-				//local var replacements
-				// $line = preg_replace_callback("/\{local\s+?var=\"(.+?)\"\}/",'EngineAPI::localMatches',$line);
 
 				//engineVar replacements
 				$line = preg_replace_callback("/\{engine\s+?var=\"(.+?)\"\}/",'EngineAPI::engineVarMatches',$line);
@@ -1413,32 +1411,5 @@ class EngineAPI{
 		return $output;
 	}
 
-	//** Deprecated functions to be removed in 4.0 **/
-
-	/**
-	 * Define local variables.
-	 * if second value is not provided, tries to return that value. False if it doesn't exist
-	 *
-	 * @deprecated 4.0
-	 * @param $variable
-	 * @param null $value
-	 * @param bool $null
-	 * @return bool|null|string
-	 */
-	public function localVars($variable,$value=NULL,$null=FALSE) {
-		return localvars::variable($variable,$value,$null);
-	}
-
-
-	/**
-	 * Returns an array identical to the original LocalVars arrays
-	 * This function is only for migration purposes and should be removed in 4.0
-	 *
-	 * @deprecated 4.0
-	 * @return array
-	 */
-	public function localVarsExport() {
-		return localvars::export();
-	}
 }
 ?>
