@@ -217,8 +217,6 @@ class EngineAPI{
 		// make sure the session cookie is only accessible via HTTP
 		ini_set("session.cookie_httponly", 1);
 
-		// ob_start('EngineAPI::displayTemplate');
-
 		// setup private config variables
 		require_once self::$engineDir."/config/defaultPrivate.php";
 		if($site != "default" && $site != "defaultPrivate"){
@@ -619,15 +617,6 @@ class EngineAPI{
 		return $output;
 
 	}
-
-	/**
-	 * Returns the current template directory
-	 *
-	 * @return string
-	 */
-	// public function currentTemplate() {
-	// 	return $this->template;
-	// }
 
 	/**
 	 * Register ACL rules
@@ -1258,23 +1247,7 @@ class EngineAPI{
 				// This should be moved out to a module
 			    $output = $engineVars['emailSender'][$attPairs['type']];
 				break;
-			// case "include":
-			//     $output = recurseInsert($attPairs['file'],$attPairs['type']);
-			// 	break;
-			// case "session":
-			//     $output = sessionGet($attPairs['var']);
-			// 	break;
-			// case "insertCSRF":
-			// case "csrf":
-			//     $output = sessionInsertCSRF();
-			// 	break;
-			// case "csrfGet":
-			//     $output = sessionInsertCSRF(FALSE);
-			//     break;
-			// case "function":
-			// 	errorHandle::newError("{engine name=\"function\"} replacement is deprecated", errorHandle::DEBUG);
-			//     $output = $attPairs['function']($attPairs);
-			// 	break;
+
 			default:
 			    $output = FALSE;
 		}
