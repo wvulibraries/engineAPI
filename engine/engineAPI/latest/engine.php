@@ -74,31 +74,31 @@ class EngineAPI{
 	#############################################################
 
 
-	/**
-	 * Access Methods
-	 * @var string
-	 */
-	private $accessMethods = "";
-	/**
-	 * Unknown
-	 * @var bool
-	 */
-	private $accessExistsTest = TRUE;
-	/**
-	 * ACL items
-	 * @var array
-	 */
-	private $acl = array();
-	/**
-	 * ACL groups
-	 * @var array
-	 */
-	private $aclgroups = array();
-	/**
-	 * ACL count
-	 * @var int
-	 */
-	private $aclCount = 0;
+	// /**
+	//  * Access Methods
+	//  * @var string
+	//  */
+	// private $accessMethods = "";
+	// /**
+	//  * Unknown
+	//  * @var bool
+	//  */
+	// private $accessExistsTest = TRUE;
+	// /**
+	//  * ACL items
+	//  * @var array
+	//  */
+	// private $acl = array();
+	// /**
+	//  * ACL groups
+	//  * @var array
+	//  */
+	// private $aclgroups = array();
+	// /**
+	//  * ACL count
+	//  * @var int
+	//  */
+	// private $aclCount = 0;
 
 	# Used for database connections
 	#############################################################
@@ -213,6 +213,8 @@ class EngineAPI{
 		// Need to load this so that onLoads and template definitions can be set
 		// curing the construct() of engine
 		require_once self::$engineDir."/modules/templates/templates.php";
+		require_once __DIR__."/modules/session/session.php";
+		require_once self::$engineDir."/accessControl/accessControl.php";
 
 		// make sure the session cookie is only accessible via HTTP
 		ini_set("session.cookie_httponly", 1);
@@ -263,27 +265,7 @@ class EngineAPI{
 		$this->dbServer   = ($this->engineVarsPrivate['mysql']['server'])?$this->engineVarsPrivate['mysql']['server']:NULL;
 
 		//Load Access Control Modules
-		$accessModDirHandle = @opendir($engineVars['accessModules']) or die("Unable to open ".$engineVars['accessModules']);
-		while (false !== ($file = readdir($accessModDirHandle))) {
-			// Check to make sure that it isn't a hidden file and that it is a PHP file
-			if ($file != "." && $file != ".." && $file) {
-				$fileChunks = array_reverse(explode(".", $file));
-				$ext= $fileChunks[0];
-				if ($ext == "php") {
-					include_once($engineVars['accessModules']."/".$file);
-				}
-			}
-		}
-
-		foreach ($accessControl as $method => $function) {
-			$this->accessMethods[$method] = $function;
-		}
-		$this->accessMethods['denyAll']  = 'dummyFunction';
-		$this->accessMethods['allowAll'] = 'dummyFunction';
-
-		if ($engineVars['accessExistsTest'] === TRUE || $engineVars['accessExistsTest'] === FALSE) {
-			$this->accessExistsTest = $engineVars['accessExistsTest'];
-		}
+		accessControl::init();
 
 		// Define the AutoLoader
 		// spl_autoload_register(array($this, 'autoloader'));
@@ -356,7 +338,7 @@ class EngineAPI{
 		}
 
 		// Initialize the session and if we are not in CLI mode start the session
-		require_once __DIR__."/modules/session/session.php";
+
 		session::singlton(NULL,$this);
 		if(!isCLI() and !session::started()) session::start();
 
@@ -618,157 +600,6 @@ class EngineAPI{
 
 	}
 
-	/**
-	 * Register ACL rules
-	 * hardbreak causes the function to exit immediately on a FALSE ACL return if set to TRUE
-	 *
-	 * @param $action
-	 *        debugListAll - Prints debug info
-	 *        existsTest - UNKNOWN
-	 *        build - UNKNOWN
-	 *        clear - Clears all acl rules
-	 * @param string|null $value
-	 * @param string|bool $state
-	 * @param bool $hardBreak
-	 * @return bool
-	 */
-	public function accessControl($action,$value=NULL,$state=FALSE,$hardBreak=TRUE) {
-
-		if ($action == "debugListAll") {
-			print "<pre>";
-			var_dump($this->acl);
-			print "</pre>";
-			return TRUE;
-		}
-
-		if ($action == "existsTest") {
-			if ($value === TRUE || $value === FALSE) {
-				$this->accessExistsTest = $value;
-				return TRUE;
-			}
-			return FALSE;
-		}
-
-		if ($action == "build") {
-
-			$auth  = NULL;
-			$count = 0;
-
-			foreach ($this->acl as $key => $value) {
-
-				$action = $value['action'];
-
-				if ($action == "denyAll") {
-					// If this is the first item in the array, access is denied.
-					// if it is NOT the first item, we assume it is the last intended to be
-					// evaluated as a 'catch all'
-					if ($count === 0) {
-						$this->accessControlDenied();
-						exit;
-					}
-					else {
-						break;
-					}
-				}
-
-				$count++;
-
-				if ($action == "allowAll") {
-					return TRUE;
-				}
-
-
-				$returnValue = $this->accessMethods[$action]($value['value'],$value['state']);
-
-				// NULL value is error state. set auth to false to be safe
-				if (isnull($returnValue)) {
-					if ($value['hardBreak'] === TRUE) {
-						$this->aclgroups[$action] = FALSE;
-						$this->accessControlDenied();
-						exit;
-					}
-					$this->aclgroups[$action] = FALSE;
-					continue;
-				}
-				else if ($returnValue === FALSE) {
-					if ($value['hardBreak'] === TRUE) {
-						$this->aclgroups[$action] = FALSE;
-						$this->accessControlDenied();
-						exit;
-					}
-					if ($this->aclgroups[$action] === TRUE) {
-						continue;
-					}
-					$this->aclgroups[$action] = FALSE;
-				}
-				else if ($returnValue === TRUE) {
-					$this->aclgroups[$action] = TRUE;
-				}
-			}
-
-			// foreach group ("action") check if it is true. If all actions are true, YAY!
-			// Otherwise Ugh!
-			$auth = NULL;
-			foreach ($this->aclgroups as $key => $value) {
-
-				// At this point, the only "FALSE" things should be those that did not have a hard break
-				// so we should NOT exit if we see them, unless ALL things fail.
-
-				if ($value === FALSE) {
-					if (isnull($auth)) {
-						$auth = FALSE;
-					}
-					// $this->accessControlDenied();
-					// exit;
-				}
-				else if ($value === TRUE) {
-					$auth = TRUE;
-				}
-				else {
-					// Safety check in case of errors
-					$auth = NULL;
-				}
-			}
-
-			if ($auth === TRUE) {
-				return TRUE;
-			}
-
-
-			$this->accessControlDenied();
-			exit;
-
-			return $auth;
-		}
-
-		if ($action == "clear") {
-			unset($this->acl);
-			$this->acl = array();
-			$aclCount  = 0;
-			return TRUE;
-		}
-
-		if(!isset($this->accessMethods[$action])) {
-			if ($this->accessExistsTest === TRUE) {
-				die("Access Control $action is undefined. Exiting.\n");
-			}
-			return FALSE;
-		}
-
-		$this->acl[$this->aclCount]['action']     = $action;
-		$this->acl[$this->aclCount]['value']      = $value;
-		$this->acl[$this->aclCount]['state']      = $state;
-		$this->acl[$this->aclCount]['hardBreak']  = $hardBreak;
-
-
-		if ($action != "denyAll") {
-			$this->aclgroups[$action] = FALSE;
-		}
-
-		$this->aclCount++;
-
-		return TRUE;
-	}
 
 	/**
 	 * Connect to MySQL Database
@@ -1026,27 +857,6 @@ class EngineAPI{
 		$results = $engineDB->query($query);
 
 		return TRUE;
-	}
-
-	/**
-	 * accessControlDenied()
-	 */
-	private function accessControlDenied() {
-		global $engineVars;
-
-		$engineVars['loginPage'] = EngineAPI::$engineVars['loginPage'];
-
-		ob_end_clean();
-
-		sessionSet("page",$_SERVER['PHP_SELF']);
-
-		//@TODO : this query_String shouldn't be straight html sanitized, so that the &'s dont get screwed
-		sessionSet("qs",preg_replace('/&#039;/',"'",urldecode(html_entity_decode($_SERVER['QUERY_STRING']))));
-
-
-		header( 'Location: '.$engineVars['loginPage'].'?page='.$_SERVER['PHP_SELF']."&qs=".(urlencode($_SERVER['QUERY_STRING'])) ) ;
-		//die("No Access Here");
-		//return FALSE;
 	}
 
 	/**
