@@ -603,10 +603,11 @@ class EngineAPI{
 	/**
 	 * Set function extensions
 	 *
-	 * @todo What does $stage control?
 	 * @param string|array $function
 	 * @param string|array $newFunction
-	 * @param string $stage UNKNOWN
+	 * @param string $stage identifier of when this callback will be called. 
+	 *                      Used by the calling function to allow the calling function to 
+	 *                      have multiple Extensions. 
 	 * @return bool
 	 */
 	public function setFunctionExtension($function,$newFunction,$stage="after") {
@@ -663,7 +664,9 @@ class EngineAPI{
 	 * Execute something...
 	 * @param string $function
 	 * @param string $params
-	 * @param string $stage UNKNOWN (before, after)
+	 * @param string $stage identifier of when this callback will be called. 
+	 *                      Used by the calling function to allow the calling function to 
+	 *                      have multiple Extensions. 
 	 * @return bool
 	 */
 	public function execFunctionExtension($function,$params,$stage="after") {
