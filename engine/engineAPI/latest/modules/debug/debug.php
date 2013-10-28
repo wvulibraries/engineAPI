@@ -28,11 +28,10 @@ class debug {
 	private $getPassword;
 	
 	private function __construct() {
-		$this->engine = EngineAPI::singleton();
-		if(isset($this->engine->cleanGet['HTML']['debug'])) {
-			$this->debug[$this->engine->cleanGet['HTML']['debug']] = TRUE;
-			if(isset($this->engine->cleanGet['HTML']['debugPassword']) && !is_empty($this->engine->cleanGet['HTML']['debugPassword'])) {
-				$this->getPassword = $this->engine->cleanGet['HTML']['debugPassword'];
+		if(isset($_GET['HTML']['debug'])) {
+			$this->debug[$_GET['HTML']['debug']] = TRUE;
+			if(isset($_GET['HTML']['debugPassword']) && !is_empty($_GET['HTML']['debugPassword'])) {
+				$this->getPassword = $_GET['HTML']['debugPassword'];
 			}
 		}
 	}
@@ -57,15 +56,12 @@ class debug {
 	 * Print the EngineAPI environment
 	 * Prints te EngineAPI EngineVars and LocalVars
 	 *
-	 * @todo Remove use of deprecated use of localVarsExport()
 	 * @todo Remove usage of global $engineVars
 	 * @todo Look at cleanup / rewrite
 	 * @return bool
 	 */
 	public static function printENV() {
 		global $engineVars;
-		$engine = EngineAPI::singleton();
-		if(isnull($engine)) return(FALSE);
 
 		print "<p><strong>Engine Variables:</strong>:<br />";
 		foreach ($engineVars as $key => $value) {
@@ -73,7 +69,7 @@ class debug {
 		}
 		print "</p>";
 
-		$localVars = $engine->localVarsExport();
+		$localVars = localvars::export();
 
 		print "<p><strong>Local Variables:</strong>:<br />";
 		foreach ($localVars as $key => $value) {

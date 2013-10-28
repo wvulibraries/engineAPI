@@ -9,8 +9,7 @@ class date {
 	public $function = "date::templateMatches";
 
 	function __construct() {
-		$engine = EngineAPI::singleton();
-		$engine->defTempPattern($this->pattern,$this->function,$this);
+		templates::defTempPatterns($this->pattern,$this->function,$this);
 	}
 
 	/**

@@ -80,10 +80,10 @@ class session{
 		self::$optionsDefault = isset(EngineAPI::$engineVars['session']) ? EngineAPI::$engineVars['session'] : array();
 
 		// Define template tags
-		self::$engine->defTempPattern('/\{session\s+(.+?)\}/', 'session::templateHandler', $this);
-		self::$engine->defTempPattern('/\{csrf}/', 'session::templateHandler_csrf', $this);
-		self::$engine->defTempPattern('/\{csrfToken=[\'"](.+?)[\'"]}/', 'session::templateHandler_csrfToken', $this);
-		self::$engine->defTempPattern('/\{csrfID=[\'"](.+?)[\'"]}/', 'session::templateHandler_csrfID', $this);
+		templates::defTempPatterns('/\{session\s+(.+?)\}/', 'session::templateHandler', $this);
+		templates::defTempPatterns('/\{csrf}/', 'session::templateHandler_csrf', $this);
+		templates::defTempPatterns('/\{csrfToken=[\'"](.+?)[\'"]}/', 'session::templateHandler_csrfToken', $this);
+		templates::defTempPatterns('/\{csrfID=[\'"](.+?)[\'"]}/', 'session::templateHandler_csrfID', $this);
 
 		// Get the current cookie params (these will be used as the fail-safe defaults)
 		$defaultCookieParams = session_get_cookie_params();

@@ -3,7 +3,7 @@
 class queryString {
 
 	function __construct() {
-		EngineAPI::defTempPatterns("/\{queryString\s+(.+?)\}/","queryString::templateMatches",$this);
+		templates::defTempPatterns("/\{queryString\s+(.+?)\}/","queryString::templateMatches",$this);
 	}
 
 	/**
@@ -13,14 +13,14 @@ class queryString {
 	 * @return string
 	 */
 	public static function templateMatches($matches) {
-		$engine        = EngineAPI::singleton();
+		
 		$attPairs      = attPairs($matches[1]);
 
-		if (isset($engine->cleanGet['HTML'][$attPairs['var']]) && !is_empty($engine->cleanGet['HTML'][$attPairs['var']])) {
+		if (isset($_GET['HTML'][$attPairs['var']]) && !is_empty($_GET['HTML'][$attPairs['var']])) {
 			if (isset($attPairs['decode']) && $attPairs['decode'] == "true") {
-				$engine->cleanGet['HTML'][$attPairs['var']] = urldecode($engine->cleanGet['HTML'][$attPairs['var']]);
+				$_GET['HTML'][$attPairs['var']] = urldecode($_GET['HTML'][$attPairs['var']]);
 			}
-			return($engine->cleanGet['HTML'][$attPairs['var']]);
+			return($_GET['HTML'][$attPairs['var']]);
 		}
 
 		return("");

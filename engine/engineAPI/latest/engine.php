@@ -57,7 +57,7 @@ class EngineAPI{
 	 * $engineVars['currentTemplate']
 	 * @var string
 	 */
-	public $template = "";
+	// public $template = "";
 	/**
 	 * Current working directory
 	 * @var string
@@ -72,16 +72,8 @@ class EngineAPI{
 
 	# Used for page access/security
 	#############################################################
-	/**
-	 * Sanitized $_GET
-	 * @var array
-	 */
-	public $cleanGet = array();
-	/**
-	 * Sanitized $_POST
-	 * @var array
-	 */
-	public $cleanPost = array();
+
+
 	/**
 	 * Access Methods
 	 * @var string
@@ -171,11 +163,7 @@ class EngineAPI{
 
 	# Module Template Mathes and function calls for displayTemplate()
 	###################################################################
-	/**
-	 * Unknown
-	 * @var array
-	 */
-	private static $moduleTemplateEngine = array();
+	
 	/**
 	 * Recursive counter for template renderer
 	 * In module template matches, prevent infinite recursion
@@ -220,10 +208,14 @@ class EngineAPI{
 	private function __construct($site="default") {
 		self::$engineDir = dirname(__FILE__);
 
+		require_once self::$engineDir."/helperFunctions/http.php";
+
+		// Need to load this so that onLoads and template definitions can be set
+		// curing the construct() of engine
+		require_once self::$engineDir."/modules/templates/templates.php";
+
 		// make sure the session cookie is only accessible via HTTP
 		ini_set("session.cookie_httponly", 1);
-
-		// ob_start('EngineAPI::displayTemplate');
 
 		// setup private config variables
 		require_once self::$engineDir."/config/defaultPrivate.php";
@@ -264,10 +256,6 @@ class EngineAPI{
 		// Setup Current Working Directory
 		$this->cwd = getcwd();
 
-		// Setup initial Template
-		$this->template = $engineVars['tempDir']."/".$engineVars['templateDefault'];
-		$engineVars['currentTemplate'] = $this->template;
-
 		// Setup default database connections
 		$this->dbUsername = ($this->engineVarsPrivate['mysql']['username'])?$this->engineVarsPrivate['mysql']['username']:NULL;
 		$this->dbPassword = ($this->engineVarsPrivate['mysql']['password'])?$this->engineVarsPrivate['mysql']['password']:NULL;
@@ -303,11 +291,12 @@ class EngineAPI{
 
 		// Get modules ready for Autoloader (previously loaded modules). Load the "onLoad.php" files
 		// for each module
-		$modules_dirHandle = @opendir($engineVars['modules']) or die("Unable to open ".$engineVars['modules']);
+		$modules_dirHandle = @opendir($engineVars['modules']) or die("Unable to open (Modules)".$engineVars['modules']);
 		while (false !== ($dir = readdir($modules_dirHandle))) {
 			// Check to make sure that it isn't a hidden file and that the file is a directory
 			if ($dir != "." && $dir != ".." && is_dir($engineVars['modules']."/".$dir) === TRUE) {
-				$singleMod_dirHandle = @opendir($engineVars['modules']."/".$dir) or die("Unable to open ".$engineVars['modules']);
+				if ($dir == "templates") continue;
+				$singleMod_dirHandle = @opendir($engineVars['modules']."/".$dir) or die("Unable to open (Single Module)".$engineVars['modules']);
 				while (false !== ($file = readdir($singleMod_dirHandle))) {
 					if ($file != "." && $file != ".." && $file) {
 
@@ -326,10 +315,6 @@ class EngineAPI{
 				}
 			}
 		}
-
-		// $testP = "/\{engine name=\"function\"\s+(.+?)\}/";
-		// $testF = "eapi_function::templateMatches";
-		// $this->defTempPattern($testP,$testF,$this);
 
 		//Load Login Functions
 		$login_dirHandle = @opendir($engineVars['loginModules']) or die("Unable to open ".$engineVars['loginModules']);
@@ -400,26 +385,10 @@ class EngineAPI{
 		}
 
 		// Get clean $_POST
-		if(isset($_POST)) {
-			foreach ($_POST as $key => $value) {
-				$cleanKey                            = htmlSanitize($key);
-				$this->cleanPost['HTML'][$cleanKey]  = htmlSanitize($value);
-				$this->cleanPost['MYSQL'][$cleanKey] = dbSanitize($value);
-				$this->cleanPost['RAW'][$cleanKey]   = $value;
-			}
-			unset($_POST);
-		}
+		http::cleanPost();
 
 		// Get clean $_GET
-		if(isset($_GET)) {
-			foreach ($_GET as $key => $value) {
-				$cleanKey                           = htmlSanitize($key);
-				$this->cleanGet['HTML'][$cleanKey]  = htmlSanitize($value);
-				$this->cleanGet['MYSQL'][$cleanKey] = dbSanitize($value);
-				$this->cleanGet['RAW'][$cleanKey]   = $value;
-			}
-			unset($_GET);
-		}
+		http::cleanGet();
 
 		// kill off $_REQUEST and force everything through cleanGet and cleanPost
 		if (isset($_REQUEST)) {
@@ -539,96 +508,13 @@ class EngineAPI{
 	}
 
 	/**
-	 * [Alias] EngineAPI::setItems()
-	 *
-	 * @see self::defTempPatterns()
-	 * @param string $pattern
-	 * @param string $function
-	 * @param string $object
-	 * @return bool Always TRUE
-	 */
-	public function defTempPattern($pattern,$function,$object) {
-		return self::defTempPatterns($pattern,$function,$object);
-	}
-
-	/**
-	 * Define Template Object Pattern
-	 *
-	 * @param string $pattern
-	 * @param string $function
-	 * @param string $object
-	 * @return bool Always TRUE
-	 */
-	public static function defTempPatterns($pattern,$function,$object) {
-		$class            = get_class($object);
-		$temp             = array();
-		$temp['pattern']  = $pattern;
-		$temp['function'] = $function;
-		$temp['object']   = $object;
-		self::$moduleTemplateEngine[$class][] = $temp;
-		return TRUE;
-	}
-
-	/**
-	 * Redefine Template Object Pattern
-	 *
-	 * @see self::defTempPatterns()
-	 * @param string $oldPattern
-	 * @param string $newPattern
-	 * @param string $function
-	 * @param string $object
-	 * @return bool Always TRUE
-	 */
-	public function reDefTempPattern($oldPattern,$newPattern,$function,$object) {
-		foreach (self::$moduleTemplateEngine as $class=>$V) {
-			foreach (self::$moduleTemplateEngine[$class] as $I => $plugin) {
-				if ($plugin['pattern'] == $oldPattern) {
-					unset(self::$moduleTemplateEngine[$class][$I]);
-					break;
-				}
-			}
-		}
-		$this->defTempPattern($newPattern,$function,$object);
-		return TRUE;
-	}
-
-	/**
-	 * Um...
-	 * This function should be combined with defTempPatterns
-	 * if $pattern, $function, $class already exist the object should be updated
-	 *
-	 * @param string $pattern
-	 * @param string $function
-	 * @param string $object
-	 * @return bool Always TRUE
-	 */
-	public function reDefTempPatternObject($pattern,$function,$object) {
-		$class = get_class($object);
-		foreach (self::$moduleTemplateEngine[$class] as $I => $plugin) {
-			if ($plugin['pattern'] == $pattern) {
-				self::$moduleTemplateEngine[$class][$I]['object'] = $object;
-			}
-		}
-		return TRUE;
-	}
-
-	/**
-	 * Retrieve Template Object
-	 *
-	 * @param string $className
-	 * @return mixed
-	 */
-	public function retTempObj($className) {
-		return self::$moduleTemplateEngine[$className][0]['object'];
-	}
-
-	/**
 	 * Set function extensions
 	 *
-	 * @todo What does $stage control?
 	 * @param string|array $function
 	 * @param string|array $newFunction
-	 * @param string $stage UNKNOWN
+	 * @param string $stage identifier of when this callback will be called. 
+	 *                      Used by the calling function to allow the calling function to 
+	 *                      have multiple Extensions. 
 	 * @return bool
 	 */
 	public function setFunctionExtension($function,$newFunction,$stage="after") {
@@ -685,7 +571,9 @@ class EngineAPI{
 	 * Execute something...
 	 * @param string $function
 	 * @param string $params
-	 * @param string $stage UNKNOWN (before, after)
+	 * @param string $stage identifier of when this callback will be called. 
+	 *                      Used by the calling function to allow the calling function to 
+	 *                      have multiple Extensions. 
 	 * @return bool
 	 */
 	public function execFunctionExtension($function,$params,$stage="after") {
@@ -728,64 +616,6 @@ class EngineAPI{
 
 		return $output;
 
-	}
-
-	/**
-	 * eTemplate() - Not sure what this does
-	 *
-	 * @param $func
-	 * 		  load - define which tempalte to use.
-	 * 		  name - UNKNOWN
-	 * 		  include - fire off the 'header' or the 'footer'
-	 * @param null $value
-	 * @return bool|string
-	 */
-	public function eTemplate($func,$value=NULL) {
-
-		global $engineVars;
-
-		if ($func == "load") {
-
-			if(isnull($value)) {
-				return FALSE;
-			}
-
-			if (file_exists($engineVars['tempDir']."/".$value)) {
-				$this->template = $engineVars['tempDir']."/".$value;
-				$engineVars['currentTemplate'] = $this->template;
-			}
-			else {
-				return FALSE;
-			}
-		}
-		if ($func == "name") {
-			return basename($this->template);
-		}
-		if ($func == "include") {
-			switch($value) {
-				case "header":
-					include($this->template."/templateHeader.php");
-					break;
-
-				case "footer":
-				    include($this->template."/templateFooter.php");
-					break;
-
-				default:
-				    return FALSE;
-				    break;
-			}
-		}
-		return TRUE;
-	}
-
-	/**
-	 * Returns the current template directory
-	 *
-	 * @return string
-	 */
-	public function currentTemplate() {
-		return $this->template;
 	}
 
 	/**
@@ -1049,7 +879,7 @@ class EngineAPI{
 	 */
 	public function login($loginType) {
 		if (isset($this->loginFunctions[$loginType])) {
-			if($this->loginFunctions[$loginType](trim($this->cleanPost['RAW']['username']),$this->cleanPost['RAW']['password'])) {
+			if($this->loginFunctions[$loginType](trim($_POST['RAW']['username']),$_POST['RAW']['password'])) {
 				return TRUE;
 			}
 		}
@@ -1138,9 +968,9 @@ class EngineAPI{
 	}
 
 	/**
-	 * Um... huh?
+	 * determines the server from $referer
 	 * @param $referer
-	 * @return null
+	 * @return string the server passed in via referer 
 	 */
 	private function getHTTP_REFERERServer($referer) {
 
@@ -1258,8 +1088,6 @@ class EngineAPI{
 			}
 
 			if ($engine->displayTemplateOff === FALSE) {
-				//local var replacements
-				// $line = preg_replace_callback("/\{local\s+?var=\"(.+?)\"\}/",'EngineAPI::localMatches',$line);
 
 				//engineVar replacements
 				$line = preg_replace_callback("/\{engine\s+?var=\"(.+?)\"\}/",'EngineAPI::engineVarMatches',$line);
@@ -1295,7 +1123,8 @@ class EngineAPI{
 
 				//module Replacements
 				// foreach ($engine->moduleTemplateEngine as $class) {
-				foreach (self::$moduleTemplateEngine as $class) {
+				// self::$moduleTemplateEngine
+				foreach (templates::getTemplatePatterns() as $class) {
 					foreach ($class as $plugin) {
 						if(isset($plugin['pattern']) && isset($plugin['function'])) {
 							// testing
@@ -1343,7 +1172,12 @@ class EngineAPI{
 	}
 
 	/**
-	 * Not a clue
+	 * If $engineVars['replaceDoubleQuotes'] = TRUE, this method will replace double 
+	 * quote strings (two quotes, without any characters in between, example: "" ) with : 
+	 * "$engineVars['replaceDQCharacter']"
+	 *
+	 * This prevents a bug in some browsers with "" in the header causes issues. 
+	 * 
 	 * @param $matches
 	 * @return string
 	 */
@@ -1355,7 +1189,8 @@ class EngineAPI{
 	}
 
 	/**
-	 * Something to do with engine matches
+	 * callback to handle {engine .*} matches in templates
+	 * 
 	 * @param $matches
 	 * @return bool|string
 	 */
@@ -1412,55 +1247,12 @@ class EngineAPI{
 				// This should be moved out to a module
 			    $output = $engineVars['emailSender'][$attPairs['type']];
 				break;
-			// case "include":
-			//     $output = recurseInsert($attPairs['file'],$attPairs['type']);
-			// 	break;
-			// case "session":
-			//     $output = sessionGet($attPairs['var']);
-			// 	break;
-			// case "insertCSRF":
-			// case "csrf":
-			//     $output = sessionInsertCSRF();
-			// 	break;
-			// case "csrfGet":
-			//     $output = sessionInsertCSRF(FALSE);
-			//     break;
-			// case "function":
-			// 	errorHandle::newError("{engine name=\"function\"} replacement is deprecated", errorHandle::DEBUG);
-			//     $output = $attPairs['function']($attPairs);
-			// 	break;
+
 			default:
 			    $output = FALSE;
 		}
 		return $output;
 	}
 
-	//** Deprecated functions to be removed in 4.0 **/
-
-	/**
-	 * Define local variables.
-	 * if second value is not provided, tries to return that value. False if it doesn't exist
-	 *
-	 * @deprecated 4.0
-	 * @param $variable
-	 * @param null $value
-	 * @param bool $null
-	 * @return bool|null|string
-	 */
-	public function localVars($variable,$value=NULL,$null=FALSE) {
-		return localvars::variable($variable,$value,$null);
-	}
-
-
-	/**
-	 * Returns an array identical to the original LocalVars arrays
-	 * This function is only for migration purposes and should be removed in 4.0
-	 *
-	 * @deprecated 4.0
-	 * @return array
-	 */
-	public function localVarsExport() {
-		return localvars::export();
-	}
 }
 ?>

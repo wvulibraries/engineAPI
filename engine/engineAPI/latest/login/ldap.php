@@ -10,7 +10,6 @@ $loginFunctions['ldap'] = "ldapLogin";
 /**
  * Process a LDAP login attempt
  *
- * @todo Remove deprecated EngineAPI->localVars() method call
  * @todo Remove deprecated use of lc() function
  * @param string $username
  *        The user's username
@@ -20,7 +19,7 @@ $loginFunctions['ldap'] = "ldapLogin";
  */
 function ldapLogin($username,$password)
 {
-    $ldapSearch = new ldapSearch(EngineAPI::singleton()->localVars("domain"));
+    $ldapSearch = new ldapSearch(localvars::get("domain"));
     if($ldapSearch->login($username,$password)){
         $user = $ldapSearch->findUser($username);
         if($user){

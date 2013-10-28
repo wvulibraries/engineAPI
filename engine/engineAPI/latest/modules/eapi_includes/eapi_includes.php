@@ -17,8 +17,8 @@ class eapi_includes {
 	private $function = "eapi_includes::templateMatches";
 	
 	function __construct() {		
-		EngineAPI::defTempPatterns($this->pattern,$this->function,$this);
-		EngineAPI::defTempPatterns("/\{engine name=\"include\"\s+(.+?)\}/",$this->function,$this);
+		templates::defTempPatterns($this->pattern,$this->function,$this);
+		templates::defTempPatterns("/\{engine name=\"include\"\s+(.+?)\}/",$this->function,$this);
 	}
 
 	/**
@@ -28,8 +28,8 @@ class eapi_includes {
 	 * @return bool
 	 */
 	public static function templateMatches($matches) {
-		$engine        = EngineAPI::singleton();
-		$eapi_function = $engine->retTempObj("eapi_function");
+
+		$eapi_function = templates::retTempObj("eapi_function");
 		$attPairs      = attPairs($matches[1]);
 		
 		if(!isset($attPairs['file']) && isempty($attPairs['type'])) return(FALSE);

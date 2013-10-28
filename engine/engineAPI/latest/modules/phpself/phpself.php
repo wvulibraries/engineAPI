@@ -19,8 +19,7 @@ class phpself {
 	 * Class constructor
 	 */
 	function __construct() {
-		$engine = EngineAPI::singleton();
-		$engine->defTempPattern($this->pattern,$this->function,$this);
+		templates::defTempPatterns($this->pattern,$this->function,$this);
 	}
 
 	/**
@@ -30,8 +29,8 @@ class phpself {
 	 * @return string
 	 */
 	public static function templateMatches($matches) {
-		$engine   = EngineAPI::singleton();
-		$obj      = $engine->retTempObj("phpself");
+
+		$obj      = templates::retTempObj("phpself");
 		$attPairs = attPairs($matches[1]);
 		$phpself  = $_SERVER['PHP_SELF'];
 

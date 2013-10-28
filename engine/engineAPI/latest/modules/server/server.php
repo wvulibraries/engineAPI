@@ -21,8 +21,7 @@ class server {
 	 * Class constructor
 	 */
 	function __construct() {
-		$engine   = EngineAPI::singleton();
-		$engine->defTempPattern($this->pattern,$this->function,$this);
+		templates::defTempPatterns($this->pattern,$this->function,$this);
 	}
 
 	/**
@@ -33,8 +32,7 @@ class server {
 	 * @return string
 	 */
 	public static function templateMatches($matches) {
-		$engine   = EngineAPI::singleton();
-		$obj      = $engine->retTempObj("server");
+		$obj      = templates::retTempObj("server");
 		
 		$attPairs = attPairs($matches[1]);
 		if (!isset($attPairs['var'])) {
