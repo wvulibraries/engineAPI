@@ -28,77 +28,49 @@ class EngineAPI{
 	 * @var self
 	 */
 	private static $instance; // Hold an instance of this object, for use as Singleton
+
 	/**
 	 * The root directory for EngineAPI and its modules
 	 * @var string
 	 */
 	public static $engineDir;
+
 	/**
 	 * The engine config items
 	 * @var array
 	 */
 	public static $engineVars = array();
+
 	/**
 	 * Private engine config vars
 	 * @var array
 	 */
 	private $engineVarsPrivate = array();
+
 	/**
 	 * The error stack
 	 * @var array
 	 */
 	public $errorStack = array();
+
 	/**
 	 * If set to false, the engine tags will not be processed.
 	 * @var bool
 	 */
 	public $obCallback = TRUE; //
-	/**
-	 * $engineVars['currentTemplate']
-	 * @var string
-	 */
-	// public $template = "";
+
 	/**
 	 * Current working directory
 	 * @var string
 	 */
 	public $cwd = "";
+
 	/**
 	 * Unknown - Remove?
 	 * @todo appears unused - Remove?
 	 * @var array
 	 */
 	private $DEBUG = array();
-
-	# Used for page access/security
-	#############################################################
-
-
-	// /**
-	//  * Access Methods
-	//  * @var string
-	//  */
-	// private $accessMethods = "";
-	// /**
-	//  * Unknown
-	//  * @var bool
-	//  */
-	// private $accessExistsTest = TRUE;
-	// /**
-	//  * ACL items
-	//  * @var array
-	//  */
-	// private $acl = array();
-	// /**
-	//  * ACL groups
-	//  * @var array
-	//  */
-	// private $aclgroups = array();
-	// /**
-	//  * ACL count
-	//  * @var int
-	//  */
-	// private $aclCount = 0;
 
 	# Used for database connections
 	#############################################################
@@ -107,36 +79,43 @@ class EngineAPI{
 	 * @var string
 	 */
 	private $dbUsername = "";
+
 	/**
 	 * Database Password
 	 * @var string
 	 */
 	private $dbPassword = "";
+
 	/**
 	 * Database Name
 	 * @var string
 	 */
 	private $dbDatabase = "";
+
 	/**
 	 * Database Server hostname/ip
 	 * @var string
 	 */
 	private $dbServer = "";
+
 	/**
 	 * Database Port
 	 * @var string
 	 */
 	private $dbPort = "";
+
 	/**
 	 * Database table name mappings
 	 * @var array
 	 */
 	private $dbTables = array();
+
 	/**
 	 * The EngineAPI database object
 	 * @var engineDB
 	 */
 	private $engineDB = NULL;
+
 	/**
 	 * The database object
 	 * @var engineDB
@@ -150,11 +129,13 @@ class EngineAPI{
 	 * @var array
 	 */
 	private $availableModules = array();
+
 	/**
 	 * Array of loaded libraries (for auto-loading)
 	 * @var array
 	 */
 	public $library = array();
+
 	/**
 	 * Function extensions
 	 * @var array
@@ -170,16 +151,19 @@ class EngineAPI{
 	 * @var int
 	 */
 	private $recurseCount = 0;
+
 	/**
 	 * Recursive level for template renderer
 	 * @var int
 	 */
 	private $recurseLevel = 3;
+
 	/**
 	 * Flag to trigger recursion
 	 * @var bool
 	 */
 	private $recurseNeeded = FALSE;
+	
 	/**
 	 * Flag to turn off templates
 	 * @var bool
