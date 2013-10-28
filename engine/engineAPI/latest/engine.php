@@ -512,6 +512,8 @@ class EngineAPI{
 	/**
 	 * [Alias] EngineAPI::setItems()
 	 *
+	 ** Deprecated. Remove in EngineAPI 4.0
+	 * 
 	 * @see self::defTempPatterns()
 	 * @param string $pattern
 	 * @param string $function
