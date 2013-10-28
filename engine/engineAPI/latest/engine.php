@@ -163,7 +163,7 @@ class EngineAPI{
 	 * @var bool
 	 */
 	private $recurseNeeded = FALSE;
-	
+
 	/**
 	 * Flag to turn off templates
 	 * @var bool
@@ -343,7 +343,6 @@ class EngineAPI{
 			if($server != $engineVars['server']) {
 				error_log("HTTP Referer check failed. Possible Cross Site Request Forgery Attack!");
 				echo "HTTP Referer check failed. Possible Cross Site Request Forgery Attack!<br />";
-				echo "engineVars['server']: ".$engineVars['server']."<br />";
 				echo "_SERVER: ".$_SERVER['HTTP_REFERER']."<br />";
 				echo "server: ".$server."<br />";
 				exit;
