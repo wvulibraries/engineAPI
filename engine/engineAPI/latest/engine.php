@@ -1119,9 +1119,9 @@ class EngineAPI{
 	}
 
 	/**
-	 * Um... huh?
+	 * determines the server from $referer
 	 * @param $referer
-	 * @return null
+	 * @return string the server passed in via referer 
 	 */
 	private function getHTTP_REFERERServer($referer) {
 
@@ -1322,7 +1322,12 @@ class EngineAPI{
 	}
 
 	/**
-	 * Not a clue
+	 * If $engineVars['replaceDoubleQuotes'] = TRUE, this method will replace double 
+	 * quote strings (two quotes, without any characters in between, example: "" ) with : 
+	 * "$engineVars['replaceDQCharacter']"
+	 *
+	 * This prevents a bug in some browsers with "" in the header causes issues. 
+	 * 
 	 * @param $matches
 	 * @return string
 	 */
@@ -1334,7 +1339,8 @@ class EngineAPI{
 	}
 
 	/**
-	 * Something to do with engine matches
+	 * callback to handle {engine .*} matches in templates
+	 * 
 	 * @param $matches
 	 * @return bool|string
 	 */
