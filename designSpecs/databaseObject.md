@@ -187,7 +187,7 @@ Return an array of all rows of only the given field.
 
 Return the error Code/Number for the last error
 
-#### errorInfo()
+#### errorMsg()
 
 Return the error message for the last error
 
