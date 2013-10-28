@@ -221,10 +221,11 @@ class EngineAPI{
 		self::$engineVars = $engineVars;
 
 		// $engineVars - backward compatibility
+		// @TODO deprecated Remove in 4.0
 		global $engineVars;
 		$engineVar =& self::$engineVars;
 
-		//Load Access Control Modules
+		//Load helper function Modules
 		$hfDirHandle = @opendir($engineVars['helperFunctions']) or die("Unable to open ".$engineVars['helperFunctions']);
 		while (false !== ($file = readdir($hfDirHandle))) {
 			// Check to make sure that it isn't a hidden file and that it is a PHP file
