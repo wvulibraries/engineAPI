@@ -57,7 +57,7 @@ class EngineAPI{
 	 * $engineVars['currentTemplate']
 	 * @var string
 	 */
-	public $template = "";
+	// public $template = "";
 	/**
 	 * Current working directory
 	 * @var string
@@ -163,11 +163,7 @@ class EngineAPI{
 
 	# Module Template Mathes and function calls for displayTemplate()
 	###################################################################
-	/**
-	 * Unknown
-	 * @var array
-	 */
-	private static $moduleTemplateEngine = array();
+	
 	/**
 	 * Recursive counter for template renderer
 	 * In module template matches, prevent infinite recursion
@@ -214,6 +210,10 @@ class EngineAPI{
 
 		require_once self::$engineDir."/helperFunctions/http.php";
 
+		// Need to load this so that onLoads and template definitions can be set
+		// curing the construct() of engine
+		require_once self::$engineDir."/modules/templates/templates.php";
+
 		// make sure the session cookie is only accessible via HTTP
 		ini_set("session.cookie_httponly", 1);
 
@@ -258,10 +258,6 @@ class EngineAPI{
 		// Setup Current Working Directory
 		$this->cwd = getcwd();
 
-		// Setup initial Template
-		$this->template = $engineVars['tempDir']."/".$engineVars['templateDefault'];
-		$engineVars['currentTemplate'] = $this->template;
-
 		// Setup default database connections
 		$this->dbUsername = ($this->engineVarsPrivate['mysql']['username'])?$this->engineVarsPrivate['mysql']['username']:NULL;
 		$this->dbPassword = ($this->engineVarsPrivate['mysql']['password'])?$this->engineVarsPrivate['mysql']['password']:NULL;
@@ -297,11 +293,12 @@ class EngineAPI{
 
 		// Get modules ready for Autoloader (previously loaded modules). Load the "onLoad.php" files
 		// for each module
-		$modules_dirHandle = @opendir($engineVars['modules']) or die("Unable to open ".$engineVars['modules']);
+		$modules_dirHandle = @opendir($engineVars['modules']) or die("Unable to open (Modules)".$engineVars['modules']);
 		while (false !== ($dir = readdir($modules_dirHandle))) {
 			// Check to make sure that it isn't a hidden file and that the file is a directory
 			if ($dir != "." && $dir != ".." && is_dir($engineVars['modules']."/".$dir) === TRUE) {
-				$singleMod_dirHandle = @opendir($engineVars['modules']."/".$dir) or die("Unable to open ".$engineVars['modules']);
+				if ($dir == "templates") continue;
+				$singleMod_dirHandle = @opendir($engineVars['modules']."/".$dir) or die("Unable to open (Single Module)".$engineVars['modules']);
 				while (false !== ($file = readdir($singleMod_dirHandle))) {
 					if ($file != "." && $file != ".." && $file) {
 
@@ -320,10 +317,6 @@ class EngineAPI{
 				}
 			}
 		}
-
-		// $testP = "/\{engine name=\"function\"\s+(.+?)\}/";
-		// $testF = "eapi_function::templateMatches";
-		// $this->defTempPattern($testP,$testF,$this);
 
 		//Load Login Functions
 		$login_dirHandle = @opendir($engineVars['loginModules']) or die("Unable to open ".$engineVars['loginModules']);
@@ -532,23 +525,21 @@ class EngineAPI{
 	/**
 	 * Define Template Object Pattern
 	 *
+	 * Deprecated. Remove in EngineAPI 4.0
+	 * 
 	 * @param string $pattern
 	 * @param string $function
 	 * @param string $object
 	 * @return bool Always TRUE
 	 */
 	public static function defTempPatterns($pattern,$function,$object) {
-		$class            = get_class($object);
-		$temp             = array();
-		$temp['pattern']  = $pattern;
-		$temp['function'] = $function;
-		$temp['object']   = $object;
-		self::$moduleTemplateEngine[$class][] = $temp;
-		return TRUE;
+		return templates::defTempPatterns($pattern,$function,$object);
 	}
 
 	/**
 	 * Redefine Template Object Pattern
+	 *
+	 * * Deprecated. Remove in EngineAPI 4.0
 	 *
 	 * @see self::defTempPatterns()
 	 * @param string $oldPattern
@@ -558,16 +549,7 @@ class EngineAPI{
 	 * @return bool Always TRUE
 	 */
 	public function reDefTempPattern($oldPattern,$newPattern,$function,$object) {
-		foreach (self::$moduleTemplateEngine as $class=>$V) {
-			foreach (self::$moduleTemplateEngine[$class] as $I => $plugin) {
-				if ($plugin['pattern'] == $oldPattern) {
-					unset(self::$moduleTemplateEngine[$class][$I]);
-					break;
-				}
-			}
-		}
-		$this->defTempPattern($newPattern,$function,$object);
-		return TRUE;
+		return templates::reDefTempPattern($oldPattern,$newPattern,$function,$object);
 	}
 
 	/**
@@ -575,29 +557,27 @@ class EngineAPI{
 	 * This function should be combined with defTempPatterns
 	 * if $pattern, $function, $class already exist the object should be updated
 	 *
+	 ** Deprecated. Remove in EngineAPI 4.0
+	 * 
 	 * @param string $pattern
 	 * @param string $function
 	 * @param string $object
 	 * @return bool Always TRUE
 	 */
 	public function reDefTempPatternObject($pattern,$function,$object) {
-		$class = get_class($object);
-		foreach (self::$moduleTemplateEngine[$class] as $I => $plugin) {
-			if ($plugin['pattern'] == $pattern) {
-				self::$moduleTemplateEngine[$class][$I]['object'] = $object;
-			}
-		}
-		return TRUE;
+		return templates::reDefTempPatternObject($pattern,$function,$object);
 	}
 
 	/**
 	 * Retrieve Template Object
 	 *
+	 ** Deprecated. Remove in EngineAPI 4.0
+	 * 
 	 * @param string $className
 	 * @return mixed
 	 */
 	public function retTempObj($className) {
-		return self::$moduleTemplateEngine[$className][0]['object'];
+		return templates::retTempObj($className);
 	}
 
 	/**
@@ -712,62 +692,13 @@ class EngineAPI{
 	}
 
 	/**
-	 * eTemplate() - Not sure what this does
-	 *
-	 * @param $func
-	 * 		  load - define which tempalte to use.
-	 * 		  name - UNKNOWN
-	 * 		  include - fire off the 'header' or the 'footer'
-	 * @param null $value
-	 * @return bool|string
-	 */
-	public function eTemplate($func,$value=NULL) {
-
-		global $engineVars;
-
-		if ($func == "load") {
-
-			if(isnull($value)) {
-				return FALSE;
-			}
-
-			if (file_exists($engineVars['tempDir']."/".$value)) {
-				$this->template = $engineVars['tempDir']."/".$value;
-				$engineVars['currentTemplate'] = $this->template;
-			}
-			else {
-				return FALSE;
-			}
-		}
-		if ($func == "name") {
-			return basename($this->template);
-		}
-		if ($func == "include") {
-			switch($value) {
-				case "header":
-					include($this->template."/templateHeader.php");
-					break;
-
-				case "footer":
-				    include($this->template."/templateFooter.php");
-					break;
-
-				default:
-				    return FALSE;
-				    break;
-			}
-		}
-		return TRUE;
-	}
-
-	/**
 	 * Returns the current template directory
 	 *
 	 * @return string
 	 */
-	public function currentTemplate() {
-		return $this->template;
-	}
+	// public function currentTemplate() {
+	// 	return $this->template;
+	// }
 
 	/**
 	 * Register ACL rules
@@ -1274,7 +1205,8 @@ class EngineAPI{
 
 				//module Replacements
 				// foreach ($engine->moduleTemplateEngine as $class) {
-				foreach (self::$moduleTemplateEngine as $class) {
+				// self::$moduleTemplateEngine
+				foreach (templates::getTemplatePatterns() as $class) {
 					foreach ($class as $plugin) {
 						if(isset($plugin['pattern']) && isset($plugin['function'])) {
 							// testing
