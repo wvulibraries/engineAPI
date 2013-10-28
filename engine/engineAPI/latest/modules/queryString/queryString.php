@@ -3,7 +3,7 @@
 class queryString {
 
 	function __construct() {
-		EngineAPI::defTempPatterns("/\{queryString\s+(.+?)\}/","queryString::templateMatches",$this);
+		templates::defTempPatterns("/\{queryString\s+(.+?)\}/","queryString::templateMatches",$this);
 	}
 
 	/**

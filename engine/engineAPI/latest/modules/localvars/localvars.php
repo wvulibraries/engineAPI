@@ -14,7 +14,7 @@ class localvars {
 	 * Class constructor
 	 */
 	function __construct() {		
-		EngineAPI::defTempPatterns("/\{local\s+(.+?)\}/","localvars::templateMatches",$this);
+		templates::defTempPatterns("/\{local\s+(.+?)\}/","localvars::templateMatches",$this);
 	}
 
 	/**
@@ -24,8 +24,7 @@ class localvars {
 	 * @return string
 	 */
 	public static function templateMatches($matches) {
-//		$engine        = EngineAPI::singleton();
-//		$eapi_function = $engine->retTempObj("eapi_function");
+
 		$attPairs      = attPairs($matches[1]);
 		
 		if (isset(self::$localvars[$attPairs['var']]) && !is_empty(self::$localvars[$attPairs['var']])) {
