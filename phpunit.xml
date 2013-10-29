@@ -1,0 +1,5 @@
+<phpunit>
+  <whitelist>
+    <directory suffix=".php">Tests</directory>
+  </whitelist>
+</phpunit>
