@@ -26,7 +26,7 @@ function accessControl_ad_user($value,$state=FALSE) {
 		return(FALSE);
 	}
 	
-	$username = sessionGet("username");
+	$username = session::get("username");
 	
 	if ($value == $username && $state === TRUE) {
 		return(TRUE);
@@ -52,7 +52,7 @@ function accessControl_ad_auth($value,$state=FALSE) {
 		return(FALSE);
 	}
 
-	$username = sessionGet("username");
+	$username = session::get("username");
 	
 	if ($username === FALSE && $state === TRUE) {
 		return(FALSE);
@@ -82,7 +82,7 @@ function accessControl_ad_group($value,$state=FALSE) {
 		return(FALSE);
 	}
 	
-	$usergroups = sessionGet("groups");
+	$usergroups = session::get("groups");
 	
 	foreach ($usergroups as $key=>$usergroup) {
 		
@@ -111,7 +111,7 @@ function accessControl_ad_ou($value,$state=FALSE) {
 		return(FALSE);
 	}
 
-	$userou   = sessionGet("ou");
+	$userou   = session::get("ou");
 	
 	if ($value == $userou && $state === TRUE) {
 		return(TRUE);
@@ -129,12 +129,12 @@ function accessControl_ad_ou($value,$state=FALSE) {
  */
 function ADcheckLoginStatus() {
 	
-	$authType   = sessionGet("authType");
+	$authType   = session::get("authType");
 	if ($authType != "ldap") {
 		return(FALSE);
 	}
 	
-	if(!sessionGet("username")) {
+	if(!session::get("username")) {
 		return(FALSE);
 	}
 }
@@ -147,7 +147,7 @@ function ADcheckLoginStatus() {
  */
 function checkGroup($group) {
 
-	$usergroups = sessionGet("groups");
+	$usergroups = session::get("groups");
 	
 	if (!$usergroups) {
 		return(NULL);
@@ -167,7 +167,7 @@ function checkGroup($group) {
  */
 function checkOUs($ous) {
 
-	$userou = sessionGet("ou");
+	$userou = session::get("ou");
 	
 	if (!$userou) {
 		return(NULL);
