@@ -68,6 +68,102 @@ class accessControl {
 	}
 
 	/**
+	 * builds the current ACL list, and applies it.
+	 * @return BOOL / Redirect Returns TRUE on successful access, otherwise redirects to login page.
+	 */				
+	public static function build() {
+
+			$auth  = NULL;
+			$count = 0;
+
+			foreach (self::$acl as $key => $value) {
+
+				$action = $value['action'];
+
+				if ($action == "denyAll") {
+					// If this is the first item in the array, access is denied.
+					// if it is NOT the first item, we assume it is the last intended to be
+					// evaluated as a 'catch all'
+					if ($count === 0) {
+						self::accessControlDenied();
+						exit;
+					}
+					else {
+						break;
+					}
+				}
+
+				$count++;
+
+				if ($action == "allowAll") {
+					return TRUE;
+				}
+
+				$foo = self::$accessMethods[$action];
+
+				$returnValue = $foo($value['value'],$value['state']);
+
+				// NULL value is error state. set auth to false to be safe
+				if (isnull($returnValue)) {
+					if ($value['hardBreak'] === TRUE) {
+						self::$aclgroups[$action] = FALSE;
+						self::accessControlDenied();
+						exit;
+					}
+					self::$aclgroups[$action] = FALSE;
+					continue;
+				}
+				else if ($returnValue === FALSE) {
+					if ($value['hardBreak'] === TRUE) {
+						self::$aclgroups[$action] = FALSE;
+						self::accessControlDenied();
+						exit;
+					}
+					if (self::$aclgroups[$action] === TRUE) {
+						continue;
+					}
+					self::$aclgroups[$action] = FALSE;
+				}
+				else if ($returnValue === TRUE) {
+					self::$aclgroups[$action] = TRUE;
+				}
+			}
+
+			// foreach group ("action") check if it is true. If all actions are true, YAY!
+			// Otherwise Ugh!
+			$auth = NULL;
+			foreach (self::$aclgroups as $key => $value) {
+
+				// At this point, the only "FALSE" things should be those that did not have a hard break
+				// so we should NOT exit if we see them, unless ALL things fail.
+
+				if ($value === FALSE) {
+					if (isnull($auth)) {
+						$auth = FALSE;
+					}
+				}
+				else if ($value === TRUE) {
+					$auth = TRUE;
+				}
+				else {
+					// Safety check in case of errors
+					$auth = NULL;
+				}
+			}
+
+			if ($auth === TRUE) {
+				return TRUE;
+			}
+
+
+			self::accessControlDenied();
+			exit;
+
+			return $auth;
+
+	}
+
+	/**
 	 * Register ACL rules
 	 * hardbreak causes the function to exit immediately on a FALSE ACL return if set to TRUE
 	 *
