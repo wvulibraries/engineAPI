@@ -294,6 +294,7 @@ function normalizeArray($input,$delimiter=','){
 /**
  * This function will parse a date time string and convert it into a unix timestamp
  *
+ * @deprecated
  * @param string $str
  * @return string
  **/
