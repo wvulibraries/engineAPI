@@ -1,4 +1,4 @@
-<phpunit>
+<phpunit colors="true">
   <whitelist>
     <directory suffix=".php">Tests</directory>
   </whitelist>
