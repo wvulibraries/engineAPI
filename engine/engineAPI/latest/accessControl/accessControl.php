@@ -60,7 +60,7 @@ class accessControl {
 	 * Lists the ACLs that have been registered, printed to the screen
 	 * @return BOOL TRUE
 	 */
-	public static function list() {
+	public static function listACLs() {
 		print "<pre>";
 		var_dump(self::$acl);
 		print "</pre>";
@@ -176,29 +176,33 @@ class accessControl {
 	}
 
 	/**
+	 * Sets the value of $accessExistsTest
+	 *
+	 * If $accessExistsTest is TRUE and the passed in ACL type is not defined in the system, the program
+	 * will exit out. By default, we don't check that an ACL method exists. We leave it to the developer
+	 * 
+	 * @param  bool   $value 
+	 * @return bool        TRUE
+	 */
+	public static function existsTest(bool $value) {
+		self::$accessExistsTest = $value;
+		return TRUE;
+	}
+
+	/**
 	 * Register ACL rules
 	 * hardbreak causes the function to exit immediately on a FALSE ACL return if set to TRUE
 	 *
-	 * @param $action
-	 *        debugListAll - Prints debug info
-	 *        existsTest - UNKNOWN
-	 *        build - UNKNOWN
-	 *        clear - Clears all acl rules
+	 * @param $action the ACL to be added to the system.
+	 *                    allowAll
+	 *                    denyAll
+	 *                    defined in accessControl Methods
 	 * @param string|null $value
 	 * @param string|bool $state
 	 * @param bool $hardBreak
 	 * @return bool
 	 */
-	// @TODO this function needs to be broken up into additional methods. Handling too many things
 	public static function accessControl($action,$value=NULL,$state=FALSE,$hardBreak=TRUE) {
-
-		if ($action == "existsTest") {
-			if ($value === TRUE || $value === FALSE) {
-				self::$accessExistsTest = $value;
-				return TRUE;
-			}
-			return FALSE;
-		}
 
 
 		if(!isset(self::$accessMethods[$action])) {
