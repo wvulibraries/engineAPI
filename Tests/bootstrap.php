@@ -1,12 +1,28 @@
 <?php
 
 
-$modulesDirectory = "engine/engineAPI/latest/modules";
+$modulesDirectory  = "engine/engineAPI/latest/modules";
+$helperFunctions = "engine/engineAPI/latest/helperFunctions";
 
-$availableModules = array();
+$availableModules  = array();
+
+
+
+
+//Load helper function Modules
+$hfDirHandle = @opendir($helperFunctions) or die("Unable to open: ".$helperFunctions);
+while (false !== ($file = readdir($hfDirHandle))) {
+	// Check to make sure that it isn't a hidden file and that it is a PHP file
+	if ($file != "." && $file != ".." && $file) {
+		$fileChunks = array_reverse(explode(".", $file));
+		$ext= $fileChunks[0];
+		if ($ext == "php") {
+			require_once $helperFunctions."/".$file;
+		}
+	}
+}
 
 $modules_dirHandle = @opendir($modulesDirectory) or die("Unable to open (Modules): ".$modulesDirectory);
-
 while (false !== ($dir = readdir($modules_dirHandle))) {
 
 	$moduleDirectory = $modulesDirectory."/".$dir;
