@@ -57,6 +57,17 @@ class accessControl {
 	}
 
 	/**
+	 * removes all the current ACLs from the list
+	 * @return BOOL TRUE
+	 */
+	public static function clear() {
+		unset(self::$acl);
+		self::$acl = array();
+		$aclCount  = 0;
+		return TRUE;
+	}
+
+	/**
 	 * Register ACL rules
 	 * hardbreak causes the function to exit immediately on a FALSE ACL return if set to TRUE
 	 *
