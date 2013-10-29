@@ -95,6 +95,7 @@ function isnull($var,$strict=TRUE) {
  * @param bool $strict
  *        Pass-through for isnull() [Defaults to TRUE]
  * @return bool
+ * @deprecated
  */
 function is_empty($var,$strict=TRUE) {
 	return isempty($var, $strict);
