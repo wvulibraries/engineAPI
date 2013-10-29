@@ -1,6 +1,6 @@
 <?php
 
-$modulesDirectory = "/Users/mrbond/Documents/Dropbox/GIT/engineAPI/engine/engineAPI/latest/modules";
+
 $modulesDirectory = "engine/engineAPI/latest/modules";
 
 $availableModules = array();
