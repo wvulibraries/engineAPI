@@ -12,7 +12,7 @@
  *        Method name to test
  * @return bool
  */
-function is_function( &$mixed ) {
+function is_function( $mixed ) {
     if ( is_object( $mixed ) ) {
         return ( $mixed instanceof Closure );
     } elseif( is_string( $mixed ) ) {
