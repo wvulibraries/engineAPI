@@ -1,5 +1,9 @@
 <phpunit colors="true">
-  <whitelist>
-    <directory suffix=".php">Tests</directory>
-  </whitelist>
+
+	<testsuites>
+		<testsuite name="engineAPI">
+			<directory>Tests/</directory>
+		</testsuite>
+	</testsuites>
+
 </phpunit>
