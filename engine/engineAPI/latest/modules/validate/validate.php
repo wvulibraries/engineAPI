@@ -223,9 +223,8 @@ class validate {
 	 * @return bool
 	 */
 	public static function internalEmailAddr($email) {
-		global $engineVars;
 
-		foreach ($engineVars['internalEmails'] as $key => $regex) {
+		foreach (EngineAPI::$engineVars['internalEmails'] as $key => $regex) {
 			if(preg_match($regex,$email)) {
 				return(TRUE);
 			}	
