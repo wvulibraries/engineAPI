@@ -135,6 +135,8 @@ class validate {
 	/**
 	 * Validate as an IP Address
 	 *
+	 * @todo  this function is incorrect. 
+	 * 
 	 * @param string $ip
 	 * @return bool|null
 	 */
