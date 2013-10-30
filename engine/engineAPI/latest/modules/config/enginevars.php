@@ -2,32 +2,34 @@
 
 class enginevars extends config {
 
+	const CONFIG_TYPE     = "engine";
+
 	public static function set($name,$value,$null=FALSE) {
-		return parent::set("engine",$name,$value,$null);
+		return parent::set(self::CONFIG_TYPE,$name,$value,$null);
 	}
 
 	public static function isset($name) {
-		return parent::isset("engine",$name);
+		return parent::isset(self::CONFIG_TYPE,$name);
 	}
 
 	public static function get($name,$default="") {
-		return parent::get("engine",$name,$default);
+		return parent::get(self::CONFIG_TYPE,$name,$default);
 	}
 
 	public static function remove($var) {
 		
-		return parent::remove("engine",$var);
+		return parent::remove(self::CONFIG_TYPE,$var);
 		
 	}
 
 	public static function variable($var,$value=NULL,$null=FALSE) {
 		
-		return parent::variable("engine",$var,$value,$null);
+		return parent::variable(self::CONFIG_TYPE,$var,$value,$null);
 		
 	}
 
 	public static function export() {
-		return parent::export("engine");
+		return parent::export(self::CONFIG_TYPE);
 	}
 
 }

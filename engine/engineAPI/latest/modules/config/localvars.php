@@ -5,6 +5,7 @@
  */
 class localvars extends config {
 
+	const CONFIG_TYPE     = "local";
 
 	/**
 	 * Class constructor
@@ -23,7 +24,7 @@ class localvars extends config {
 
 		$attPairs      = attPairs($matches[1]);
 
-		$localvars = parent::export("local");
+		$localvars = parent::export(self::CONFIG_TYPE);
 		
 		$variable = self::get($attPairs['var']);
 
@@ -45,7 +46,7 @@ class localvars extends config {
 	 */
 	public static function add($var,$value,$null=FALSE) {
 		
-		return parent::set("local",$var,$value,$null);
+		return parent::set(self::CONFIG_TYPE,$var,$value,$null);
 		
 	}
 	public static function set($var,$value,$null=FALSE) {
@@ -55,7 +56,7 @@ class localvars extends config {
 	}
 
 	public static function isset($name) {
-		return parent::isset("local",$name);
+		return parent::isset(self::CONFIG_TYPE,$name);
 	}
 
 	/**
@@ -67,7 +68,7 @@ class localvars extends config {
 	 */
 	public static function get($var,$default="") {
 		
-		return parent::get("local",$var,$default);
+		return parent::get(self::CONFIG_TYPE,$var,$default);
 		
 	}
 
@@ -79,12 +80,12 @@ class localvars extends config {
 	 */
 	public static function del($var) {
 		
-		return parent::remove("local",$var);
+		return parent::remove(self::CONFIG_TYPE,$var);
 		
 	}
 	public static function remove($var) {
 		
-		return self::del("local",$var);
+		return self::del(self::CONFIG_TYPE,$var);
 		
 	}
 
@@ -104,7 +105,7 @@ class localvars extends config {
 	 */
 	public static function variable($var,$value=NULL,$null=FALSE) {
 		
-		return parent::variable("local",$var,$value,$null);
+		return parent::variable(self::CONFIG_TYPE,$var,$value,$null);
 		
 	}
 
@@ -115,7 +116,7 @@ class localvars extends config {
 	 * @return array
 	 */
 	public static function export() {
-		return parent::export("local");
+		return parent::export(self::CONFIG_TYPE);
 	}
 
     /**
