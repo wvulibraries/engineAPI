@@ -83,11 +83,11 @@ class isTest extends PHPUnit_Framework_TestCase {
 	}
 
 	public function test_isCLI_RunningFromCommandLine() {
-		$this->markTestIncomplete();
+		$this->markTestIncomplete('Currently untestable: Needs code refactoring.');
 	}
 
 	public function test_isCLI_NotRunningFromCommandLine() {
-		$this->markTestIncomplete();
+		$this->markTestIncomplete('Currently untestable: Needs code refactoring.');
 	}
 
 	public function test_isPHP_VersionGreaterThanOrEqualToSuppliedReturnsTrue() {
