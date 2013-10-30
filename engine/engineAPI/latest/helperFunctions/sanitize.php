@@ -71,7 +71,7 @@ function htmlSanitize($var, $flags=ENT_QUOTES, $charSet="UTF-8", $doubleEncode=T
 	//run each array item through this function (by reference)
     if (is_array($var)) {
         foreach ($var as &$val) {
-            $val = htmlSanitize($val);
+            $val = htmlSanitize($val, $flags, $charSet, $doubleEncode);
         }
     }
 	else {
