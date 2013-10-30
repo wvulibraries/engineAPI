@@ -178,11 +178,11 @@ function array_getLastIndex($array) {
  * @return array|mixed
  */
 function buildECMSArray($array) {
-	global $engineVars;
+	
 	
 	$output = "";
 	if(is_array($array)) {
-		$output = implode($engineVars['delim'],$array);
+		$output = implode(enginevars::get("delim"),$array);
 	}
 	else {
 		$output = $array;

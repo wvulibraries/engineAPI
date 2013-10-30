@@ -71,11 +71,11 @@ class ldapSearch
             $this->ldapServer = sprintf('%s://%s', $urlInfo['scheme'], $urlInfo['host']);
             if(isset($urlInfo['port'])) $this->ldapServerPort = $urlInfo['port'];
         }else{
-            global $engineVars;
+            
             if(isset($configKey)){
                 $configKey = trim($configKey);
-                if(@isset($engineVars['ldapDomain'][ trim($configKey) ])){
-                    foreach($engineVars['ldapDomain'][ trim($configKey) ] as $key => $value){
+                if(@enginevars::is_set(array("ldapDomain",trim($configKey)))){
+                    foreach(enginevars::get("ldapDomain")[ trim($configKey) ] as $key => $value){
                         $this->$key = $value;
                     }
                 }

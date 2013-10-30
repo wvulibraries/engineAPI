@@ -273,7 +273,7 @@ class mailSender {
 	 **/
 	public function sendEmail() {
 
-		$mailClassLocation = engineAPI::$engineVars['rootPHPDir'] ."/phpmailer/class.phpmailer.php";
+		$mailClassLocation = enginevars::get("rootPHPDir") ."/phpmailer/class.phpmailer.php";
 
 		if (!file_exists($mailClassLocation)) {
 			if ($this->debug === TRUE) {
@@ -413,7 +413,7 @@ class mailSender {
 			$dbInfo[$key] = escapeshellarg($value);
 		}
 
-		$exec  = "php ".engineAPI::$engineVars['documentRoot']."/engineIncludes/emailSendBulk.php";
+		$exec  = "php ".enginevars::get("documentRoot")."/engineIncludes/emailSendBulk.php";
 		$exec .= " -id=$sendID";
 		$exec .= " -d=".$dbInfo['database'];
 		$exec .= " -t=".$dbInfo['table'];

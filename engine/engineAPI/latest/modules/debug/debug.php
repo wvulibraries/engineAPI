@@ -61,7 +61,7 @@ class debug {
 	 * @return bool
 	 */
 	public static function printENV() {
-		global $engineVars;
+		
 
 		print "<p><strong>Engine Variables:</strong>:<br />";
 		foreach ($engineVars as $key => $value) {

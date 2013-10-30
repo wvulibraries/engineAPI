@@ -11,8 +11,8 @@ class templates {
 	private static $moduleTemplateEngine = array();
 
 	function __construct() {
-		if (!is_empty(EngineAPI::$engineVars['templateDefault'])) {
-			self::load(EngineAPI::$engineVars['templateDefault']);
+		if (!is_empty(enginevars::get("templateDefault"))) {
+			self::load(enginevars::get("templateDefault"));
 		}
 	}
 
@@ -24,10 +24,10 @@ class templates {
 	 */
 	public static function load($template) {
 
-		if (file_exists(EngineAPI::$engineVars['tempDir'].DIRECTORY_SEPARATOR.$template)) {
+		if (file_exists(enginevars::get("tempDir").DIRECTORY_SEPARATOR.$template)) {
 
-			self::$template                           = EngineAPI::$engineVars['tempDir'].DIRECTORY_SEPARATOR.$template;
-			EngineAPI::$engineVars['currentTemplate'] = self::$template;
+			self::$template = enginevars::get("tempDir").DIRECTORY_SEPARATOR.$template;
+			enginevars::get("currentTemplate", self::$template);
 			return TRUE;
 
 		}

@@ -20,17 +20,15 @@
  */
 function naturalSort($array,$col=NULL,$ignoreSymbols=TRUE,$ignoreCase=TRUE) {
 
-	global $engineVars;
-
-	$engineVars['sortCol']           = $col;
-	$engineVars['sortIgnoreSymbols'] = $ignoreSymbols;
-	$engineVars['sortIgnoreCase']    = $ignoreCase;
+	enginevars::set("sortCol", $col);
+	enginevars::set("sortIgnoreSymbols", $ignoreSymbols);
+	enginevars::set("sortIgnoreCase", $ignoreCase);
 	
 	usort($array,"naturalSortCmp");
 
-	$engineVars['sortCol']           = NULL;
-	$engineVars['sortIgnoreSymbols'] = NULL;
-	$engineVars['sortIgnoreCase']    = NULL;
+	enginevars::set("sortCol", NULL);
+	enginevars::set("sortIgnoreSymbols", NULL);
+	enginevars::set("sortIgnoreCase", NULL);
 	
 	return($array);
 }
@@ -48,23 +46,23 @@ function naturalSort($array,$col=NULL,$ignoreSymbols=TRUE,$ignoreCase=TRUE) {
  */
 function naturalSortCmp($a, $b) {
 	
-	global $engineVars;
 	
-	if (!isnull($engineVars['sortCol'])) {
-		$aString = $a[$engineVars['sortCol']];
-		$bString = $b[$engineVars['sortCol']];
+	
+	if (!isnull(enginevars::get("sortCol"))) {
+		$aString = $a[enginevars::get("sortCol")];
+		$bString = $b[enginevars::get("sortCol")];
 	}
 	else {
 		$aString = $a;
 		$bString = $b;
 	}
 	
-	if($engineVars['sortIgnoreSymbols'] === TRUE) {
+	if(enginevars::get("sortIgnoreSymbols") === TRUE) {
 		$aString = ereg_replace("[^A-Za-z0-9]", "", $aString);
 		$bString = ereg_replace("[^A-Za-z0-9]", "", $bString);
 	}
 	
-	if($engineVars['sortIgnoreCase'] === TRUE) {
+	if(enginevars::get("sortIgnoreCase") === TRUE) {
 		return strnatcasecmp($aString,$bString);
 	}
 	
