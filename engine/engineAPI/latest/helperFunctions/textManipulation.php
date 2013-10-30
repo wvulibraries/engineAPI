@@ -215,10 +215,10 @@ function formatPhone($phoneIn,$format=1,$extFormat=1){
                 // Ignore extension
                 break;
             case 1:
-                $phoneOut = ' x'.substr($phoneIn,10);
+                $phoneOut .= ' x'.substr($phoneIn,10);
                 break;
             case 2:
-                $phoneOut = ' ext'.substr($phoneIn,10);
+                $phoneOut .= ' ext'.substr($phoneIn,10);
                 break;
             default:
                 return formatPhone($phoneIn, $format);
