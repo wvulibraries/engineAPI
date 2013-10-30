@@ -55,8 +55,8 @@ class localvars extends config {
 
 	}
 
-	public static function isset($name) {
-		return parent::isset(self::CONFIG_TYPE,$name);
+	public static function is_set($name) {
+		return parent::is_set(self::CONFIG_TYPE,$name);
 	}
 
 	/**

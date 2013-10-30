@@ -30,7 +30,7 @@ class config {
 
 	}
 
-	public static function isset($type,$name) {
+	public static function is_set($type,$name) {
 
 		if (isset(self::$variables[$type][$name])) return TRUE;
 
