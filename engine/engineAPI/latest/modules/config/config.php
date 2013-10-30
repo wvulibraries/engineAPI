@@ -75,19 +75,9 @@ class config {
 
 	public static function get($type,$name,$default="") {
 
-		// @TODO the private ACLs need to be fixed. 
-		if ($type == "private") {
-			$file     = callingFile();
-			$function = callingFunction();
-
-			$engineDir = FALSE;
-			if (strpos($file,self::get("engine","engineDir")) === 0) {
-				$engineDir = TRUE;
-			}
-			else {
-				$engineDir = FALSE;
-			}
-		}
+		// @TODO private ACLs need to be put into place
+		// @TODO should only return a type if it is called from self:: or from the correct 
+		// 		 class
 
 		if (is_array($name)) {
 			$arrayLen = count($name);
