@@ -17,7 +17,7 @@ if(isset($_SESSION)) {
 <?php
 if ($termed) {
 
-	$logoutRedirect = $engineVars['WEBROOT'];
+	$logoutRedirect = enginevars::get("WEBROOT");
 	if (isset($engine->cleanGet['HTML']['redirect'])) {
 		$logoutRedirect = $engine->cleanGet['HTML']['redirect'];
 	}

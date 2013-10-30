@@ -77,7 +77,7 @@ class session{
 	 */
 	private function __construct($options,$engineAPI=NULL){
 		self::$engine         = isset($engineAPI) ? $engineAPI : EngineAPI::singleton();
-		self::$optionsDefault = isset(EngineAPI::$engineVars['session']) ? EngineAPI::$engineVars['session'] : array();
+		self::$optionsDefault = enginevars::is_set("session") ? enginevars::get("session") : array();
 
 		// Define template tags
 		templates::defTempPatterns('/\{session\s+(.+?)\}/', 'session::templateHandler', $this);

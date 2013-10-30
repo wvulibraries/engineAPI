@@ -12,7 +12,7 @@
  *        Method name to test
  * @return bool
  */
-function is_function( &$mixed ) {
+function is_function( $mixed ) {
     if ( is_object( $mixed ) ) {
         return ( $mixed instanceof Closure );
     } elseif( is_string( $mixed ) ) {
@@ -87,17 +87,18 @@ function isnull($var,$strict=TRUE) {
 
 
 /**
- * Alias for is_empty()
+ * Alias for isempty()
  *
- * @see is_empty()
+ * @see isempty()
  * @param mixed $var
  *        The input to test
  * @param bool $strict
  *        Pass-through for isnull() [Defaults to TRUE]
  * @return bool
+ * @deprecated
  */
-function isempty($var,$strict=TRUE) {
-	return is_empty($var, $strict);
+function is_empty($var,$strict=TRUE) {
+	return isempty($var, $strict);
 }
 
 /**
@@ -110,7 +111,7 @@ function isempty($var,$strict=TRUE) {
  *        Pass-through for isnull() [Defaults to TRUE]
  * @return bool
  */
-function is_empty($var,$strict=TRUE) {
+function isempty($var,$strict=TRUE) {
 
 	if (!isset($var)) {
 		return(TRUE);

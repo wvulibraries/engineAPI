@@ -6,25 +6,6 @@ $loginType = "ldap";
 require_once("/home/library/public_html/includes/engineHeader.php");
 
 
-					// $fh = fopen('/tmp/foo2.txt', 'w');	
-					// fwrite($fh,sessionGet("qs"));
-					// fclose($fh);
-
-// print "<pre>";
-// var_dump($engine->cleanGet);
-// print "</pre>";
-
-//$engineDir = "/home/library/phpincludes/engine/engineAPI";
-//include($engineDir ."/engine.php"); 
-//$engine = EngineAPI::singleton();
-
-// if($engineVars['forceSSLLogin'] === TRUE && (!isset($_SERVER['HTTPS']) or is_empty($_SERVER['HTTPS']))){
-//         $engineVars['loginPage'] = str_replace("http://","https://",$engineVars['loginPage']);
-//         header("Location: ".$engineVars['loginPage']."?".$_SERVER['QUERY_STRING']);
-//         exit;
-// }
-
-
 localvars::add('pageTitle',"Login Page");
 // localvars::add("excludeToolbar","TRUE");
 
@@ -59,7 +40,7 @@ if (isset($engine->cleanPost['HTML']['loginSubmit'])) {
 		$loginFail = TRUE;
 	}
 	else {
-		global $engineVars;
+		
 		if ($engine->login($loginType)) {
 //            die(__LINE__.' - '.__FILE__);
             if(isset($engine->cleanGet['HTML']['url'])) {
@@ -81,7 +62,7 @@ if (isset($engine->cleanPost['HTML']['loginSubmit'])) {
 					exit;
 				}
 				else {
-					header("Location: ".$engineVars['WEBROOT'] );
+					header("Location: ".enginevars::get("WEBROOT") );
 				}
 
 			}

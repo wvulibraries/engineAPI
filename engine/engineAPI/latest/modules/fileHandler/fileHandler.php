@@ -576,7 +576,7 @@ class fileHandler {
 			case "download":
 			case "window":
 			default:
-				header("Location: " . EngineAPI::$engineVars['downloadPage'].'?id='.$id);
+				header("Location: " . enginevars::get("downloadPage").'?id='.$id);
 		}
 
 		return FALSE;
@@ -592,7 +592,7 @@ class fileHandler {
 	 */
 	private function displayFileInline($file,$id) {
 		if(strpos($file['type'],'image') !== FALSE){
-			$output = '<img src="'.EngineAPI::$engineVars['downloadPage'].'?id='.$id.'" />';
+			$output = '<img src="'.enginevars::get("downloadPage").'?id='.$id.'" />';
 		}else{
 			$output = $file['data'];
 		}
@@ -856,7 +856,7 @@ class fileHandler {
             if(isPHP('5.3')){
                 // $fInfo = new finfo(FILEINFO_MIME_TYPE);
 
-                @$fInfo = new finfo(FILEINFO_MIME_TYPE, EngineAPI::$engineVars['mimeFilename']);
+                @$fInfo = new finfo(FILEINFO_MIME_TYPE, enginevars::get("mimeFilename"));
                 @$mimeType = $fInfo->file($file_path);
                 print "<pre>";
                 var_dump($mimeType);
@@ -866,7 +866,7 @@ class fileHandler {
 	                $mimeType = $fInfo->file($file_path);
                 }
             }else{
-                @$fInfo = new finfo(FILEINFO_MIME, EngineAPI::$engineVars['mimeFilename']);
+                @$fInfo = new finfo(FILEINFO_MIME, enginevars::get("mimeFilename"));
                 @$mimeData = $fInfo->file($file_path);
                 if($mimeData === FALSE){
 	                $fInfo = new finfo(FILEINFO_MIME);

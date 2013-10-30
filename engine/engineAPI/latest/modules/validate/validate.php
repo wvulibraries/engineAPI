@@ -135,6 +135,8 @@ class validate {
 	/**
 	 * Validate as an IP Address
 	 *
+	 * @todo  this function is incorrect. 
+	 * 
 	 * @param string $ip
 	 * @return bool|null
 	 */
@@ -215,15 +217,14 @@ class validate {
 
 	/**
 	 * Validate as an 'internal' email address
-	 * Runs the email through regex's in $engineVars['internalEmails'] for a match
+	 * Runs the email through regex's in enginevars::get("internalEmails") for a match
 	 *
 	 * @param string $email
 	 * @return bool
 	 */
 	public static function internalEmailAddr($email) {
-		global $engineVars;
 
-		foreach ($engineVars['internalEmails'] as $key => $regex) {
+		foreach (enginevars::get('internalEmails') as $key => $regex) {
 			if(preg_match($regex,$email)) {
 				return(TRUE);
 			}	

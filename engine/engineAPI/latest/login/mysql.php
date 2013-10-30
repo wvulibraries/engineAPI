@@ -19,18 +19,18 @@ $loginFunctions['mysql'] = "mysqlLogin";
 function mysqlLogin($username,$password) {
 	
 	global $engineDB;
-	global $engineVars;
+	
 
 	$engine = EngineAPI::singleton();
 
-	if (!isset($engineVars['mysqlAuthTable'])) {
-		$engineVars['mysqlAuthTable'] = "users";
+	if (!enginevars::is_set("mysqlAuthTable")) {
+		enginevars::get("mysqlAuthTable","users");
 	}
 	
 	$engineDB = $engine->getPrivateVar("engineDB");
 	
 	$sql = sprintf("SELECT * FROM %s WHERE username='%s' AND password='%s'",
-		$engineDB->escape($engineVars['mysqlAuthTable']),
+		$engineDB->escape(enginevars::get("mysqlAuthTable")),
 		$engineDB->escape($username),
 		$engineDB->escape(md5($password))
 		);

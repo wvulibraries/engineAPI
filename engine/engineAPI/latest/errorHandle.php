@@ -554,8 +554,8 @@ class errorHandle
         if($logLocation == 'nativePHP'){
             error_log(self::$errMsg." at ".self::$errLine.":".self::$errFile);
         }elseif($logLocation == 'engineDB'){
-            $dbName = EngineAPI::$engineVars['logDB'];
-            global $engineVars;
+            $dbName = enginevars::get("logDB");
+            
 
             if(!(self::$db instanceof engineDB)){
                 $e = EngineAPI::singleton();

@@ -3,12 +3,9 @@
  * EngineAPI localvars module
  * @package EngineAPI\modules\localvars
  */
-class localvars {
-	/**
-	 * Array of localVars
-	 * @var array
-	 */
-	private static $localvars = array();
+class localvars extends config {
+
+	const CONFIG_TYPE     = "local";
 
 	/**
 	 * Class constructor
@@ -26,9 +23,13 @@ class localvars {
 	public static function templateMatches($matches) {
 
 		$attPairs      = attPairs($matches[1]);
+
+		$localvars = parent::export(self::CONFIG_TYPE);
 		
-		if (isset(self::$localvars[$attPairs['var']]) && !is_empty(self::$localvars[$attPairs['var']])) {
-			return(self::$localvars[$attPairs['var']]);
+		$variable = self::get($attPairs['var']);
+
+		if (!is_empty($variable)) {
+			return($variable);
 		}
 
 		return("");
@@ -38,7 +39,6 @@ class localvars {
 	/**
 	 * Add a localvar
 	 *
-	 * @deprecated
 	 * @param string $var
 	 * @param mixed $value
 	 * @param bool $null
@@ -46,56 +46,46 @@ class localvars {
 	 */
 	public static function add($var,$value,$null=FALSE) {
 		
-		if (isnull($value) && $null === TRUE) {
-			self::$localvars[$var] = "%eapi%1ee6ba19c95e25f677e7963c6ce293b4%api%";
-			return(TRUE);
-		}
+		return parent::set(self::CONFIG_TYPE,$var,$value,$null);
 		
-		if(isset($value)) {
-			self::$localvars[$var] = $value;
-			return(TRUE);
-		}
+	}
+	public static function set($var,$value,$null=FALSE) {
 		
-		return(FALSE);
-		
+		return self::add($var,$value,$null);
+
+	}
+
+	public static function is_set($name) {
+		return parent::is_set(self::CONFIG_TYPE,$name);
 	}
 
 	/**
 	 * Let a local var
 	 *
- 	 * @deprecated
 	 * @param string $var
 	 * @param string $default
 	 * @return mixed
 	 */
 	public static function get($var,$default="") {
 		
-		if (array_key_exists($var,self::$localvars)) {
-			if (self::$localvars[$var] == "%eapi%1ee6ba19c95e25f677e7963c6ce293b4%api%") {
-				return(NULL);
-			}
-			return(self::$localvars[$var]);
-		}
-		
-		return($default);
+		return parent::get(self::CONFIG_TYPE,$var,$default);
 		
 	}
 
 	/**
 	 * Delete a localvar
 	 *
-	 * @deprecated
 	 * @param string $var
 	 * @return bool
 	 */
 	public static function del($var) {
 		
-		if (array_key_exists($var,self::$localvars)) {
-			unset(self::$localvars[$var]);
-			return(TRUE);
-		}
+		return parent::remove(self::CONFIG_TYPE,$var);
 		
-		return(FALSE);
+	}
+	public static function remove($var) {
+		
+		return self::del(self::CONFIG_TYPE,$var);
 		
 	}
 
@@ -115,11 +105,7 @@ class localvars {
 	 */
 	public static function variable($var,$value=NULL,$null=FALSE) {
 		
-		if (isnull($value) && $null === FALSE) {
-			return self::get($var);
-		}
-		
-		return self::add($var,$value,$null);
+		return parent::variable(self::CONFIG_TYPE,$var,$value,$null);
 		
 	}
 
@@ -130,7 +116,7 @@ class localvars {
 	 * @return array
 	 */
 	public static function export() {
-		return self::$localvars;
+		return parent::export(self::CONFIG_TYPE);
 	}
 
     /**
