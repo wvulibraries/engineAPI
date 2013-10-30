@@ -6,6 +6,10 @@ class enginevars extends config {
 		return parent::set("engine",$name,$value,$null);
 	}
 
+	public static function isset($name) {
+		return parent::isset("engine",$name);
+	}
+
 	public static function get($name,$default="") {
 		return parent::get("engine",$name,$default);
 	}

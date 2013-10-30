@@ -54,6 +54,10 @@ class localvars extends config {
 
 	}
 
+	public static function isset($name) {
+		return parent::isset("local",$name);
+	}
+
 	/**
 	 * Let a local var
 	 *

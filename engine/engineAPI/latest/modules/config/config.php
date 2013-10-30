@@ -30,6 +30,14 @@ class config {
 
 	}
 
+	public static function isset($type,$name) {
+
+		if (isset(self::$variables[$type][$name])) return TRUE;
+
+		return FALSE;
+
+	}
+
 	public static function set($type,$name,$value,$null=FALSE) {
 
 		if (is_array($name) === TRUE && count($variable) > 1) {
