@@ -249,6 +249,18 @@ class validate {
 		return(FALSE);
 	}
 
+	private function integerPreChecks($test) {
+
+		if (is_numeric($test) === FALSE) return FALSE;
+		
+		if ((int)$test != $test) return FALSE;
+
+		if (is_float($test)) return FALSE;
+
+		return TRUE;
+
+	}
+
 	/**
 	 * Validate as an integer
 	 * (ex: '1234')
@@ -260,15 +272,7 @@ class validate {
 	 */
 	public function integer($test) {
 
-		if (is_numeric($test) === FALSE) {
-			return(FALSE);
-		}
-
-		if ((int)$test != $test) {
-			return(FALSE);
-		}
-
-		if (is_float($test)) return FALSE;
+		if ($this->integerPreChecks($test) === FALSE) return FALSE;
 
 		$regexp = "/^-?\d+$/";
 		return($this->regexp($regexp,$test));
@@ -282,7 +286,9 @@ class validate {
 	 * @return bool|null
 	 */
 	public function integerSpaces($test) {
-		$regexp = "/^-?[0-9\ ]+$/";
+		// if ($this->integerPreChecks($test) === FALSE) return FALSE;
+		// 
+		$regexp = "/^-?\s*[0-9\ ]+\s*$/";
 		return($this->regexp($regexp,$test));
 	}
 
