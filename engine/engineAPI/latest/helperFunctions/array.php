@@ -259,7 +259,12 @@ function simpleXMLToArray(SimpleXMLElement $xml,$attributesKey=null,$childrenKey
     if($children) { 
 
         if ($childrenKey) {
-            $return[$childrenKey] = $children;
+            if (is_array($return)) {
+                $return = array($return, $childrenKey=>$children);
+            }
+            else {
+                $return[$childrenKey] = $children;
+            }
         }
         else {
             $return = array_merge((array)$return,$children);
@@ -275,7 +280,12 @@ function simpleXMLToArray(SimpleXMLElement $xml,$attributesKey=null,$childrenKey
 
     if($attributes) { 
         if ($attributesKey) {
-            $return[$attributesKey] = $attributes;
+            if (!is_array($return)) {
+                $return = array($return, $attributesKey=>$attributes);
+            }
+            else {
+                $return[$attributesKey] = $attributes;
+            }
         } 
         else {
             $return = array_merge((array)$return, $attributes);
