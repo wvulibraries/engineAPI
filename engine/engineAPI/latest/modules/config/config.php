@@ -63,7 +63,7 @@ class config {
 
 	public function set($name,$value,$null=FALSE) {
 
-		if (is_array($name) === TRUE && count($variable) > 1) {
+		if (is_array($name) === TRUE && count($name) > 1) {
 			$arrayLen = count($name);
 			$count    = 0;
 
@@ -71,7 +71,7 @@ class config {
 				$count++;
 				if ($count == 1) { 
 					$this->variables[$V] = array(); 
-					$prevTemp = &$this->variables[$type][$V]; 
+					$prevTemp = &$this->variables[$V]; 
 				} 
 				else { 
 					if ($count == $arrayLen) {
