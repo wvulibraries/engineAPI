@@ -144,13 +144,12 @@ function array_prevIndex($array,$index,$loop=FALSE) {
  *         Returns the index if found, otherwise FALSE
  */
 function array_getFirstIndex($array) {
-	if (is_array($array) && count($array) > 0) {
-		reset($array);
-		foreach ($array as $I=>$V) {
-			return($I);
-		}
-	}
-	return(FALSE);
+
+    if (is_array($array) && count($array) > 0) {
+        return(array_shift(array_keys($array)));
+    }
+    
+    return(FALSE); 
 }
 
 /**
@@ -174,6 +173,7 @@ function array_getLastIndex($array) {
  * Turns an array into a string, using a definable delimiter. 
  * if parameter is not an array, returns that parameter unmodified. 
  *
+ * @deprecated This can be replaced with just using serialize_array() i think
  * @param array $array
  * @return array|mixed
  */
