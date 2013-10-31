@@ -46,7 +46,7 @@ function is_odd($number) {
  * @return bool
  */
 function isint($var) {
-	return (bool)validate::integer($var);
+	return (bool)validate::getInstance()->integer($var);
 }
 
 /**
