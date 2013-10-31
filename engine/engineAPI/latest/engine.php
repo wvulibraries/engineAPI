@@ -14,6 +14,11 @@
 $engineVars        = array();
 $engineVarsPrivate = array();
 
+$accessControl   = array();
+$moduleFunctions = array();
+$engineDB        = NULL;
+$DEBUG           = NULL;
+
 /**
  * EngineAPI Class
  *
@@ -40,12 +45,14 @@ class EngineAPI{
 	 * @var array
 	 */
 	public static $engineVars = array();
+	private $enginevars;
 
 	/**
 	 * Private engine config vars
 	 * @var array
 	 */
 	private $engineVarsPrivate = array();
+	private $privatevars;
 
 	/**
 	 * The error stack
@@ -195,7 +202,7 @@ class EngineAPI{
 		// require_once self::$engineDir."/helperFunctions/http.php";
 
 		//Load helper function Modules
-		//enginevars::get('helperFunctions')
+		//$enginevars->get('helperFunctions')
 		$helperFunctionsDir = self::$engineDir."/helperFunctions";
 		$hfDirHandle = @opendir($helperFunctionsDir) or die("Unable to open ".$helperFunctionsDir);
 		while (false !== ($file = readdir($hfDirHandle))) {
@@ -222,12 +229,14 @@ class EngineAPI{
 		require_once self::$engineDir."/modules/config/enginevars.php";
 		require_once self::$engineDir."/modules/config/privatevars.php";
 
-		$configObject = new config(self::$engineDir,$site);
+		// $configObject = config::getInstance(self::$engineDir,$site);
+		$this->privatevars = privatevars::getInstance(self::$engineDir,$site);
+		$this->enginevars  = enginevars::getInstance(self::$engineDir,$site);
 
 		/**
 		 * @deprecated added to ease transition
 		 */
-		self::$engineVars = enginevars::export();
+		 $enginevars = $this->enginevars;
 
 		// make sure the session cookie is only accessible via HTTP
 		ini_set("session.cookie_httponly", 1);
@@ -240,10 +249,10 @@ class EngineAPI{
 		$this->cwd = getcwd();
 
 		// Setup default database connections
-		$this->dbUsername = privatevars::get(array('mysql','username'),"foobar");
-		$this->dbPassword = privatevars::get(array('mysql','password'),NULL);
-		$this->dbPort     = privatevars::get(array('mysql','port'),NULL);
-		$this->dbServer   = privatevars::get(array('mysql','server'),NULL);
+		$this->dbUsername = $this->privatevars->get(array('mysql','username'),NULL);
+		$this->dbPassword = $this->privatevars->get(array('mysql','password'),NULL);
+		$this->dbPort     = $this->privatevars->get(array('mysql','port'),NULL);
+		$this->dbServer   = $this->privatevars->get(array('mysql','server'),NULL);
 
 		//Load Access Control Modules
 		accessControl::init();
@@ -254,23 +263,23 @@ class EngineAPI{
 
 		// Get modules ready for Autoloader (previously loaded modules). Load the "onLoad.php" files
 		// for each module
-		$modules_dirHandle = @opendir(enginevars::get('modules')) or die("Unable to open (Modules)".enginevars::get('modules'));
+		$modules_dirHandle = @opendir($enginevars->get('modules')) or die("Unable to open (Modules)".$enginevars->get('modules'));
 		while (false !== ($dir = readdir($modules_dirHandle))) {
 			// Check to make sure that it isn't a hidden file and that the file is a directory
-			if ($dir != "." && $dir != ".." && is_dir(enginevars::get('modules')."/".$dir) === TRUE) {
+			if ($dir != "." && $dir != ".." && is_dir($enginevars->get('modules')."/".$dir) === TRUE) {
 				if ($dir == "templates") continue;
-				$singleMod_dirHandle = @opendir(enginevars::get('modules')."/".$dir) or die("Unable to open (Single Module)".enginevars::get('modules'));
+				$singleMod_dirHandle = @opendir($enginevars->get('modules')."/".$dir) or die("Unable to open (Single Module)".$enginevars->get('modules'));
 				while (false !== ($file = readdir($singleMod_dirHandle))) {
 					if ($file != "." && $file != ".." && $file) {
 
 						if ($file == "onLoad.php") {
-							include_once(enginevars::get('modules')."/".$dir."/".$file);
+							include_once($enginevars->get('modules')."/".$dir."/".$file);
 						}
 						else {
 							$fileChunks = array_reverse(explode(".", $file));
 							$ext= $fileChunks[0];
 							if ($ext == "php") {
-								$this->availableModules[$fileChunks[1]] = enginevars::get('modules')."/".$dir."/".$file;
+								$this->availableModules[$fileChunks[1]] = $enginevars->get('modules')."/".$dir."/".$file;
 							}
 						}
 
@@ -280,14 +289,14 @@ class EngineAPI{
 		}
 
 		//Load Login Functions
-		$login_dirHandle = @opendir(enginevars::get('loginModules')) or die("Unable to open ".enginevars::get('loginModules'));
+		$login_dirHandle = @opendir($enginevars->get('loginModules')) or die("Unable to open ".$enginevars->get('loginModules'));
 		while (false !== ($file = readdir($login_dirHandle))) {
 			// Check to make sure that it isn't a hidden file and that it is a PHP file
 			if ($file != "." && $file != ".." && $file) {
 				$fileChunks = array_reverse(explode(".", $file));
 				$ext= $fileChunks[0];
 				if ($ext == "php") {
-					include_once(enginevars::get('loginModules')."/".$file);
+					include_once($enginevars->get('loginModules')."/".$file);
 				}
 			}
 		}
@@ -311,10 +320,10 @@ class EngineAPI{
 
 		// Startup engines database connection
 		require_once self::$engineDir."/modules/database/engineDB.php";
-		$this->engineDB = new engineDB(privatevars::get(array('mysql','username')),privatevars::get(array('mysql','password')),privatevars::get(array('mysql','server')),privatevars::get(array('mysql','port')),enginevars::get('logDB'),FALSE);
+		$this->engineDB = new engineDB($this->privatevars->get(array('mysql','username')),$this->privatevars->get(array('mysql','password')),$this->privatevars->get(array('mysql','server')),$this->privatevars->get(array('mysql','port')),$enginevars->get('logDB'),FALSE);
 
 		// Start up the logging
-		if (enginevars::get('log')) {
+		if ($enginevars->get('log')) {
 			$this->engineLog(); // access log
 		}
 
@@ -337,7 +346,7 @@ class EngineAPI{
 			}
 
 			$server = $this->getHTTP_REFERERServer($_SERVER['HTTP_REFERER']);
-			if($server != enginevars::get('server')) {
+			if($server != $enginevars->get('server')) {
 				error_log("HTTP Referer check failed. Possible Cross Site Request Forgery Attack!");
 				echo "HTTP Referer check failed. Possible Cross Site Request Forgery Attack!<br />";
 				echo "_SERVER: ".$_SERVER['HTTP_REFERER']."<br />";
@@ -808,7 +817,7 @@ class EngineAPI{
 	 */
 	private function engineLog($type="access",$function=NULL,$message=NULL) {
 
-		$engineVars = enginevars::export();
+		$engineVars = enginevars::getInstance()->export();
 		$engineDB = $this->engineDB;
 
 		if (!$engineVars['log'] || $engineDB->status === FALSE) {
@@ -853,7 +862,7 @@ class EngineAPI{
 	 */
 	public static function displayTemplate($content) {
 		
-		$engineVars = enginevars::export();
+		$engineVars = enginevars::getInstance()->export();
 
 		$engine     = EngineAPI::singleton();
 
@@ -962,7 +971,7 @@ class EngineAPI{
 	 * @return string
 	 */
 	public static function engineVarMatches($matches) {
-		$engineVars = enginevars::export();
+		$engineVars = enginevars::getInstance()->export();
 		$output = (!empty($engineVars[$matches[1]]))?$engineVars[$matches[1]]:"";
 		return $output;
 	}
@@ -978,7 +987,7 @@ class EngineAPI{
 	 * @return string
 	 */
 	public static function engineDQMatches($matches) {
-		$engineVars = enginevars::export();
+		$engineVars = enginevars::getInstance()->export();
 
 		$output = $matches[1].'"'.$engineVars['replaceDQCharacter'].'"'.$matches[3];
 		return $output;
@@ -1026,7 +1035,7 @@ class EngineAPI{
 	 */
 	private function handleMatch($attPairs) {
 
-		$engineVars = enginevars::export();
+		$engineVars = enginevars::getInstance()->export();
 
 		$output = "Error: handleMatch in template.php";
 		switch($attPairs['name']) {

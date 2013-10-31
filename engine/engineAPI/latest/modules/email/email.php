@@ -14,7 +14,7 @@ class email {
 	 * @return bool
 	 */
 	public static function validate($email,$internal=FALSE) {
-		return(validate::emailAddr($email,$internal));
+		return(validate::getInstance()->emailAddr($email,$internal));
 	}
 
 	/**
@@ -25,7 +25,7 @@ class email {
 	 * @return bool
 	 */
 	public static function internalEmailAddr($email) {
-		return(validate::internalEmailAddr($email));
+		return(validate::getInstance()->internalEmailAddr($email));
 	}
 }
 

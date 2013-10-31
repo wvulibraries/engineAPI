@@ -2,57 +2,80 @@
 
 class config {
 	
-	private static $variables = array();
+	private static $classInstance;
 
-	public function __construct($engineDir,$site="default") {
+	public function __construct() {
+
+		//@TODO this isn't DRY. Needs refactoring
 
 		// setup private config variables 
-		require_once $engineDir."/config/defaultPrivate.php";
-		if($site != "default" && $site != "defaultPrivate"){
-			$siteConfigFile = $engineDir."/config/".$site."Private.php";
-			require_once $siteConfigFile;
-		}
-		self::$variables['private'] = $engineVarsPrivate;
-		unset($engineVarsPrivate);
+		// require $engineDir."/config/defaultPrivate.php";
+		// if($site != "default" && $site != "defaultPrivate"){
+		// 	$siteConfigFile = $engineDir."/config/".$site."Private.php";
+		// 	require_once $siteConfigFile;
+		// }
+		// $this->variables['private'] = $engineVarsPrivate;
+		// unset($engineVarsPrivate);
 
-		// setup $engineVars
-		require_once $engineDir."/config/default.php";
-		if($site != "default" && $site != "defaultPrivate"){
-			$siteConfigFile = $engineDir."/config/".$site.".php";
-			require_once $siteConfigFile;
-		}
-		self::$variables['engine'] = $engineVars;
-		unset($engineVars);
+		// // setup $engineVars
+		// require $engineDir."/config/default.php";
+		// if($site != "default" && $site != "defaultPrivate"){
+		// 	$siteConfigFile = $engineDir."/config/".$site.".php";
+		// 	require_once $siteConfigFile;
+		// }
+		// $this->variables['engine'] = $engineVars;
+		// unset($engineVars);
 
-		self::$variables['local'] = array();
+		// $this->variables['local'] = array();
 
-		self::set("engine","engineDir",$engineDir);
+		// $this->set("engine","engineDir",$engineDir);
 
 	}
 
-	public static function is_set($type,$name) {
+	public function loadConfig($file) {
 
-		if (isset(self::$variables[$type][$name])) return TRUE;
+		$varsBefore = array_keys(get_defined_vars());
+		require $file;
+		$varsAfter  = array_keys(get_defined_vars());
+		return compact(array_diff($varsAfter, $varsBefore));
+
+		// require $file;
+		// if($site != "default" && $site != "defaultPrivate"){
+		// 	$siteConfigFile = $engineDir."/config/".$site."Private.php";
+		// 	require_once $siteConfigFile;
+		// }
+		// $this->variables['private'] = $engineVarsPrivate;
+		// unset($engineVarsPrivate);
+	}
+
+	public static function getInstance($engineDir=NULL,$site="default") {
+
+		return new self();
+	}
+
+	public function is_set($name) {
+
+		if (isset($this->variables[$name])) return TRUE;
 
 		return FALSE;
 
 	}
 
-	public static function set($type,$name,$value,$null=FALSE) {
+	public function set($name,$value,$null=FALSE) {
 
-		if (is_array($name) === TRUE && count($variable) > 1) {
+		if (is_array($name) === TRUE && count($name) > 1) {
 			$arrayLen = count($name);
 			$count    = 0;
 
 			foreach ( $name as $V ) { 
 				$count++;
 				if ($count == 1) { 
-					self::$variables[$type][$V] = array(); 
-					$prevTemp = &self::$variables[$type][$V]; 
+					$this->variables[$V] = array(); 
+					$prevTemp = &$this->variables[$V]; 
 				} 
 				else { 
 					if ($count == $arrayLen) {
-                                        // $prevTemp[$V] = $value;
+                        // $prevTemp[$V] = $value;
 						if ($prevTemp[$V] = $value) {
 							return TRUE;
 						}
@@ -68,12 +91,12 @@ class config {
 		}
 
 		if (isnull($value) && $null === TRUE) {
-			self::$variables[$type][$name] = "%eapi%1ee6ba19c95e25f677e7963c6ce293b4%api%";
+			$this->variables[$name] = "%eapi%1ee6ba19c95e25f677e7963c6ce293b4%api%";
 			return TRUE;
 		}
 		
 		if(isset($value)) {
-			self::$variables[$type][$name] = $value;
+			$this->variables[$name] = $value;
 			return TRUE;
 		}
 		
@@ -81,7 +104,7 @@ class config {
 
 	}
 
-	public static function get($type,$name,$default="") {
+	public function get($name,$default="") {
 
 		// @TODO private ACLs need to be put into place
 		// @TODO should only return a type if it is called from self:: or from the correct 
@@ -94,8 +117,8 @@ class config {
 			foreach ( $name as $V ) { 
 				$count++;
 				if ($count == 1) { 
-					if (isset(self::$variables[$type][$V])) {
-						$prevTemp = &self::$variables[$type][$V];
+					if (isset($this->variables[$V])) {
+						$prevTemp = &$this->variables[$V];
 					} 
 					else {
 						return(NULL);
@@ -117,21 +140,21 @@ class config {
 			return $default;
 		}
 
-		if (array_key_exists($name,self::$variables[$type])) {
-			if (self::$variables[$type][$name] == "%eapi%1ee6ba19c95e25f677e7963c6ce293b4%api%") {
+		if (array_key_exists($name,$this->variables)) {
+			if ($this->variables[$name] == "%eapi%1ee6ba19c95e25f677e7963c6ce293b4%api%") {
 				return NULL;
 			}
-			return self::$variables[$type][$name];
+			return $this->variables[$name];
 		}
 		
 		return $default;
 
 	}
 
-	public static function remove($type,$name) {
+	public function remove($name) {
 		
-		if (array_key_exists($name,self::$variables[$type])) {
-			unset(self::$variables[$type][$name]);
+		if (array_key_exists($name,$this->variables)) {
+			unset($this->variables[$name]);
 			return TRUE;
 		}
 		
@@ -139,19 +162,16 @@ class config {
 		
 	}
 
-	public static function variable($type,$name,$value=NULL,$null=FALSE) {
+	public function variable($name,$value=NULL,$null=FALSE) {
 		if (isnull($value) && $null === FALSE) {
-			return self::get($type,$name);
+			return $this->get($name);
 		}
 		
-		return self::add($type,$name,$value,$null);
+		return $this->set($name,$value,$null);
 	}
 
-	public static function export($type) {
-
-		if ($type == "private") return FALSE;
-
-		return self::$variables[$type];
+	public function export() {
+		return $this->variables;
 	}
 
 }

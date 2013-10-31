@@ -19,7 +19,10 @@ $loginFunctions['ldap'] = "ldapLogin";
  */
 function ldapLogin($username,$password)
 {
-    $ldapSearch = new ldapSearch(localvars::get("domain"));
+
+	$localvars = localvars::getInstance();
+
+    $ldapSearch = new ldapSearch($localvars->get("domain"));
     if($ldapSearch->login($username,$password)){
         $user = $ldapSearch->findUser($username);
         if($user){

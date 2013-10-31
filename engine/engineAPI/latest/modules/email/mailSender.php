@@ -85,6 +85,8 @@ class mailSender {
 	 */
 	public $debug = FALSE; // Must be FALSE in Production
 
+	private $enginevars;
+
 	/**
 	 * Class constructor
 	 * @param engineDB $database
@@ -92,6 +94,11 @@ class mailSender {
 	function __construct($database=NULL) {
 		$this->engine   = EngineAPI::singleton();
 		$this->database = ($database instanceof engineDB) ? $database : $this->engine->openDB;
+		$this->set_enginevars(enginevars::getInstance());
+	}
+
+	public function set_enginevars($enginevars) {
+		$this->enginevars = $enginevars;
 	}
 
 	/**
@@ -273,7 +280,9 @@ class mailSender {
 	 **/
 	public function sendEmail() {
 
-		$mailClassLocation = enginevars::get("rootPHPDir") ."/phpmailer/class.phpmailer.php";
+		$enginevars = enginevars::getInstance();
+
+		$mailClassLocation = $enginevars->get("rootPHPDir") ."/phpmailer/class.phpmailer.php";
 
 		if (!file_exists($mailClassLocation)) {
 			if ($this->debug === TRUE) {
@@ -408,12 +417,14 @@ class mailSender {
 	 */
 	private function performBulkSend($sendID,$dbInfo) {
 
+		$enginevars = enginevars::getInstance();
+
 		$sendID = escapeshellarg($sendID);
 		foreach ($dbInfo as $key => $value) {
 			$dbInfo[$key] = escapeshellarg($value);
 		}
 
-		$exec  = "php ".enginevars::get("documentRoot")."/engineIncludes/emailSendBulk.php";
+		$exec  = "php ".$enginevars->get("documentRoot")."/engineIncludes/emailSendBulk.php";
 		$exec .= " -id=$sendID";
 		$exec .= " -d=".$dbInfo['database'];
 		$exec .= " -t=".$dbInfo['table'];

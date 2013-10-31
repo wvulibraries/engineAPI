@@ -5,12 +5,28 @@
  */
 class validate {
 
+	private $enginevars;
+
+	function __construct() {
+	}
+
+	public static function getInstance() {
+		$c = __CLASS__;
+		$validate = new $c;
+		$validate->set_enginevars(enginevars::getInstance());
+		return $validate;
+	}
+
+	public function set_enginevars($enginevars) {
+		$this->enginevars = $enginevars;
+	}
+
 	/**
 	 * Mapping of available validators and their human-readable names
 	 * Format: "method_name" => "Human readable name"
 	 * @var array
 	 */
-	private static $availableMethods = array(
+	private $availableMethods = array(
 		"regexp"               => "Regular Expression",
 		"phoneNumber"          => "Phone Number",
 		"ipAddr"               => "ipAddr",
@@ -36,8 +52,8 @@ class validate {
 	 * @see self::$availableMethods
 	 * @return array
 	 */
-	public static function validationMethods() {
-		return(self::$availableMethods);
+	public function validationMethods() {
+		return($this->availableMethods);
 	}
 
 	/**
@@ -46,9 +62,9 @@ class validate {
 	 * @param $validationType
 	 * @return bool
 	 */
-	public static function isValidMethod($validationType) {
+	public function isValidMethod($validationType) {
 
-		if (array_key_exists($validationType,self::validationMethods())) {
+		if (array_key_exists($validationType,$this->validationMethods())) {
 			return(TRUE);
 		}
 
@@ -67,7 +83,7 @@ class validate {
 	 *        A CSV of value(s) to which $testName validatioin is applied
 	 * @return bool
 	 */
-	public static function csvValue($testName, $string){
+	public function csvValue($testName, $string){
         $testName = strtolower($testName);
         $classMethods = array_map('strtolower', get_class_methods(__CLASS__));
         if(!$classMethods) $classMethods = array();
@@ -94,7 +110,7 @@ class validate {
 	 *         Boolean: Regex matched or didn't match
 	 *         Null: Regex returned an error
 	 */
-	public static function regexp($regexp,$test) {
+	public function regexp($regexp,$test) {
 		$match = @preg_match($regexp,$test);
 		
 		switch($match) {
@@ -126,10 +142,10 @@ class validate {
 	 * @param $number
 	 * @return bool|null
 	 */
-	public static function phoneNumber($number) {
+	public function phoneNumber($number) {
 		$phoneRegex = "/^\s*(\+?\d+\s*(\-|\ |\.)\s*)?\(?\d{3}\)?\s*(\-|\ |\.)\s*\d{3}\s*(\-|\ |\.)\s*\d{4}(\s*(\s|ext(\.|\:)?|extension\:?|x(\.|\:)?)\s*\d+)?$/";
 		
-		return(self::regexp($phoneRegex,$number));
+		return($this->regexp($phoneRegex,$number));
 	}
 	
 	/**
@@ -140,9 +156,9 @@ class validate {
 	 * @param string $ip
 	 * @return bool|null
 	 */
-	public static function ipAddr($ip) {
+	public function ipAddr($ip) {
 		$ipRegex = "/^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/";
-		return(self::regexp($ipRegex,$ip));
+		return($this->regexp($ipRegex,$ip));
 	}
 	
 	/**
@@ -151,11 +167,11 @@ class validate {
 	 * @param string $ip
 	 * @return bool|null
 	 */
-	public static function ipAddrRange($ip) {
+	public function ipAddrRange($ip) {
 		$ipAddr  = "(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)";
         $ipGroup = "(?:$ipAddr|$ipAddr-$ipAddr|\*)";
         $ipRange = "(?:$ipGroup\.){3}$ipGroup";
-		return(self::regexp("/^$ipRange$/",$ip));
+		return($this->regexp("/^$ipRange$/",$ip));
 	}
 
 	/**
@@ -165,12 +181,12 @@ class validate {
 	 * @param string $url
 	 * @return bool|null
 	 */
-	public static function optionalURL($url) {
+	public function optionalURL($url) {
 		$urlCheckRegex = "/^(https?|ftp|ssh|telnet)\:\/\/.+/";
-		$urlTest       = self::regexp($urlCheckRegex,$url);
+		$urlTest       = $this->regexp($urlCheckRegex,$url);
 
 		if ($urlTest == 1) {
-			return(self::url($url));
+			return($this->url($url));
 		}
 
 		return(TRUE);
@@ -182,13 +198,13 @@ class validate {
 	 * @param string $url
 	 * @return bool|null
 	 */
-	public static function url($url) {
+	public function url($url) {
 		
 		// Regex stolen from
 		// http://phpcentral.com/208-url-validation-in-php.html
 		$urlregex = "/^(https?|ftp|ssh|telnet)\:\/\/([a-zA-Z0-9+!*(),;?&=\$_.-]+(\:[a-zA-Z0-9+!*(),;?&=\$_.-]+)?@)?[a-zA-Z0-9+\$_-]+(\.[a-zA-Z0-9+\$_-]+)*(\:[0-9]{2,5})?(\/([a-zA-Z0-9+\$_-]\.?)+)*\/?(\?[a-zA-Z+&\*\$_.-][a-zA-Z0-9;:@\/&%=+\*\$_.-]*)?(#[a-zA-Z_.-][a-zA-Z0-9+\*\$_.-]*)?\$/";
 
-		return(self::regexp($urlregex,$url));
+		return($this->regexp($urlregex,$url));
 	}
 
 	/**
@@ -200,11 +216,11 @@ class validate {
 	 *        If true, also validate against self::internalEmailAddr()
 	 * @return bool
 	 */
-	public static function emailAddr($email,$internal=FALSE) {
+	public function emailAddr($email,$internal=FALSE) {
 
 		if(filter_var($email, FILTER_VALIDATE_EMAIL)) {
 			if($internal) {
-				if (self::internalEmailAddr($email) === TRUE) {
+				if ($this->internalEmailAddr($email) === TRUE) {
 					return(TRUE);
 				}
 				return(FALSE);
@@ -217,14 +233,14 @@ class validate {
 
 	/**
 	 * Validate as an 'internal' email address
-	 * Runs the email through regex's in enginevars::get("internalEmails") for a match
+	 * Runs the email through regex's in $enginevars->get("internalEmails") for a match
 	 *
 	 * @param string $email
 	 * @return bool
 	 */
-	public static function internalEmailAddr($email) {
+	public function internalEmailAddr($email) {
 
-		foreach (enginevars::get('internalEmails') as $key => $regex) {
+		foreach ($this->enginevars->get('internalEmails') as $key => $regex) {
 			if(preg_match($regex,$email)) {
 				return(TRUE);
 			}	
@@ -233,25 +249,33 @@ class validate {
 		return(FALSE);
 	}
 
+	private function integerPreChecks($test) {
+
+		if (is_numeric($test) === FALSE) return FALSE;
+		
+		if ((int)$test != $test) return FALSE;
+
+		if (is_float($test)) return FALSE;
+
+		return TRUE;
+
+	}
+
 	/**
 	 * Validate as an integer
 	 * (ex: '1234')
+	 * This function improves over built in is_int() because it will test 
+	 * strings as well
 	 *
 	 * @param int $test
 	 * @return bool|null
 	 */
-	public static function integer($test) {
+	public function integer($test) {
 
-		if (is_numeric($test) === FALSE) {
-			return(FALSE);
-		}
+		if ($this->integerPreChecks($test) === FALSE) return FALSE;
 
-		if ((int)$test != $test) {
-			return(FALSE);
-		}
-
-		$regexp = "/^[0-9]+$/";
-		return(self::regexp($regexp,$test));
+		$regexp = "/^-?\d+$/";
+		return($this->regexp($regexp,$test));
 	}
 
 	/**
@@ -261,9 +285,11 @@ class validate {
 	 * @param string $test
 	 * @return bool|null
 	 */
-	public static function integerSpaces($test) {
-		$regexp = "/^[0-9\ ]+$/";
-		return(self::regexp($regexp,$test));
+	public function integerSpaces($test) {
+		// if ($this->integerPreChecks($test) === FALSE) return FALSE;
+		// 
+		$regexp = "/^-?\s*[0-9\ ]+\s*$/";
+		return($this->regexp($regexp,$test));
 	}
 
 	/**
@@ -273,9 +299,9 @@ class validate {
 	 * @param string $test
 	 * @return bool|null
 	 */
-	public static function alphaNumeric($test) {
+	public function alphaNumeric($test) {
 		$regexp = "/^[a-zA-Z0-9\-\_\ ]+$/";
-		return(self::regexp($regexp,$test));
+		return($this->regexp($regexp,$test));
 	}
 
 	/**
@@ -285,9 +311,9 @@ class validate {
 	 * @param string $test
 	 * @return bool|null
 	 */
-	public static function alphaNumericNoSpaces($test) {
+	public function alphaNumericNoSpaces($test) {
 		$regexp = "/^[a-zA-Z0-9\-\_]+$/";
-		return(self::regexp($regexp,$test));
+		return($this->regexp($regexp,$test));
 	}
 
 	/**
@@ -297,9 +323,9 @@ class validate {
 	 * @param string $test
 	 * @return bool|null
 	 */
-	public static function alpha($test) {
+	public function alpha($test) {
 		$regexp = "/^[a-zA-Z\ ]+$/";
-		return(self::regexp($regexp,$test));
+		return($this->regexp($regexp,$test));
 	}
 
 	/**
@@ -309,9 +335,9 @@ class validate {
 	 * @param string $test
 	 * @return bool|null
 	 */
-	public static function alphaNoSpaces($test) {
+	public function alphaNoSpaces($test) {
 		$regexp = "/^[a-zA-Z]+$/";
-		return(self::regexp($regexp,$test));
+		return($this->regexp($regexp,$test));
 	}
 
 	/**
@@ -321,9 +347,9 @@ class validate {
 	 * @param string $test
 	 * @return bool|null
 	 */
-	public static function noSpaces($test) {
+	public function noSpaces($test) {
 		$regexp = "/^[^\ ]+$/";
-		return(self::regexp($regexp,$test));
+		return($this->regexp($regexp,$test));
 	}
 
 	/**
@@ -332,9 +358,9 @@ class validate {
 	 * @param $test
 	 * @return bool|null
 	 */
-	public static function noSpecialChars($test) {
+	public function noSpecialChars($test) {
 		$regexp = "/^[^\W]+$/";
-		return(self::regexp($regexp,$test));
+		return($this->regexp($regexp,$test));
 	}
 
 	/**
@@ -343,7 +369,7 @@ class validate {
 	 * @param string $test
 	 * @return bool
 	 */
-	public static function date($test) {
+	public function date($test) {
 		// Parse the date
 		$parseData = date_parse($test);
 
@@ -366,7 +392,7 @@ class validate {
 	 * @param $str
 	 * @return bool
 	 */
-	public static function serialized($str) {
+	public function serialized($str) {
 		return ($str == serialize(false) || @unserialize($str) !== false);
 	}
 	

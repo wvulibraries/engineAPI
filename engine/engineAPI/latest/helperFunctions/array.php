@@ -179,10 +179,11 @@ function array_getLastIndex($array) {
  */
 function buildECMSArray($array) {
 	
+    $enginevars = enginevars::getInstance();
 	
 	$output = "";
 	if(is_array($array)) {
-		$output = implode(enginevars::get("delim"),$array);
+		$output = implode($enginevars->get("delim"),$array);
 	}
 	else {
 		$output = $array;

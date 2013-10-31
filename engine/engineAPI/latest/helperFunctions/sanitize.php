@@ -139,9 +139,7 @@ function jsonSanitize($var,$type="mysql") {
  */
 function stripCarriageReturns($string) {
 
-
-
-	if (enginevars::get("stripCarriageReturns") === TRUE) {
+	if (enginevars::getInstance()->get("stripCarriageReturns") === TRUE) {
 		$string = str_replace("\r","",$string);
 	}
 

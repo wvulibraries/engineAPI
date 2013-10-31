@@ -58,6 +58,8 @@ class ldapSearch
      */
     private $baseDN;
 
+    private $enginevars;
+
     /**
      * Class Constructor
      * @param string $configKey
@@ -65,6 +67,9 @@ class ldapSearch
      */
     public function __construct($configKey=NULL)
     {
+
+        $this->set_enginevars(enginevars::getInstance());
+
         // We need to figure out of the configKey is just an LDAP URL, or if its a configKey
         $urlInfo = parse_url($configKey);
         if(isset($urlInfo['scheme'])){
@@ -74,8 +79,8 @@ class ldapSearch
             
             if(isset($configKey)){
                 $configKey = trim($configKey);
-                if(@enginevars::is_set(array("ldapDomain",trim($configKey)))){
-                    foreach(enginevars::get("ldapDomain")[ trim($configKey) ] as $key => $value){
+                if(@$this->enginevars->is_set(array("ldapDomain",trim($configKey)))){
+                    foreach($this->enginevars->get("ldapDomain")[ trim($configKey) ] as $key => $value){
                         $this->$key = $value;
                     }
                 }
@@ -88,6 +93,10 @@ class ldapSearch
      */
     public function __destruct() {
         return $this->disconnect();
+    }
+
+    public function set_enginevars($enginevars) {
+        $this->enginevars = $enginevars;
     }
 
     /**

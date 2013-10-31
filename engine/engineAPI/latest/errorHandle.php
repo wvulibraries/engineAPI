@@ -157,6 +157,8 @@ class errorHandle
      */
     public static $uiClassWarning = 'warningMessage';
 
+    private $enginevars;
+
     /**
      * Singleton access
      * @static
@@ -224,6 +226,12 @@ class errorHandle
         // Register custom handlers for PHP's errors and exceptions
         set_error_handler(array(__CLASS__, 'phpError'));
         set_exception_handler(array(__CLASS__, 'phpException'));
+
+        $this->set_enginevars(enginevars::getInstance());
+    }
+
+    public function set_enginevars($enginevars) {
+        $this->enginevars = $enginevars;
     }
 
 	/**
@@ -554,7 +562,7 @@ class errorHandle
         if($logLocation == 'nativePHP'){
             error_log(self::$errMsg." at ".self::$errLine.":".self::$errFile);
         }elseif($logLocation == 'engineDB'){
-            $dbName = enginevars::get("logDB");
+            $dbName = $this->enginevars->get("logDB");
             
 
             if(!(self::$db instanceof engineDB)){

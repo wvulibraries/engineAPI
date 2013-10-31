@@ -558,6 +558,8 @@ class fileHandler {
 	 **/
 	public function displayFile($file,$display=NULL) {
 
+		$enginevars = enginevars::getInstance();
+
 		if (isnull($display)) {
 			$display = "window"; // set to default
 		}
@@ -576,7 +578,7 @@ class fileHandler {
 			case "download":
 			case "window":
 			default:
-				header("Location: " . enginevars::get("downloadPage").'?id='.$id);
+				header("Location: " . $enginevars->get("downloadPage").'?id='.$id);
 		}
 
 		return FALSE;
@@ -591,8 +593,10 @@ class fileHandler {
 	 * @return string
 	 */
 	private function displayFileInline($file,$id) {
+		$enginevars = enginevars::getInstance();
+
 		if(strpos($file['type'],'image') !== FALSE){
-			$output = '<img src="'.enginevars::get("downloadPage").'?id='.$id.'" />';
+			$output = '<img src="'.$enginevars->get("downloadPage").'?id='.$id.'" />';
 		}else{
 			$output = $file['data'];
 		}
@@ -843,6 +847,9 @@ class fileHandler {
 	 * @return string
 	 **/
 	public function getMimeType($file_path, $defaultMimeType='application/force-download', $realFilename=NULL){
+        
+        $enginevars = enginevars::getInstance();
+
         $mimeType = $defaultMimeType;
 
         // if $realFilename is given, we need to create a shadow-copy of the file to examine the copy
@@ -856,7 +863,7 @@ class fileHandler {
             if(isPHP('5.3')){
                 // $fInfo = new finfo(FILEINFO_MIME_TYPE);
 
-                @$fInfo = new finfo(FILEINFO_MIME_TYPE, enginevars::get("mimeFilename"));
+                @$fInfo = new finfo(FILEINFO_MIME_TYPE, $enginevars->get("mimeFilename"));
                 @$mimeType = $fInfo->file($file_path);
                 print "<pre>";
                 var_dump($mimeType);
@@ -866,7 +873,7 @@ class fileHandler {
 	                $mimeType = $fInfo->file($file_path);
                 }
             }else{
-                @$fInfo = new finfo(FILEINFO_MIME, enginevars::get("mimeFilename"));
+                @$fInfo = new finfo(FILEINFO_MIME, $enginevars->get("mimeFilename"));
                 @$mimeData = $fInfo->file($file_path);
                 if($mimeData === FALSE){
 	                $fInfo = new finfo(FILEINFO_MIME);

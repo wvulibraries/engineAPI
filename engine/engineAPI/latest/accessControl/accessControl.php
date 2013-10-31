@@ -31,14 +31,17 @@ class accessControl {
 	function __construct() {}
 
 	public static function init() {
-		$accessModDirHandle = @opendir(enginevars::get("accessModules")) or die("Unable to open ".enginevars::get("accessModules"));
+
+		$enginevars = enginevars::getInstance();
+
+		$accessModDirHandle = @opendir($enginevars->get("accessModules")) or die("Unable to open ".$enginevars->get("accessModules"));
 		while (false !== ($file = readdir($accessModDirHandle))) {
 			// Check to make sure that it isn't a hidden file and that it is a PHP file
 			if ($file != "." && $file != ".." && $file) {
 				$fileChunks = array_reverse(explode(".", $file));
 				$ext= $fileChunks[0];
 				if ($ext == "php") {
-					include_once(enginevars::get("accessModules")."/".$file);
+					include_once($enginevars->get("accessModules")."/".$file);
 				}
 			}
 		}
@@ -51,8 +54,8 @@ class accessControl {
 
 		// @TODO unset $accessControl here?
 
-		if (enginevars::get("accessExistsTest") === TRUE || enginevars::get("accessExistsTest") === FALSE) {
-			self::$accessExistsTest = enginevars::get("accessExistsTest");
+		if ($enginevars->get("accessExistsTest") === TRUE || $enginevars->get("accessExistsTest") === FALSE) {
+			self::$accessExistsTest = $enginevars->get("accessExistsTest");
 		}
 	}
 
@@ -234,13 +237,15 @@ class accessControl {
 
 		ob_end_clean();
 
+		$enginevars = enginevars::getInstance();
+
 		session::set("page",$_SERVER['PHP_SELF']);
 
 		//@TODO : this query_String shouldn't be straight html sanitized, so that the &'s dont get screwed
 		session::set("qs",preg_replace('/&#039;/',"'",urldecode(html_entity_decode($_SERVER['QUERY_STRING']))));
 
 
-		header( 'Location: '.enginevars::get("loginPage").'?page='.$_SERVER['PHP_SELF']."&qs=".(urlencode($_SERVER['QUERY_STRING'])) ) ;
+		header( 'Location: '.$enginevars->get("loginPage").'?page='.$_SERVER['PHP_SELF']."&qs=".(urlencode($_SERVER['QUERY_STRING'])) ) ;
 		//die("No Access Here");
 		//return FALSE;
 	}

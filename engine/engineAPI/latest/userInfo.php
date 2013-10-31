@@ -122,7 +122,7 @@ function ipRangeCheck($ipRanges,$checkIP = NULL) {
  */
 function onCampus($checkIP = NULL) {
 	
-	
+	$enginevars = enginevars::getInstance();
 	
 	if(isnull($checkIP) && isset($_SERVER['REMOTE_ADDR'])) {
 		//WTF can't you use $_SERVER in the parameter 
@@ -130,7 +130,7 @@ function onCampus($checkIP = NULL) {
 		$checkIP = $_SERVER['REMOTE_ADDR'];
 	}
 	
-	$ipFound = ipRangeCheck(enginevars::get("onCampus"),$checkIP);
+	$ipFound = ipRangeCheck($enginevars->get("onCampus"),$checkIP);
 	
 	if ($ipFound === TRUE) {
 		return(TRUE);

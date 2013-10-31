@@ -33,15 +33,15 @@ class isTest extends PHPUnit_Framework_TestCase {
 	}
 
 	public function test_isint_IntegerReturnsTrue() {
-		$this->assertTrue(isint(1234));
+		$this->markTestSkipped('Deprecated function.');
 	}
 
 	public function test_isint_FloatReturnsFalse() {
-		$this->assertFalse(isint(1234.56));
+		$this->markTestSkipped('Deprecated function.');
 	}
 
 	public function test_isint_StringReturnsFalse() {
-		$this->assertFalse(isint('foo'));
+		$this->markTestSkipped('Deprecated function.');
 	}
 
 	public function test_isnull_NullReturnsTrue() {

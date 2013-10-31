@@ -144,10 +144,9 @@ function removeQueryStringVar($qs, $var) {
  * @return bool|string
  */
 function recurseInsert($file,$type="php",$regex=NULL,$condition="REQUEST_URI",$caseInsensitive=TRUE) {
-
 	
-
-	$engine = EngineAPI::singleton();
+	$engine     = EngineAPI::singleton();
+	$enginevars = enginevars::getInstance();
 
 	if (!isnull($condition) && !isnull($regex)) {
 		if (!isset($_SERVER[$condition])) {
@@ -203,7 +202,7 @@ function recurseInsert($file,$type="php",$regex=NULL,$condition="REQUEST_URI",$c
 		array_pop($cwd);
 
 		// Prevent it from recursing past the document root into the file system
-		if($cwdTemp == enginevars::get("documentRoot")) {
+		if($cwdTemp == $enginevars->get("documentRoot")) {
 			break;
 		}
 	}
@@ -214,11 +213,11 @@ function recurseInsert($file,$type="php",$regex=NULL,$condition="REQUEST_URI",$c
 			$foundFile = $engine->currentTemplate()."/$file";
 		}
 	}
-	// If $engine is null, check enginevars::get("currentTemplate")
+	// If $engine is null, check $enginevars->get("currentTemplate")
 	// *********** I think this check can be removed now ... ************** //
-	else if (isnull($engine) && isnull($foundFile) && !isnull(enginevars::get("currentTemplate"))) {
-		if(file_exists(enginevars::get("currentTemplate")."/$file")) {
-			$foundFile = enginevars::get("currentTemplate")."/$file";
+	else if (isnull($engine) && isnull($foundFile) && !isnull($enginevars->get("currentTemplate"))) {
+		if(file_exists($enginevars->get("currentTemplate")."/$file")) {
+			$foundFile = $enginevars->get("currentTemplate")."/$file";
 		}
 	}
 
@@ -235,8 +234,8 @@ function recurseInsert($file,$type="php",$regex=NULL,$condition="REQUEST_URI",$c
 			return("");
 		}
 		elseif ($type == "url") {
-			$cwdTemp = str_replace(enginevars::get("documentRoot"),"",$cwdTemp."/");
-			$url = enginevars::get("WVULSERVER")."/".$cwdTemp.$file;
+			$cwdTemp = str_replace($enginevars->get("documentRoot"),"",$cwdTemp."/");
+			$url = $enginevars->get("WVULSERVER")."/".$cwdTemp.$file;
 			return($url);
 		}
 		elseif ($type == "text") {

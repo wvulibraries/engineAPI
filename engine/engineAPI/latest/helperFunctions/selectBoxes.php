@@ -99,8 +99,8 @@ function emod_msww($attPairs){
  */
 function webHelper_listSelect($attPairs) {
 	
-	$engine = EngineAPI::singleton();
-	
+	$engine     = EngineAPI::singleton();
+	$enginevars = enginevars::getInstance();
 	
 	$dbTables = $engine->dbTablesExport();
 		
@@ -116,7 +116,7 @@ function webHelper_listSelect($attPairs) {
 	$selected = array();
 	if (!empty($attPairs['select'])) {
 		$temp = array();
-		$selected = explode(enginevars::get("delim"),$attPairs['select']);
+		$selected = explode($enginevars->get("delim"),$attPairs['select']);
 		foreach($selected as $k=>$v) {
 			$temp[$v] = $k;
 		}
@@ -166,9 +166,8 @@ function webHelper_listSelect($attPairs) {
  */
 function webHelper_listCheckbox($attPairs) {
 	
-	$engine = EngineAPI::singleton();
-	
-	
+	$engine     = EngineAPI::singleton();
+	$enginevars = enginevars::getInstance();
 	
 	$dbTables = $engine->dbTablesExport();
 	
@@ -187,7 +186,7 @@ function webHelper_listCheckbox($attPairs) {
 	$selected = array();
 	if (!empty($attPairs['select'])) {
 		$temp = array();
-		$selected = explode(enginevars::get("delim"),$attPairs['select']);
+		$selected = explode($enginevars->get("delim"),$attPairs['select']);
 		foreach($selected as $k=>$v) {
 			$temp[$v] = $k;
 		}
