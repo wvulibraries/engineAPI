@@ -372,8 +372,7 @@ class validate {
 
 		// Now we need to check both to catch both MM/DD/YYYY and DD/MM/YYYY
 		$chkDate1 = checkdate($parseData['month'],$parseData['day'],$parseData['year']);
-		$chkDate2 = checkdate($parseData['day'],$parseData['month'],$parseData['year']);
-		if(!$chkDate1 and !$chkDate2) return FALSE;
+		if(!$chkDate1) return FALSE;
 
 		// If we get here, the date is valid
 		return TRUE;
