@@ -13,13 +13,12 @@
  * @return bool
  */
 function is_function( $mixed ) {
-    if ( is_object( $mixed ) ) {
-        return ( $mixed instanceof Closure );
-    } elseif( is_string( $mixed ) ) {
-        return function_exists( $mixed );
-    } else {
-        return false;
-    }
+	if ( is_object( $mixed ) ) {
+		return ( $mixed instanceof Closure );
+	} elseif( is_string( $mixed ) ) {
+		return function_exists( $mixed );
+	}
+
 	return FALSE;
 }
 
@@ -149,8 +148,8 @@ function isempty($var,$strict=TRUE) {
  *
  * @return bool
  */
-function isCLI(){
-    return (php_sapi_name() == 'cli' || (@is_numeric($_SERVER['argc']) && $_SERVER['argc'] > 0));
+function isCLI() {
+	return (PHP_SAPI == 'cli' || (@is_numeric($_SERVER['argc']) && $_SERVER['argc'] > 0));
 }
 
 /**
@@ -164,12 +163,12 @@ function isCLI(){
  * @return bool
  */
 function isPHP($version){
-    static $_isPHP;
-    $version = (string)$version;
-    if(!isset($_isPHP[$version])){
-        $_isPHP[$version] = (version_compare(PHP_VERSION, $version) < 0) ? FALSE : TRUE;
-    }
-    return $_isPHP[$version];
+	static $_isPHP;
+	$version = (string)$version;
+	if(!isset($_isPHP[$version])){
+		$_isPHP[$version] = (version_compare(PHP_VERSION, $version) < 0) ? FALSE : TRUE;
+	}
+	return $_isPHP[$version];
 }
 
 /**
