@@ -8,12 +8,13 @@ class validate {
 	private $enginevars;
 
 	function __construct() {
-		$this->set_enginevars(enginevars::getInstance());
 	}
 
 	public static function getInstance() {
 		$c = __CLASS__;
-		return new $c;
+		$validate = new $c;
+		$validate->set_enginevars(enginevars::getInstance());
+		return $validate;
 	}
 
 	public function set_enginevars($enginevars) {
@@ -52,7 +53,7 @@ class validate {
 	 * @return array
 	 */
 	public function validationMethods() {
-		return(self::$availableMethods);
+		return($this->availableMethods);
 	}
 
 	/**
@@ -63,7 +64,7 @@ class validate {
 	 */
 	public function isValidMethod($validationType) {
 
-		if (array_key_exists($validationType,self::validationMethods())) {
+		if (array_key_exists($validationType,$this->validationMethods())) {
 			return(TRUE);
 		}
 
@@ -144,7 +145,7 @@ class validate {
 	public function phoneNumber($number) {
 		$phoneRegex = "/^\s*(\+?\d+\s*(\-|\ |\.)\s*)?\(?\d{3}\)?\s*(\-|\ |\.)\s*\d{3}\s*(\-|\ |\.)\s*\d{4}(\s*(\s|ext(\.|\:)?|extension\:?|x(\.|\:)?)\s*\d+)?$/";
 		
-		return(self::regexp($phoneRegex,$number));
+		return($this->regexp($phoneRegex,$number));
 	}
 	
 	/**
@@ -157,7 +158,7 @@ class validate {
 	 */
 	public function ipAddr($ip) {
 		$ipRegex = "/^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/";
-		return(self::regexp($ipRegex,$ip));
+		return($this->regexp($ipRegex,$ip));
 	}
 	
 	/**
@@ -170,7 +171,7 @@ class validate {
 		$ipAddr  = "(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)";
         $ipGroup = "(?:$ipAddr|$ipAddr-$ipAddr|\*)";
         $ipRange = "(?:$ipGroup\.){3}$ipGroup";
-		return(self::regexp("/^$ipRange$/",$ip));
+		return($this->regexp("/^$ipRange$/",$ip));
 	}
 
 	/**
@@ -182,10 +183,10 @@ class validate {
 	 */
 	public function optionalURL($url) {
 		$urlCheckRegex = "/^(https?|ftp|ssh|telnet)\:\/\/.+/";
-		$urlTest       = self::regexp($urlCheckRegex,$url);
+		$urlTest       = $this->regexp($urlCheckRegex,$url);
 
 		if ($urlTest == 1) {
-			return(self::url($url));
+			return($this->url($url));
 		}
 
 		return(TRUE);
@@ -203,7 +204,7 @@ class validate {
 		// http://phpcentral.com/208-url-validation-in-php.html
 		$urlregex = "/^(https?|ftp|ssh|telnet)\:\/\/([a-zA-Z0-9+!*(),;?&=\$_.-]+(\:[a-zA-Z0-9+!*(),;?&=\$_.-]+)?@)?[a-zA-Z0-9+\$_-]+(\.[a-zA-Z0-9+\$_-]+)*(\:[0-9]{2,5})?(\/([a-zA-Z0-9+\$_-]\.?)+)*\/?(\?[a-zA-Z+&\*\$_.-][a-zA-Z0-9;:@\/&%=+\*\$_.-]*)?(#[a-zA-Z_.-][a-zA-Z0-9+\*\$_.-]*)?\$/";
 
-		return(self::regexp($urlregex,$url));
+		return($this->regexp($urlregex,$url));
 	}
 
 	/**
@@ -219,7 +220,7 @@ class validate {
 
 		if(filter_var($email, FILTER_VALIDATE_EMAIL)) {
 			if($internal) {
-				if (self::internalEmailAddr($email) === TRUE) {
+				if ($this->internalEmailAddr($email) === TRUE) {
 					return(TRUE);
 				}
 				return(FALSE);
@@ -239,7 +240,7 @@ class validate {
 	 */
 	public function internalEmailAddr($email) {
 
-		foreach ($enginevars->get('internalEmails') as $key => $regex) {
+		foreach ($this->enginevars->get('internalEmails') as $key => $regex) {
 			if(preg_match($regex,$email)) {
 				return(TRUE);
 			}	
@@ -266,7 +267,7 @@ class validate {
 		}
 
 		$regexp = "/^[0-9]+$/";
-		return(self::regexp($regexp,$test));
+		return($this->regexp($regexp,$test));
 	}
 
 	/**
@@ -278,7 +279,7 @@ class validate {
 	 */
 	public function integerSpaces($test) {
 		$regexp = "/^[0-9\ ]+$/";
-		return(self::regexp($regexp,$test));
+		return($this->regexp($regexp,$test));
 	}
 
 	/**
@@ -290,7 +291,7 @@ class validate {
 	 */
 	public function alphaNumeric($test) {
 		$regexp = "/^[a-zA-Z0-9\-\_\ ]+$/";
-		return(self::regexp($regexp,$test));
+		return($this->regexp($regexp,$test));
 	}
 
 	/**
@@ -302,7 +303,7 @@ class validate {
 	 */
 	public function alphaNumericNoSpaces($test) {
 		$regexp = "/^[a-zA-Z0-9\-\_]+$/";
-		return(self::regexp($regexp,$test));
+		return($this->regexp($regexp,$test));
 	}
 
 	/**
@@ -314,7 +315,7 @@ class validate {
 	 */
 	public function alpha($test) {
 		$regexp = "/^[a-zA-Z\ ]+$/";
-		return(self::regexp($regexp,$test));
+		return($this->regexp($regexp,$test));
 	}
 
 	/**
@@ -326,7 +327,7 @@ class validate {
 	 */
 	public function alphaNoSpaces($test) {
 		$regexp = "/^[a-zA-Z]+$/";
-		return(self::regexp($regexp,$test));
+		return($this->regexp($regexp,$test));
 	}
 
 	/**
@@ -338,7 +339,7 @@ class validate {
 	 */
 	public function noSpaces($test) {
 		$regexp = "/^[^\ ]+$/";
-		return(self::regexp($regexp,$test));
+		return($this->regexp($regexp,$test));
 	}
 
 	/**
@@ -349,7 +350,7 @@ class validate {
 	 */
 	public function noSpecialChars($test) {
 		$regexp = "/^[^\W]+$/";
-		return(self::regexp($regexp,$test));
+		return($this->regexp($regexp,$test));
 	}
 
 	/**
