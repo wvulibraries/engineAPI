@@ -7,6 +7,7 @@ class localvars extends config {
 
 	private static $classInstance;
 	protected $variables = array();
+	protected $database;
 
 	/**
 	 * Class constructor
@@ -20,15 +21,18 @@ class localvars extends config {
 		if (!isset(self::$classInstance)) { 
 
 			self::$classInstance = new self();
+
+			// @TODO this needs updated with new database info
+			self::$classInstance->set_database(EngineAPI::singleton()->openDB);
 		}
 
 		return self::$classInstance;
 	}
 
-	// public static function getInstance() {
-	// 	$c = __CLASS__;
-	// 	return new $c;
-	// }
+	public function set_database(engineDB $database) {
+		$this->database = $database;
+		return TRUE;
+	}
 
 	/**
 	 * Engine tag handler
@@ -161,7 +165,7 @@ class localvars extends config {
     public static function dbImport($tblName, $nameField, $valueField, $params=array()){
         // Handle default params
         $params = array_merge(array(
-            'dbConn'    => EngineAPI::singleton()->openDB,
+            'dbConn'    => $this->database,
             'namespace' => '',
             'sqlWhere'  => '1=1'
         ), (array)$params);
