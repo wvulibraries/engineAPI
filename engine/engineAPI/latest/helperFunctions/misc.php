@@ -120,9 +120,7 @@ function attPairs($attpairs) {
  * @return string
  */
 function removeQueryStringVar($qs, $var) {
-	$qs = preg_replace('/(.*)(?|&)'.$var.'=[^&]+?(&)(.*)/i', '$1$2$4', $qs.'&');
-	$qs = substr($qs, 0, -1);
-	return $qs;
+	return preg_replace('/[\?|&]'.$var.'=[a-zA-Z0-9]*$|'.$var.'=[a-zA-Z0-9]*[&]/', '', $qs);
 }
 
 /**
