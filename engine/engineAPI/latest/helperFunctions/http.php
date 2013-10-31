@@ -107,10 +107,11 @@ class http
      *
      * @param string $url
      * @param int $statusCode
+     * @param bool $exit
      */
-    public static function redirect($url, $statusCode=307)
+    public static function redirect($url, $statusCode=307, $exit=TRUE)
     {
-        $statusCode = (int)$statusCode;
+        $statusCode = is_null($statusCode) ? 307 : (int)$statusCode;
         $validCodes = array(201,301,304,305,307);
         if(!in_array($statusCode, $validCodes)){
             trigger_error(__METHOD__."() - Invalid HTTP status code", E_USER_NOTICE);
@@ -119,7 +120,7 @@ class http
 
         self::sendStatus($statusCode);
         header(sprintf("Location: %s", trim($url)));
-        exit();
+        if($exit) exit();
     }
 
     /**
