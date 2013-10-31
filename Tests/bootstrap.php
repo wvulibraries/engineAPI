@@ -1,5 +1,7 @@
 <?php
 
+// Start output-buffering for any header for cookie functions ('headers already sent' error)
+ob_start();
 
 $modulesDirectory  = "engine/engineAPI/latest/modules";
 $helperFunctions = "engine/engineAPI/latest/helperFunctions";
