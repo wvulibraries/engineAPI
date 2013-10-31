@@ -7,7 +7,7 @@
 /**
  * Determine if an email is internal
  *
- * @depreciated
+ * @deprecated
  * @see email::internalEmailAddr()
  * @param $email
  * @return bool
@@ -18,7 +18,7 @@ function internalEmail($email) {
 
 /**
  * [Web Helper] Generate error message
- * @depreciated
+ * @deprecated
  * @see errorHandle::errorMsg()
  * @param $message
  * @return string
@@ -29,7 +29,7 @@ function webHelper_errorMsg($message) {
 
 /**
  * [Web Helper] Generate success message
- * @depreciated
+ * @deprecated
  * @see errorHandle::successMsg()
  * @param $message
  * @return string
@@ -41,7 +41,7 @@ function webHelper_successMsg($message) {
 /**
  * Determine if browser is mobile
  *
- * @depreciated
+ * @deprecated
  * @see mobileBrowsers::isMobileBrowser()
  * @return null
  */
@@ -52,7 +52,7 @@ function engine_isMobileBrowser() {
 /**
  * Generate HTML date drop-down
  *
- * @depreciated
+ * @deprecated
  * @see date->dateDropDown()
  * @param $attPairs
  * @param null $engine
@@ -66,7 +66,7 @@ function dateDropDown($attPairs,$engine=null) {
 /**
  * Generate HTML time drop-down
  *
- * @depreciated
+ * @deprecated
  * @see date->timeDropDown()
  * @param $attPairs
  * @param null $engine
@@ -80,7 +80,7 @@ function timeDropDown($attPairs,$engine=null) {
 /**
  * Generate a file list?
  *
- * @depreciated
+ * @deprecated
  * @see fileList
  * @param $dir
  * @param $template
@@ -88,22 +88,22 @@ function timeDropDown($attPairs,$engine=null) {
  * @return mixed
  */
 function filelist($dir,$template,$engine) {
-	
+
 	$enginevars = enginevars::getInstance();
-	
+
 	$enginevars->set("fileList", fileList($dir,$engine));
-	
+
 	$output = $enginevars->get("fileList")->applyTemplate($engine->template."/".$template);
-	
+
 	$enginevars->set("fileList", NULL);
-	
+
 	return($output);
 }
 
 /**
  * Prints the current environment
  *
- * @depreciated
+ * @deprecated
  * @see debug::printENV()
  */
 function printENV(){
@@ -114,7 +114,7 @@ function printENV(){
 /**
  * Generate print_r() output that's output-buffer safe
  *
- * @depreciated
+ * @deprecated
  * @see debug::obsafe_print_r()
  * @param $var
  * @param bool $return
