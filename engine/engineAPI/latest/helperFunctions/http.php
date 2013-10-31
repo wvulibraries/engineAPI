@@ -112,7 +112,7 @@ class http
     public static function redirect($url, $statusCode=307, $exit=TRUE)
     {
         $statusCode = is_null($statusCode) ? 307 : (int)$statusCode;
-        $validCodes = array(201,301,304,305,307);
+        $validCodes = array(301,307);
         if(!in_array($statusCode, $validCodes)){
             trigger_error(__METHOD__."() - Invalid HTTP status code", E_USER_NOTICE);
             $statusCode=307;
