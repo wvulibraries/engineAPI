@@ -252,6 +252,8 @@ class validate {
 	/**
 	 * Validate as an integer
 	 * (ex: '1234')
+	 * This function improves over built in is_int() because it will test 
+	 * strings as well
 	 *
 	 * @param int $test
 	 * @return bool|null
@@ -280,7 +282,7 @@ class validate {
 	 * @return bool|null
 	 */
 	public function integerSpaces($test) {
-		$regexp = "/^[0-9\ ]+$/";
+		$regexp = "/^-?[0-9\ ]+$/";
 		return($this->regexp($regexp,$test));
 	}
 
