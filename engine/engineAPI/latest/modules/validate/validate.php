@@ -266,7 +266,9 @@ class validate {
 			return(FALSE);
 		}
 
-		$regexp = "/^[0-9]+$/";
+		if (is_float($test)) return FALSE;
+
+		$regexp = "/^-?\d+$/";
 		return($this->regexp($regexp,$test));
 	}
 
