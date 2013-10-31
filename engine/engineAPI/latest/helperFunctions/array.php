@@ -338,6 +338,13 @@ function array_merge_recursive_overwrite() {
  * @param string $side
  *        Which side of the array are we looking at? (left|front|top or right|end|bottom)
  *        Default: Left
+ *
+ *        Start, Left, Bottom refers to the "Start", "Left hand Side", or "Bottom" of the stack 
+ *        End, Right, Top, is the "End" Right hand side, or top of the stack. 
+ *
+ *        Start, Left, Bottom, = Shift()
+ *        End, Right, Top = Pop()
+ * 
  * @return mixed
  */
 function array_peak($arr,$side='TOP'){
@@ -345,6 +352,7 @@ function array_peak($arr,$side='TOP'){
     if(!is_array($arr)) return NULL;
 
     // Make a copy of the array (makes sure we aren't working with a ref)
+    // Is this check really needed now that pass by reference has been removed? 
     $arr2 = $arr;
 
     switch(trim(strtoupper($side))){
