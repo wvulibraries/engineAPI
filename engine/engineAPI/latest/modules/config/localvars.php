@@ -5,14 +5,30 @@
  */
 class localvars extends config {
 
-	const CONFIG_TYPE     = "local";
+	private static $classInstance;
+	protected $variables = array();
 
 	/**
 	 * Class constructor
 	 */
-	function __construct() {		
+	function __construct() {
+		$this->configObject = config::getInstance(); 
 		templates::defTempPatterns("/\{local\s+(.+?)\}/","localvars::templateMatches",$this);
 	}
+
+	public static function getInstance() {
+		if (!isset(self::$classInstance)) { 
+
+			self::$classInstance = new self();
+		}
+
+		return self::$classInstance;
+	}
+
+	// public static function getInstance() {
+	// 	$c = __CLASS__;
+	// 	return new $c;
+	// }
 
 	/**
 	 * Engine tag handler
@@ -24,9 +40,9 @@ class localvars extends config {
 
 		$attPairs      = attPairs($matches[1]);
 
-		$localvars = parent::export(self::CONFIG_TYPE);
+		$localvars = self::export_static();
 		
-		$variable = self::get($attPairs['var']);
+		$variable = self::get_static($attPairs['var']);
 
 		if (!is_empty($variable)) {
 			return($variable);
@@ -34,6 +50,16 @@ class localvars extends config {
 
 		return("");
 		
+	}
+
+	public static function export_static() {
+		$localvars = self::getInstance();
+		return $localvars->export();
+	}
+
+	public static function get_static($var) {
+		$localvars = self::getInstance();
+		return $localvars->get($var);
 	}
 
 	/**
@@ -44,20 +70,20 @@ class localvars extends config {
 	 * @param bool $null
 	 * @return bool
 	 */
-	public static function add($var,$value,$null=FALSE) {
+	// public function set($var,$value,$null=FALSE) {
 		
-		return parent::set(self::CONFIG_TYPE,$var,$value,$null);
+	// 	return $this->configObject->set(self::CONFIG_TYPE,$var,$value,$null);
 		
-	}
-	public static function set($var,$value,$null=FALSE) {
+	// }
+	// public function add($var,$value,$null=FALSE) {
 		
-		return self::add($var,$value,$null);
+	// 	return $this->set($var,$value,$null);
 
-	}
+	// }
 
-	public static function is_set($name) {
-		return parent::is_set(self::CONFIG_TYPE,$name);
-	}
+	// public function is_set($name) {
+	// 	return $this->configObject->is_set(self::CONFIG_TYPE,$name);
+	// }
 
 	/**
 	 * Let a local var
@@ -66,11 +92,11 @@ class localvars extends config {
 	 * @param string $default
 	 * @return mixed
 	 */
-	public static function get($var,$default="") {
+	// public function get($var,$default="") {
 		
-		return parent::get(self::CONFIG_TYPE,$var,$default);
+	// 	return $this->configObject->get(self::CONFIG_TYPE,$var,$default);
 		
-	}
+	// }
 
 	/**
 	 * Delete a localvar
@@ -78,16 +104,16 @@ class localvars extends config {
 	 * @param string $var
 	 * @return bool
 	 */
-	public static function del($var) {
+	// public function remove($var) {
 		
-		return parent::remove(self::CONFIG_TYPE,$var);
+	// 	return $this->configObject->remove(self::CONFIG_TYPE,$var);
 		
-	}
-	public static function remove($var) {
+	// }
+	// public function del($var) {
 		
-		return self::del(self::CONFIG_TYPE,$var);
+	// 	return $this->remove(self::CONFIG_TYPE,$var);
 		
-	}
+	// }
 
 	/**
 	 * Smartly set/get localvar
@@ -103,11 +129,11 @@ class localvars extends config {
 	 *        Pass-through to self::add()
 	 * @return mixed
 	 */
-	public static function variable($var,$value=NULL,$null=FALSE) {
+	// public function variable($var,$value=NULL,$null=FALSE) {
 		
-		return parent::variable(self::CONFIG_TYPE,$var,$value,$null);
+	// 	return $this->configObject->variable(self::CONFIG_TYPE,$var,$value,$null);
 		
-	}
+	// }
 
 	/**
 	 * Return array of all localvars
@@ -115,9 +141,9 @@ class localvars extends config {
 	 * @deprecated
 	 * @return array
 	 */
-	public static function export() {
-		return parent::export(self::CONFIG_TYPE);
-	}
+	// public function export() {
+	// 	return $this->configObject->export(self::CONFIG_TYPE);
+	// }
 
     /**
      * This will import a key->value database table into local vars (very useful for a 'settings' table)
@@ -149,7 +175,7 @@ class localvars extends config {
         if($dbSettings['result']){
             $settingCount = 0;
             while($row = mysql_fetch_assoc($dbSettings['result'])){
-                self::add($params['namespace'].$row[ $nameField ], $row[ $valueField ]);
+                $this->add($params['namespace'].$row[ $nameField ], $row[ $valueField ]);
                 $settingCount++;
             }
             return $settingCount;
