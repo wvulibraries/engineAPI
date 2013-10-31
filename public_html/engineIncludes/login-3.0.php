@@ -6,11 +6,13 @@ $loginType = "ldap";
 require_once("/home/library/public_html/includes/engineHeader.php");
 
 
-localvars::add('pageTitle',"Login Page");
+$localvars = localvars::getInstance();
+
+$localvars->set('pageTitle',"Login Page");
 // localvars::add("excludeToolbar","TRUE");
 
 // Domain for ldap login
-localvars::add("domain","wvu-ad");
+$localvars->set("domain","wvu-ad");
 
 
 
@@ -62,7 +64,7 @@ if (isset($engine->cleanPost['HTML']['loginSubmit'])) {
 					exit;
 				}
 				else {
-					header("Location: ".enginevars::get("WEBROOT") );
+					header("Location: ".enginevars::getInstance()->get("WEBROOT") );
 				}
 
 			}

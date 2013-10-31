@@ -89,13 +89,13 @@ function timeDropDown($attPairs,$engine=null) {
  */
 function filelist($dir,$template,$engine) {
 	
+	$enginevars = enginevars::getInstance();
 	
+	$enginevars->set("fileList", fileList($dir,$engine));
 	
-	enginevars::set("fileList", fileList($dir,$engine));
+	$output = $enginevars->get("fileList")->applyTemplate($engine->template."/".$template);
 	
-	$output = enginevars::get("fileList")->applyTemplate($engine->template."/".$template);
-	
-	enginevars::set("fileList", NULL);
+	$enginevars->set("fileList", NULL);
 	
 	return($output);
 }

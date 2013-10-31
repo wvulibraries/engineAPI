@@ -69,6 +69,8 @@ class session{
 	 */
 	private static $started=FALSE;
 
+	private $enginevars;
+
 	/**
 	 * Class constructor
 	 *
@@ -77,8 +79,10 @@ class session{
 	 */
 	private function __construct($options,$engineAPI=NULL){
 		self::$engine         = isset($engineAPI) ? $engineAPI : EngineAPI::singleton();
-		self::$optionsDefault = enginevars::is_set("session") ? enginevars::get("session") : array();
+		$this->set_enginevars(enginevars::getInstance());
 
+		self::$optionsDefault = $this->enginevars->is_set("session") ? $this->enginevars->get("session") : array();
+		
 		// Define template tags
 		templates::defTempPatterns('/\{session\s+(.+?)\}/', 'session::templateHandler', $this);
 		templates::defTempPatterns('/\{csrf}/', 'session::templateHandler_csrf', $this);
@@ -169,6 +173,10 @@ class session{
 
 		// Lastly, should we auto-start?
 		if(self::$options['autoStart']) self::start();
+	}
+
+	public function set_enginevars($enginevars) {
+		$this->enginevars = $enginevars;
 	}
 
 	/**

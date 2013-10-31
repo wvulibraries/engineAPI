@@ -69,7 +69,8 @@ class debug {
 		}
 		print "</p>";
 
-		$localVars = localvars::export();
+		$localvars = localvars::getInstance();
+		$localVars = $localvars->export();
 
 		print "<p><strong>Local Variables:</strong>:<br />";
 		foreach ($localVars as $key => $value) {

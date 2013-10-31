@@ -21,16 +21,17 @@ function mysqlLogin($username,$password) {
 	global $engineDB;
 	
 
-	$engine = EngineAPI::singleton();
+	$engine     = EngineAPI::singleton();
+	$enginevars = enginevars::getInstance();
 
-	if (!enginevars::is_set("mysqlAuthTable")) {
-		enginevars::get("mysqlAuthTable","users");
+	if (!$enginevars->is_set("mysqlAuthTable")) {
+		$enginevars->get("mysqlAuthTable","users");
 	}
 	
 	$engineDB = $engine->getPrivateVar("engineDB");
 	
 	$sql = sprintf("SELECT * FROM %s WHERE username='%s' AND password='%s'",
-		$engineDB->escape(enginevars::get("mysqlAuthTable")),
+		$engineDB->escape($enginevars->get("mysqlAuthTable")),
 		$engineDB->escape($username),
 		$engineDB->escape(md5($password))
 		);

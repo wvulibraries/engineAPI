@@ -1107,6 +1107,9 @@ class auth extends authCommon{
 	}
 }
 class authCommon{
+
+	$enginevars = enginevars::getInstance();
+	
 	public $dbName='Engine_CMS';
 	public $tblUsers='auth_users';
 	public $tblGroups='auth_groups';
@@ -1130,13 +1133,13 @@ class authCommon{
 		}
 
 		if(array_key_exists('userAuth',$engineVars)){
-			if(array_key_exists('dbName',enginevars::get("userAuth")))            $this->dbName            = enginevars::get("userAuth")['dbName'];
-			if(array_key_exists('tblUsers',enginevars::get("userAuth")))          $this->tblUsers          = enginevars::get("userAuth")['tblUsers'];
-			if(array_key_exists('tblGroups',enginevars::get("userAuth")))         $this->tblGroups         = enginevars::get("userAuth")['tblGroups'];
-			if(array_key_exists('tblPermissions',enginevars::get("userAuth")))    $this->tblPermissions    = enginevars::get("userAuth")['tblPermissions'];
-			if(array_key_exists('tblAuthorizations',enginevars::get("userAuth"))) $this->tblAuthorizations = enginevars::get("userAuth")['tblAuthorizations'];
-			if(array_key_exists('tblUsers2Groups',enginevars::get("userAuth")))   $this->tblUsers2Groups   = enginevars::get("userAuth")['tblUsers2Groups'];
-			if(array_key_exists('tblGroups2Groups',enginevars::get("userAuth")))  $this->tblGroups2Groups  = enginevars::get("userAuth")['tblGroups2Groups'];
+			if(array_key_exists('dbName',$enginevars->get("userAuth")))            $this->dbName            = $enginevars->get("userAuth")['dbName'];
+			if(array_key_exists('tblUsers',$enginevars->get("userAuth")))          $this->tblUsers          = $enginevars->get("userAuth")['tblUsers'];
+			if(array_key_exists('tblGroups',$enginevars->get("userAuth")))         $this->tblGroups         = $enginevars->get("userAuth")['tblGroups'];
+			if(array_key_exists('tblPermissions',$enginevars->get("userAuth")))    $this->tblPermissions    = $enginevars->get("userAuth")['tblPermissions'];
+			if(array_key_exists('tblAuthorizations',$enginevars->get("userAuth"))) $this->tblAuthorizations = $enginevars->get("userAuth")['tblAuthorizations'];
+			if(array_key_exists('tblUsers2Groups',$enginevars->get("userAuth")))   $this->tblUsers2Groups   = $enginevars->get("userAuth")['tblUsers2Groups'];
+			if(array_key_exists('tblGroups2Groups',$enginevars->get("userAuth")))  $this->tblGroups2Groups  = $enginevars->get("userAuth")['tblGroups2Groups'];
 		}
 	}
 

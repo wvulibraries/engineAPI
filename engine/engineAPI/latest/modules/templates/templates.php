@@ -10,10 +10,20 @@ class templates {
 
 	private static $moduleTemplateEngine = array();
 
+	private $enginevars;
+
 	function __construct() {
-		if (!is_empty(enginevars::get("templateDefault"))) {
-			self::load(enginevars::get("templateDefault"));
+		$this->set_enginevars(enginevars::getInstance());
+
+		if (!is_empty($this->enginevars->get("templateDefault"))) {
+			self::load($this->enginevars->get("templateDefault"));
 		}
+
+
+	}
+
+	public function set_enginevars($enginevars) {
+		$this->enginevars = $enginevars;
 	}
 
 	/**
@@ -23,11 +33,12 @@ class templates {
 	 * @return BOOL           	TRUE on success, FALSE otherwise.
 	 */
 	public static function load($template) {
+		$enginevars = enginevars::getInstance();
+		
+		if (file_exists($enginevars->get("tempDir").DIRECTORY_SEPARATOR.$template)) {
 
-		if (file_exists(enginevars::get("tempDir").DIRECTORY_SEPARATOR.$template)) {
-
-			self::$template = enginevars::get("tempDir").DIRECTORY_SEPARATOR.$template;
-			enginevars::get("currentTemplate", self::$template);
+			self::$template = $enginevars->get("tempDir").DIRECTORY_SEPARATOR.$template;
+			$enginevars->get("currentTemplate", self::$template);
 			return TRUE;
 
 		}
