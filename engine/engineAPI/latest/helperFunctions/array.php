@@ -212,9 +212,9 @@ function buildECMSArray($array) {
  */
 function simpleXMLToArray(SimpleXMLElement $xml,$attributesKey=null,$childrenKey=null,$valueKey=null){ 
 
-    if ($childrenKey   && !is_string($childrenKey))   $childrenKey = '@children';
+    if ($childrenKey   && !is_string($childrenKey))   $childrenKey   = '@children';
     if ($attributesKey && !is_string($attributesKey)) $attributesKey = '@attributes';
-    if ($valueKey      && !is_string($valueKey))      $valueKey = '@values';
+    if ($valueKey      && !is_string($valueKey))      $valueKey      = '@values';
     
     $return = array(); 
     $name   = $xml->getName(); 
@@ -222,9 +222,13 @@ function simpleXMLToArray(SimpleXMLElement $xml,$attributesKey=null,$childrenKey
 
     if (!strlen($_value)) $_value = null; 
 
-    if($_value!==null){ 
-        if($valueKey){$return[$valueKey] = $_value;} 
-        else{$return = $_value;} 
+    if($_value !== null){ 
+        if ($valueKey) {
+            $return[$valueKey] = $_value;
+        } 
+        else {
+            $return = $_value;
+        } 
     } 
 
     $children = array(); 
@@ -258,9 +262,9 @@ function simpleXMLToArray(SimpleXMLElement $xml,$attributesKey=null,$childrenKey
             $return[$childrenKey] = $children;
         }
         else {
-            $return = array_merge($return,$children);
+            $return = array_merge((array)$return,$children);
         } 
-        
+
     } 
 
     $attributes = array(); 
@@ -274,7 +278,7 @@ function simpleXMLToArray(SimpleXMLElement $xml,$attributesKey=null,$childrenKey
             $return[$attributesKey] = $attributes;
         } 
         else {
-            $return = array_merge($return, $attributes);
+            $return = array_merge((array)$return, $attributes);
         } 
     } 
 
