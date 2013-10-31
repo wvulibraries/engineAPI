@@ -144,13 +144,12 @@ function array_prevIndex($array,$index,$loop=FALSE) {
  *         Returns the index if found, otherwise FALSE
  */
 function array_getFirstIndex($array) {
-	if (is_array($array) && count($array) > 0) {
-		reset($array);
-		foreach ($array as $I=>$V) {
-			return($I);
-		}
-	}
-	return(FALSE);
+
+    if (is_array($array) && count($array) > 0) {
+        return(array_shift(array_keys($array)));
+    }
+    
+    return(FALSE); 
 }
 
 /**
