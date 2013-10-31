@@ -41,6 +41,7 @@ function is_odd($number) {
  * Replacement for is_int()
  * Tests strings as well, returns true for an integer.
  *
+ * @deprecated
  * @param mixed $var
  *        The input to test
  * @return bool

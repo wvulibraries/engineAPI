@@ -33,18 +33,15 @@ class isTest extends PHPUnit_Framework_TestCase {
 	}
 
 	public function test_isint_IntegerReturnsTrue() {
-		$this->assertTrue(isint(1234));
-		$this->markTestIncomplete('Need to stub validate class.');
+		$this->markTestSkipped('Deprecated function.');
 	}
 
 	public function test_isint_FloatReturnsFalse() {
-		$this->assertFalse(isint(1234.56));
-		$this->markTestIncomplete('Need to stub validate class.');
+		$this->markTestSkipped('Deprecated function.');
 	}
 
 	public function test_isint_StringReturnsFalse() {
-		$this->assertFalse(isint('foo'));
-		$this->markTestIncomplete('Need to stub validate class.');
+		$this->markTestSkipped('Deprecated function.');
 	}
 
 	public function test_isnull_NullReturnsTrue() {
