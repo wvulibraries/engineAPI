@@ -161,7 +161,7 @@ function obfuscateEmail($input){
  */
 function secureFilepath($filepath){
     // If this is a cli session, there's no need to secure the filepath
-    if(isCLI()) return $filepath;
+    if(!class_exists('PHPUnit_Framework_TestCase', FALSE) and isCLI()) return $filepath;
 
 	return (string)preg_replace(array(
 		'|^'.$_SERVER["DOCUMENT_ROOT"].'|i',
@@ -215,10 +215,10 @@ function formatPhone($phoneIn,$format=1,$extFormat=1){
                 // Ignore extension
                 break;
             case 1:
-                $phoneOut = ' x'.substr($phoneIn,10);
+                $phoneOut .= ' x'.substr($phoneIn,10);
                 break;
             case 2:
-                $phoneOut = ' ext'.substr($phoneIn,10);
+                $phoneOut .= ' ext'.substr($phoneIn,10);
                 break;
             default:
                 return formatPhone($phoneIn, $format);
@@ -294,6 +294,7 @@ function normalizeArray($input,$delimiter=','){
 /**
  * This function will parse a date time string and convert it into a unix timestamp
  *
+ * @deprecated
  * @param string $str
  * @return string
  **/
