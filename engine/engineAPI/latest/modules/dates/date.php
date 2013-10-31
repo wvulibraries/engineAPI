@@ -25,7 +25,7 @@ class date {
 		$attPairs = attPairs($matches[1]);
 
 		if (isset($attPairs['time'])) {
-			if (!validate::integer($attPairs['time'])) {
+			if (!validate::getInstance()->integer($attPairs['time'])) {
 				errorHandle::newError(__METHOD__."() - ".$attPairs['time'], errorHandle::DEBUG);
 				return(FALSE);
 			}
