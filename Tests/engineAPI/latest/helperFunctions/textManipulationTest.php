@@ -154,8 +154,8 @@ class textManipulationTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals($array, normalizeArray($json));
     }
     function test_normalizeArray_csvInput(){
-        $arrayOUT = array('a','b','c', 'a' => '123', 'b' => 'abc');
-        $this->assertEquals($arrayOUT, normalizeArray());
+        $arrayOUT = array('a','b','c');
+        $this->assertEquals($arrayOUT, normalizeArray('a, b    ,  c   '));
     }
 
     function test_dateToUnix(){
