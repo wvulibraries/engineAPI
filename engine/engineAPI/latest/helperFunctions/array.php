@@ -173,6 +173,7 @@ function array_getLastIndex($array) {
  * Turns an array into a string, using a definable delimiter. 
  * if parameter is not an array, returns that parameter unmodified. 
  *
+ * @deprecated This can be replaced with just using serialize_array() i think
  * @param array $array
  * @return array|mixed
  */
