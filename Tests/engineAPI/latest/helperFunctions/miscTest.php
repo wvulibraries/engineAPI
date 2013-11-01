@@ -31,6 +31,9 @@ class miscTest extends PHPUnit_Framework_TestCase {
 	}
 
 	public function test_functionExists_NonExistantVariableReturnsFalse() {
+		// Using an undefined variable
+		$this->setExpectedException('PHPUnit_Framework_Error_Notice');
+
 		$this->assertFalse(functionExists($foo));
 	}
 

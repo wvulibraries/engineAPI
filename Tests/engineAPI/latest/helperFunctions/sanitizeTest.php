@@ -33,6 +33,9 @@ class sanitizeTest extends PHPUnit_Framework_TestCase {
 	}
 
 	public function test_htmlSanitize_NonExistantVariableReturnsFalse() {
+		// Using an undefined variable
+		$this->setExpectedException('PHPUnit_Framework_Error_Notice');
+
 		$this->assertFalse(htmlSanitize($foo));
 	}
 
@@ -51,12 +54,18 @@ class sanitizeTest extends PHPUnit_Framework_TestCase {
 	}
 
 	public function test_jsonSanitize_UnsupportedTypeReturnsType() {
+		// Using an undefined variable
+		$this->setExpectedException('PHPUnit_Framework_Error_Notice');
+
 		$this->assertEquals('foo', jsonSanitize($foo, 'FOO'));
 		$this->assertEquals('foo', jsonSanitize($foo, 'Foo'));
 		$this->assertEquals('foo', jsonSanitize($foo, 'foo'));
 	}
 
 	public function test_jsonSanitize_SupportedTypeDoesNotReturnType() {
+		// Using an undefined variable
+		$this->setExpectedException('PHPUnit_Framework_Error_Notice');
+
 		$this->assertNotEquals('MYSQL', jsonSanitize($foo, 'MYSQL'));
 		$this->assertNotEquals('mysql', jsonSanitize($foo, 'MYSQL'));
 		$this->assertNotEquals('mysql', jsonSanitize($foo, 'mysql'));
