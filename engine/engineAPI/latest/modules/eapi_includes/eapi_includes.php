@@ -29,7 +29,6 @@ class eapi_includes {
 	 */
 	public static function templateMatches($matches) {
 
-		$eapi_function = templates::retTempObj("eapi_function");
 		$attPairs      = attPairs($matches[1]);
 		
 		if(!isset($attPairs['file']) && isempty($attPairs['type'])) return(FALSE);

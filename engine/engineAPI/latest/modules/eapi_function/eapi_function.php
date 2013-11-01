@@ -28,8 +28,7 @@ class eapi_function {
 	 * @return bool
 	 */
 	public static function templateMatches($matches) {
-		
-		$eapi_function = templates::retTempObj("eapi_function");
+
 		$attPairs      = attPairs($matches[1]);
 		
 		if (!isset($attPairs['function']) && isempty($attPairs['function'])) {
