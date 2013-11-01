@@ -65,11 +65,12 @@ function kwic($str1,$str2) {
  *
  * @see http://nanovivid.com/stuff/wordpress/title-case/
  * @see http://daringfireball.net/2008/05/title_case/
- * @param $str
+ * @param $str 
+ * @param  $preserve If TRUE, will preserve any capitalization already in the string (such as words in all caps or camel case)
  * @return mixed|string
  */
 
-function str2TitleCase($str) {
+function str2TitleCase($str,$preserve=FALSE) {
 
     // Edit this list to change what words should be lowercase
     $small_words = "a an and as at but by en for if in of on or the to v[.]? via vs[.]?";
@@ -89,13 +90,23 @@ function str2TitleCase($str) {
     for ($i = 0; $i < count($words); $i++) {
 
         // Skip words with dots in them like del.icio.us
-        $words[$i] = preg_replace_callback('/\b([[:alpha:]][[:lower:].\'’(&\#8217;)]*)\b/x', 'nv_title_skip_dotted', $words[$i]);
+        $preserveRegex = '/\b([[:alpha:]][[:lower:].\'’(&\#8217;)]*)\b/x';
+        $normalRegex   = '/\b([[:alpha:]][[:lower:][:upper:].\'’(&\#8217;)]*)\b/x';
+
+        if ($preserve) {
+            $regex = $preserveRegex;
+        }
+        else {
+            $regex = $normalRegex;
+        }
+
+        $words[$i] = preg_replace_callback($regex, 'nv_title_skip_dotted', $words[$i]);
 
         // Lowercase our list of small words
-        $words[$i] = preg_replace("/\b($small_re)\b/ei", "strtolower(\"$1\")", $words[$i]);
+        if (!$preserve) $words[$i] = preg_replace("/\b($small_re)\b/ei", "strtolower(\"$1\")", $words[$i]);
 
         // If the first word in the title is a small word, capitalize it
-        $words[$i] = preg_replace("/\A([[:punct:]]*)($small_re)\b/e", "\"$1\" . ucfirst(\"$2\")", $words[$i]);
+        $words[$i] = preg_replace("/\A([[:punct:]]*)($small_re)\b/ie", "\"$1\" . ucfirst(\"$2\")", $words[$i]);
 
         // If the last word in the title is a small word, capitalize it
         $words[$i] = preg_replace("/\b($small_re)([[:punct:]]*)\Z/e", "ucfirst(\"$1\") . \"$2\"", $words[$i]);
@@ -122,13 +133,12 @@ function str2TitleCase($str) {
 }
 
 /**
- * Um...
- * @todo Is this still needed? (Can it be deprecated/removed?)
+ * This is a callback function for str2title. This is the function that actually does the case changing
  * @param $matches
  * @return string
  */
 function nv_title_skip_dotted($matches) {
-    return preg_match('/[[:alpha:]] [.] [[:alpha:]]/x', $matches[0]) ? $matches[0] : ucfirst($matches[0]);
+    return preg_match('/[[:alpha:]] [.] [[:alpha:]]/x', $matches[0]) ? $matches[0] : ucfirst(strtolower($matches[0]));
 }
 
 /**
