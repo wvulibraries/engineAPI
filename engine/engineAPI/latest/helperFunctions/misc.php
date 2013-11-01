@@ -90,9 +90,8 @@ function callingFile($basename=FALSE){
 }
 
 /**
- * Return attribute pairs
+ * Return key->value attribute pairs from a string that is in the form of 'key1="val1" key2="val2"'
  *
- * @todo What is this function for? Is it still needed?
  * @param $attpairs
  * @return array
  */
@@ -114,16 +113,14 @@ function attPairs($attpairs) {
 }
 
 /**
- * Not sure...
+ * Remove a variable from the query string
  *
  * @param $qs
  * @param $var
  * @return string
  */
 function removeQueryStringVar($qs, $var) {
-	$qs = preg_replace('/(.*)(?|&)'.$var.'=[^&]+?(&)(.*)/i', '$1$2$4', $qs.'&');
-	$qs = substr($qs, 0, -1);
-	return $qs;
+	return preg_replace('/[\?|&]'.$var.'=[a-zA-Z0-9]*$|'.$var.'=[a-zA-Z0-9]*[&]/', '', $qs);
 }
 
 /**
@@ -144,7 +141,7 @@ function removeQueryStringVar($qs, $var) {
  * @return bool|string
  */
 function recurseInsert($file,$type="php",$regex=NULL,$condition="REQUEST_URI",$caseInsensitive=TRUE) {
-	
+
 	$engine     = EngineAPI::singleton();
 	$enginevars = enginevars::getInstance();
 
