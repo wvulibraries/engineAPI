@@ -6,6 +6,10 @@ class queryString {
 		templates::defTempPatterns("/\{queryString\s+(.+?)\}/","queryString::templateMatches",$this);
 	}
 
+	public static function getInstance() {
+		return new self;
+	}
+
 	/**
 	 * Engine tag handler
 	 * @param $matches
@@ -25,6 +29,40 @@ class queryString {
 
 		return("");
 		
+	}
+
+	/**
+	 * Remove a variable from the query string
+	 *
+	 * @param $var
+	 * @param $qs optional. if not provided will get query string from $_SERVER;
+	 * @return string
+	 */
+	public function remove($var, $qs = NULL) {
+		if (isnull($qs)) $qs = $_SERVER['QUERY_STRING'];
+
+		if ($qs[0] == "?") {
+			$qs     = substr($qs, 1);
+			$qmTest = TRUE;
+		}
+		else {
+			$qmTest = FALSE;
+		}
+
+
+		if ($qs[strlen($qs)-1] == "&") {
+			$qs     = substr($qs, 0, -1);
+			$ampTest = TRUE;
+		}
+		else {
+			$ampTest = FALSE;
+		}
+
+		parse_str($qs, $output);
+		if (array_key_exists($var, $output)) unset($output[$var]);
+
+		return (($qmTest)?"?":"").http_build_query($output).(($ampTest)?"&":"");
+
 	}
 
 }

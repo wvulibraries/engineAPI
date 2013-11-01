@@ -115,34 +115,16 @@ function attPairs($attpairs) {
 /**
  * Remove a variable from the query string
  *
+ * @deprecated Now just a wrapper function
+ * 
  * @param $qs
  * @param $var
  * @return string
  */
 function removeQueryStringVar($qs, $var) {
 
-	
-	if ($qs[0] == "?") {
-		$qs     = substr($qs, 1);
-		$qmTest = TRUE;
-	}
-	else {
-		$qmTest = FALSE;
-	}
+	return queryString::getInstance()->remove($var,$qs);
 
-
-	if ($qs[strlen($qs)-1] == "&") {
-		$qs     = substr($qs, 0, -1);
-		$ampTest = TRUE;
-	}
-	else {
-		$ampTest = FALSE;
-	}
-
-	parse_str($qs, $output);
-	if (array_key_exists($var, $output)) unset($output[$var]);
-
-	return (($qmTest)?"?":"").http_build_query($output).(($ampTest)?"&":"");
 }
 
 /**
