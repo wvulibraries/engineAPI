@@ -22,17 +22,24 @@ class textManipulationTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals(kwic('cat', $targetStr), $targetStr);
     }
 
-    function test_str2TitleCase(){
+    function test_str2TitleCase_Normal(){
         $this->assertEquals(str2TitleCase('tO KILL A MoCKinGBird'), 'To Kill a Mockingbird');
-        $this->assertEquals(str2TitleCase('Gone WITH the Wind'), 'Gone with the Wind');
+        $this->assertEquals(str2TitleCase('Gone WITH the Wind'), 'Gone With the Wind');
         $this->assertEquals(str2TitleCase('AnGeLs and Demons'), 'Angels and Demons');
         $this->assertEquals(str2TitleCase('a Tale of twO cities'), 'A Tale of Two Cities');
         $this->assertEquals(str2TitleCase('The Lord OF ThE Rings'), 'The Lord of the Rings');
         $this->assertEquals(str2TitleCase('WaterSHIP down'), 'Watership Down');
-        $this->assertEquals(str2TitleCase("gOD's Little Acre"), "God's Little Acre");
+        $this->assertEquals(str2TitleCase("gOD&apos;s Little Acre"), "God&apos;s Little Acre");
         $this->assertEquals(str2TitleCase('Catch-22'), 'Catch-22');
         $this->assertEquals(str2TitleCase('Mr. men'), 'Mr. Men');
         $this->assertEquals(str2TitleCase("Where's WALLY?"), "Where's Wally?");
+    }
+
+    function test_str2TitleCase_Preserve(){
+        $this->assertEquals(str2TitleCase('to KILL A MoCKinGBird',TRUE), 'To KILL A MoCKinGBird');
+        $this->assertEquals(str2TitleCase("gOD&apos;s Little Acre",TRUE), "gOD&apos;s Little Acre");
+        $this->assertEquals(str2TitleCase('Catch-22',TRUE), 'Catch-22');
+        $this->assertEquals(str2TitleCase('Mr. men',TRUE), 'Mr. Men');
     }
 
     function test_nv_title_skip_dotted(){
@@ -54,7 +61,9 @@ class textManipulationTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals(secureFilepath("/some/basic/path"), '/some/basic/path');
     }
     function test_secureFilepath_home(){
-        $this->assertEquals(secureFilepath("/some/home/directory"), '[HOME]/some/home/directory');
+        // Document root needs to be set
+        $_SERVER['DOCUMENT_ROOT'] = '/some/hidden/path';
+        $this->assertEquals(secureFilepath("/home/directory"), '[HOME]/directory');
         $this->assertEquals(secureFilepath("/some/basic/path"), '/some/basic/path');
     }
 
