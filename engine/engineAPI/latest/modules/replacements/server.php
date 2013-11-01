@@ -32,7 +32,6 @@ class server {
 	 * @return string
 	 */
 	public static function templateMatches($matches) {
-		$obj      = templates::retTempObj("server");
 		
 		$attPairs = attPairs($matches[1]);
 		if (!isset($attPairs['var'])) {
