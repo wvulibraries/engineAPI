@@ -66,15 +66,15 @@ class miscTest extends PHPUnit_Framework_TestCase {
 	}
 
 	public function test_callingFunction() {
-		$this->markTestSkipped('Untestable or assume debug_backtrace will always return with the same string?');
+		$this->markTestIncomplete('Untestable or assume debug_backtrace will always return with the same string?');
 	}
 
 	public function test_callingLine() {
-		$this->markTestSkipped('Untestable or assume debug_backtrace will always return with the same string?');
+		$this->markTestIncomplete('Untestable or assume debug_backtrace will always return with the same string?');
 	}
 
 	public function test_callingFile() {
-		$this->markTestSkipped('Untestable or assume debug_backtrace will always return with the same string?');
+		$this->markTestIncomplete('Untestable or assume debug_backtrace will always return with the same string?');
 	}
 
 	public function test_attPairs_CreatesArrayFromProperString() {
@@ -95,6 +95,17 @@ class miscTest extends PHPUnit_Framework_TestCase {
 		$this->assertNotEquals($a, attPairs('key1=val1 key2=val2'));
 		$this->assertNotEquals($a, attPairs('key1 = val1 key2 = val2'));
 		unset($a);
+	}
+
+	// public function test_recurseInsert_InvalidRegexAndConditionReturnsFalse() {
+	// 	$this->assertFalse(recurseInsert('anything','anything','badRegex','badCondition',TRUE));
+	// 	$this->assertFalse(recurseInsert('anything','anything','badRegex','badCondition',FALSE));
+	// 	$this->assertFalse(recurseInsert('anything','anything','badRegex','badCondition'));
+	// 	$this->markTestIncomplete();
+	// }
+
+	public function test_recurseInsert_() {
+		$this->markTestIncomplete('Cannot currently stub EngineAPI.');
 	}
 
 
