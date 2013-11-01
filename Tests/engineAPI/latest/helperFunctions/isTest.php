@@ -32,18 +32,6 @@ class isTest extends PHPUnit_Framework_TestCase {
 		$this->assertFalse(is_odd('foo'));
 	}
 
-	public function test_isint_IntegerReturnsTrue() {
-		$this->markTestSkipped('Deprecated function.');
-	}
-
-	public function test_isint_FloatReturnsFalse() {
-		$this->markTestSkipped('Deprecated function.');
-	}
-
-	public function test_isint_StringReturnsFalse() {
-		$this->markTestSkipped('Deprecated function.');
-	}
-
 	public function test_isnull_NullReturnsTrue() {
 		$this->assertTrue(isnull(NULL,FALSE));
 		$this->assertTrue(isnull(NULL,TRUE));
@@ -86,11 +74,11 @@ class isTest extends PHPUnit_Framework_TestCase {
 	}
 
 	public function test_isCLI_RunningFromCommandLine() {
-		$this->markTestSkipped('Currently untestable: Needs code refactoring.');
+		$this->markTestIncomplete('Currently untestable: Needs code refactoring.');
 	}
 
 	public function test_isCLI_NotRunningFromCommandLine() {
-		$this->markTestSkipped('Currently untestable: Needs code refactoring.');
+		$this->markTestIncomplete('Currently untestable: Needs code refactoring.');
 	}
 
 	public function test_isPHP_VersionGreaterThanOrEqualToSuppliedReturnsTrue() {

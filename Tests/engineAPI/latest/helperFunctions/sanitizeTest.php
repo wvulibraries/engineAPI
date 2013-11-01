@@ -17,19 +17,19 @@ class sanitizeTest extends PHPUnit_Framework_TestCase {
 	}
 
 	public function test_dbSanitize_SanitizeString() {
-		$this->markTestSkipped('Skipping until new database object is complete.');
+		$this->markTestIncomplete('Skipping until new database object is complete.');
 	}
 
 	public function test_dbSanitize_SanitizeStringWithQuotesEqualTrue() {
-		$this->markTestSkipped('Skipping until new database object is complete.');
+		$this->markTestIncomplete('Skipping until new database object is complete.');
 	}
 
 	public function test_dbSanitize_SanitizeStringWithQuotesEqualFalse() {
-		$this->markTestSkipped('Skipping until new database object is complete.');
+		$this->markTestIncomplete('Skipping until new database object is complete.');
 	}
 
 	public function test_dbSanitize_SanitizeArrays() {
-		$this->markTestSkipped('Skipping until new database object is complete.');
+		$this->markTestIncomplete('Skipping until new database object is complete.');
 	}
 
 	public function test_htmlSanitize_NonExistantVariableReturnsFalse() {
@@ -75,17 +75,17 @@ class sanitizeTest extends PHPUnit_Framework_TestCase {
 	}
 
 	public function test_jsonSanitize() {
-		$this->markTestSkipped('Cannot properly test due to lack of function level stubbing.');
+		$this->markTestIncomplete('Cannot properly test due to lack of function level stubbing.');
 	}
 
 	public function test_stripCarriageReturns_StripWhenEnginevarIsTrue() {
 		// Mock Enginevars to make sure it is true, should return input string w/o any carriage returns
-		$this->markTestSkipped('Awaiting Enginevars changes.');
+		$this->markTestIncomplete('Awaiting Enginevars changes.');
 	}
 
 	public function test_stripCarriageReturns_ReturnStringWhenEnginevarIsNotTrue() {
 		// Test with FALSE as well as random string, should return input string unchanged
-		$this->markTestSkipped('Awaiting Enginevars changes.');
+		$this->markTestIncomplete('Awaiting Enginevars changes.');
 	}
 
 	public function test_stripNewLines_StripSlashR() {
