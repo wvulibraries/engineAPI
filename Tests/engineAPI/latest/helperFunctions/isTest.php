@@ -62,6 +62,9 @@ class isTest extends PHPUnit_Framework_TestCase {
 	}
 
 	public function test_isempty_EmptyReturnsTrue() {
+		// Using an undefined variable
+		$this->setExpectedException('PHPUnit_Framework_Error_Notice');
+
 		$this->assertTrue(isempty($foo));
 		$this->assertTrue(isempty(''));
 		$this->assertTrue(isempty(NULL,FALSE));
