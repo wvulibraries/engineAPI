@@ -25,7 +25,7 @@ class MyGuestbookTest extends PHPUnit_Extensions_Database_TestCase {
      * @return PHPUnit_Extensions_Database_DataSet_IDataSet
      */
     public function getDataSet() {
-        return $this->createFlatXMLDataSet(dirname(__FILE__).'/_files/guestbook-seed.xml');
+        return $this->createFlatXMLDataSet(dirname(__FILE__).'/_files/localvarsTest_dataset.xml');
     }
 }
 
