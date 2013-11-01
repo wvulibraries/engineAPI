@@ -1,33 +1,27 @@
 <?php
 
-class MyGuestbookTest extends PHPUnit_Extensions_Database_TestCase {
-    /**
-     * @return PHPUnit_Extensions_Database_DB_IDatabaseConnection
-     */
-    public function getConnection() {
+// class localvarsDBTest extends PHPUnit_Extensions_Database_TestCase {
 
-    	if ($this->conn == null) {
-    		if (self::$pdo == null) {
-    			try {
-    				self::$pdo = new PDO($GLOBALS['DB_DSN'], $GLOBALS['DB_USER'], $GLOBALS['DB_PASSWD']);
-    			}
-    			catch(PDOException $e) {
-    				echo $e->getMessage();
-    			}
-    		}
+//     public function getConnection() {
 
-    		$this->conn = $this->createDefaultDBConnection(self::$pdo, $GLOBALS['DB_DBNAME']);
-    	}
-        return $this->conn;
-    }
+//     	$pdo = new PDO($GLOBALS['DB_DSN'], $GLOBALS['DB_USER'], $GLOBALS['DB_PASSWD']);
+//     	return $this->createDefaultDBConnection($pdo, $GLOBALS['DB_DBNAME']);
+//     }
  
-    /**
-     * @return PHPUnit_Extensions_Database_DataSet_IDataSet
-     */
-    public function getDataSet() {
-        return $this->createFlatXMLDataSet(dirname(__FILE__).'/_files/localvarsTest_dataset.xml');
-    }
-}
+//     public function getDataSet() {
+//     	//$ds =
+//  		return $this->createFlatXMLDataSet(dirname(__FILE__).'/_files/localvarsTest_dataset.xml');
+//         // $rds = new PHPUnit_Extensions_Database_DataSet_ReplacementDataSet($ds);
+//         // $rds->addFullReplacement('##NULL##', null);
+//         // return $rds;
+//     }
+
+//     public function test_test() {
+    	
+//     	$this->assertTrue(TRUE);
+//     }
+
+// }
 
 
 ?>

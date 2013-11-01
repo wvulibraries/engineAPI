@@ -1,21 +1,5 @@
 <?xml version="1.0" ?>
 <dataset>
-    <table name="localvarsTest">
-        <column>id</column>
-        <column>content</column>
-        <column>user</column>
-        <column>created</column>
-        <row>
-            <value>1</value>
-            <value>Hello buddy!</value>
-            <value>joe</value>
-            <value>2010-04-24 17:15:23</value>
-        </row>
-        <row>
-            <value>2</value>
-            <value>I like it!</value>
-            <null />
-            <value>2010-04-26 12:14:20</value>
-        </row>
-    </table>
+    <localvarsTest id="1" content="foo" user="John" created="2010-04-24 17:15:23" />
+    <localvarsTest id="2" content="bar" user="Smith" created="2010-04-26 12:14:20" />
 </dataset>

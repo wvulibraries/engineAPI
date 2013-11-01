@@ -1,15 +1,17 @@
 <phpunit colors="true"
 		 bootstrap="Tests/bootstrap.php">
 
-	<var name="DB_DSN"    value="mysql:dbname=engineAPTest;host=localhost" />
-	<var name="DB_USER"   value="user" />
-    <var name="DB_PASSWD" value="passwd" />
-    <var name="DB_DBNAME" value="engineAPITest" />
+		 <php>
+		 	<var name="DB_DSN"    value="mysql:dbname=engineAPITest;host=localhost" />
+		 	<var name="DB_USER"   value="user" />
+		 	<var name="DB_PASSWD" value="passwd" />
+		 	<var name="DB_DBNAME" value="engineAPITest" />
+		 </php>
 
-	<testsuites>
-		<testsuite name="engineAPI">
-			<directory>Tests/</directory>
-		</testsuite>
-	</testsuites>
+		 <testsuites>
+		 	<testsuite name="engineAPI">
+		 		<directory>Tests/</directory>
+		 	</testsuite>
+		 </testsuites>
 
 </phpunit>
