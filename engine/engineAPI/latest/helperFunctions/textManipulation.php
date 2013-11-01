@@ -163,13 +163,10 @@ function secureFilepath($filepath){
     // If this is a cli session, there's no need to secure the filepath
     if(!class_exists('PHPUnit_Framework_TestCase', FALSE) and isCLI()) return $filepath;
 
-	return (string)preg_replace(array(
-		'|^'.$_SERVER["DOCUMENT_ROOT"].'|i',
-		'|^/home|i'
-	), array(
-		'[DOCUMENT_ROOT]',
-		'[HOME]'
-	), $filepath);
+    $filepath = preg_replace('|^'.$_SERVER["DOCUMENT_ROOT"].'|i', '[DOCUMENT_ROOT]', $filepath);
+    $filepath = preg_replace('|^/home|i', '[HOME]', $filepath);
+
+	return $filepath;
 }
 
 /**
