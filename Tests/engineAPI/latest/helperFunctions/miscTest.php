@@ -102,6 +102,8 @@ class miscTest extends PHPUnit_Framework_TestCase {
 
 		$this->assertEquals('a=1&c=3&d=4', removeQueryStringVar('a=1&b=2&c=3&d=4', 'b'));
 		$this->assertEquals('a=1&c=3&d=4&', removeQueryStringVar('a=1&b=2&c=3&d=4&', 'b'));
+
+		$this->assertEquals('?a=1&c=3&d=4', removeQueryStringVar('?a=1&b=This%20%22is%22%20a%20test%20amd%20%22stuff%22%3F%3F%23%24%25%5E%26*&c=3&d=4', 'b'));
 	}
 
 	public function test_removeQueryStringVar_NonExistantVariableReturnsSameString() {
