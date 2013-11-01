@@ -120,9 +120,29 @@ function attPairs($attpairs) {
  * @return string
  */
 function removeQueryStringVar($qs, $var) {
-	$qs = preg_replace('/(.*)(?|&)'.$var.'=[^&]+?(&)(.*)/i', '$1$2$4', $qs.'&');
-	$qs = substr($qs, 0, -1);
-	return $qs;
+
+	
+	if ($qs[0] == "?") {
+		$qs     = substr($qs, 1);
+		$qmTest = TRUE;
+	}
+	else {
+		$qmTest = FALSE;
+	}
+
+
+	if ($qs[strlen($qs)-1] == "&") {
+		$qs     = substr($qs, 0, -1);
+		$ampTest = TRUE;
+	}
+	else {
+		$ampTest = FALSE;
+	}
+
+	parse_str($qs, $output);
+	if (array_key_exists($var, $output)) unset($output[$var]);
+
+	return (($qmTest)?"?":"").http_build_query($output).(($ampTest)?"&":"");
 }
 
 /**
