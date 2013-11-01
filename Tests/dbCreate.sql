@@ -1,0 +1,3 @@
+CREATE DATABASE engineAPITest;
+
+GRANT ALL PRIVILEGES ON *.* TO 'user'@'localhost' IDENTIFIED BY PASSWORD 'passwd';
