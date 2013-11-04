@@ -198,6 +198,7 @@ class EngineAPI{
 		require_once self::$engineDir."/autoloader.php";
 		require_once self::$engineDir."/accessControl/accessControl.php";
 		require_once self::$engineDir."/userInfo.php";
+		require_once self::$engineDir."/errorHandle.php";
 
 		// This needs to be explicitly loaded so that onLoad.php's that call
 		// template information can be loaded correctly
@@ -246,14 +247,12 @@ class EngineAPI{
 			$this->loginFunctions[$type] = $function;
 		}
 
-		// Sets up a clean PHP_SELF variable to use.
-		phpself::clean();
-
-		// Sets up a clean clean $_SERVER['HTTP_REFERER']
-		server::cleanHTTPReferer();
-
-		// Sets up a clean $_SERVER['QUERY_STRING'] variable
-		server::cleanQueryStringReferer();
+		// Clean variables
+		http::cleanPost();                 // $_POST
+		http::cleanGet();                  // $_GET
+		phpself::clean();                  // $_SERVER['PHP_SELF']
+		server::cleanHTTPReferer();        // $_SERVER['HTTP_REFERER']
+		server::cleanQueryStringReferer(); // $_SERVER['QUERY_STRING']
 
 		// Startup engines database connection
 		require_once self::$engineDir."/modules/database/engineDB.php";
@@ -292,19 +291,12 @@ class EngineAPI{
 			}
 		}
 
-		// Get clean $_POST
-		http::cleanPost();
-
-		// Get clean $_GET
-		http::cleanGet();
-
 		// kill off $_REQUEST and force everything through cleanGet and cleanPost
 		if (isset($_REQUEST)) {
 			unset($_REQUEST);
 		}
 
         // Last thing we need to do is load, and initialize the errorHandle class (the error handler)
-        require_once self::$engineDir."/errorHandle.php";
         errorHandle::singleton();
         ob_start('EngineAPI::displayTemplate');
 
