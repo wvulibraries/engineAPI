@@ -249,14 +249,11 @@ class EngineAPI{
 		// Sets up a clean PHP_SELF variable to use.
 		phpself::clean();
 
-		// Sets up a clean clean HTTP_REFERER
-		if (isset($_SERVER['HTTP_REFERER'])) {
-			$_SERVER['HTTP_REFERER'] = htmlSanitize($_SERVER['HTTP_REFERER']);
-		}
+		// Sets up a clean clean $_SERVER['HTTP_REFERER']
+		server::cleanHTTPReferer();
 
-		if (isset($_SERVER['QUERY_STRING'])) {
-			$_SERVER['QUERY_STRING'] = htmlSanitize($_SERVER['QUERY_STRING']);
-		}
+		// Sets up a clean $_SERVER['QUERY_STRING'] variable
+		server::cleanQueryStringReferer();
 
 		// Startup engines database connection
 		require_once self::$engineDir."/modules/database/engineDB.php";
