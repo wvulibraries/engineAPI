@@ -44,6 +44,14 @@ class server {
 		
 		return("Variable not found in \$_SERVER");
 	}
+
+	public static function cleanHTTPReferer() {
+		if (isset($_SERVER['HTTP_REFERER'])) {
+			$_SERVER['HTTP_REFERER'] = htmlSanitize($_SERVER['HTTP_REFERER']);
+		}
+
+		return TRUE;
+	}
 	
 }
 
