@@ -200,6 +200,7 @@ class EngineAPI{
 		self::$engineDir = dirname(__FILE__);
 
 		require_once self::$engineDir."/loader.php";
+		require_once self::$engineDir."/autoloader.php";
 
 		// require_once self::$engineDir."/helperFunctions/http.php";
 
@@ -231,8 +232,6 @@ class EngineAPI{
 		// make sure the session cookie is only accessible via HTTP
 		ini_set("session.cookie_httponly", 1);
 
-
-
 		require_once self::$engineDir."/userInfo.php";
 
 		// Setup Current Working Directory
@@ -248,35 +247,10 @@ class EngineAPI{
 		accessControl::init();
 
 		// Define the AutoLoader
-		// spl_autoload_register(array($this, 'autoloader'));
-		$this->addAutoloader(array($this, 'autoloader'));
-
-		// Get modules ready for Autoloader (previously loaded modules). Load the "onLoad.php" files
-		// for each module
-		$modules_dirHandle = @opendir($enginevars->get('modules')) or die("Unable to open (Modules)".$enginevars->get('modules'));
-		while (false !== ($dir = readdir($modules_dirHandle))) {
-			// Check to make sure that it isn't a hidden file and that the file is a directory
-			if ($dir != "." && $dir != ".." && is_dir($enginevars->get('modules')."/".$dir) === TRUE) {
-				if ($dir == "templates") continue;
-				$singleMod_dirHandle = @opendir($enginevars->get('modules')."/".$dir) or die("Unable to open (Single Module)".$enginevars->get('modules'));
-				while (false !== ($file = readdir($singleMod_dirHandle))) {
-					if ($file != "." && $file != ".." && $file) {
-
-						if ($file == "onLoad.php") {
-							include_once($enginevars->get('modules')."/".$dir."/".$file);
-						}
-						else {
-							$fileChunks = array_reverse(explode(".", $file));
-							$ext= $fileChunks[0];
-							if ($ext == "php") {
-								$this->availableModules[$fileChunks[1]] = $enginevars->get('modules')."/".$dir."/".$file;
-							}
-						}
-
-					}
-				}
-			}
-		}
+		$autoloader = autoloader::getInstance($enginevars->get('modules'));
+		$autoloader->addAutoloader(array($autoloader,'autoloader'));
+		$autoloader->loadModules();
+		$autoloader->export();
 
 		//Load Login Functions
 		loader($enginevars->get('loginModules'));
@@ -373,40 +347,6 @@ class EngineAPI{
         }
 
         return self::$instance;
-	}
-
-	/**
-	 * Adds a library
-	 *
-	 * @param string $libraryDir
-	 * @return bool
-	 */
-	public function addLibrary($libraryDir) {
-
-		// Make sure that it is a directory
-		if (is_dir($libraryDir) === FALSE) {
-			return FALSE;
-		}
-
-		// Make sure that we can read it
-		if (is_readable($libraryDir) === FALSE) {
-			return FALSE;
-		}
-
-		$dirHandle = @opendir($libraryDir);
-
-		if ($dirHandle === FALSE) {
-			return FALSE;
-		}
-
-		while (false !== ($file = readdir($dirHandle))) {
-
-			$fileChunks = array_reverse(explode(".", $file));
-			$ext        = $fileChunks[0];
-			if ($ext == "php") {
-				$this->availableModules[$fileChunks[1]] = $libraryDir."/".$file;
-			}
-		}
 	}
 
 	/**
@@ -691,86 +631,7 @@ class EngineAPI{
 		return FALSE;
 	}
 
-	/**
-	 * Adds the given autoload function to the autoload stack
-	 * @internal
-	 * @param mixed $autoload
-	 * @return bool
-	 */
-	function addAutoloader($autoload) {
 
-		if (version_compare(PHP_VERSION, '5.3.0') >= 0) {
-			$return = spl_autoload_register($autoload,TRUE,TRUE);
-			return $return;
-		}
-
-		$functions = spl_autoload_functions();
-
-		if ($functions === FALSE) {
-			$return = spl_autoload_register($autoload);
-			return $return;
-		}
-
-		foreach ($functions as $I=>$V) {
-			$return = spl_autoload_unregister($V);
-			if ($return === FALSE) {
-				return FALSE;
-			}
-		}
-
-		$return = spl_autoload_register($autoload);
-		if ($return === FALSE) {
-			return FALSE;
-		}
-		foreach ($functions as $I=>$V) {
-			$return = spl_autoload_register($V);
-			if ($return === FALSE) {
-				return FALSE;
-			}
-		}
-
-		return $return;
-
-	}
-
-	/**
-	 * Base EngineAPI autoloader
-	 * @param $className
-	 * @return bool
-	 */
-	public static function autoloader($className) {
-		$engine = EngineAPI::singleton();
-		if (!class_exists($className, FALSE)) {
-			if (isset($engine->availableModules[$className]) && file_exists($engine->availableModules[$className])) {
-				require_once $engine->availableModules[$className];
-				return TRUE;
-			}
-
-			// Can't throw exceptions in php 5.2 from an autoloader, but you can
-			// catch it from this eval block.
-
-			if (preg_match('/^[^a-zA-Z_\x7f-\xff]/',$className)) {
-				eval("throw new Exception('Class $className not found', 1001);");
-				return FALSE;
-			}
-
-			eval("
-				class $className {
-					function __construct() {
-						throw new Exception('Class $className not found', 1001);
-					}
-					static function __callstatic(\$m, \$args) {
-						throw new Exception('Class $className not found', 1001);
-					}
-					function x_notaclass_x(){}
-				}
-				");
-
-			return FALSE;
-		}
-
-		return;
-	}
 
 	/**
 	 * determines the server from $referer
