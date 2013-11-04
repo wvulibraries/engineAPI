@@ -10,9 +10,11 @@ class autoloader {
 
 	}
 
-	public static function getInstance($modulesDirectory) {
+	public static function getInstance($modulesDirectory = NULL) {
 
 		if (!isset(self::$classInstance)) { 
+
+			if (isnull($modulesDirectory)) return FALSE;
 
 			self::$classInstance = new self();
 
@@ -72,6 +74,7 @@ class autoloader {
 	 * @return bool
 	 */
 	function autoloader($className) {
+
 		if (!class_exists($className, FALSE)) {
 			if (isset(self::$availableModules[$className]) && file_exists(self::$availableModules[$className])) {
 				require_once self::$availableModules[$className];
