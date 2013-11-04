@@ -250,6 +250,7 @@ class EngineAPI{
 		// Clean variables
 		http::cleanPost();                 // $_POST
 		http::cleanGet();                  // $_GET
+		http::removeRequest();             // kill off $_REQUEST
 		phpself::clean();                  // $_SERVER['PHP_SELF']
 		server::cleanHTTPReferer();        // $_SERVER['HTTP_REFERER']
 		server::cleanQueryStringReferer(); // $_SERVER['QUERY_STRING']
@@ -291,10 +292,7 @@ class EngineAPI{
 			}
 		}
 
-		// kill off $_REQUEST and force everything through cleanGet and cleanPost
-		if (isset($_REQUEST)) {
-			unset($_REQUEST);
-		}
+
 
         // Last thing we need to do is load, and initialize the errorHandle class (the error handler)
         errorHandle::singleton();
