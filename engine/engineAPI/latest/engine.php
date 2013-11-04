@@ -237,6 +237,15 @@ class EngineAPI{
 		$this->dbPort     = $this->privatevars->get(array('mysql','port'),NULL);
 		$this->dbServer   = $this->privatevars->get(array('mysql','server'),NULL);
 
+		// Startup engines database connection
+		require_once self::$engineDir."/modules/database/engineDB.php";
+		$this->engineDB = new engineDB($this->privatevars->get(array('mysql','username')),$this->privatevars->get(array('mysql','password')),$this->privatevars->get(array('mysql','server')),$this->privatevars->get(array('mysql','port')),$enginevars->get('logDB'),FALSE);
+
+		// Start up the logging
+		if ($enginevars->get('log')) {
+			$this->engineLog(); // access log
+		}
+
 		//Load Access Control Modules
 		accessControl::init();
 
@@ -254,15 +263,6 @@ class EngineAPI{
 		phpself::clean();                  // $_SERVER['PHP_SELF']
 		server::cleanHTTPReferer();        // $_SERVER['HTTP_REFERER']
 		server::cleanQueryStringReferer(); // $_SERVER['QUERY_STRING']
-
-		// Startup engines database connection
-		require_once self::$engineDir."/modules/database/engineDB.php";
-		$this->engineDB = new engineDB($this->privatevars->get(array('mysql','username')),$this->privatevars->get(array('mysql','password')),$this->privatevars->get(array('mysql','server')),$this->privatevars->get(array('mysql','port')),$enginevars->get('logDB'),FALSE);
-
-		// Start up the logging
-		if ($enginevars->get('log')) {
-			$this->engineLog(); // access log
-		}
 
 		// Initialize the session and if we are not in CLI mode start the session
 
@@ -291,8 +291,6 @@ class EngineAPI{
 				exit;
 			}
 		}
-
-
 
         // Last thing we need to do is load, and initialize the errorHandle class (the error handler)
         errorHandle::singleton();
