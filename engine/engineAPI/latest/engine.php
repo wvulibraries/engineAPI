@@ -196,24 +196,24 @@ class EngineAPI{
 
 		require_once self::$engineDir."/loader.php";
 		require_once self::$engineDir."/autoloader.php";
+		require_once self::$engineDir."/accessControl/accessControl.php";
+		require_once self::$engineDir."/userInfo.php";
 
-		// require_once self::$engineDir."/helperFunctions/http.php";
+		// This needs to be explicitly loaded so that onLoad.php's that call
+		// template information can be loaded correctly
+		// 
+		// @TODO -- we need a to handle priorities / dependencies. onload.php
+		// should wait until dependencies are filled before firing off. That would
+		// remove the requirement that the templates module be loaded manually. 
+		require_once self::$engineDir."/modules/templates/templates.php";
 
 		//Load helper function Modules
 		loader(self::$engineDir."/helperFunctions");
 
-		// Need to load this so that onLoads and template definitions can be set
-		// curing the construct() of engine
-		// 
-		// @TODO we need to look at moving the autoloader here so we can get rid of these
-		// require statements
-		require_once self::$engineDir."/modules/templates/templates.php";
-		require_once self::$engineDir."/modules/session/session.php";
-		require_once self::$engineDir."/accessControl/accessControl.php";
-
-		require_once self::$engineDir."/modules/config/config.php";
-		require_once self::$engineDir."/modules/config/enginevars.php";
-		require_once self::$engineDir."/modules/config/privatevars.php";
+		// Define the AutoLoader
+		$autoloader = autoloader::getInstance(self::$engineDir."/modules");
+		$autoloader->addAutoloader(array($autoloader,'autoloader'));
+		$autoloader->loadModules();
 
 		// $configObject = config::getInstance(self::$engineDir,$site);
 		$this->privatevars = privatevars::getInstance(self::$engineDir,$site);
@@ -227,8 +227,6 @@ class EngineAPI{
 		// make sure the session cookie is only accessible via HTTP
 		ini_set("session.cookie_httponly", 1);
 
-		require_once self::$engineDir."/userInfo.php";
-
 		// Setup Current Working Directory
 		$this->cwd = getcwd();
 
@@ -240,11 +238,6 @@ class EngineAPI{
 
 		//Load Access Control Modules
 		accessControl::init();
-
-		// Define the AutoLoader
-		$autoloader = autoloader::getInstance($enginevars->get('modules'));
-		$autoloader->addAutoloader(array($autoloader,'autoloader'));
-		$autoloader->loadModules();
 
 		//Load Login Functions
 		loader($enginevars->get('loginModules'));
