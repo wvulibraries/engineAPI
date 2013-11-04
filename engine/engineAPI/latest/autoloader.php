@@ -29,6 +29,14 @@ class autoloader {
 		return TRUE;
 	}
 
+	public function exists($className) {
+
+		if (array_key_exists($className, self::$availableModules)) return TRUE;
+		
+		return FALSE;
+
+	}
+
 	function loadModules() {
 
 		$modules_dirHandle = @opendir(self::$modulesDirectory) or die("Unable to open (Modules) ".self::$modulesDirectory);
