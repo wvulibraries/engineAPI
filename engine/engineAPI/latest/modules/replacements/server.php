@@ -53,6 +53,14 @@ class server {
 		return TRUE;
 	}
 	
+	public static function cleanHTTPReferer() {
+		if (isset($_SERVER['QUERY_STRING'])) {
+			$_SERVER['QUERY_STRING'] = htmlSanitize($_SERVER['QUERY_STRING']);
+		}
+
+		return TRUE;
+	}
+		
 }
 
 ?>
