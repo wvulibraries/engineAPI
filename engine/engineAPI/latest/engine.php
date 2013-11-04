@@ -131,11 +131,6 @@ class EngineAPI{
 
 	# Module Stuffs
 	#############################################################
-	/**
-	 * Stack of available modules
-	 * @var array
-	 */
-	private $availableModules = array();
 
 	/**
 	 * Array of loaded libraries (for auto-loading)
@@ -751,17 +746,23 @@ class EngineAPI{
 				preg_match_all("/\{(.+?)(\s(.+?))?\}/",$line,$matches);
 				if (isset($matches[1]) && !is_empty($matches[1])) {
 					foreach ($matches[1] as $I=>$className) {
-						if (!class_exists($className, FALSE)) {
+						// This if check prevents modules that have been loaded but the 
+						// constructor hasn't been called from using tag replacements.
+						// Commented out until we figure out if its bad to have it commented out ... 
+						// The modules could get around this by using an onLoad.php, but i'd rather see it 
+						// all autoloaded. 
+						
+						// if (!class_exists($className, FALSE)) {
 							$className = preg_replace("/[^a-zA-Z0-9_]/", "", $className);
 							try {
-								if (array_key_exists($className,$engine->availableModules)) {
+								if (autoloader::getInstance()->exists($className)) {
 									$temp = new $className();
 								}
 							}
 							catch (Exception $e) {
 								// do nothing
 							}
-						}
+						// }
 					}
 				}
 
