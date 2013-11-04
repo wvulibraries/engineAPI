@@ -259,8 +259,7 @@ class EngineAPI{
 		}
 
 		// Sets up a clean PHP_SELF variable to use.
-		$phpself             = basename($_SERVER['SCRIPT_FILENAME']);
-		$_SERVER['PHP_SELF'] = substr($_SERVER['PHP_SELF'], 0, strpos($_SERVER['PHP_SELF'],$phpself)).$phpself;
+		phpself::clean();
 
 		// Sets up a clean clean HTTP_REFERER
 		if (isset($_SERVER['HTTP_REFERER'])) {
