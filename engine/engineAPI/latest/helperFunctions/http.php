@@ -12,6 +12,11 @@ class http
     public function  __construct()
     {}
 
+    public static function removeRequest() {
+        if (isset($_REQUEST)) unset($_REQUEST);
+
+        return TRUE;
+    }
 
     /**
      * rebuilds the $_GET variable with sanitized HTML, MYSQL, and unsanitized raw values.
