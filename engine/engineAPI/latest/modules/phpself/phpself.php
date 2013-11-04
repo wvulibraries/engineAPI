@@ -41,6 +41,13 @@ class phpself {
 
 		return($phpself);
 	}
+
+	public static function clean() {
+		$phpself             = basename($_SERVER['SCRIPT_FILENAME']);
+		$_SERVER['PHP_SELF'] = substr($_SERVER['PHP_SELF'], 0, strpos($_SERVER['PHP_SELF'],$phpself)).$phpself;
+		return TRUE;
+	}
+
 }
 
 ?>
