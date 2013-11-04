@@ -199,22 +199,12 @@ class EngineAPI{
 	private function __construct($site="default") {
 		self::$engineDir = dirname(__FILE__);
 
+		require_once self::$engineDir."/loader.php";
+
 		// require_once self::$engineDir."/helperFunctions/http.php";
 
 		//Load helper function Modules
-		//$enginevars->get('helperFunctions')
-		$helperFunctionsDir = self::$engineDir."/helperFunctions";
-		$hfDirHandle = @opendir($helperFunctionsDir) or die("Unable to open ".$helperFunctionsDir);
-		while (false !== ($file = readdir($hfDirHandle))) {
-			// Check to make sure that it isn't a hidden file and that it is a PHP file
-			if ($file != "." && $file != ".." && $file) {
-				$fileChunks = array_reverse(explode(".", $file));
-				$ext= $fileChunks[0];
-				if ($ext == "php") {
-					require_once $helperFunctionsDir."/".$file;
-				}
-			}
-		}
+		loader(self::$engineDir."/helperFunctions");
 
 		// Need to load this so that onLoads and template definitions can be set
 		// curing the construct() of engine
@@ -289,17 +279,7 @@ class EngineAPI{
 		}
 
 		//Load Login Functions
-		$login_dirHandle = @opendir($enginevars->get('loginModules')) or die("Unable to open ".$enginevars->get('loginModules'));
-		while (false !== ($file = readdir($login_dirHandle))) {
-			// Check to make sure that it isn't a hidden file and that it is a PHP file
-			if ($file != "." && $file != ".." && $file) {
-				$fileChunks = array_reverse(explode(".", $file));
-				$ext= $fileChunks[0];
-				if ($ext == "php") {
-					include_once($enginevars->get('loginModules')."/".$file);
-				}
-			}
-		}
+		loader($enginevars->get('loginModules'));
 
 		foreach ($loginFunctions as $type => $function) {
 			$this->loginFunctions[$type] = $function;
