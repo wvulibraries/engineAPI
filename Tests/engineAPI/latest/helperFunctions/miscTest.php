@@ -97,17 +97,112 @@ class miscTest extends PHPUnit_Framework_TestCase {
 		unset($a);
 	}
 
-	// public function test_recurseInsert_InvalidRegexAndConditionReturnsFalse() {
+	public function test_recurseInsert_InvalidRegexAndConditionReturnsFalse() {
 	// 	$this->assertFalse(recurseInsert('anything','anything','badRegex','badCondition',TRUE));
 	// 	$this->assertFalse(recurseInsert('anything','anything','badRegex','badCondition',FALSE));
 	// 	$this->assertFalse(recurseInsert('anything','anything','badRegex','badCondition'));
-	// 	$this->markTestIncomplete();
-	// }
+		$this->markTestIncomplete('Cannot currently stub EngineAPI.');
+	}
 
 	public function test_recurseInsert_() {
 		$this->markTestIncomplete('Cannot currently stub EngineAPI.');
 	}
 
+	public function test_linkPhone_NoPhoneNumber() {
+		// $this->assertFalse(linkPhone(array()));
+		// $this->assertFalse(linkPhone(array('phone'=>'')));
+		$this->markTestIncomplete('Need to stub errorHandle::errorMsg()');
+	}
+
+	public function test_linkPhone_InvalidPhoneFormat() {
+		// $this->assertFalse(linkPhone(array('phone'=>'(123) 456-7890')));
+		$this->markTestIncomplete('Need to stub errorHandle::errorMsg()');
+	}
+
+	public function test_linkPhone_NoDisplayNotMobile() {
+		// $phone = '1-234-567-8901';
+		// $this->assertEquals('<span class="phoneNumber">'.$phone.'</span>', linkPhone(array('phone'=>$phone)));
+		$this->markTestIncomplete('Need to stub mobileBrowsers::isMobileBrowser()');
+	}
+
+	public function test_linkPhone_NoDisplayIsMobile() {
+		// $phone = '1-234-567-8901';
+		// $this->assertEquals('<span class="phoneNumber">'.$phone.'</span>', linkPhone(array('phone'=>$phone)));
+		$this->markTestIncomplete('Need to stub mobileBrowsers::isMobileBrowser()');
+	}
+
+	public function test_linkPhone_HasDisplayNotMobile() {
+		// $phone = '1-234-567-8901';
+		// $display = '(234) 567-8901';
+		// $this->assertEquals('<span class="phoneNumber">'.$phone.'</span>', linkPhone(array('phone'=>$phone,'display'=>$display)));
+		$this->markTestIncomplete('Need to stub mobileBrowsers::isMobileBrowser()');
+	}
+
+	public function test_linkPhone_HasDisplayIsMobile() {
+		// $phone = '1-234-567-8901';
+		// $display = '(234) 567-8901';
+		// $this->assertEquals('<span class="phoneNumber">'.$phone.'</span>', linkPhone(array('phone'=>$phone,'display'=>$display)));
+		$this->markTestIncomplete('Need to stub mobileBrowsers::isMobileBrowser()');
+	}
+
+	public function test_displayFileSize_NotNumericReturnsNaN() {
+		$this->assertEquals('NaN', displayFileSize('foo'));
+	}
+
+	public function test_displayFileSize_CorrectlyIdentifyingSizes() {
+		$this->assertEquals('1 Byte', displayFileSize(1));
+		$this->assertEquals('1 KB', displayFileSize(1000));
+		$this->assertEquals('1 MB', displayFileSize(1000000));
+		$this->assertEquals('1 GB', displayFileSize(1000000000));
+		$this->assertEquals('1 TB', displayFileSize(1000000000000));
+		$this->assertEquals('1 PB', displayFileSize(1000000000000000));
+	}
+
+	public function test_castAs_NotValidCastType() {
+		$this->setExpectedException('PHPUnit_Framework_Error_Warning');
+
+		$this->assertNull(castAs('foo', 'bar'));
+	}
+
+	public function test_castAs_InputCastAsBoolean() {
+		$this->assertTrue(is_bool(castAs(1,'boolean')));
+	}
+
+	public function test_castAs_InputCastAsBool() {
+		$this->assertTrue(is_bool(castAs(1,'bool')));
+	}
+
+	public function test_castAs_InputCastAsInteger() {
+		$this->assertTrue(is_int(castAs(1,'integer')));
+	}
+
+	public function test_castAs_InputCastAsInt() {
+		$this->assertTrue(is_int(castAs(1,'int')));
+	}
+
+	public function test_castAs_InputCastAsFloat() {
+		$this->assertTrue(is_float(castAs(1,'float')));
+	}
+
+	public function test_castAs_InputCastAsDouble() {
+		$this->assertTrue(is_float(castAs(1,'double')));
+	}
+
+	public function test_castAs_InputCastAsString() {
+		$this->assertTrue(is_string(castAs(1,'string')));
+	}
+
+	public function test_castAs_InputCastAsArray() {
+		$this->assertTrue(is_array(castAs(1,'array')));
+	}
+
+	public function test_castAs_InputCastAsObject() {
+		$this->assertTrue(is_object(castAs(1,'object')));
+	}
+
+	public function test_castAs_InputCastAsNull() {
+		$this->assertTrue(is_null(castAs(1,'null')));
+	}
 
 }
 ?>

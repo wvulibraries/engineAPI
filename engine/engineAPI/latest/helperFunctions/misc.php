@@ -116,7 +116,7 @@ function attPairs($attpairs) {
  * Remove a variable from the query string
  *
  * @deprecated Now just a wrapper function
- * 
+ *
  * @param $qs
  * @param $var
  * @return string
@@ -277,7 +277,6 @@ function recurseInsert($file,$type="php",$regex=NULL,$condition="REQUEST_URI",$c
 /**
  * Generate the correct HTML to link a phone number for mobile browsers
  *
- * @todo Remove deprecated webHelper_() function calls
  * @todo Look at cleaning up / rewriting
  * @param $attPairs
  *        An array of params
@@ -288,36 +287,36 @@ function recurseInsert($file,$type="php",$regex=NULL,$condition="REQUEST_URI",$c
 function linkPhone($attPairs) {
 
 	if (!isset($attPairs['phone'])) {
-		return webHelper_errorMsg("No phone number provided");
+		errorHandle::errorMsg("No phone number provided");
+		return FALSE;
 	}
-
-	$phone   = $attPairs['phone'];
-	$display = NULL;
 
 	if (isset($attPairs['display'])) {
 		$display = $attPairs['display'];
 	}
+	else {
+		$display = NULL;
+	}
 
 	$phoneRegex = "/^\d-\d{3}-\d{3}-\d{4}$/";
-	$match = preg_match($phoneRegex,$phone);
 
-	if ($match == 0) {
-		return webHelper_errorMsg("Phone number must be in format of: x-xxx-xxx-xxxx");
+	if (preg_match($phoneRegex,$attPairs['phone']) == 0) {
+		errorHandle::errorMsg("Phone number must be in format of: x-xxx-xxx-xxxx");
+		return FALSE;
 	}
 
 	$output = '<span class="phoneNumber">';
-	if (engine_isMobileBrowser()) {
-		$output .= '<a href="tel:'.$phone.'">';
-		$output .= (isnull($display))?$phone:$display;
+	if (mobileBrowsers::isMobileBrowser()) {
+		$output .= '<a href="tel:'.$attPairs['phone'].'">';
+		$output .= (isnull($display))?$attPairs['phone']:$display;
 		$output .= "</a>";
 	}
 	else {
-		$output .= (isnull($display))?$phone:$display;
+		$output .= (isnull($display))?$attPairs['phone']:$display;
 	}
-
 	$output .= "</span>";
 
-	return($output);
+	return $output;
 }
 
 /**
