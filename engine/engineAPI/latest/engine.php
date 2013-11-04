@@ -250,7 +250,6 @@ class EngineAPI{
 		$autoloader = autoloader::getInstance($enginevars->get('modules'));
 		$autoloader->addAutoloader(array($autoloader,'autoloader'));
 		$autoloader->loadModules();
-		$autoloader->export();
 
 		//Load Login Functions
 		loader($enginevars->get('loginModules'));
