@@ -238,10 +238,9 @@ class EngineAPI{
 		$this->engineDB = new engineDB($this->privatevars->get(array('mysql','username')),$this->privatevars->get(array('mysql','password')),$this->privatevars->get(array('mysql','server')),$this->privatevars->get(array('mysql','port')),$enginevars->get('logDB'),FALSE);
 
 		// Start up the logging
-		if ($enginevars->get('log')) {
-			$this->engineLog(); // access log
-		}
-
+		$logger = logger::getInstance($this->engineDB);
+		$logger->log();
+		
 		// Access Control and login inits can't be off loaded to onLoad.php for the 
 		// modules because engine and private vars needs to be created with engineAPI
 		// constructor variables first. (enginedir and site)
@@ -596,51 +595,6 @@ class EngineAPI{
 		}
 
 		return $server;
-	}
-
-	/**
-	 * Record a log message to the log table
-	 * @param string $type
-	 * @param null $function
-	 * @param null $message
-	 * @return bool
-	 */
-	private function engineLog($type="access",$function=NULL,$message=NULL) {
-
-		$engineVars = enginevars::getInstance()->export();
-		$engineDB = $this->engineDB;
-
-		if (!$engineVars['log'] || $engineDB->status === FALSE) {
-			return FALSE;
-		}
-
-		// setup the variables
-		$date      = time();
-		$ip        = isset($_SERVER['REMOTE_ADDR'])?$_SERVER['REMOTE_ADDR']:NULL;
-		$referrer  = isset($_SERVER['HTTP_REFERER'])?$_SERVER['HTTP_REFERER']:NULL;
-		$resource  = isset($_SERVER['REQUEST_URI'])?$_SERVER['REQUEST_URI']:NULL;
-		$queryStr  = isset($_SERVER['QUERY_STRING'])?$_SERVER['QUERY_STRING']:NULL;
-		$useragent = isset($_SERVER['HTTP_USER_AGENT'])?$_SERVER['HTTP_USER_AGENT']:NULL;
-		$site      = isset($engineVars['server'])?$engineVars['server']:NULL;
-
-		$query = sprintf(
-			"INSERT INTO log (date,ip,referrer,resource,useragent,function,type,message,querystring,site) VALUES('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s')",
-			$engineDB->escape($date),
-			$engineDB->escape($ip),
-			$engineDB->escape($referrer),
-			$engineDB->escape($resource),
-			$engineDB->escape($useragent),
-			$engineDB->escape($function),
-			$engineDB->escape($type),
-			$engineDB->escape($message),
-			$engineDB->escape($queryStr),
-			$engineDB->escape($site)
-			);
-
-		$engineDB->sanitize = FALSE;
-		$results = $engineDB->query($query);
-
-		return TRUE;
 	}
 
 	/**
