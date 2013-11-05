@@ -195,7 +195,6 @@ class EngineAPI{
 		self::$engineDir = dirname(__FILE__);
 
 		require_once self::$engineDir."/loader.php";
-		require_once self::$engineDir."/errorHandle.php";
 
 		// This needs to be explicitly loaded so that onLoad.php's that call
 		// template information can be loaded correctly
