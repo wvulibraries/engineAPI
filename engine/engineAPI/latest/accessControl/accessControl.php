@@ -28,21 +28,23 @@ class accessControl {
 	 */
 	private static $aclCount = 0;
 
+	private static $enginevars;
+
 	function __construct() {}
 
 	public static function init() {
 
-		$enginevars = enginevars::getInstance();
+		self::set_enginevars(enginevars::getInstance());
 
-		loader($enginevars->get("accessModules"));
-		$accessModDirHandle = @opendir($enginevars->get("accessModules")) or die("Unable to open ".$enginevars->get("accessModules"));
+		loader(self::$enginevars->get("accessModules"));
+		$accessModDirHandle = @opendir(self::$enginevars->get("accessModules")) or die("Unable to open ".self::$enginevars->get("accessModules"));
 		while (false !== ($file = readdir($accessModDirHandle))) {
 			// Check to make sure that it isn't a hidden file and that it is a PHP file
 			if ($file != "." && $file != ".." && $file) {
 				$fileChunks = array_reverse(explode(".", $file));
 				$ext= $fileChunks[0];
 				if ($ext == "php") {
-					include_once($enginevars->get("accessModules")."/".$file);
+					include_once(self::$enginevars->get("accessModules")."/".$file);
 				}
 			}
 		}
@@ -55,9 +57,14 @@ class accessControl {
 
 		// @TODO unset $accessControl here?
 
-		if ($enginevars->get("accessExistsTest") === TRUE || $enginevars->get("accessExistsTest") === FALSE) {
+		if (self::$enginevars->get("accessExistsTest") === TRUE || self::$enginevars->get("accessExistsTest") === FALSE) {
 			self::$accessExistsTest = $enginevars->get("accessExistsTest");
 		}
+	}
+
+	public static function set_enginevars($enginevars) {
+		self::$enginevars = $enginevars;
+		return TRUE;
 	}
 
 	/**
@@ -238,15 +245,13 @@ class accessControl {
 
 		ob_end_clean();
 
-		$enginevars = enginevars::getInstance();
-
 		session::set("page",$_SERVER['PHP_SELF']);
 
 		//@TODO : this query_String shouldn't be straight html sanitized, so that the &'s dont get screwed
 		session::set("qs",preg_replace('/&#039;/',"'",urldecode(html_entity_decode($_SERVER['QUERY_STRING']))));
 
 
-		header( 'Location: '.$enginevars->get("loginPage").'?page='.$_SERVER['PHP_SELF']."&qs=".(urlencode($_SERVER['QUERY_STRING'])) ) ;
+		header( 'Location: '.self::$enginevars->get("loginPage").'?page='.$_SERVER['PHP_SELF']."&qs=".(urlencode($_SERVER['QUERY_STRING'])) ) ;
 		//die("No Access Here");
 		//return FALSE;
 	}
