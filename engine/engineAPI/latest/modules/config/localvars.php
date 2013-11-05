@@ -29,9 +29,14 @@ class localvars extends config {
 		return self::$classInstance;
 	}
 
-	public function set_database(engineDB $database) {
-		$this->database = $database;
-		return TRUE;
+	public function set_database($database) {
+
+		if ($database instanceof engineDB) {
+			$this->database = $database;
+			return TRUE;
+		} 
+
+		return FALSE;
 	}
 
 	/**
