@@ -2,7 +2,19 @@
 
 class functions {
 	
-	private $functionExtensions= array();
+	private static $functionExtensions = array();
+
+	private static $classInstance;
+
+	function __construct() {}
+
+	public static function getInstance() {
+		if (!isset(self::$classInstance)) { 
+			self::$classInstance = new self();]
+		}
+
+		return self::$classInstance;
+	}
 
 	/**
 	 * Set function extensions
@@ -40,11 +52,11 @@ class functions {
 		$temp['class']    = $newClass;
 		$temp['function'] = $newFunction;
 
-		if (!isset($this->functionExtensions[$functionIndex][$stage])) {
-			$this->functionExtensions[$functionIndex][$stage] = array();
+		if (!isset(self::$functionExtensions[$functionIndex][$stage])) {
+			self::$functionExtensions[$functionIndex][$stage] = array();
 		}
 
-		$this->functionExtensions[$functionIndex][$stage][] = $temp;
+		self::$functionExtensions[$functionIndex][$stage][] = $temp;
 
 		return TRUE;
 	}
@@ -58,8 +70,8 @@ class functions {
 	 */
 	public function getFunctionExtension($function,$class=NULL) {
 		$functionIndex = $function.((isnull($class))?"":"::".$class);
-		if (array_key_exists($functionIndex,$this->functionExtensions)) {
-			return $this->functionExtensions[$functionIndex];
+		if (array_key_exists($functionIndex,self::$functionExtensions)) {
+			return self::$functionExtensions[$functionIndex];
 		}
 		return FALSE;
 	}
