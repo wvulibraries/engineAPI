@@ -245,6 +245,10 @@ class EngineAPI{
 			$this->engineLog(); // access log
 		}
 
+		// Access Control and login inits can't be off loaded to onLoad.php for the 
+		// modules because engine and private vars needs to be created with engineAPI
+		// constructor variables first. (enginedir and site)
+
 		//Load Access Control Modules
 		accessControl::init();
 
