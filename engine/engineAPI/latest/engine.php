@@ -249,11 +249,7 @@ class EngineAPI{
 		accessControl::init();
 
 		//Load Login Functions
-		loader($enginevars->get('loginModules'));
-
-		foreach ($loginFunctions as $type => $function) {
-			$this->loginFunctions[$type] = $function;
-		}
+		login::init();
 
 		// Clean variables
 		http::cleanPost();                 // $_POST
@@ -584,24 +580,6 @@ class EngineAPI{
 		return $dbTablesArray;
 
 	}
-
-	/**
-	 * Process a login (Is this deprecated?)
-	 *
-	 * @deprecated
-	 * @param $loginType
-	 * @return bool
-	 */
-	public function login($loginType) {
-		if (isset($this->loginFunctions[$loginType])) {
-			if($this->loginFunctions[$loginType](trim($_POST['RAW']['username']),$_POST['RAW']['password'])) {
-				return TRUE;
-			}
-		}
-		return FALSE;
-	}
-
-
 
 	/**
 	 * determines the server from $referer
