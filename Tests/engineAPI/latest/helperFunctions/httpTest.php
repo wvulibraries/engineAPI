@@ -129,5 +129,18 @@ class httpTest extends PHPUnit_Framework_TestCase {
         $data = serialize($this);
         $this->assertEquals($data, http::decompressData(http::compressData($data)));
     }
+
+
+    function test_removeRequest() {
+        $_REQUEST = "foo";
+        http::removeRequest();
+
+        if (isset($_REQUEST)) {
+            $this->assertTrue(FALSE);
+        }
+        else {
+            $this->assertTrue(TRUE);
+        }
+    }
 }
  
