@@ -159,10 +159,13 @@ function recurseInsert($file,$type="php",$regex=NULL,$condition="REQUEST_URI",$c
 		}
 	}
 
+
+	$function = functions::getInstance();
+
 	$tempParams         = array();
 	$tempParams['file'] = $file;
 	$tempParams['type'] = $type;
-	$output             = $engine->execFunctionExtension("recurseInsert",$tempParams,"before");
+	$output             = $functions->execFunctionExtension("recurseInsert",$tempParams,"before");
 
 	if ($output !== FALSE) {
 		return($output);
@@ -268,7 +271,7 @@ function recurseInsert($file,$type="php",$regex=NULL,$condition="REQUEST_URI",$c
 	// fclose($fh);
 
 
-	$output                        = $engine->execFunctionExtension("recurseInsert",$tempParams);
+	$output                        = $function->execFunctionExtension("recurseInsert",$tempParams);
 
 	return($output);
 
