@@ -105,7 +105,7 @@ $engineVars['lessHandler'] = dirname(dirname(EngineAPI::$engineDir)) ."/lessc/le
 $engineVars['modules']       = EngineAPI::$engineDir."/modules";
 
 // Access Control Modules
-$engineVars['accessModules'] = EngineAPI::$engineDir."/accessControl";
+$engineVars['accessModules'] = $engineVars['modules']."/accessControl/drivers";
 
 // Helper Function Modules
 $engineVars['helperFunctions'] = EngineAPI::$engineDir."/helperFunctions";

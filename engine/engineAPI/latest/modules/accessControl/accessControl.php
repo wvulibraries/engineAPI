@@ -36,18 +36,9 @@ class accessControl {
 
 		self::set_enginevars(enginevars::getInstance());
 
-		loader(self::$enginevars->get("accessModules"));
-		$accessModDirHandle = @opendir(self::$enginevars->get("accessModules")) or die("Unable to open ".self::$enginevars->get("accessModules"));
-		while (false !== ($file = readdir($accessModDirHandle))) {
-			// Check to make sure that it isn't a hidden file and that it is a PHP file
-			if ($file != "." && $file != ".." && $file) {
-				$fileChunks = array_reverse(explode(".", $file));
-				$ext= $fileChunks[0];
-				if ($ext == "php") {
-					include_once(self::$enginevars->get("accessModules")."/".$file);
-				}
-			}
-		}
+		$returnVars = loader(self::$enginevars->get("accessModules"));
+		
+		$accessControl = $returnVars['accessControl'];
 
 		foreach ($accessControl as $method => $function) {
 			self::$accessMethods[$method] = $function;
