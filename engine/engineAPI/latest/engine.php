@@ -265,27 +265,7 @@ class EngineAPI{
 		if(!isCLI() and !session::started()) session::start();
 
 		// Cross Site Request Forgery Check
-		if(!empty($_POST)){
-			if(!isset($_POST['csrfToken']) or !isset($_POST['csrfID'])){
-				$msg = "Engine Security - CSRF Check Failed - No token/id provided";
-				error_log($msg);
-				die($msg);
-			}
-			if(!session::csrfTokenCheck($_POST['csrfID'], $_POST['csrfToken'])){
-				$msg = "Engine Security - CSRF Check Failed - Invalid token/id provided";
-				error_log($msg);
-				die($msg);
-			}
-
-			$server = $this->getHTTP_REFERERServer($_SERVER['HTTP_REFERER']);
-			if($server != $enginevars->get('server')) {
-				error_log("HTTP Referer check failed. Possible Cross Site Request Forgery Attack!");
-				echo "HTTP Referer check failed. Possible Cross Site Request Forgery Attack!<br />";
-				echo "_SERVER: ".$_SERVER['HTTP_REFERER']."<br />";
-				echo "server: ".$server."<br />";
-				exit;
-			}
-		}
+		http::csrfCheck();
 
         // Last thing we need to do is load, and initialize the errorHandle class (the error handler)
         errorHandle::singleton();

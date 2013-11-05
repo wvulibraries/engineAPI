@@ -9,8 +9,35 @@ class http
     /**
      * Class constructor
      */
-    public function  __construct()
-    {}
+    public function  __construct(){}
+
+    public static function csrfCheck() {
+
+        if(!empty($_POST)){
+            if(!isset($_POST['csrfToken']) or !isset($_POST['csrfID'])){
+                $msg = "Engine Security - CSRF Check Failed - No token/id provided";
+                error_log($msg);
+                die($msg);
+            }
+            if(!session::csrfTokenCheck($_POST['csrfID'], $_POST['csrfToken'])){
+                $msg = "Engine Security - CSRF Check Failed - Invalid token/id provided";
+                error_log($msg);
+                die($msg);
+            }
+
+            $server = $this->getHTTP_REFERERServer($_SERVER['HTTP_REFERER']);
+            if($server != $enginevars->get('server')) {
+                error_log("HTTP Referer check failed. Possible Cross Site Request Forgery Attack!");
+                echo "HTTP Referer check failed. Possible Cross Site Request Forgery Attack!<br />";
+                echo "_SERVER: ".$_SERVER['HTTP_REFERER']."<br />";
+                echo "server: ".$server."<br />";
+                exit;
+            }
+        }
+
+        return TRUE;
+
+    }
 
     public static function removeRequest() {
         if (isset($_REQUEST)) unset($_REQUEST);
