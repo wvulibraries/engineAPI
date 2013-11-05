@@ -45,20 +45,20 @@ class server {
 		return("Variable not found in \$_SERVER");
 	}
 
-	public static function cleanHTTPReferer() {
-		if (isset($_SERVER['HTTP_REFERER'])) {
-			$_SERVER['HTTP_REFERER'] = htmlSanitize($_SERVER['HTTP_REFERER']);
+	private static function cleanServerVars($var) {
+		if (isset($_SERVER[$var])) {
+			$_SERVER[$var] = htmlSanitize($_SERVER[$var]);
 		}
 
 		return TRUE;
 	}
+
+	public static function cleanHTTPReferer() {
+		return self::cleanServerVars('HTTP_REFERER');
+	}
 	
 	public static function cleanQueryStringReferer() {
-		if (isset($_SERVER['QUERY_STRING'])) {
-			$_SERVER['QUERY_STRING'] = htmlSanitize($_SERVER['QUERY_STRING']);
-		}
-
-		return TRUE;
+		return self::cleanServerVars('QUERY_STRING');
 	}
 		
 }
