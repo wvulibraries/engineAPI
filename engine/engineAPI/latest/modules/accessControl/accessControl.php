@@ -37,10 +37,8 @@ class accessControl {
 		self::set_enginevars(enginevars::getInstance());
 
 		$returnVars = loader(self::$enginevars->get("accessModules"));
-		
-		$accessControl = $returnVars['accessControl'];
 
-		foreach ($accessControl as $method => $function) {
+		foreach ($returnVars['accessControl'] as $method => $function) {
 			self::$accessMethods[$method] = $function;
 		}
 		self::$accessMethods['denyAll']  = 'dummyFunction';
