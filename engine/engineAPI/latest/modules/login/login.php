@@ -4,6 +4,7 @@ class login {
 
 	private static $enginevars;
 	private static $loginFunctions = array();
+	public static  $loginType = NULL;
 	
 	function __construct() {}
 
@@ -29,7 +30,10 @@ class login {
 	 * @param $loginType
 	 * @return bool
 	 */
-	public static function login($loginType) {
+	public static function login() {
+
+		if (isnull(self::$loginType)) return FALSE;
+
 		if (isset($this->loginFunctions[$loginType])) {
 			if($this->loginFunctions[$loginType](trim($_POST['RAW']['username']),$_POST['RAW']['password'])) {
 				return TRUE;
