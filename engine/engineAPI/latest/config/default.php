@@ -111,7 +111,7 @@ $engineVars['accessModules'] = $engineVars['modules']."/accessControl/drivers";
 $engineVars['helperFunctions'] = EngineAPI::$engineDir."/helperFunctions";
 
 // Login Modules
-$engineVars['loginModules']  = EngineAPI::$engineDir."/login";
+$engineVars['loginModules']  = $engineVars['modules']."/login/drivers";
 
 // RSS Templates
 $engineVars['rssDir']        = $engineVars['tempDir'] ."/rss";
