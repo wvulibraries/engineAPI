@@ -5,6 +5,13 @@ $loginType = "ldap";
 
 require_once("/home/library/public_html/includes/engineHeader.php");
 
+$enginevars = enginevars::getInstance();
+
+if($enginevars::get('forceSSLLogin') === TRUE && (!isset($_SERVER['HTTPS']) or is_empty($_SERVER['HTTPS']))){
+        $enginevars::get('loginPage') = str_replace("http://","https://",$enginevars::get('loginPage'));
+        header("Location: ".$enginevars::get('loginPage')."?".$_SERVER['QUERY_STRING']);
+        exit;
+}
 
 $localvars = localvars::getInstance();
 
