@@ -196,7 +196,6 @@ class EngineAPI{
 
 		require_once self::$engineDir."/loader.php";
 		require_once self::$engineDir."/autoloader.php";
-		require_once self::$engineDir."/userInfo.php";
 		require_once self::$engineDir."/errorHandle.php";
 
 		// This needs to be explicitly loaded so that onLoad.php's that call
