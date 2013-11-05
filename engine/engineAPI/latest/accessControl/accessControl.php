@@ -34,6 +34,7 @@ class accessControl {
 
 		$enginevars = enginevars::getInstance();
 
+		loader($enginevars->get("accessModules"));
 		$accessModDirHandle = @opendir($enginevars->get("accessModules")) or die("Unable to open ".$enginevars->get("accessModules"));
 		while (false !== ($file = readdir($accessModDirHandle))) {
 			// Check to make sure that it isn't a hidden file and that it is a PHP file
