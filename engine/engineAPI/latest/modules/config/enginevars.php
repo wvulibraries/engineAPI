@@ -28,34 +28,6 @@ class enginevars extends config {
 		return self::$classInstance;
 	}
 
-	// public function set($name,$value,$null=FALSE) {
-	// 	return $this->configObject->set(self::CONFIG_TYPE,$name,$value,$null);
-	// }
-
-	// public function is_set($name) {
-	// 	return $this->configObject->is_set(self::CONFIG_TYPE,$name);
-	// }
-
-	// public function get($name,$default="") {
-	// 	return $this->configObject->get(self::CONFIG_TYPE,$name,$default);
-	// }
-
-	// public function remove($var) {
-		
-	// 	return $this->configObject->remove(self::CONFIG_TYPE,$var);
-		
-	// }
-
-	// public function variable($var,$value=NULL,$null=FALSE) {
-		
-	// 	return $this->configObject->variable(self::CONFIG_TYPE,$var,$value,$null);
-		
-	// }
-
-	// public function export() {
-	// 	return $this->configObject->export(self::CONFIG_TYPE);
-	// }
-
 }
 
 ?>
