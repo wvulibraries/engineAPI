@@ -1,9 +1,8 @@
 <?php
 
-#$loginType = "mysql";
-$loginType = "ldap";
-
 require_once("/home/library/public_html/includes/engineHeader.php");
+
+login::$loginType = "ldap"; //mysql
 
 $enginevars = enginevars::getInstance();
 
@@ -26,7 +25,7 @@ $localvars->set("domain","wvu-ad");
 $authFail  = FALSE; // Authorization to the current resource .. we may end up not using this
 $loginFail = FALSE; // Login Success/Failure
 
-if (!sessionGet("page") && isset($engine->cleanGet['HTML']['page'])) {
+if (!session::get("page") && isset($engine->cleanGet['HTML']['page'])) {
 	$page = $engine->cleanGet['HTML']['page']; 
 	if (isset($engine->cleanGet['HTML']['qs'])) {
 		$qs = urldecode($engine->cleanGet['HTML']['qs']);
@@ -37,8 +36,8 @@ if (!sessionGet("page") && isset($engine->cleanGet['HTML']['page'])) {
 		$qs = "";
 	}
 
-	sessionSet("page",$page);
-	sessionSet("qs",$qs);
+	session::set("page",$page);
+	session::set("qs",$qs);
 
 }
 
@@ -50,7 +49,7 @@ if (isset($engine->cleanPost['HTML']['loginSubmit'])) {
 	}
 	else {
 		
-		if (login::login($loginType)) {
+		if (login::login()) {
 //            die(__LINE__.' - '.__FILE__);
             if(isset($engine->cleanGet['HTML']['url'])) {
 				header("Location: ".$engine->cleanGet['HTML']['URL'] ) ;
@@ -60,10 +59,10 @@ if (isset($engine->cleanPost['HTML']['loginSubmit'])) {
 				// if (debugNeeded("login")) {
 				// 	debugDisplay("login","\$_SESSION",1,"Contents of the \$_SESSION array.",$_SESSION);
 				// }
-				if (sessionGet("page")) {
+				if (session::set("page")) {
 					$url = sprintf("%s?%s",
-						sessionGet("page"),
-						sessionGet("qs")
+						session::get("page"),
+						session::set("qs")
 						);
 
 					header("Location: ".$url );
