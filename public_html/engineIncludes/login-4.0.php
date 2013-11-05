@@ -50,7 +50,7 @@ if (isset($engine->cleanPost['HTML']['loginSubmit'])) {
 	}
 	else {
 		
-		if ($engine->login($loginType)) {
+		if (login::login($loginType)) {
 //            die(__LINE__.' - '.__FILE__);
             if(isset($engine->cleanGet['HTML']['url'])) {
 				header("Location: ".$engine->cleanGet['HTML']['URL'] ) ;
