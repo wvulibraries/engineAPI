@@ -129,21 +129,6 @@ class EngineAPI{
 	 */
 	public $openDB = NULL;
 
-	# Module Stuffs
-	#############################################################
-
-	/**
-	 * Array of loaded libraries (for auto-loading)
-	 * @var array
-	 */
-	public $library = array();
-
-	/**
-	 * Function extensions
-	 * @var array
-	 */
-	private $functionExtensions = array();
-
 	# Module Template Mathes and function calls for displayTemplate()
 	###################################################################
 	
