@@ -30,6 +30,10 @@ global $engineVars;
 // Your domain
 $engineVars['server']     = ($serverVars === TRUE)?$_SERVER['SERVER_NAME']:"my.domain.com";
 
+if (isset($_SERVER['SERVER_PORT']) && ($_SERVER['SERVER_PORT'] != "80" || $_SERVER['SERVER_PORT'] != "443")) {
+  $engineVars['server'] = $engineVars['server'].":".$_SERVER['SERVER_PORT'];
+}
+
 // stick your protocol in front ... 'http' or 'https' or 'ftp' or whatever
 // Trying to be a little smarter about http and https
 $engineVars['WVULSERVER'] = "http".((isset($_SERVER['HTTPS']) && !empty($_SERVER['HTTPS']))?"s":"")."://".$engineVars['server'];
