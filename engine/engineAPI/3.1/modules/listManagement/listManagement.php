@@ -14,6 +14,7 @@ class listManagement {
 	private $database      = NULL;  // database object. defaults to $engine->openDB;
 	private $error         = NULL;
 	private $multiKey      = array();
+    public $postTarget    = NULL;
 
 	private $dndInputs     = FALSE;
 	private $dndPathJS     = "/fineuploader/jquery.fineuploader-3.0.min.js";
@@ -449,7 +450,7 @@ class listManagement {
 		}
 
 		$output .= sprintf('<form action="%s%s" method="post" class="listObj insertForm" %s %s>',
-			$_SERVER['PHP_SELF'],
+            (isset($this->postTarget) ? $this->postTarget : $_SERVER['PHP_SELF']),
 			$queryString,
 			(is_null($this->rel))?"":'rel="'.$this->rel.'"',
 			(is_null($this->rev))?"":'rev="'.$this->rev.'"'
@@ -926,7 +927,7 @@ class listManagement {
 
 		$output .= "\n<!-- engine Instruction break -->".'<!-- engine Instruction displayTemplateOff -->'."\n<!-- engine Instruction break -->";
 		$output .= sprintf('<form action="%s%s" method="post" class="listObj insertForm" %s %s %s>%s',
-			$_SERVER['PHP_SELF'],
+            (isset($this->postTarget) ? $this->postTarget : $_SERVER['PHP_SELF']),
 			$queryString,
 			($this->confirmUpdateDelete === TRUE)?'onsubmit="return listObjDeleteConfirm(this);"':"",
 			(is_null($this->rel))?"":'rel="'.$this->rel.'"',
