@@ -3,20 +3,8 @@
 #$loginType = "mysql";
 $loginType = "ldap";
 
-require_once("/home/library/public_html/includes/engineHeader.php");
-
-
-					// $fh = fopen('/tmp/foo2.txt', 'w');	
-					// fwrite($fh,sessionGet("qs"));
-					// fclose($fh);
-
-// print "<pre>";
-// var_dump($engine->cleanGet);
-// print "</pre>";
-
-//$engineDir = "/home/library/phpincludes/engine/engineAPI";
-//include($engineDir ."/engine.php"); 
-//$engine = EngineAPI::singleton();
+require_once("/home/engineAPI/phpincludes/engine/engineAPI/latest/engine.php");
+$engine = EngineAPI::singleton();
 
 // if($engineVars['forceSSLLogin'] === TRUE && (!isset($_SERVER['HTTPS']) or is_empty($_SERVER['HTTPS']))){
 //         $engineVars['loginPage'] = str_replace("http://","https://",$engineVars['loginPage']);
@@ -94,8 +82,8 @@ if (isset($engine->cleanPost['HTML']['loginSubmit'])) {
 
 }
 
-$engine->eTemplate("load","library2012.1col");
-$engine->eTemplate("include","header");
+// $engine->eTemplate("load","library2012.1col");
+// $engine->eTemplate("include","header");
 ?>
 
 
@@ -153,5 +141,5 @@ document.loginForm.username.focus();
 </script>
 
 <?php
-$engine->eTemplate("include","footer");
+// $engine->eTemplate("include","footer");
 ?>
