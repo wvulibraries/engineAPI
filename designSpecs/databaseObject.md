@@ -60,6 +60,12 @@ This method removes all registered aliases from an object
 
 This method parses the drivers dir and returns an array of all available drivers.
 
+### listObjects()
+
+[*Helper method*]
+
+This method returns an array of all available driver objects and their associated alias
+
 ---
 ## dbDriver
 
