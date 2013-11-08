@@ -517,26 +517,28 @@ class errorHandle
         }
 
         // We now have the profile we need to operate on.
-        foreach($winningProfile['actions'] as $action => $value){
-            switch($action){
-                case 'logLocation':
-                    $locations = (array)$value;
-                    foreach($locations as $location){
-                        self::recordError($location);
-                    }
-                    break;
+        if(isset($winningProfile['actions'])){
+            foreach($winningProfile['actions'] as $action => $value){
+                switch($action){
+                    case 'logLocation':
+                        $locations = (array)$value;
+                        foreach($locations as $location){
+                            self::recordError($location);
+                        }
+                        break;
 
-                case 'httpRedirect':
-                    http::redirect($value);
-                    break;
+                    case 'httpRedirect':
+                        http::redirect($value);
+                        break;
 
-                case 'fatal':
-                    if($value and !defined('FATAL_ERROR')) define("FATAL_ERROR",true);
-                    break;
+                    case 'fatal':
+                        if($value and !defined('FATAL_ERROR')) define("FATAL_ERROR",true);
+                        break;
 
-                case 'exec':
-                    exec($value);
-                    break;
+                    case 'exec':
+                        exec($value);
+                        break;
+                }
             }
         }
 
