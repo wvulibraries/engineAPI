@@ -4,12 +4,32 @@
  * @package EngineAPI\modules\db
  */
 
+// Make sure the abstract dbDriver and dbStatement classes are loaded!
+require_once __DIR__.DIRECTORY_SEPARATOR.'dbDriver.php';
+require_once __DIR__.DIRECTORY_SEPARATOR.'dbStatement.php';
+
 /**
  * EngineAPI database manager
  *
  * @package EngineAPI\modules\db
  */
 class db{
+    /**
+     * @var self
+     */
+    private static $classInstance;
+    /**
+     * @var string[]
+     */
+    private static $drivers = array();
+    /**
+     * @var dbDriver[]
+     */
+    private static $objects = array();
+
+    public function getInstance(){
+        return new self;
+    }
 
 	/**
 	 * Create a new database driver
@@ -24,8 +44,30 @@ class db{
 	 *        If name collision, return FALSE
 	 * @return dbDriver|bool
 	 */
-	public static function create($driver, $options=array(), $alias=''){
+	public static function create($driver, $options=array(), $alias=NULL){
+        $alias  = trim(strtolower($alias));
+        $driver = trim(strtolower($driver));
 
+        try{
+            // Make sure alias isn't already taken
+            if(isset($alias) and isset(self::$objects[$alias])) throw new Exception('Alias already registered!');
+
+            // Make sure requested driver is a valid one
+            if(!self::loadDriver($driver)) throw new Exception('Failed to load driver!');
+
+            // Create the new driver
+            $dbDriverClass = "dbDriver_$driver";
+            $dbDriverObj   = new $dbDriverClass($options);
+
+            // Save the driver for later if it's been given an alias
+            if(isset($alias)) self::$objects[$alias] = $dbDriverObj;
+
+            // Return the new driver object
+            return $dbDriverObj;
+        }catch(Exception $e){
+            errorHandle::newError(__METHOD__."() {$e->getMessage()} thrown from line {$e->getLine()}", errorHandle::DEBUG);
+            return FALSE;
+        }
     }
 
 	/**
@@ -49,7 +91,14 @@ class db{
 	 * @return bool
 	 */
 	public static function registerAs(dbDriver $driver, $alias){
-
+        $alias = trim(strtolower($alias));
+        if(isset(self::$objects[$alias])){
+            errorHandle::newError(__METHOD__."() - Alias already exists!", errorHandle::DEBUG);
+            return FALSE;
+        }else{
+            self::$objects[$alias] = $driver;
+            return TRUE;
+        }
     }
 
 	/**
@@ -60,7 +109,13 @@ class db{
 	 * @return bool
 	 */
 	public static function unregisterAlias($alias){
-
+        $alias = trim(strtolower($alias));
+        if(isset(self::$objects[$alias])){
+            unset(self::$objects[$alias]);
+            return TRUE;
+        }else{
+            return FALSE;
+        }
     }
 
 	/**
@@ -71,7 +126,14 @@ class db{
 	 * @return bool
 	 */
 	public static function unregisterObject(dbDriver $driver){
-
+        $removedCounter = 0;
+        foreach(self::$objects as $alias => $object){
+            if($driver === $object){
+                $removedCounter++;
+                unset(self::$objects[$alias]);
+            }
+        }
+        return ($removedCounter > 0);
     }
 
 	/**
@@ -81,6 +143,57 @@ class db{
 	 * @return array
 	 */
 	public static function listDrivers(){
+        if(!sizeof(self::$drivers)){
+            self::$drivers = array();
+            foreach(glob(__DIR__.DIRECTORY_SEPARATOR.'drivers'.DIRECTORY_SEPARATOR.'*') as $dir){
+                $driverType = basename($dir);
+                if(self::loadDriver($driverType)) self::$drivers[] = $driverType;
+            }
+        }
+        return array_filter(self::$drivers);
+    }
 
+
+    private static function loadDriver($driver){
+        $driverDir = __DIR__.DIRECTORY_SEPARATOR.'drivers'.DIRECTORY_SEPARATOR;
+        $driver    = trim(strtolower($driver));
+
+        // If we already know the answer, just return the known answer
+        if(in_array($driver, self::$drivers)) return (bool)self::$drivers[$driver];
+
+        // Try and figure out the answer
+        try{
+            // Make sure the driver directory exists
+            if(!is_dir($driverDir.$driver)) throw new Exception("No driver directory for given driverType $driver: '$driverDir.$driverType'");
+
+            // Make sure the driver's dbDriver file exists
+            $dbDriverFilename = $driverDir.$driver.DIRECTORY_SEPARATOR."dbDriver_$driver.php";
+            if(!is_readable($dbDriverFilename)) throw new Exception("No dbDriver file found for $driver: '$dbDriverFilename'");
+            require_once $dbDriverFilename;
+
+            // Make sure we have a dbDriver and dbStatement class for the driver
+            if(!class_exists("dbDriver_$driver", FALSE)) throw new Exception("Failed to load dbDriver class for 'dbDriver_$driver'");
+            if(!class_exists("dbStatement_$driver", FALSE)) throw new Exception("Failed to load dbDriver class for 'dbStatement_$driver'");
+
+            // Make sure the driver's dbDriver class extends the right parent classes and is instantiable
+            $dbDriver = new ReflectionClass("dbDriver_$driver");
+            if($dbDriver->isSubclassOf('dbDriver')) throw new Exception("dbDriver_$driver doesn't extend dbDriver!");
+            if($dbDriver->isInstantiable())         throw new Exception("dbDriver_$driver isn't instantiable!");
+
+            // Make sure the driver's dbStatement class extends the right parent classes and is instantiable
+            $dbStatement = new ReflectionClass("dbStatement_$driver");
+            if($dbStatement->isSubclassOf('dbStatement')) throw new Exception("dbStatement_$driver doesn't extend dbStatement!");
+            if($dbStatement->isInstantiable())            throw new Exception("dbDriver_$driver isn't instantiable!");
+
+            // If we're here, then this driver is good to go
+            self::$drivers[$driver] = TRUE;
+        }catch(Exception $e){
+            // If we're here, then this driver is NOT good to go
+            errorHandle::newError(__METHOD__."() {$e->getMessage()} thrown from line {$e->getLine()}", errorHandle::DEBUG);
+            self::$drivers[$driver] = FALSE;
+        }
+
+        // Return the now known answer
+        return (bool)self::$drivers[$driver];
     }
 } 
