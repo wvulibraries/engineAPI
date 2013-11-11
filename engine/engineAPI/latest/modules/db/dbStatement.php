@@ -26,6 +26,16 @@ abstract class dbStatement{
      * @var PDOStatement
      */
     protected $pdoStatement;
+    /**
+     * [Flag] Make this statement as executed
+     * @var bool
+     */
+    protected $isExecuted=FALSE;
+    /**
+     * Array of field names in a result set
+     * @var array
+     */
+    protected $fieldNames;
 
     /**
      * Return this statement's underlying PDOStatement object
@@ -35,6 +45,10 @@ abstract class dbStatement{
      */
     public function getStatement(){
         return $this->pdoStatement;
+    }
+
+    public function isExecuted(){
+        return $this->isExecuted;
     }
 
     // -------------------------------
@@ -116,24 +130,22 @@ abstract class dbStatement{
 	/**
 	 * Return only the given field from one row at a time. (Defaults to the 1st field)
 	 *
-	 * @param $fetchMode
-	 *        The 'Fetch mode' to use. See FETCH_* constants on dbStatement
 	 * @param int|string $field
 	 *        Either the index (base 0) or the name of the field to fetch
+     *        Note: passing the index is often faster
 	 * @return mixed
 	 */
-	public abstract function fetchField($fetchMode=self::FETCH_ASSOC, $field=0);
+	public abstract function fetchField($field=0);
 
 	/**
 	 * Return an array of all rows of only the given field. (Defaults to the 1st field)
 	 *
-	 * @param $fetchMode
-	 *        The 'Fetch mode' to use. See FETCH_* constants on dbStatement
 	 * @param int|string $field
 	 *        Either the index (base 0) or the name of the field to fetch
+     *        Note: passing the index is often faster
 	 * @return mixed
 	 */
-	public abstract function fetchFieldAll($fetchMode=self::FETCH_ASSOC, $field=0);
+	public abstract function fetchFieldAll($field=0);
 
 	/**
 	 * The error code/number of the last error *driver specific*
