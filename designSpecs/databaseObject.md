@@ -28,10 +28,10 @@ Classes:
 ## db
 This class will be the main class
 
-### create(driver [,(array)options] [,(string)alias])
+### create(driver [,(array|string)options] [,(string)alias])
 
 * Create a db driver object (factory pattern) of the given driver type
-* If an options array is passed, pass it along to the driver class for driver setup (can be driver-specific)
+* Any options array or DSN is passed along to the driver class for driver setup (can be driver-specific)
 * If alias is passed, register the created object (registry pattern) under this name for easy access
 * If alias passed already exists, throw error and return FALSE
 * DB objects created by engine itself should be named as "__engine_aliasName"

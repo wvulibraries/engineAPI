@@ -37,8 +37,9 @@ class db{
 	 * @author David Gersting
 	 * @param string $driver
 	 *        The driver type to use (@see self::listDrivers())
-	 * @param array $options
+	 * @param array|string $options
 	 *        An optional array of params to pass to the driver *driver-specific*
+     *        OR a fully qualified DSN (@see http://us2.php.net/manual/en/pdo.construct.php)
 	 * @param string $alias
 	 *        If provided, register this driver under the given alias.
 	 *        If name collision, return FALSE
