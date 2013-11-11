@@ -14,6 +14,28 @@ abstract class dbStatement{
 	const FETCH_NUM = 2;
 	const FETCH_OBJ = 3;
 
+    /**
+     * @var dbDriver
+     */
+    protected $dbDriver;
+    /**
+     * @var PDO
+     */
+    protected $pdo;
+    /**
+     * @var PDOStatement
+     */
+    protected $pdoStatement;
+
+    /**
+     * Create a database statement object
+     *
+     * @param dbDriver $parentConnection
+     * @param string   $sql
+     * @param array    $params
+     */
+    public abstract function __construct($parentConnection, $sql, $params=array());
+
 	/**
 	 * Execute the prepared SQL
 	 *
