@@ -10,10 +10,6 @@
  * @package EngineAPI\modules\db
  */
 abstract class dbStatement{
-	const FETCH_ASSOC = 1;
-	const FETCH_NUM = 2;
-	const FETCH_OBJ = 3;
-
     /**
      * @var dbDriver
      */
@@ -116,7 +112,7 @@ abstract class dbStatement{
 	 *        The 'Fetch mode' to use. See FETCH_* constants on dbStatement
 	 * @return mixed
 	 */
-	public abstract function fetch($fetchMode=self::FETCH_ASSOC);
+	public abstract function fetch($fetchMode=PDO::FETCH_ASSOC);
 
 	/**
 	 * Return an array of all rows from the result set.
@@ -125,7 +121,7 @@ abstract class dbStatement{
 	 *        The 'Fetch mode' to use. See FETCH_* constants on dbStatement
 	 * @return array
 	 */
-	public abstract function fetchAll($fetchMode=self::FETCH_ASSOC);
+	public abstract function fetchAll($fetchMode=PDO::FETCH_ASSOC);
 
 	/**
 	 * Return only the given field from one row at a time. (Defaults to the 1st field)
