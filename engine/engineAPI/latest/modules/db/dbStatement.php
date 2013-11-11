@@ -34,6 +34,17 @@ abstract class dbStatement{
     protected $fieldNames;
 
     /**
+     * An array of valid PDO param types
+     * @var array
+     */
+    protected $pdoParamTypes = array(
+        PDO::PARAM_BOOL,
+        PDO::PARAM_NULL,
+        PDO::PARAM_INT,
+        PDO::PARAM_STR,
+        PDO::PARAM_LOB);
+
+    /**
      * Return this statement's underlying PDOStatement object
      *
      * @author David Gersting
@@ -43,6 +54,10 @@ abstract class dbStatement{
         return $this->pdoStatement;
     }
 
+    /**
+     * Return TRUE if the statement has been executed
+     * @return bool
+     */
     public function isExecuted(){
         return $this->isExecuted;
     }
@@ -67,6 +82,19 @@ abstract class dbStatement{
 	 * @return bool
 	 */
 	public abstract function execute();
+
+    /**
+     * Manually bind a param to the prepared statement
+     *
+     * @param int|string $param
+     * @param mixed      $value
+     * @param int        $type
+     * @param int        $length
+     * @param array      $options
+     *
+     * @return mixed
+     */
+    public abstract function bindParam($param, &$value, $type=PDO::PARAM_STR, $length=NULL, $options=NULL);
 
 	/**
 	 * Return the number of fields in the prepared SQL/result
