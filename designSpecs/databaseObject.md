@@ -123,6 +123,10 @@ Return `TRUE` if we're inside a transaction, `FALSE` otherwise
 Sets the current object to read only. Only select statements can be called.
 To turn readOnly mode off, pass FALSE
 
+### isReadOnly()
+
+Returns TRUE if the driver is in 'read-only mode'
+
 ### destroy()
 
 Closes the connection to the database and destroys the object

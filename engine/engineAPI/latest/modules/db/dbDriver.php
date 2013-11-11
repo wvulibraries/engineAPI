@@ -82,6 +82,14 @@ abstract class dbDriver{
         return $this->pdo;
     }
 
+    /**
+     * Return TRUE if driver is in read-only mode
+     * @return bool
+     */
+    public function isReadOnly(){
+        return $this->readOnlyMode;
+    }
+
     // -------------------------------
 
 	/**
