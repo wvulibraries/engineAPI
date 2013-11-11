@@ -90,6 +90,21 @@ abstract class dbDriver{
         return $this->readOnlyMode;
     }
 
+    /**
+     * Parse the given SQL for compliance with read-only mode
+     *
+     * @param $sql
+     * @return bool
+     */
+    protected function chkReadOnlySQL($sql){
+        // Remove SQL comments
+        $sql = preg_replace('/^--.*?$/', '', $sql);
+        // There's got to be a better way to combine this...
+        if(preg_match('/^\s*(?:ALTER|CREATE|DELETE|INSERT|UPDATE|DROP|TRUNCATE)/i', $sql)) return FALSE;
+        if(preg_match('/;\s*(?:ALTER|CREATE|DELETE|INSERT|UPDATE|DROP|TRUNCATE)/i', $sql)) return FALSE;
+        return TRUE;
+    }
+
     // -------------------------------
 
 	/**

@@ -80,6 +80,10 @@ class dbDriver_mysql extends dbDriver{
      * @author David Gersting
      */
     public function query($sql, array $params=array()){
+        if($this->isReadOnly() and !$this->chkReadOnlySQL($sql)){
+            errorHandle::newError(__METHOD__."() - Driver is in read-only mode!", errorHandle::DEBUG);
+            return FALSE;
+        }
         return new dbStatement_mysql($this, $sql, $params);
     }
 
@@ -88,6 +92,11 @@ class dbDriver_mysql extends dbDriver{
      * @author David Gersting
      */
     public function exec($sql){
+        if($this->isReadOnly() and !$this->chkReadOnlySQL($sql)){
+            errorHandle::newError(__METHOD__."() - Driver is in read-only mode!", errorHandle::DEBUG);
+            return FALSE;
+        }
+
         return $this->exec($sql);
     }
 
@@ -180,4 +189,4 @@ class dbDriver_mysql extends dbDriver{
         // De-register this object
         db::unregisterObject($this);
     }
-} 
+}
