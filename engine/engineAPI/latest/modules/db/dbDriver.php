@@ -10,6 +10,48 @@
  * @package EngineAPI\modules\db
  */
 abstract class dbDriver{
+
+    /**
+     * Extract a given param from a list of params
+     *
+     * This extracts the given params and removes it from the array, or returns the given default value
+     *
+     * @author David Gersting
+     * @param string|int $param
+     * @param array $params
+     * @param mixed $default
+     * @return mixed
+     */
+    public function extractParam($param, &$params, $default=NULL){
+        // Make operation case-insensitive
+        $params = array_change_key_case($params, CASE_LOWER);
+        $param  = strtolower($param);
+
+        // Use array_key_exists() because we need to get a null or false value
+        if(array_key_exists($param, $params)){
+            $return = $params[$param];
+            unset($params[$param]);
+            return $return;
+        }else{
+            return $default;
+        }
+    }
+
+    /**
+     * Build a PDO DSN string based on passed params
+     *
+     * @author David Gersting
+     * @param string $driver
+     * @param array $params
+     * @return string string
+     */
+    public function buildDSN($driver, $params){
+        $driver = trim(strtolower($driver));
+        return "$driver:".http_build_query((array)$params, '', ';');
+    }
+
+    // -------------------------------
+
 	/**
 	 * Prepare the given SQL for execution
 	 *
@@ -19,7 +61,7 @@ abstract class dbDriver{
 	 *        If given, will be use to 'auto-execute' the prepared SQL
 	 * @return dbStatement
 	 */
-	public abstract function query($sql, array $params);
+	public abstract function query($sql, array $params=array());
 
 	/**
 	 * Execute a raw SQL statement against the database
@@ -69,9 +111,10 @@ abstract class dbDriver{
 	 * Place this connection into 'Read Only' mode.
 	 * The driver will do it's best ability to prevent database writes in this mode.
 	 *
+     * @param bool $newState
 	 * @return bool
 	 */
-	public abstract function readOnly();
+	public abstract function readOnly($newState=TRUE);
 
 	/**
 	 * Disconnect the underlying driver and self-destruct
