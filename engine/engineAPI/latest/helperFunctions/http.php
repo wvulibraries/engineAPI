@@ -9,9 +9,41 @@ class http
     /**
      * Class constructor
      */
-    public function  __construct()
-    {}
+    public function  __construct(){}
 
+    public static function csrfCheck() {
+
+        if(!empty($_POST)){
+            if(!isset($_POST['csrfToken']) or !isset($_POST['csrfID'])){
+                $msg = "Engine Security - CSRF Check Failed - No token/id provided";
+                error_log($msg);
+                die($msg);
+            }
+            if(!session::csrfTokenCheck($_POST['csrfID'], $_POST['csrfToken'])){
+                $msg = "Engine Security - CSRF Check Failed - Invalid token/id provided";
+                error_log($msg);
+                die($msg);
+            }
+
+            $server = $this->getHTTP_REFERERServer($_SERVER['HTTP_REFERER']);
+            if($server != $enginevars->get('server')) {
+                error_log("HTTP Referer check failed. Possible Cross Site Request Forgery Attack!");
+                echo "HTTP Referer check failed. Possible Cross Site Request Forgery Attack!<br />";
+                echo "_SERVER: ".$_SERVER['HTTP_REFERER']."<br />";
+                echo "server: ".$server."<br />";
+                exit;
+            }
+        }
+
+        return TRUE;
+
+    }
+
+    public static function removeRequest() {
+        if (isset($_REQUEST)) unset($_REQUEST);
+
+        return TRUE;
+    }
 
     /**
      * rebuilds the $_GET variable with sanitized HTML, MYSQL, and unsanitized raw values.
@@ -109,8 +141,7 @@ class http
      * @param int $statusCode
      * @param bool $exit
      */
-    public static function redirect($url, $statusCode=307, $exit=TRUE)
-    {
+    public static function redirect($url, $statusCode=307, $exit=TRUE) {
         $statusCode = is_null($statusCode) ? 307 : (int)$statusCode;
         $validCodes = array(301,307);
         if(!in_array($statusCode, $validCodes)){
@@ -129,8 +160,7 @@ class http
      * @param int $statusCode
      * @param boolean $replace
      */
-    public static function sendStatus($statusCode, $replace=true)
-    {
+    public static function sendStatus($statusCode, $replace=true) {
         // Clean params
         $statusCode = (int)$statusCode;
         $replace = (bool)$replace;
@@ -204,8 +234,7 @@ class http
      * @param mixed $data
      * @return string
      */
-    public static function compressData($data)
-    {
+    public static function compressData($data) {
         return strtr(base64_encode(addslashes(gzcompress(serialize($data),9))), '+/=', '-_,');
     }
 
@@ -215,8 +244,7 @@ class http
      * @param string $string
      * @return mixed
      */
-    public static function decompressData($string)
-    {
+    public static function decompressData($string) {
         return unserialize(gzuncompress(stripslashes(base64_decode(strtr($string, '-_,', '+/=')))));
     }
 }

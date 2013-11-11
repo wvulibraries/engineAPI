@@ -129,26 +129,6 @@ class EngineAPI{
 	 */
 	public $openDB = NULL;
 
-	# Module Stuffs
-	#############################################################
-	/**
-	 * Stack of available modules
-	 * @var array
-	 */
-	private $availableModules = array();
-
-	/**
-	 * Array of loaded libraries (for auto-loading)
-	 * @var array
-	 */
-	public $library = array();
-
-	/**
-	 * Function extensions
-	 * @var array
-	 */
-	private $functionExtensions = array();
-
 	# Module Template Mathes and function calls for displayTemplate()
 	###################################################################
 	
@@ -201,23 +181,21 @@ class EngineAPI{
 
 		require_once self::$engineDir."/loader.php";
 
-		// require_once self::$engineDir."/helperFunctions/http.php";
+		// This needs to be explicitly loaded so that onLoad.php's that call
+		// template information can be loaded correctly
+		// 
+		// @TODO -- we need a to handle priorities / dependencies. onload.php
+		// should wait until dependencies are filled before firing off. That would
+		// remove the requirement that the templates module be loaded manually. 
+		require_once self::$engineDir."/modules/templates/templates.php";
 
 		//Load helper function Modules
 		loader(self::$engineDir."/helperFunctions");
 
-		// Need to load this so that onLoads and template definitions can be set
-		// curing the construct() of engine
-		// 
-		// @TODO we need to look at moving the autoloader here so we can get rid of these
-		// require statements
-		require_once self::$engineDir."/modules/templates/templates.php";
-		require_once self::$engineDir."/modules/session/session.php";
-		require_once self::$engineDir."/accessControl/accessControl.php";
-
-		require_once self::$engineDir."/modules/config/config.php";
-		require_once self::$engineDir."/modules/config/enginevars.php";
-		require_once self::$engineDir."/modules/config/privatevars.php";
+		// Define the AutoLoader
+		$autoloader = autoloader::getInstance(self::$engineDir."/modules");
+		$autoloader->addAutoloader(array($autoloader,'autoloader'));
+		$autoloader->loadModules();
 
 		// $configObject = config::getInstance(self::$engineDir,$site);
 		$this->privatevars = privatevars::getInstance(self::$engineDir,$site);
@@ -231,10 +209,6 @@ class EngineAPI{
 		// make sure the session cookie is only accessible via HTTP
 		ini_set("session.cookie_httponly", 1);
 
-
-
-		require_once self::$engineDir."/userInfo.php";
-
 		// Setup Current Working Directory
 		$this->cwd = getcwd();
 
@@ -244,68 +218,31 @@ class EngineAPI{
 		$this->dbPort     = $this->privatevars->get(array('mysql','port'),NULL);
 		$this->dbServer   = $this->privatevars->get(array('mysql','server'),NULL);
 
-		//Load Access Control Modules
-		accessControl::init();
-
-		// Define the AutoLoader
-		// spl_autoload_register(array($this, 'autoloader'));
-		$this->addAutoloader(array($this, 'autoloader'));
-
-		// Get modules ready for Autoloader (previously loaded modules). Load the "onLoad.php" files
-		// for each module
-		$modules_dirHandle = @opendir($enginevars->get('modules')) or die("Unable to open (Modules)".$enginevars->get('modules'));
-		while (false !== ($dir = readdir($modules_dirHandle))) {
-			// Check to make sure that it isn't a hidden file and that the file is a directory
-			if ($dir != "." && $dir != ".." && is_dir($enginevars->get('modules')."/".$dir) === TRUE) {
-				if ($dir == "templates") continue;
-				$singleMod_dirHandle = @opendir($enginevars->get('modules')."/".$dir) or die("Unable to open (Single Module)".$enginevars->get('modules'));
-				while (false !== ($file = readdir($singleMod_dirHandle))) {
-					if ($file != "." && $file != ".." && $file) {
-
-						if ($file == "onLoad.php") {
-							include_once($enginevars->get('modules')."/".$dir."/".$file);
-						}
-						else {
-							$fileChunks = array_reverse(explode(".", $file));
-							$ext= $fileChunks[0];
-							if ($ext == "php") {
-								$this->availableModules[$fileChunks[1]] = $enginevars->get('modules')."/".$dir."/".$file;
-							}
-						}
-
-					}
-				}
-			}
-		}
-
-		//Load Login Functions
-		loader($enginevars->get('loginModules'));
-
-		foreach ($loginFunctions as $type => $function) {
-			$this->loginFunctions[$type] = $function;
-		}
-
-		// Sets up a clean PHP_SELF variable to use.
-		$phpself             = basename($_SERVER['SCRIPT_FILENAME']);
-		$_SERVER['PHP_SELF'] = substr($_SERVER['PHP_SELF'], 0, strpos($_SERVER['PHP_SELF'],$phpself)).$phpself;
-
-		// Sets up a clean clean HTTP_REFERER
-		if (isset($_SERVER['HTTP_REFERER'])) {
-			$_SERVER['HTTP_REFERER'] = htmlSanitize($_SERVER['HTTP_REFERER']);
-		}
-
-		if (isset($_SERVER['QUERY_STRING'])) {
-			$_SERVER['QUERY_STRING'] = htmlSanitize($_SERVER['QUERY_STRING']);
-		}
-
 		// Startup engines database connection
 		require_once self::$engineDir."/modules/database/engineDB.php";
 		$this->engineDB = new engineDB($this->privatevars->get(array('mysql','username')),$this->privatevars->get(array('mysql','password')),$this->privatevars->get(array('mysql','server')),$this->privatevars->get(array('mysql','port')),$enginevars->get('logDB'),FALSE);
 
 		// Start up the logging
-		if ($enginevars->get('log')) {
-			$this->engineLog(); // access log
-		}
+		$logger = logger::getInstance($this->engineDB);
+		$logger->log();
+		
+		// Access Control and login inits can't be off loaded to onLoad.php like they should be
+		// because engine and private vars needs to be created with engineAPI
+		// constructor variables first. (enginedir and site)
+
+		//Load Access Control Modules
+		accessControl::init();
+
+		//Load Login Functions
+		login::init();
+
+		// Clean variables
+		http::cleanPost();                 // $_POST
+		http::cleanGet();                  // $_GET
+		http::removeRequest();             // kill off $_REQUEST
+		phpself::clean();                  // $_SERVER['PHP_SELF']
+		server::cleanHTTPReferer();        // $_SERVER['HTTP_REFERER']
+		server::cleanQueryStringReferer(); // $_SERVER['QUERY_STRING']
 
 		// Initialize the session and if we are not in CLI mode start the session
 
@@ -313,41 +250,9 @@ class EngineAPI{
 		if(!isCLI() and !session::started()) session::start();
 
 		// Cross Site Request Forgery Check
-		if(!empty($_POST)){
-			if(!isset($_POST['csrfToken']) or !isset($_POST['csrfID'])){
-				$msg = "Engine Security - CSRF Check Failed - No token/id provided";
-				error_log($msg);
-				die($msg);
-			}
-			if(!session::csrfTokenCheck($_POST['csrfID'], $_POST['csrfToken'])){
-				$msg = "Engine Security - CSRF Check Failed - Invalid token/id provided";
-				error_log($msg);
-				die($msg);
-			}
-
-			$server = $this->getHTTP_REFERERServer($_SERVER['HTTP_REFERER']);
-			if($server != $enginevars->get('server')) {
-				error_log("HTTP Referer check failed. Possible Cross Site Request Forgery Attack!");
-				echo "HTTP Referer check failed. Possible Cross Site Request Forgery Attack!<br />";
-				echo "_SERVER: ".$_SERVER['HTTP_REFERER']."<br />";
-				echo "server: ".$server."<br />";
-				exit;
-			}
-		}
-
-		// Get clean $_POST
-		http::cleanPost();
-
-		// Get clean $_GET
-		http::cleanGet();
-
-		// kill off $_REQUEST and force everything through cleanGet and cleanPost
-		if (isset($_REQUEST)) {
-			unset($_REQUEST);
-		}
+		http::csrfCheck();
 
         // Last thing we need to do is load, and initialize the errorHandle class (the error handler)
-        require_once self::$engineDir."/errorHandle.php";
         errorHandle::singleton();
         ob_start('EngineAPI::displayTemplate');
 
@@ -373,40 +278,6 @@ class EngineAPI{
         }
 
         return self::$instance;
-	}
-
-	/**
-	 * Adds a library
-	 *
-	 * @param string $libraryDir
-	 * @return bool
-	 */
-	public function addLibrary($libraryDir) {
-
-		// Make sure that it is a directory
-		if (is_dir($libraryDir) === FALSE) {
-			return FALSE;
-		}
-
-		// Make sure that we can read it
-		if (is_readable($libraryDir) === FALSE) {
-			return FALSE;
-		}
-
-		$dirHandle = @opendir($libraryDir);
-
-		if ($dirHandle === FALSE) {
-			return FALSE;
-		}
-
-		while (false !== ($file = readdir($dirHandle))) {
-
-			$fileChunks = array_reverse(explode(".", $file));
-			$ext        = $fileChunks[0];
-			if ($ext == "php") {
-				$this->availableModules[$fileChunks[1]] = $libraryDir."/".$file;
-			}
-		}
 	}
 
 	/**
@@ -462,118 +333,6 @@ class EngineAPI{
 			return FALSE;
 		}
 	}
-
-	/**
-	 * Set function extensions
-	 *
-	 * @param string|array $function
-	 * @param string|array $newFunction
-	 * @param string $stage identifier of when this callback will be called. 
-	 *                      Used by the calling function to allow the calling function to 
-	 *                      have multiple Extensions. 
-	 * @return bool
-	 */
-	public function setFunctionExtension($function,$newFunction,$stage="after") {
-
-		$class       = (is_array($function))?$function[0]:NULL;
-		$function    = (is_array($function))?$function[1]:$function;
-		$newClass    = (is_array($newFunction))?$newFunction[0]:NULL;
-		$newFunction = (is_array($newFunction))?$newFunction[1]:$newFunction;
-
-		// check if the function/method exists
-
-		if (isnull($newClass) && functionExists($newFunction) === FALSE) {
-			return FALSE;
-		}
-		else if (isnull($newClass) && $newFunction == "recurseInsert") {
-			// can't define the system recurseInsert as the function.
-			return FALSE;
-		}
-		else if (!isnull($newClass) && functionExists($newClass,$newFunction) === FALSE) {
-			return FALSE;
-		}
-
-		$functionIndex = $function.((isnull($class))?"":"::".$class);
-
-		$temp             = array();
-		$temp['class']    = $newClass;
-		$temp['function'] = $newFunction;
-
-		if (!isset($this->functionExtensions[$functionIndex][$stage])) {
-			$this->functionExtensions[$functionIndex][$stage] = array();
-		}
-
-		$this->functionExtensions[$functionIndex][$stage][] = $temp;
-
-		return TRUE;
-	}
-
-	/**
-	 * Get function extensions
-	 *
-	 * @param string $function
-	 * @param string|null $class
-	 * @return array|bool
-	 */
-	public function getFunctionExtension($function,$class=NULL) {
-		$functionIndex = $function.((isnull($class))?"":"::".$class);
-		if (array_key_exists($functionIndex,$this->functionExtensions)) {
-			return $this->functionExtensions[$functionIndex];
-		}
-		return FALSE;
-	}
-
-	/**
-	 * Execute something...
-	 * @param string $function
-	 * @param string $params
-	 * @param string $stage identifier of when this callback will be called. 
-	 *                      Used by the calling function to allow the calling function to 
-	 *                      have multiple Extensions. 
-	 * @return bool
-	 */
-	public function execFunctionExtension($function,$params,$stage="after") {
-
-		if (!is_array($params)) {
-			return FALSE;
-		}
-
-		$class     = (is_array($function))?$function[0]:NULL;
-		$function  = (is_array($function))?$function[1]:$function;
-
-
-		$functions = $this->getFunctionExtension($function,$class);
-
-		if (!is_array($functions) || count($functions) < 1) {
-			return FALSE;
-		}
-
-		if (!array_key_exists($stage, $functions)) {
-			return FALSE;
-		}
-
-		$output = FALSE;
-
-
-
-		// return FALSE;
-		foreach($functions[$stage] as $I=>$function) {
-			if (array_key_exists('class',$function) && !isnull($function['class'])) {
-				$obj    = new $function['class'];
-				$output = $obj->$function['function']($params);
-			}
-			else {
-				$output = $function['function']($params);
-			}
-			if ($output !== FALSE) {
-				break;
-			}
-		}
-
-		return $output;
-
-	}
-
 
 	/**
 	 * Connect to MySQL Database
@@ -676,103 +435,6 @@ class EngineAPI{
 	}
 
 	/**
-	 * Process a login (Is this deprecated?)
-	 *
-	 * @deprecated
-	 * @param $loginType
-	 * @return bool
-	 */
-	public function login($loginType) {
-		if (isset($this->loginFunctions[$loginType])) {
-			if($this->loginFunctions[$loginType](trim($_POST['RAW']['username']),$_POST['RAW']['password'])) {
-				return TRUE;
-			}
-		}
-		return FALSE;
-	}
-
-	/**
-	 * Adds the given autoload function to the autoload stack
-	 * @internal
-	 * @param mixed $autoload
-	 * @return bool
-	 */
-	function addAutoloader($autoload) {
-
-		if (version_compare(PHP_VERSION, '5.3.0') >= 0) {
-			$return = spl_autoload_register($autoload,TRUE,TRUE);
-			return $return;
-		}
-
-		$functions = spl_autoload_functions();
-
-		if ($functions === FALSE) {
-			$return = spl_autoload_register($autoload);
-			return $return;
-		}
-
-		foreach ($functions as $I=>$V) {
-			$return = spl_autoload_unregister($V);
-			if ($return === FALSE) {
-				return FALSE;
-			}
-		}
-
-		$return = spl_autoload_register($autoload);
-		if ($return === FALSE) {
-			return FALSE;
-		}
-		foreach ($functions as $I=>$V) {
-			$return = spl_autoload_register($V);
-			if ($return === FALSE) {
-				return FALSE;
-			}
-		}
-
-		return $return;
-
-	}
-
-	/**
-	 * Base EngineAPI autoloader
-	 * @param $className
-	 * @return bool
-	 */
-	public static function autoloader($className) {
-		$engine = EngineAPI::singleton();
-		if (!class_exists($className, FALSE)) {
-			if (isset($engine->availableModules[$className]) && file_exists($engine->availableModules[$className])) {
-				require_once $engine->availableModules[$className];
-				return TRUE;
-			}
-
-			// Can't throw exceptions in php 5.2 from an autoloader, but you can
-			// catch it from this eval block.
-
-			if (preg_match('/^[^a-zA-Z_\x7f-\xff]/',$className)) {
-				eval("throw new Exception('Class $className not found', 1001);");
-				return FALSE;
-			}
-
-			eval("
-				class $className {
-					function __construct() {
-						throw new Exception('Class $className not found', 1001);
-					}
-					static function __callstatic(\$m, \$args) {
-						throw new Exception('Class $className not found', 1001);
-					}
-					function x_notaclass_x(){}
-				}
-				");
-
-			return FALSE;
-		}
-
-		return;
-	}
-
-	/**
 	 * determines the server from $referer
 	 * @param $referer
 	 * @return string the server passed in via referer 
@@ -786,51 +448,6 @@ class EngineAPI{
 		}
 
 		return $server;
-	}
-
-	/**
-	 * Record a log message to the log table
-	 * @param string $type
-	 * @param null $function
-	 * @param null $message
-	 * @return bool
-	 */
-	private function engineLog($type="access",$function=NULL,$message=NULL) {
-
-		$engineVars = enginevars::getInstance()->export();
-		$engineDB = $this->engineDB;
-
-		if (!$engineVars['log'] || $engineDB->status === FALSE) {
-			return FALSE;
-		}
-
-		// setup the variables
-		$date      = time();
-		$ip        = isset($_SERVER['REMOTE_ADDR'])?$_SERVER['REMOTE_ADDR']:NULL;
-		$referrer  = isset($_SERVER['HTTP_REFERER'])?$_SERVER['HTTP_REFERER']:NULL;
-		$resource  = isset($_SERVER['REQUEST_URI'])?$_SERVER['REQUEST_URI']:NULL;
-		$queryStr  = isset($_SERVER['QUERY_STRING'])?$_SERVER['QUERY_STRING']:NULL;
-		$useragent = isset($_SERVER['HTTP_USER_AGENT'])?$_SERVER['HTTP_USER_AGENT']:NULL;
-		$site      = isset($engineVars['server'])?$engineVars['server']:NULL;
-
-		$query = sprintf(
-			"INSERT INTO log (date,ip,referrer,resource,useragent,function,type,message,querystring,site) VALUES('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s')",
-			$engineDB->escape($date),
-			$engineDB->escape($ip),
-			$engineDB->escape($referrer),
-			$engineDB->escape($resource),
-			$engineDB->escape($useragent),
-			$engineDB->escape($function),
-			$engineDB->escape($type),
-			$engineDB->escape($message),
-			$engineDB->escape($queryStr),
-			$engineDB->escape($site)
-			);
-
-		$engineDB->sanitize = FALSE;
-		$results = $engineDB->query($query);
-
-		return TRUE;
 	}
 
 	/**
@@ -892,17 +509,23 @@ class EngineAPI{
 				preg_match_all("/\{(.+?)(\s(.+?))?\}/",$line,$matches);
 				if (isset($matches[1]) && !is_empty($matches[1])) {
 					foreach ($matches[1] as $I=>$className) {
-						if (!class_exists($className, FALSE)) {
+						// This if check prevents modules that have been loaded but the 
+						// constructor hasn't been called from using tag replacements.
+						// Commented out until we figure out if its bad to have it commented out ... 
+						// The modules could get around this by using an onLoad.php, but i'd rather see it 
+						// all autoloaded. 
+						
+						// if (!class_exists($className, FALSE)) {
 							$className = preg_replace("/[^a-zA-Z0-9_]/", "", $className);
 							try {
-								if (array_key_exists($className,$engine->availableModules)) {
+								if (autoloader::getInstance()->exists($className)) {
 									$temp = new $className();
 								}
 							}
 							catch (Exception $e) {
 								// do nothing
 							}
-						}
+						// }
 					}
 				}
 

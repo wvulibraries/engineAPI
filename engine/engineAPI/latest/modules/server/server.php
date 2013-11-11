@@ -44,7 +44,23 @@ class server {
 		
 		return("Variable not found in \$_SERVER");
 	}
+
+	private static function cleanServerVars($var) {
+		if (isset($_SERVER[$var])) {
+			$_SERVER[$var] = htmlSanitize($_SERVER[$var]);
+		}
+
+		return TRUE;
+	}
+
+	public static function cleanHTTPReferer() {
+		return self::cleanServerVars('HTTP_REFERER');
+	}
 	
+	public static function cleanQueryStringReferer() {
+		return self::cleanServerVars('QUERY_STRING');
+	}
+		
 }
 
 ?>
