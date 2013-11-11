@@ -22,29 +22,6 @@ class dbDriver_mysql extends dbDriver{
     const DEFAULT_CHARSET = 'utf8';
 
     /**
-     * @var PDO
-     */
-    private $pdo;
-
-    /**
-     * Transaction nesting counter
-     * @var int
-     */
-    private $transNestingCounter = 0;
-
-    /**
-     * [Flag] Rollback-only mode for current transaction
-     * @var bool
-     */
-    private $transRollbackOnly = FALSE;
-
-    /**
-     * [Flag] Place connection into read-only mode, which will do it's best to only allow SELECT sql calls
-     * @var bool
-     */
-    private $readOnlyMode = FALSE;
-
-    /**
      * Construct a MySQL
      *
      * @author David Gersting

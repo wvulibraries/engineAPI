@@ -10,6 +10,28 @@
  * @package EngineAPI\modules\db
  */
 abstract class dbDriver{
+    /**
+     * @var PDO
+     */
+    private $pdo;
+
+    /**
+     * Transaction nesting counter
+     * @var int
+     */
+    private $transNestingCounter = 0;
+
+    /**
+     * [Flag] Rollback-only mode for current transaction
+     * @var bool
+     */
+    private $transRollbackOnly = FALSE;
+
+    /**
+     * [Flag] Place connection into read-only mode, which will do it's best to only allow SELECT sql calls
+     * @var bool
+     */
+    private $readOnlyMode = FALSE;
 
     /**
      * Extract a given param from a list of params
