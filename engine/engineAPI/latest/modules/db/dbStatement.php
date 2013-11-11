@@ -28,6 +28,18 @@ abstract class dbStatement{
     protected $pdoStatement;
 
     /**
+     * Return this statement's underlying PDOStatement object
+     *
+     * @author David Gersting
+     * @return PDOStatement
+     */
+    public function getStatement(){
+        return $this->pdoStatement;
+    }
+
+    // -------------------------------
+
+    /**
      * Create a database statement object
      *
      * @param dbDriver $parentConnection

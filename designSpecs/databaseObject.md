@@ -150,9 +150,13 @@ The dbStatement object will keep an internal state determined by if the underlyi
 
 *these methods must be implemented on the child (statement) object*
 
+#### getStatement()
+
+Returns the underlying PDOStatement object for any really advanced/custom developer logic
+
 #### execute([params])
 
-Execute the prepared statement against the database. Pass in prepared statement params here. Typed to what they should be in the statement. 
+Execute the prepared statement against the database. Pass in prepared statement params here. Typed to what they should be in the statement.
 
 example:
 	
