@@ -162,13 +162,16 @@ abstract class dbDriver{
 	 */
 	public abstract function inTransaction();
 
-	/**
-	 * Place this connection into 'Read Only' mode.
-	 * The driver will do it's best ability to prevent database writes in this mode.
-	 *
+    /**
+     * Place this connection into 'Read Only' mode.
+     * The driver will do it's best ability to prevent database writes in this mode.
+     *
+     * Warning: placing a driver into read-only mode will cause a degradation in performance when making SQL calls
+     * due the additional code needed to parse and check the SQL to be executed.
+     *
      * @param bool $newState
-	 * @return bool
-	 */
+     * @return bool
+     */
 	public abstract function readOnly($newState=TRUE);
 
 	/**
