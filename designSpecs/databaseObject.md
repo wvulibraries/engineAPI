@@ -2,6 +2,10 @@
 
 This design is based PHP's PDO library and somewhat loosly on the Doctrine db abstraction library (http://www.doctrine-project.org/projects/dbal.html)
 
+When a new driver object is requested, the db class will locate a driver's dbDriver class (ie: dbDriver_type.php) and require it.
+It is the responsibility of the target file to then load any additional files needed for its operations
+(for example, the main db object will not seek out and load a dbStatement_type.php file)
+
 Classes:
 
  - db
