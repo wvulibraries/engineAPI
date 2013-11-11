@@ -84,6 +84,10 @@ This is an abstract class which represents a given database driver and connectio
 *these methods must be implemented on the child (driver) object*
 
 
+#### getPDO()
+
+Returns the underlying PDO object so that created dbStatements can access it and for any really advanced/custom developer logic
+
 #### query(sql [,params])
 
 Returns a dbStatement object for fine-grained prepared statement operations. Internally calls exec()

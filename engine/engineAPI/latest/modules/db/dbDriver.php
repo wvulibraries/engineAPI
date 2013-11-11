@@ -72,6 +72,16 @@ abstract class dbDriver{
         return "$driver:".http_build_query((array)$params, '', ';');
     }
 
+    /**
+     * Return this driver's underlying PDO object
+     *
+     * @author David Gersting
+     * @return PDO
+     */
+    public function getPDO(){
+        return $this->pdo;
+    }
+
     // -------------------------------
 
 	/**
