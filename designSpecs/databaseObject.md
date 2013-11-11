@@ -118,9 +118,10 @@ Rollback and end the current transaction (assuming we're on the 'root' transacti
 
 Return `TRUE` if we're inside a transaction, `FALSE` otherwise
 
-### readOnly()
+### readOnly([newState=true])
 
 Sets the current object to read only. Only select statements can be called.
+To turn readOnly mode off, pass FALSE
 
 ### destroy()
 
