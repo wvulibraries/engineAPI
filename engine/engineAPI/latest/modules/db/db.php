@@ -72,15 +72,16 @@ class db{
     }
 
 	/**
-	 * [PHP Magic Method] Allow drivers to be called via virtual static methods (eg: db::system->...)
+	 * [PHP Magic Method] Allow drivers to be called via virtual static methods (eg: $db->system->...)
 	 *
 	 * @author David Gersting
 	 * @param $name
-	 * @param $arguments
 	 * @return dbDriver
 	 */
-	public static function __callStatic($name, $arguments){
-
+	public static function __get($name){
+        $name = trim(strtolower($name));
+        if(self::$objects[$name]) return self::$objects[$name];
+        return NULL;
     }
 
 	/**
