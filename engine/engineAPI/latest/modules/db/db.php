@@ -147,11 +147,10 @@ class db{
         if(!sizeof(self::$drivers)){
             self::$drivers = array();
             foreach(glob(__DIR__.DIRECTORY_SEPARATOR.'drivers'.DIRECTORY_SEPARATOR.'*') as $dir){
-                $driverType = basename($dir);
-                if(self::loadDriver($driverType)) self::$drivers[] = $driverType;
+                self::loadDriver(basename($dir));
             }
         }
-        return array_filter(self::$drivers);
+        return array_keys(array_filter(self::$drivers));
     }
 
 
@@ -178,13 +177,13 @@ class db{
 
             // Make sure the driver's dbDriver class extends the right parent classes and is instantiable
             $dbDriver = new ReflectionClass("dbDriver_$driver");
-            if($dbDriver->isSubclassOf('dbDriver')) throw new Exception("dbDriver_$driver doesn't extend dbDriver!");
-            if($dbDriver->isInstantiable())         throw new Exception("dbDriver_$driver isn't instantiable!");
+            if(!$dbDriver->isSubclassOf('dbDriver')) throw new Exception("dbDriver_$driver doesn't extend dbDriver!");
+            if(!$dbDriver->isInstantiable())         throw new Exception("dbDriver_$driver isn't instantiable!");
 
             // Make sure the driver's dbStatement class extends the right parent classes and is instantiable
             $dbStatement = new ReflectionClass("dbStatement_$driver");
-            if($dbStatement->isSubclassOf('dbStatement')) throw new Exception("dbStatement_$driver doesn't extend dbStatement!");
-            if($dbStatement->isInstantiable())            throw new Exception("dbDriver_$driver isn't instantiable!");
+            if(!$dbStatement->isSubclassOf('dbStatement')) throw new Exception("dbStatement_$driver doesn't extend dbStatement!");
+            if(!$dbStatement->isInstantiable())            throw new Exception("dbDriver_$driver isn't instantiable!");
 
             // If we're here, then this driver is good to go
             self::$drivers[$driver] = TRUE;
