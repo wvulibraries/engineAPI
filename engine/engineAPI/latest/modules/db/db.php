@@ -78,7 +78,7 @@ class db{
 	 * @param $name
 	 * @return dbDriver
 	 */
-	public static function __get($name){
+	public function __get($name){
         $name = trim(strtolower($name));
         if(self::$objects[$name]) return self::$objects[$name];
         return NULL;
