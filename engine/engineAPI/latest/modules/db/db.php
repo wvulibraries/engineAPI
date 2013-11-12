@@ -58,7 +58,7 @@ class db{
 
             // Create the new driver
             $dbDriverClass = "dbDriver_$driver";
-            $dbDriverObj   = new $dbDriverClass($options);
+            $dbDriverObj   = new $dbDriverClass((array)$options);
 
             // Save the driver for later if it's been given an alias
             if(isset($alias)) self::$objects[$alias] = $dbDriverObj;
