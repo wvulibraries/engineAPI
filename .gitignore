@@ -26,3 +26,9 @@ dwsync.xml
 # phpDocumentor developer config file
 #####################################
 phpdoc.xml
+
+# Vagrant Ignores
+#################
+/serverConfiguration/serverLogs/
+/.vagrant/
+sessionLogin.php
