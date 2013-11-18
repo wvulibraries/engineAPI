@@ -7,6 +7,8 @@ ENGINEAPIHOME="/home/engineAPI"
 
 SERVERURL="/home/engineAPI"
 DOCUMENTROOT="public_html"
+TEMPLATES=$GITDIR/engineAPITemplates
+MODULES=$GITDIR/engineAPI-Modules
 
 yum -y install httpd httpd-devel httpd-manual httpd-tools
 yum -y install mysql-connector-java mysql-connector-odbc mysql-devel mysql-lib mysql-server
@@ -50,3 +52,19 @@ touch /vagrant/serverConfiguration/serverlogs/error_log
 /etc/init.d/mysqld start
 mysql -u root < /vagrant/sql/vagrantSetup.sql
 mysql -u root EngineAPI < /vagrant/sql/EngineAPI.sql
+
+## The following blocks will link from templates and Modules. This is likely undesirable except in special situations. be sure to not include symlinks in commits
+
+## Link the templates
+# for f in $TEMPLATES/*
+# do
+# 	name=`basename $f`
+# 	ln -s $f $ENGINEAPIHOME/phpincludes/engine/template/$name
+# done
+
+## Link the Modules
+# for f in $MODULES/modules/*
+# do
+# 	name=`basename $f`
+# 	ln -s $f $ENGINEAPIHOME/phpincludes/engine/engineAPI/latest/modules/$name
+# done
