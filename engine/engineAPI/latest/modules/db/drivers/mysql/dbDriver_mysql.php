@@ -34,20 +34,19 @@ class dbDriver_mysql extends dbDriver{
      * Construct a MySQL
      *
      * @author David Gersting
-     * @param array $params
+     * @param array|string|pdo $params
      */
     public function __construct($params=array()){
-        if($params instanceof PDO){
-            $this->pdo = $params;
-            $this->debugInfo['Connected to'] = $this->pdo->getAttribute(PDO::ATTR_CONNECTION_STATUS);
-        }elseif(is_string($params)){
-            $this->pdo = new PDO($params);
-            $this->debugInfo['Connected to'] = $this->pdo->getAttribute(PDO::ATTR_CONNECTION_STATUS);
-        }elseif(is_array($params)){
-            if(isset($params['pdo']) and $params['pdo'] instanceof PDO){
-                $this->pdo = $params['pdo'];
+        try{
+            // Allow PDO object
+            if(is_object($params)){
+                if(!($params instanceof PDO)) throw new Exception('Unsupported object passed in! (object passed: '.get_class($params).')');
+                $this->pdo = $params;
+                // $this->debugInfo['Connected to'] = $this->pdo->getAttribute(PDO::ATTR_CONNECTION_STATUS);
+            }elseif(is_string($params)){
+                $this->pdo = new PDO($params);
                 $this->debugInfo['Connected to'] = $this->pdo->getAttribute(PDO::ATTR_CONNECTION_STATUS);
-            }else{
+            }elseif(is_array($params)){
                 // Build the DSN string
                 if(isset($params['dsn'])){
                     $dsn = $params['dsn'];
@@ -72,9 +71,12 @@ class dbDriver_mysql extends dbDriver{
                 $this->pdo = new PDO($dsn, $user, $pass, $params);
                 $this->debugInfo['DSN'] = $dsn;
                 $this->debugInfo['Connected to'] = $this->pdo->getAttribute(PDO::ATTR_CONNECTION_STATUS);
+            }else{
+                throw new Exception('Unsupported $params passed!');
             }
-        }else{
-            errorHandle::newError(__METHOD__."() - Unknown params passed!", errorHandle::DEBUG);
+
+        }catch(Exception $e){
+            errorHandle::newError(__METHOD__."() {$e->getMessage()} thrown from line {$e->getLine()}", errorHandle::DEBUG);
             return FALSE;
         }
 
