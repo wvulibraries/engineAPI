@@ -124,14 +124,6 @@ abstract class dbDriver{
 	public abstract function query($sql, $params=NULL);
 
 	/**
-	 * Execute a raw SQL statement against the database
-	 *
-	 * @param $sql
-	 * @return dbStatement
-	 */
-	public abstract function exec($sql);
-
-	/**
 	 * Escape the given var to use used safely in SQL for this driver
 	 *
 	 * @param $var

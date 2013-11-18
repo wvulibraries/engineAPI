@@ -94,10 +94,6 @@ Returns a dbStatement object for fine-grained prepared statement operations. Int
 
 If params are provided, the query is executed. 
 
-#### exec(sql)
-
-Run a query where you only expect a bool result (ex: DELETE/DROP/TRUNCATE/etc)
-
 #### escape(var)
 
 Escape the given var for safe inclusion into SQL

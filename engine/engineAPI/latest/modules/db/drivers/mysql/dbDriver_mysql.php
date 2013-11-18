@@ -141,19 +141,6 @@ class dbDriver_mysql extends dbDriver{
      * {@inheritdoc}
      * @author David Gersting
      */
-    public function exec($sql){
-        if($this->isReadOnly() and !$this->chkReadOnlySQL($sql)){
-            errorHandle::newError(__METHOD__."() - Driver is in read-only mode!", errorHandle::DEBUG);
-            return FALSE;
-        }
-
-        return $this->exec($sql);
-    }
-
-    /**
-     * {@inheritdoc}
-     * @author David Gersting
-     */
     public function escape($var){
         return $this->pdo->quote($var);
     }
