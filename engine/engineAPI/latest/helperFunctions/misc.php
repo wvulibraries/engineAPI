@@ -165,7 +165,7 @@ function recurseInsert($file,$type="php",$regex=NULL,$condition="REQUEST_URI",$c
 	$tempParams         = array();
 	$tempParams['file'] = $file;
 	$tempParams['type'] = $type;
-	$output             = $functions->execFunctionExtension("recurseInsert",$tempParams,"before");
+	$output             = $function->execFunctionExtension("recurseInsert",$tempParams,"before");
 
 	if ($output !== FALSE) {
 		return($output);
