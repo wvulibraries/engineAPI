@@ -47,23 +47,21 @@ class dbDriver_mysql extends dbDriver{
             if(isset($params['pdo']) and $params['pdo'] instanceof PDO){
                 $this->pdo = $params['pdo'];
                 $this->debugInfo['Connected to'] = $this->pdo->getAttribute(PDO::ATTR_CONNECTION_STATUS);
-            }elseif(isset($params['dsn'])){
-                $dsn = $this->extractParam('dsn', $params);
-                $this->pdo = new PDO($dsn, $params);
-                $this->debugInfo['DSN'] = $dsn;
-                $this->debugInfo['Connected to'] = $this->pdo->getAttribute(PDO::ATTR_CONNECTION_STATUS);
             }else{
                 // Build the DSN string
-                $query            = array();
-                $query['dbname']  = $this->extractParam('dbName', $params);
-                $query['charset'] = $this->extractParam('charset', $params, self::DEFAULT_CHARSET);
-
-                // A socket file will take precedence over a host:port pair
-                if(isset($params['socket'])){
-                    $query['unix_socket'] = $this->extractParam('socket', $params);
+                if(isset($params['dsn'])){
+                    $dsn = $params['dsn'];
                 }else{
-                    $query['host'] = $this->extractParam('host', $params, self::DEFAULT_HOST);
-                    $query['port'] = $this->extractParam('port', $params, self::DEFAULT_PORT);
+                    $query            = array();
+                    $query['dbname']  = $this->extractParam('dbName', $params);
+                    $query['charset'] = $this->extractParam('charset', $params, self::DEFAULT_CHARSET);
+                    if(isset($params['socket'])){
+                        $query['unix_socket'] = $this->extractParam('socket', $params);
+                    }else{
+                        $query['host'] = $this->extractParam('host', $params, self::DEFAULT_HOST);
+                        $query['port'] = $this->extractParam('port', $params, self::DEFAULT_PORT);
+                    }
+                    $dsn = $this->buildDSN(self::PDO_DRIVER, $query);
                 }
 
                 // Figure out the user/pass
@@ -71,7 +69,6 @@ class dbDriver_mysql extends dbDriver{
                 $pass = $this->extractParam('pass', $params, self::DEFAULT_PASS);
 
                 // Create the PDO object!
-                $dsn = $this->buildDSN(self::PDO_DRIVER, $query);
                 $this->pdo = new PDO($dsn, $user, $pass, $params);
                 $this->debugInfo['DSN'] = $dsn;
                 $this->debugInfo['Connected to'] = $this->pdo->getAttribute(PDO::ATTR_CONNECTION_STATUS);
