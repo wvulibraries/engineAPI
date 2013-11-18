@@ -6,7 +6,7 @@ $engine = EngineAPI::singleton();
 // Turns on verbose debugging in the apache error logs
 errorHandle::errorReporting(errorHandle::E_ALL);
 
-templates::load("distribution");
+templates::load("simple");
 templates::display("header");
 ?>
 
