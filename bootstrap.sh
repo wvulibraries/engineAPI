@@ -31,7 +31,6 @@ ln -s /vagrant/engine/ $SERVERURL/phpincludes/
 # Application Specific
 
 ln -s /vagrant/public_html $SERVERURL/$DOCUMENTROOT
-ln -s $SERVERURL/phpincludes/engine/engineAPI/latest $SERVERURL/phpincludes/engine/engineAPI/4.0
 
 rm -f /etc/php.ini
 rm -f /etc/httpd/conf/httpd.conf
