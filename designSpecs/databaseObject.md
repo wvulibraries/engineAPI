@@ -168,6 +168,10 @@ example:
 
 internally calls driver->exec()
 
+#### getSQL()
+
+Return the SQL to be used
+
 #### fieldCount()
 
 Return the number of columns/fields in the result
