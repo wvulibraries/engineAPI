@@ -89,8 +89,9 @@ class db implements Countable{
             if(!self::loadDriver($driver)) throw new Exception('Failed to load driver!');
 
             // Create the new driver
+            $options       = is_object($options) ? $options : (array)$options;
             $dbDriverClass = "dbDriver_$driver";
-            $dbDriverObj   = new $dbDriverClass((array)$options);
+            $dbDriverObj   = new $dbDriverClass($options);
 
             // Save the driver for later if it's been given an alias
             if(isset($alias)) self::$objects[$alias] = $dbDriverObj;
