@@ -1,0 +1,2 @@
+<hr />
+&copy; information here
