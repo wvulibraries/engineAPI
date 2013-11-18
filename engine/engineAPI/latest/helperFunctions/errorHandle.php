@@ -432,6 +432,14 @@ class errorHandle
         // we only care if the PHP error is being looked for
         if(!(self::$errorReporting & $errSeverity)) return;
 
+        // If we're in CLI-mode, just write the error to stderr
+        if(isCLI()){
+            $fp = fopen("php://stderr", 'w+');
+            fwrite($fp,$errMsg);
+            fclose($fp);
+            return;
+        }
+
         // Save the error info for processing
         if(!isset(self::$errorType)){
             self::$errorType='newError';

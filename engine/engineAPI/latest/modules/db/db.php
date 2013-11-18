@@ -13,11 +13,16 @@ require_once __DIR__.DIRECTORY_SEPARATOR.'dbStatement.php';
  *
  * @package EngineAPI\modules\db
  */
-class db{
+class db implements Countable{
     /**
      * @var self
      */
     private static $classInstance;
+    /**
+     *
+     * @var string
+     */
+    public static $driverDir;
     /**
      * @var string[]
      */
@@ -27,8 +32,35 @@ class db{
      */
     private static $objects = array();
 
-    public function getInstance(){
+    public static function getInstance(){
         return new self;
+    }
+
+    /**
+     * [Countable] Returns the number of object currently registered
+     *
+     * @author David Gersting
+     * @return int
+     */
+    public function count(){
+        return sizeof(self::$objects);
+    }
+
+    /**
+     * Reset the db class back to it's vanilla state
+     *
+     * Warning: This will destroy() all registered objects unless FALSE is passed in
+     *
+     * @author David Gersting
+     * @param bool $destroyObjects
+     */
+    public static function reset($destroyObjects=TRUE){
+        foreach(self::$objects as $object){
+            if($destroyObjects) $object->destroy();
+            self::unregisterObject($object);
+        }
+        self::$drivers = array();
+        self::$objects = array();
     }
 
 	/**
@@ -51,14 +83,14 @@ class db{
 
         try{
             // Make sure alias isn't already taken
-            if(isset($alias) and isset(self::$objects[$alias])) throw new Exception('Alias already registered!');
+            if(isset($alias) and !empty($alias) and isset(self::$objects[$alias])) throw new Exception('Alias already registered!');
 
             // Make sure requested driver is a valid one
             if(!self::loadDriver($driver)) throw new Exception('Failed to load driver!');
 
             // Create the new driver
             $dbDriverClass = "dbDriver_$driver";
-            $dbDriverObj   = new $dbDriverClass($options);
+            $dbDriverObj   = new $dbDriverClass((array)$options);
 
             // Save the driver for later if it's been given an alias
             if(isset($alias)) self::$objects[$alias] = $dbDriverObj;
@@ -72,15 +104,16 @@ class db{
     }
 
 	/**
-	 * [PHP Magic Method] Allow drivers to be called via virtual static methods (eg: db::system->...)
+	 * [PHP Magic Method] Allow drivers to be called via virtual static methods (eg: $db->system->...)
 	 *
 	 * @author David Gersting
 	 * @param $name
-	 * @param $arguments
 	 * @return dbDriver
 	 */
-	public static function __callStatic($name, $arguments){
-
+	public function __get($name){
+        $name = trim(strtolower($name));
+        if(self::$objects[$name]) return self::$objects[$name];
+        return NULL;
     }
 
 	/**
@@ -147,17 +180,16 @@ class db{
         if(!sizeof(self::$drivers)){
             self::$drivers = array();
             foreach(glob(__DIR__.DIRECTORY_SEPARATOR.'drivers'.DIRECTORY_SEPARATOR.'*') as $dir){
-                $driverType = basename($dir);
-                if(self::loadDriver($driverType)) self::$drivers[] = $driverType;
+                self::loadDriver(basename($dir));
             }
         }
-        return array_filter(self::$drivers);
+        return array_keys(array_filter(self::$drivers));
     }
 
 
     private static function loadDriver($driver){
-        $driverDir = __DIR__.DIRECTORY_SEPARATOR.'drivers'.DIRECTORY_SEPARATOR;
-        $driver    = trim(strtolower($driver));
+        if(!isset(self::$driverDir)) self::$driverDir = __DIR__.DIRECTORY_SEPARATOR.'drivers'.DIRECTORY_SEPARATOR;
+        $driver = trim(strtolower($driver));
 
         // If we already know the answer, just return the known answer
         if(in_array($driver, self::$drivers)) return (bool)self::$drivers[$driver];
@@ -165,10 +197,10 @@ class db{
         // Try and figure out the answer
         try{
             // Make sure the driver directory exists
-            if(!is_dir($driverDir.$driver)) throw new Exception("No driver directory for given driverType $driver: '$driverDir.$driverType'");
+            if(!is_dir(self::$driverDir.$driver)) throw new Exception("No driver directory for given driverType $driver: '".self::$driverDir.".$driver'");
 
             // Make sure the driver's dbDriver file exists
-            $dbDriverFilename = $driverDir.$driver.DIRECTORY_SEPARATOR."dbDriver_$driver.php";
+            $dbDriverFilename = self::$driverDir.$driver.DIRECTORY_SEPARATOR."dbDriver_$driver.php";
             if(!is_readable($dbDriverFilename)) throw new Exception("No dbDriver file found for $driver: '$dbDriverFilename'");
             require_once $dbDriverFilename;
 
@@ -178,13 +210,13 @@ class db{
 
             // Make sure the driver's dbDriver class extends the right parent classes and is instantiable
             $dbDriver = new ReflectionClass("dbDriver_$driver");
-            if($dbDriver->isSubclassOf('dbDriver')) throw new Exception("dbDriver_$driver doesn't extend dbDriver!");
-            if($dbDriver->isInstantiable())         throw new Exception("dbDriver_$driver isn't instantiable!");
+            if(!$dbDriver->isSubclassOf('dbDriver')) throw new Exception("dbDriver_$driver doesn't extend dbDriver!");
+            if(!$dbDriver->isInstantiable())         throw new Exception("dbDriver_$driver isn't instantiable!");
 
             // Make sure the driver's dbStatement class extends the right parent classes and is instantiable
             $dbStatement = new ReflectionClass("dbStatement_$driver");
-            if($dbStatement->isSubclassOf('dbStatement')) throw new Exception("dbStatement_$driver doesn't extend dbStatement!");
-            if($dbStatement->isInstantiable())            throw new Exception("dbDriver_$driver isn't instantiable!");
+            if(!$dbStatement->isSubclassOf('dbStatement')) throw new Exception("dbStatement_$driver doesn't extend dbStatement!");
+            if(!$dbStatement->isInstantiable())            throw new Exception("dbDriver_$driver isn't instantiable!");
 
             // If we're here, then this driver is good to go
             self::$drivers[$driver] = TRUE;

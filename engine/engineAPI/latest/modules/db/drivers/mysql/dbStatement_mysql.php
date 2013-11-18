@@ -16,11 +16,10 @@ class dbStatement_mysql extends dbStatement{
      * {@inheritdoc}
      * @author David Gersting
      */
-    public function __construct($parentConnection, $sql, $params=NULL){
+    public function __construct($parentConnection, $sql){
         $this->dbDriver     = $parentConnection;
         $this->pdo          = $this->dbDriver->getPDO();
         $this->pdoStatement = $this->pdo->prepare($sql);
-        if(isset($params)) call_user_func_array(array($this, 'execute'), $params);
     }
 
     /**
@@ -37,56 +36,58 @@ class dbStatement_mysql extends dbStatement{
             $args = array();
             for($n=0; $n<func_num_args(); $n++){
                 $arg = func_get_arg($n);
-                if(is_array($arg) and sizeof($arg) == 2){
-                    if(in_array($arg[0], $this->pdoParamTypes)){
-                        $args[$n] = $arg[1];
-                        $this->bindParam($n, $args[$n], $arg[0]);
+
+                if($arg instanceof keyValuePairs){
+                    foreach($arg as $key => $value){
+                        if(is_object($value) or is_array($value)) $value = serialize($value);
+                        $this->bindValue($key, $value, $this->determineParamType($value));
                     }
                 }else{
-                    $args[$n] = $arg;
-                    switch(gettype($arg)){
-                        case 'boolean':
-                            $this->bindParam($n, $args[$n], PDO::PARAM_BOOL);
-                            break;
-                        case 'integer':
-                            $this->bindParam($n, $args[$n], PDO::PARAM_INT);
-                            break;
-                        case 'string':
-                        case 'double':
-                            $this->bindParam($n, $args[$n], PDO::PARAM_STR);
-                            break;
-                        case 'array':
-                        case 'object':
-                            $args[$n] = serialize($args[$n]);
-                            $this->bindParam($n, $args[$n], PDO::PARAM_STR);
-                            break;
-                        case 'resource':
-                            errorHandle::newError(__METHOD__."() - Unsupported param type! (can't store a resource)", errorHandle::DEBUG);
-                            return FALSE;
-                        case 'null':
-                            $this->bindParam($n, $args[$n], PDO::PARAM_NULL);
-                            break;
-                        default:
-                            errorHandle::newError(__METHOD__."() - Unsupported param type! (unknown type)", errorHandle::DEBUG);
-                            return FALSE;
-                    }
+                    if(is_object($arg) or is_array($arg)) $arg = serialize($arg);
+                    $this->bindValue($n+1, $arg, $this->determineParamType($arg));
                 }
             }
         }
 
         // Time to execute the prepared statement!
-        return $this->pdoStatement->execute();
+        $start  = microtime(TRUE);
+        $result = $this->pdoStatement->execute();
+        $stop   = microtime(TRUE);
+        $this->executedTime = $stop - $start;
+        $this->executedAt   = new DateTime;
+
+        return $result;
     }
 
-    public function bindParam($param, &$value, $type=PDO::PARAM_STR, $length=NULL, $options=array()){
+    /**
+     * {@inheritdoc}
+     * @author David Gersting
+     */
+    public function bindParam($param, &$value, $type=PDO::PARAM_STR, $length=NULL, $options=NULL){
         if($this->isExecuted()){
             errorHandle::newError(__METHOD__."() - Method not available! (statement already executed)", errorHandle::DEBUG);
             return FALSE;
         }
 
-        if(isset($options)) return $this->pdoStatement->bindParam($param, $value, $type, $options);
-        if(isset($length))  return $this->pdoStatement->bindParam($param, $value, $type);
+        if(isset($options)) return $this->pdoStatement->bindParam($param, $value, $type, $length, $options);
+        if(isset($length))  return $this->pdoStatement->bindParam($param, $value, $type, $length);
+        if(isset($type))    return $this->pdoStatement->bindParam($param, $value, $type);
         return $this->pdoStatement->bindParam($param, $value);
+    }
+
+    /**
+     * {@inheritdoc}
+     * @author David Gersting
+     */
+    public function bindValue($param, $value, $type=PDO::PARAM_STR, $length=NULL){
+        if($this->isExecuted()){
+            errorHandle::newError(__METHOD__."() - Method not available! (statement already executed)", errorHandle::DEBUG);
+            return FALSE;
+        }
+
+        if(isset($length)) return $this->pdoStatement->bindValue($param, $value, $type, $length);
+        if(isset($type))   return $this->pdoStatement->bindValue($param, $value, $type);
+        return $this->pdoStatement->bindValue($param, $value);
     }
 
     /**
@@ -208,11 +209,8 @@ class dbStatement_mysql extends dbStatement{
             return FALSE;
         }
 
-        // We need to convert to the field number
-        if(is_string($field)) $field = array_search($field, $this->fieldNames());
-        // Return the requested field
         $rows = array();
-        while($field = $this->pdoStatement->fetchColumn($field)){
+        while($field = $this->fetchField($field)){
             $rows[] = $field;
         }
         return $rows;

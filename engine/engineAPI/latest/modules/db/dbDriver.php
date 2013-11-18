@@ -33,6 +33,11 @@ abstract class dbDriver{
      */
     protected $readOnlyMode = FALSE;
 
+
+    public function __toString(){
+        return get_class($this)."\n";
+    }
+
     /**
      * Extract a given param from a list of params
      *
@@ -96,12 +101,12 @@ abstract class dbDriver{
      * @param $sql
      * @return bool
      */
-    protected function chkReadOnlySQL($sql){
+    public function chkReadOnlySQL($sql){
         // Remove SQL comments
         $sql = preg_replace('/^--.*?$/', '', $sql);
         // There's got to be a better way to combine this...
-        if(preg_match('/^\s*(?:ALTER|CREATE|DELETE|INSERT|UPDATE|DROP|TRUNCATE)/i', $sql)) return FALSE;
-        if(preg_match('/;\s*(?:ALTER|CREATE|DELETE|INSERT|UPDATE|DROP|TRUNCATE)/i', $sql)) return FALSE;
+        if(preg_match('/^\s*(?:ALTER|CREATE|DELETE|INSERT|UPDATE|DROP|TRUNCATE|RENAME|REPLACE|LOAD DATA)/i', $sql)) return FALSE;
+        if(preg_match('/;\s*(?:ALTER|CREATE|DELETE|INSERT|UPDATE|DROP|TRUNCATE|RENAME|REPLACE|LOAD DATA)/i', $sql)) return FALSE;
         return TRUE;
     }
 
@@ -116,7 +121,7 @@ abstract class dbDriver{
 	 *        If given, will be use to 'auto-execute' the prepared SQL
 	 * @return dbStatement
 	 */
-	public abstract function query($sql, array $params=array());
+	public abstract function query($sql, $params=NULL);
 
 	/**
 	 * Execute a raw SQL statement against the database
