@@ -72,6 +72,7 @@ class db implements Countable{
 	 * @param array|string $options
 	 *        An optional array of params to pass to the driver *driver-specific*
      *        OR a fully qualified DSN (@see http://us2.php.net/manual/en/pdo.construct.php)
+     *        OR an instantiated PDO object
 	 * @param string $alias
 	 *        If provided, register this driver under the given alias.
 	 *        If name collision, return FALSE
@@ -89,7 +90,6 @@ class db implements Countable{
             if(!self::loadDriver($driver)) throw new Exception('Failed to load driver!');
 
             // Create the new driver
-            $options       = is_object($options) ? $options : (array)$options;
             $dbDriverClass = "dbDriver_$driver";
             $dbDriverObj   = new $dbDriverClass($options);
 
