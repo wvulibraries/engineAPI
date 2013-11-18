@@ -6,7 +6,7 @@
  */
 
 // Load any related MySQL files
-require_once __DIR__.DIRECTORY_SEPARATOR.'dbStatement_mysql.php'{}
+require_once __DIR__.DIRECTORY_SEPARATOR.'dbStatement_mysql.php';
 
 /**
  * MySQL database driver
@@ -22,6 +22,15 @@ class dbDriver_mysql extends dbDriver{
     const DEFAULT_CHARSET = 'utf8';
 
     /**
+     * @var DateTime
+     */
+    private $createdAt;
+    /**
+     * @var array
+     */
+    private $debugInfo;
+
+    /**
      * Construct a MySQL
      *
      * @author David Gersting
@@ -30,14 +39,19 @@ class dbDriver_mysql extends dbDriver{
     public function __construct($params=array()){
         if($params instanceof PDO){
             $this->pdo = $params;
+            $this->debugInfo['Connected to'] = $this->pdo->getAttribute(PDO::ATTR_CONNECTION_STATUS);
         }elseif(is_string($params)){
             $this->pdo = new PDO($params);
+            $this->debugInfo['Connected to'] = $this->pdo->getAttribute(PDO::ATTR_CONNECTION_STATUS);
         }elseif(is_array($params)){
             if(isset($params['pdo']) and $params['pdo'] instanceof PDO){
                 $this->pdo = $params['pdo'];
+                $this->debugInfo['Connected to'] = $this->pdo->getAttribute(PDO::ATTR_CONNECTION_STATUS);
             }elseif(isset($params['dsn'])){
                 $dsn = $this->extractParam('dsn', $params);
                 $this->pdo = new PDO($dsn, $params);
+                $this->debugInfo['DSN'] = $dsn;
+                $this->debugInfo['Connected to'] = $this->pdo->getAttribute(PDO::ATTR_CONNECTION_STATUS);
             }else{
                 // Build the DSN string
                 $query            = array();
@@ -59,11 +73,15 @@ class dbDriver_mysql extends dbDriver{
                 // Create the PDO object!
                 $dsn = $this->buildDSN(self::PDO_DRIVER, $query);
                 $this->pdo = new PDO($dsn, $user, $pass, $params);
+                $this->debugInfo['DSN'] = $dsn;
+                $this->debugInfo['Connected to'] = $this->pdo->getAttribute(PDO::ATTR_CONNECTION_STATUS);
             }
         }else{
             errorHandle::newError(__METHOD__."() - Unknown params passed!", errorHandle::DEBUG);
             return FALSE;
         }
+
+        $this->createdAt = new DateTime;
     }
 
     /**
@@ -74,17 +92,52 @@ class dbDriver_mysql extends dbDriver{
         $this->destroy();
     }
 
+    public function __toString(){
+        $debugEnv = TRUE; // TODO: switch to EngineAPI environments (when they are done)
+        if($debugEnv){
+            $header = sprintf('%s(%s)', __CLASS__, $this->pdo->getAttribute(PDO::ATTR_DRIVER_NAME));
+            $width  = strlen($header) + 20;
+            $return = str_repeat("=", $width)."\n";
+            $return .= str_pad($header, $width, ' ', STR_PAD_BOTH)."\n";
+            $return .= str_repeat("=", $width)."\n";
+            $return .= sprintf("Opened at: %s\n", $this->createdAt->format('g:i:s a'));
+            $return .= sprintf("In transaction: %s\n", ($this->inTransaction() ? sprintf('Yes (depth: %s)', $this->transNestingCounter) : 'No'));
+            if($this->inTransaction()) $return .= sprintf("Rollback only: %s\n", ($this->transRollbackOnly ? 'Yes' : 'No'));
+            if(is_array($this->debugInfo) and sizeof($this->debugInfo)){
+                $return .= str_repeat("-", $width)."\n";
+                foreach($this->debugInfo as $label => $data){
+                    $return .= "$label: $data\n";
+                }
+            }
+            $return .= str_repeat("=", $width)."\n";
+
+            return $return;
+        }else{
+            parent::__toString();
+        }
+    }
 
     /**
      * {@inheritdoc}
      * @author David Gersting
      */
-    public function query($sql, array $params=array()){
+    public function query($sql, $params=NULL){
         if($this->isReadOnly() and !$this->chkReadOnlySQL($sql)){
             errorHandle::newError(__METHOD__."() - Driver is in read-only mode!", errorHandle::DEBUG);
             return FALSE;
         }
-        return new dbStatement_mysql($this, $sql, $params);
+
+        $stmt = new dbStatement_mysql($this, $sql);
+        switch(true){
+            case !isset($params):
+                $stmt->execute();
+                return $stmt;
+            case !$params:
+                return $stmt;
+            case (is_array($params) and sizeof($params)):
+                call_user_func_array(array($stmt, 'execute'), $params);
+                return $stmt;
+        }
     }
 
     /**
@@ -114,7 +167,9 @@ class dbDriver_mysql extends dbDriver{
      */
     public function beginTransaction(){
         $this->transNestingCounter++;
-        return $this->pdo->beginTransaction();
+        return $this->transNestingCounter == 1
+            ? $this->pdo->beginTransaction()
+            : TRUE;
     }
 
     /**

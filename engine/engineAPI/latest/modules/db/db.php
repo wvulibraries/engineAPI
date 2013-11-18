@@ -13,11 +13,16 @@ require_once __DIR__.DIRECTORY_SEPARATOR.'dbStatement.php';
  *
  * @package EngineAPI\modules\db
  */
-class db{
+class db implements Countable{
     /**
      * @var self
      */
     private static $classInstance;
+    /**
+     *
+     * @var string
+     */
+    public static $driverDir;
     /**
      * @var string[]
      */
@@ -27,8 +32,35 @@ class db{
      */
     private static $objects = array();
 
-    public function getInstance(){
+    public static function getInstance(){
         return new self;
+    }
+
+    /**
+     * [Countable] Returns the number of object currently registered
+     *
+     * @author David Gersting
+     * @return int
+     */
+    public function count(){
+        return sizeof(self::$objects);
+    }
+
+    /**
+     * Reset the db class back to it's vanilla state
+     *
+     * Warning: This will destroy() all registered objects unless FALSE is passed in
+     *
+     * @author David Gersting
+     * @param bool $destroyObjects
+     */
+    public static function reset($destroyObjects=TRUE){
+        foreach(self::$objects as $object){
+            if($destroyObjects) $object->destroy();
+            self::unregisterObject($object);
+        }
+        self::$drivers = array();
+        self::$objects = array();
     }
 
 	/**
@@ -51,7 +83,7 @@ class db{
 
         try{
             // Make sure alias isn't already taken
-            if(isset($alias) and isset(self::$objects[$alias])) throw new Exception('Alias already registered!');
+            if(isset($alias) and !empty($alias) and isset(self::$objects[$alias])) throw new Exception('Alias already registered!');
 
             // Make sure requested driver is a valid one
             if(!self::loadDriver($driver)) throw new Exception('Failed to load driver!');
@@ -156,8 +188,8 @@ class db{
 
 
     private static function loadDriver($driver){
-        $driverDir = __DIR__.DIRECTORY_SEPARATOR.'drivers'.DIRECTORY_SEPARATOR;
-        $driver    = trim(strtolower($driver));
+        if(!isset(self::$driverDir)) self::$driverDir = __DIR__.DIRECTORY_SEPARATOR.'drivers'.DIRECTORY_SEPARATOR;
+        $driver = trim(strtolower($driver));
 
         // If we already know the answer, just return the known answer
         if(in_array($driver, self::$drivers)) return (bool)self::$drivers[$driver];
@@ -165,10 +197,10 @@ class db{
         // Try and figure out the answer
         try{
             // Make sure the driver directory exists
-            if(!is_dir($driverDir.$driver)) throw new Exception("No driver directory for given driverType $driver: '$driverDir.$driverType'");
+            if(!is_dir(self::$driverDir.$driver)) throw new Exception("No driver directory for given driverType $driver: '".self::$driverDir.".$driver'");
 
             // Make sure the driver's dbDriver file exists
-            $dbDriverFilename = $driverDir.$driver.DIRECTORY_SEPARATOR."dbDriver_$driver.php";
+            $dbDriverFilename = self::$driverDir.$driver.DIRECTORY_SEPARATOR."dbDriver_$driver.php";
             if(!is_readable($dbDriverFilename)) throw new Exception("No dbDriver file found for $driver: '$dbDriverFilename'");
             require_once $dbDriverFilename;
 

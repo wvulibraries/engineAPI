@@ -28,6 +28,16 @@ abstract class dbStatement{
      */
     protected $isExecuted=FALSE;
     /**
+     * The timestamp of when the statement was executed
+     * @var DateTime
+     */
+    protected $executedAt;
+    /**
+     * microtime of how long the statement took to execute
+     * @var int
+     */
+    protected $executedTime;
+    /**
      * Array of field names in a result set
      * @var array
      */
@@ -44,6 +54,35 @@ abstract class dbStatement{
         PDO::PARAM_STR,
         PDO::PARAM_LOB);
 
+    public function __toString(){
+        $debugEnv = TRUE; // TODO: switch to EngineAPI environments (when they are done)
+        if($debugEnv){
+            $header = sprintf('%s(%s)', __CLASS__, $this->pdo->getAttribute(PDO::ATTR_DRIVER_NAME));
+            $width  = strlen($this->getSQL()) + 10;
+            $return = str_repeat("=", $width)."\n";
+            $return .= str_pad($header, $width, ' ', STR_PAD_BOTH)."\n";
+            $return .= str_repeat("=", $width)."\n";
+            $return .= sprintf("SQL: %s\n", $this->getSQL());
+            $return .= sprintf("Executed at: %s\n", $this->executedAt->format('g:i:s a'));
+            $return .= sprintf("Execute time: %Fs\n", $this->executedTime);
+            $return .= str_repeat("-", $width)."\n";
+            if('0000' != $this->errorCode()){
+                $return .= sprintf("Error: [%s] %s\n", $this->errorCode(), $this->errorMsg());
+                $return .= str_repeat("-", $width)."\n";
+            }
+            $return .= sprintf("Row count: %d\n", $this->rowCount());
+            $return .= sprintf("Field count: %d\n", $this->fieldCount());
+            if($this->fieldCount()) $return .= sprintf("Field names: %s\n", implode(',', $this->fieldNames()));
+            $return .= sprintf("Affected rows: %d\n", $this->affectedRows());
+            $return .= sprintf("Insert ID: %d\n", $this->insertId());
+            $return .= str_repeat("=", $width)."\n";
+
+            return $return;
+        }else{
+            return get_class($this)."\n";
+        }
+    }
+
     /**
      * Return this statement's underlying PDOStatement object
      *
@@ -56,10 +95,49 @@ abstract class dbStatement{
 
     /**
      * Return TRUE if the statement has been executed
+     *
+     * @author David Gersting
      * @return bool
      */
     public function isExecuted(){
-        return $this->isExecuted;
+        return isset($this->executedAt);
+    }
+
+    /**
+     * Return the SQL to be used
+     *
+     * @author David Gersting
+     * @return string
+     */
+    public function getSQL(){
+        return $this->pdoStatement->queryString;
+    }
+
+    /**
+     * Determine best PDO param type base on the given data
+     *
+     * @author David Gersting
+     * @param $data
+     * @return bool|int
+     */
+    protected function determineParamType($data){
+        switch(gettype($data)){
+            case 'boolean':
+                return PDO::PARAM_BOOL;
+            case 'integer':
+                return PDO::PARAM_INT;
+            case 'null':
+                return PDO::PARAM_NULL;
+            default:
+            case 'string':
+            case 'double':
+            case 'array':
+            case 'object':
+                return PDO::PARAM_STR;
+            case 'resource':
+                errorHandle::newError(__METHOD__."() - Unsupported param type! (can't store a resource)", errorHandle::DEBUG);
+                return FALSE;
+        }
     }
 
     // -------------------------------
@@ -69,9 +147,8 @@ abstract class dbStatement{
      *
      * @param dbDriver $parentConnection
      * @param string   $sql
-     * @param array    $params
      */
-    public abstract function __construct($parentConnection, $sql, $params=array());
+    public abstract function __construct($parentConnection, $sql);
 
 	/**
 	 * Execute the prepared SQL
@@ -86,15 +163,31 @@ abstract class dbStatement{
     /**
      * Manually bind a param to the prepared statement
      *
+     * This binds the variable (by reference) to the prepared statement
+     *
      * @param int|string $param
-     * @param mixed      $value
+     * @param mixed      $var
      * @param int        $type
      * @param int        $length
      * @param array      $options
      *
      * @return mixed
      */
-    public abstract function bindParam($param, &$value, $type=PDO::PARAM_STR, $length=NULL, $options=NULL);
+    public abstract function bindParam($param, &$var, $type=PDO::PARAM_STR, $length=NULL, $options=NULL);
+
+    /**
+     * Manually bind a param to the prepared statement
+     *
+     * This bind the value to the prepared statement
+     *
+     * @param int|string $param
+     * @param mixed      $value
+     * @param int        $type
+     * @param int        $length
+     *
+     * @return mixed
+     */
+    public abstract function bindValue($param, $value, $type=PDO::PARAM_STR, $length=NULL);
 
 	/**
 	 * Return the number of fields in the prepared SQL/result
