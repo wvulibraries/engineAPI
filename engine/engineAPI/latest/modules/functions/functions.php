@@ -10,7 +10,7 @@ class functions {
 
 	public static function getInstance() {
 		if (!isset(self::$classInstance)) { 
-			self::$classInstance = new self();]
+			self::$classInstance = new self();
 		}
 
 		return self::$classInstance;
