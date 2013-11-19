@@ -100,6 +100,7 @@ class dbDriver_mysql extends dbDriver{
             $return .= str_pad($header, $width, ' ', STR_PAD_BOTH)."\n";
             $return .= str_repeat("=", $width)."\n";
             $return .= sprintf("Opened at: %s\n", $this->createdAt->format('g:i:s a'));
+            $return .= sprintf("Read-only Mode: %s\n", ($this->readOnlyMode ? 'Yes' : 'No'));
             $return .= sprintf("In transaction: %s\n", ($this->inTransaction() ? sprintf('Yes (depth: %s)', $this->transNestingCounter) : 'No'));
             if($this->inTransaction()) $return .= sprintf("Rollback only: %s\n", ($this->transRollbackOnly ? 'Yes' : 'No'));
             if(is_array($this->debugInfo) and sizeof($this->debugInfo)){
