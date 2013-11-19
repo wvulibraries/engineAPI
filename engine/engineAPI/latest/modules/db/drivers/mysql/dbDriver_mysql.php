@@ -203,7 +203,7 @@ class dbDriver_mysql extends dbDriver{
      * @author David Gersting
      */
     public function inTransaction(){
-        return $this->pdo->inTransaction();
+        return ($this->transNestingCounter > 0 and $this->pdo->inTransaction());
     }
 
     /**
