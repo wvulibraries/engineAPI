@@ -4,6 +4,10 @@ require_once __DIR__.'/../../mockPDO.php';
 
 class dbDriver_mysqlTest extends PHPUnit_Extensions_Database_TestCase{
     /**
+     * @var array
+     */
+    private static $driverOptions;
+    /**
      * @var PDO
      */
     static $pdo;
@@ -17,13 +21,13 @@ class dbDriver_mysqlTest extends PHPUnit_Extensions_Database_TestCase{
     }
 
     static function setUpBeforeClass(){
-        $options  = array(
+        self::$driverOptions = array(
             'dsn'    => $GLOBALS['DB_DSN'],
             'user'   => $GLOBALS['DB_USER'],
             'pass'   => $GLOBALS['DB_PASSWD'],
             'dbname' => $GLOBALS['DB_DBNAME'],
         );
-        self::$db = db::create('mysql', $options);
+        self::$db = db::create('mysql', self::$driverOptions);
     }
 
     public function getConnection(){
@@ -283,5 +287,45 @@ class dbDriver_mysqlTest extends PHPUnit_Extensions_Database_TestCase{
         $db->readOnly();
         $this->assertTrue(FALSE === $db->query('DROP `thisDoesNotExistAndShouldNeverExistInTheDatabase`'));
 
+    }
+
+    # Transaction tests
+    #########################################
+    function test_transactionsCanBeCommitted(){
+        self::$db->beginTransaction();
+        self::$db->query("UPDATE `dbObjectTesting` SET `value`='1' WHERE `key`='transTest'");
+        self::$db->commit();
+        $this->assertEquals('1', self::$pdo->query("SELECT `value` FROM `dbObjectTesting` WHERE `key`='transTest'")->fetchColumn(0));
+    }
+    function test_transactionsCanBeRolledBack(){
+        self::$db->beginTransaction();
+        self::$db->query("UPDATE `dbObjectTesting` SET `value`='1' WHERE `key`='transTest'");
+        self::$db->rollback();
+        $this->assertEquals('', self::$pdo->query("SELECT `value` FROM `dbObjectTesting` WHERE `key`='transTest'")->fetchColumn(0));
+    }
+    function test_transactionsThatAreNotCommittedAreRolledBack(){
+        $db = db::create('mysql', self::$driverOptions);
+        $db->beginTransaction();
+        $db->query("UPDATE `dbObjectTesting` SET `value`='1' WHERE `key`='transTest'");
+        $db->destroy();
+        $this->assertEquals('', self::$pdo->query("SELECT `value` FROM `dbObjectTesting` WHERE `key`='transTest'")->fetchColumn(0));
+    }
+    function test_aNestedRollbackWillCauseTheWholeTransactionToRollbackAsWell(){
+        $db = db::create('mysql', self::$driverOptions);
+
+        // Walk down the nesting levels
+        $db->beginTransaction(); // Level 1
+        $db->query("UPDATE `dbObjectTesting` SET `value`='1' WHERE `key`='transTest'");
+        $db->beginTransaction(); // level 2
+        $db->query("UPDATE `dbObjectTesting` SET `value`='2' WHERE `key`='transTest'");
+        $db->beginTransaction(); // level 3
+        $db->query("UPDATE `dbObjectTesting` SET `value`='3' WHERE `key`='transTest'");
+
+        // Wal back out
+        $db->commit();
+        $db->rollback();
+        $db->commit();
+
+        $this->assertEquals('', self::$pdo->query("SELECT `value` FROM `dbObjectTesting` WHERE `key`='transTest'")->fetchColumn(0));
     }
 }
