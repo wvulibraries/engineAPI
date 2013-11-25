@@ -109,7 +109,7 @@ class dbStatement_mysql extends dbStatement{
     public function fieldNames(){
         if(!$this->isExecuted()){
             errorHandle::newError(__METHOD__."() - Method not available! (statement not executed yet)", errorHandle::DEBUG);
-            return array()s;
+            return array();
         }
 
         if(!isset($this->fieldNames)){
