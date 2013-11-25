@@ -19,7 +19,7 @@ class dbStatement_mysql extends dbStatement{
     public function __construct($parentConnection, $sql){
         $this->dbDriver     = $parentConnection;
         $this->pdo          = $this->dbDriver->getPDO();
-        $this->pdoStatement = $this->pdo->prepare($sql);
+        $this->pdoStatement = ($sql instanceof PDOStatement) ? $sql : $this->pdo->prepare($sql);
     }
 
     /**
