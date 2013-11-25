@@ -265,9 +265,16 @@ abstract class dbStatement{
 	public abstract function fetchFieldAll($field=0);
 
 	/**
-	 * The error code/number of the last error *driver specific*
+	 * The SQLSTATE (ANSI SQL-92) of the last database operation
 	 *
 	 * @return int
+	 */
+	public abstract function sqlState();
+
+	/**
+	 * The error message of the last error *driver specific*
+	 *
+	 * @return string
 	 */
 	public abstract function errorCode();
 

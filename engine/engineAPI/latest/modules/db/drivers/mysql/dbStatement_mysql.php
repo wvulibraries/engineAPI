@@ -220,8 +220,17 @@ class dbStatement_mysql extends dbStatement{
      * {@inheritdoc}
      * @author David Gersting
      */
-    public function errorCode(){
+    public function sqlState(){
         return $this->pdoStatement->errorCode();
+    }
+
+    /**
+     * {@inheritdoc}
+     * @author David Gersting
+     */
+    public function errorCode(){
+        $errorMsg = $this->pdoStatement->errorInfo();
+        return $errorMsg[1];
     }
 
     /**
@@ -230,6 +239,6 @@ class dbStatement_mysql extends dbStatement{
      */
   public function errorMsg(){
       $errorMsg = $this->pdoStatement->errorInfo();
-      return $errorMsg[0];
+      return $errorMsg[2];
   }
 } 

@@ -206,13 +206,17 @@ Return only the given field from one row at a time.
 
 Return an array of all rows of only the given field.
 
+#### sqlState()
+
+The SQLSTATE (ANSI SQL-92) of the last database operation
+
 #### errorCode()
 
-Return the error Code/Number for the last error
+The error message of the last error *driver specific*
 
 #### errorMsg()
 
-Return the error message for the last error
+The error message of the last error *driver specific*
 
 
 ---
