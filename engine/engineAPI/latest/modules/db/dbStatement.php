@@ -191,7 +191,7 @@ abstract class dbStatement{
 
 	/**
 	 * Return the number of fields in the prepared SQL/result
-	 * (depending on the state of the statement)
+	 * (will always be 0 until the statement is executed)
 	 *
 	 * @return int
 	 */
