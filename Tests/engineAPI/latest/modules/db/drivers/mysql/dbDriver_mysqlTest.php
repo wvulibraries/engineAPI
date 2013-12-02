@@ -292,40 +292,53 @@ class dbDriver_mysqlTest extends PHPUnit_Extensions_Database_TestCase{
     # Transaction tests
     #########################################
     function test_transactionsCanBeCommitted(){
-        self::$db->beginTransaction();
-        self::$db->query("UPDATE `dbObjectTesting` SET `value`='1' WHERE `key`='transTest'");
-        self::$db->commit();
-        $this->assertEquals('1', self::$pdo->query("SELECT `value` FROM `dbObjectTesting` WHERE `key`='transTest'")->fetchColumn(0));
-    }
-    function test_transactionsCanBeRolledBack(){
-        self::$db->beginTransaction();
-        self::$db->query("UPDATE `dbObjectTesting` SET `value`='1' WHERE `key`='transTest'");
-        self::$db->rollback();
-        $this->assertEquals('', self::$pdo->query("SELECT `value` FROM `dbObjectTesting` WHERE `key`='transTest'")->fetchColumn(0));
-    }
-    function test_transactionsThatAreNotCommittedAreRolledBack(){
+        self::$pdo->exec("INSERT INTO `dbObjectTesting` (`value`) VALUES('')");
+        $id = self::$pdo->lastInsertId();
+
         $db = db::create('mysql', self::$driverOptions);
         $db->beginTransaction();
-        $db->query("UPDATE `dbObjectTesting` SET `value`='1' WHERE `key`='transTest'");
+        $db->query("UPDATE `dbObjectTesting` SET `value`='1' WHERE `id`='$id'");
+        $db->commit();
+        $this->assertEquals('1', self::$pdo->query("SELECT `value` FROM `dbObjectTesting` WHERE `id`='$id'")->fetchColumn(0));
+    }
+    function test_transactionsCanBeRolledBack(){
+        self::$pdo->exec("INSERT INTO `dbObjectTesting` (`value`) VALUES('')");
+        $id = self::$pdo->lastInsertId();
+
+        $db = db::create('mysql', self::$driverOptions);
+        $db->beginTransaction();
+        $db->query("UPDATE `dbObjectTesting` SET `value`='1' WHERE `id`='$id'");
+        $db->rollback();
+        $this->assertEquals('', self::$pdo->query("SELECT `value` FROM `dbObjectTesting` WHERE `id`='$id'")->fetchColumn(0));
+    }
+    function test_transactionsThatAreNotCommittedAreRolledBack(){
+        self::$pdo->exec("INSERT INTO `dbObjectTesting` (`value`) VALUES('')");
+        $id = self::$pdo->lastInsertId();
+
+        $db = db::create('mysql', self::$driverOptions);
+        $db->beginTransaction();
+        $db->query("UPDATE `dbObjectTesting` SET `value`='1' WHERE `id`='$id'");
         $db->destroy();
-        $this->assertEquals('', self::$pdo->query("SELECT `value` FROM `dbObjectTesting` WHERE `key`='transTest'")->fetchColumn(0));
+        $this->assertEquals('', self::$pdo->query("SELECT `value` FROM `dbObjectTesting` WHERE `id`='$id'")->fetchColumn(0));
     }
     function test_aNestedRollbackWillCauseTheWholeTransactionToRollbackAsWell(){
+        self::$pdo->exec("INSERT INTO `dbObjectTesting` (`value`) VALUES('')");
+        $id = self::$pdo->lastInsertId();
         $db = db::create('mysql', self::$driverOptions);
 
         // Walk down the nesting levels
         $db->beginTransaction(); // Level 1
-        $db->query("UPDATE `dbObjectTesting` SET `value`='1' WHERE `key`='transTest'");
+        $db->query("UPDATE `dbObjectTesting` SET `value`='1' WHERE `id`='$id'");
         $db->beginTransaction(); // level 2
-        $db->query("UPDATE `dbObjectTesting` SET `value`='2' WHERE `key`='transTest'");
+        $db->query("UPDATE `dbObjectTesting` SET `value`='2' WHERE `id`='$id'");
         $db->beginTransaction(); // level 3
-        $db->query("UPDATE `dbObjectTesting` SET `value`='3' WHERE `key`='transTest'");
+        $db->query("UPDATE `dbObjectTesting` SET `value`='3' WHERE `id`='$id'");
 
         // Wal back out
         $db->commit();
         $db->rollback();
         $db->commit();
 
-        $this->assertEquals('', self::$pdo->query("SELECT `value` FROM `dbObjectTesting` WHERE `key`='transTest'")->fetchColumn(0));
+        $this->assertEquals('', self::$pdo->query("SELECT `value` FROM `dbObjectTesting` WHERE `id`='$id'")->fetchColumn(0));
     }
 }
