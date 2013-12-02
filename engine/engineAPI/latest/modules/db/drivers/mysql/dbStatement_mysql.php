@@ -210,8 +210,8 @@ class dbStatement_mysql extends dbStatement{
         }
 
         $rows = array();
-        while($field = $this->fetchField($field)){
-            $rows[] = $field;
+        while($n = $this->fetchField($field)){
+            $rows[] = $n;
         }
         return $rows;
     }
