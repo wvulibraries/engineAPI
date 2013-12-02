@@ -272,7 +272,7 @@ abstract class dbStatement{
 	public abstract function sqlState();
 
 	/**
-	 * The error message of the last error *driver specific*
+	 * The error code/number of the last error *driver specific*
 	 *
 	 * @return string
 	 */
