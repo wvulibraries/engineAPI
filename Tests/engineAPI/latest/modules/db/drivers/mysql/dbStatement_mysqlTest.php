@@ -181,269 +181,252 @@ class dbStatement_mysqlTest extends PHPUnit_Extensions_Database_TestCase {
     # Tests for fetch()
     #########################################
     function test_fetchSupportsFETCH_ASSOC(){
-        $db = db::create('mysql', self::$driverOptions);
-        $db->query("INSERT INTO `dbObjectTesting` (`value`) VALUE('a1')");
+        self::$pdo->exec("INSERT INTO `dbObjectTesting` (`value`) VALUE('a')");
 
+        $db   = db::create('mysql', self::$driverOptions);
         $stmt = $db->query('SELECT * FROM dbObjectTesting');
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        $row  = $stmt->fetch(PDO::FETCH_ASSOC);
+        $this->assertEquals(1, $stmt->rowCount(), 'There should be 1 rows');
         $this->assertTrue(is_array($row), "fetch() returns an array");
         $this->assertEquals(3, sizeof($row), "fetch() returns an array with 3 elements");
         $this->assertArrayHasKey('id', $row);
         $this->assertArrayHasKey('timestamp', $row);
         $this->assertArrayHasKey('value', $row);
-        $this->assertEquals('a1', $row['value']);
+        $this->assertEquals('a', $row['value']);
     }
     function test_fetchSupportsFETCH_NUM(){
-        $db = db::create('mysql', self::$driverOptions);
-        $db->query("INSERT INTO `dbObjectTesting` (`value`) VALUE('a1')");
+        self::$pdo->exec("INSERT INTO `dbObjectTesting` (`value`) VALUE('a')");
 
+        $db   = db::create('mysql', self::$driverOptions);
         $stmt = $db->query('SELECT * FROM dbObjectTesting');
-        $row = $stmt->fetch(PDO::FETCH_NUM);
+        $row  = $stmt->fetch(PDO::FETCH_NUM);
+        $this->assertEquals(1, $stmt->rowCount(), 'There should be 1 rows');
         $this->assertTrue(is_array($row), "fetch() returns an array");
         $this->assertEquals(3, sizeof($row), "fetch() returns an array with 3 elements");
         $this->assertArrayHasKey(0, $row);
         $this->assertArrayHasKey(1, $row);
         $this->assertArrayHasKey(2, $row);
-        $this->assertEquals('a1', $row[2]);
+        $this->assertEquals('a', $row[2]);
     }
     function test_fetchSupportsFETCH_OBJ(){
-        $db = db::create('mysql', self::$driverOptions);
-        $db->query("INSERT INTO `dbObjectTesting` (`value`) VALUE('a1')");
+        self::$pdo->exec("INSERT INTO `dbObjectTesting` (`value`) VALUE('a')");
 
+        $db   = db::create('mysql', self::$driverOptions);
         $stmt = $db->query('SELECT * FROM dbObjectTesting');
-        $row = $stmt->fetch(PDO::FETCH_OBJ);
+        $row  = $stmt->fetch(PDO::FETCH_OBJ);
+        $this->assertEquals(1, $stmt->rowCount(), 'There should be 1 rows');
         $this->assertTrue(is_object($row), "fetch() returns an object");
         $this->assertAttributeNotEmpty('id', $row);
         $this->assertAttributeNotEmpty('timestamp', $row);
         $this->assertAttributeNotEmpty('value', $row);
-        $this->assertAttributeEquals('a1', 'value', $row);
+        $this->assertAttributeEquals('a', 'value', $row);
     }
     function test_fetchUsesFetchAssocByDefault(){
-        $db = db::create('mysql', self::$driverOptions);
-        $db->query("INSERT INTO `dbObjectTesting` (`value`) VALUE('a1')");
+        self::$pdo->exec("INSERT INTO `dbObjectTesting` (`value`) VALUE('a')");
 
+        $db   = db::create('mysql', self::$driverOptions);
         $stmt = $db->query('SELECT * FROM dbObjectTesting');
-        $row = $stmt->fetch();
+        $row  = $stmt->fetch();
+        $this->assertEquals(1, $stmt->rowCount(), 'There should be 1 rows');
         $this->assertTrue(is_array($row), "fetch() returns an array");
         $this->assertEquals(3, sizeof($row), "fetch() returns an array with 3 elements");
         $this->assertArrayHasKey('id', $row);
         $this->assertArrayHasKey('timestamp', $row);
         $this->assertArrayHasKey('value', $row);
-        $this->assertEquals('a1', $row['value']);
+        $this->assertEquals('a', $row['value']);
     }
     function test_fetchReturnsRowByRow(){
-        $testData = array('a1','b1','c1');
-        $db = db::create('mysql', self::$driverOptions);
-        $db->query("INSERT INTO `dbObjectTesting` (`value`) VALUE('a1'),('b1'),('c1')");
-        $stmt = $db->query('SELECT * FROM dbObjectTesting');
+        self::$pdo->exec("INSERT INTO `dbObjectTesting` (`value`) VALUE('a'),('b'),('c')");
 
-        for($n=0; $row = $stmt->fetch(PDO::FETCH_ASSOC); $n++){
+        $db       = db::create('mysql', self::$driverOptions);
+        $stmt     = $db->query('SELECT * FROM dbObjectTesting');
+        $counter  = 0;
+        $testData = array('a', 'b', 'c');
+        $this->assertEquals(3, $stmt->rowCount(), 'There should be 3 rows');
+        while($row = $stmt->fetch()){
+            $counter++;
             $this->assertTrue(is_array($row));
             $this->assertEquals(3, sizeof($row));
             $this->assertArrayHasKey('value', $row);
-            $this->assertEquals($testData[$n], $row['value']);
+            $this->assertEquals($testData[$counter-1], $row['value']);
         }
+        $this->assertEquals(3,$counter,'We should have looped 3 times');
     }
 
     # Tests for fetchAll()
     #########################################
     function test_fetchAllSupportsFETCH_ASSOC(){
-        $db = db::create('mysql', self::$driverOptions);
-        $db->query("INSERT INTO `dbObjectTesting` (`value`) VALUE('a1')");
+        self::$pdo->exec("INSERT INTO `dbObjectTesting` (`value`) VALUE('a'),('b'),('c')");
 
-        $stmt = $db->query('SELECT * FROM dbObjectTesting');
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
-        $this->assertTrue(is_array($row), "fetch() returns an array");
-        $this->assertEquals(3, sizeof($row), "fetch() returns an array with 3 elements");
-        $this->assertArrayHasKey('id', $row);
-        $this->assertArrayHasKey('timestamp', $row);
-        $this->assertArrayHasKey('value', $row);
-        $this->assertEquals('a1', $row['value']);
-    }
-    function test_fetchAllSupportsFETCH_NUM(){
-        $db = db::create('mysql', self::$driverOptions);
-        $db->query("INSERT INTO `dbObjectTesting` (`value`) VALUE('a1')");
-
-        $stmt = $db->query('SELECT * FROM dbObjectTesting');
-        $row = $stmt->fetch(PDO::FETCH_NUM);
-        $this->assertTrue(is_array($row), "fetch() returns an array");
-        $this->assertEquals(3, sizeof($row), "fetch() returns an array with 3 elements");
-        $this->assertArrayHasKey(0, $row);
-        $this->assertArrayHasKey(1, $row);
-        $this->assertArrayHasKey(2, $row);
-        $this->assertEquals('a1', $row[2]);
-    }
-    function test_fetchAllSupportsFETCH_OBJ(){
-        $db = db::create('mysql', self::$driverOptions);
-        $db->query("INSERT INTO `dbObjectTesting` (`value`) VALUE('a1')");
-
-        $stmt = $db->query('SELECT * FROM dbObjectTesting');
-        $row = $stmt->fetch(PDO::FETCH_OBJ);
-        $this->assertTrue(is_object($row), "fetch() returns an object");
-        $this->assertAttributeNotEmpty('id', $row);
-        $this->assertAttributeNotEmpty('timestamp', $row);
-        $this->assertAttributeNotEmpty('value', $row);
-        $this->assertAttributeEquals('a1', 'value', $row);
-    }
-    function test_fetchAllUsesFetchAssocByDefault(){
-        $db = db::create('mysql', self::$driverOptions);
-        $db->query("INSERT INTO `dbObjectTesting` (`value`) VALUE('a1')");
-
-        $stmt = $db->query('SELECT * FROM dbObjectTesting');
-        $row = $stmt->fetch();
-        $this->assertTrue(is_array($row), "fetch() returns an array");
-        $this->assertEquals(3, sizeof($row), "fetch() returns an array with 3 elements");
-        $this->assertArrayHasKey('id', $row);
-        $this->assertArrayHasKey('timestamp', $row);
-        $this->assertArrayHasKey('value', $row);
-        $this->assertEquals('a1', $row['value']);
-    }
-    function test_fetchAllReturnsRowByRow(){
-        $testData = array('a1','b1','c1');
-        $db = db::create('mysql', self::$driverOptions);
-        $db->query("INSERT INTO `dbObjectTesting` (`value`) VALUE('a1'),('b1'),('c1')");
-        $stmt = $db->query('SELECT * FROM dbObjectTesting');
-
-        for($n=0; $row = $stmt->fetch(PDO::FETCH_ASSOC); $n++){
-            $this->assertTrue(is_array($row));
-            $this->assertEquals(3, sizeof($row));
+        $db       = db::create('mysql', self::$driverOptions);
+        $stmt     = $db->query('SELECT * FROM dbObjectTesting');
+        $testData = array('a', 'b', 'c');
+        $rows     = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $this->assertEquals(3, $stmt->rowCount(), 'There should be 3 rows');
+        $this->assertTrue(is_array($rows), 'fetchAll() returns an array');
+        $this->assertEquals(3, sizeof($rows), 'fetchAdd() returns 3 rows');
+        for($n=0;$n<3;$n++){
+            $this->assertTrue(isset($rows[$n]));
+            $row = $rows[$n];
+            $this->assertTrue(is_array($row), "Each row is an array");
+            $this->assertEquals(3, sizeof($row), "Each row has 3 elements");
+            $this->assertArrayHasKey('id', $row);
+            $this->assertArrayHasKey('timestamp', $row);
             $this->assertArrayHasKey('value', $row);
             $this->assertEquals($testData[$n], $row['value']);
+
+        }
+    }
+    function test_fetchAllSupportsFETCH_NUM(){
+        self::$pdo->exec("INSERT INTO `dbObjectTesting` (`value`) VALUE('a'),('b'),('c')");
+
+        $db       = db::create('mysql', self::$driverOptions);
+        $stmt     = $db->query('SELECT * FROM dbObjectTesting');
+        $testData = array('a', 'b', 'c');
+        $rows     = $stmt->fetchAll(PDO::FETCH_NUM);
+        $this->assertEquals(3, $stmt->rowCount(), 'There should be 3 rows');
+        $this->assertTrue(is_array($rows), 'fetchAll() returns an array');
+        $this->assertEquals(3, sizeof($rows), 'fetchAdd() returns 3 rows');
+        for($n=0;$n<3;$n++){
+            $this->assertTrue(isset($rows[$n]));
+            $row = $rows[$n];
+            $this->assertTrue(is_array($row), "Each row is an array");
+            $this->assertEquals(3, sizeof($row), "Each row has 3 elements");
+            $this->assertArrayHasKey(0, $row);
+            $this->assertArrayHasKey(1, $row);
+            $this->assertArrayHasKey(2, $row);
+            $this->assertEquals($testData[$n], $row[2]);
+        }
+    }
+    function test_fetchAllSupportsFETCH_OBJ(){
+        self::$pdo->exec("INSERT INTO `dbObjectTesting` (`value`) VALUE('a'),('b'),('c')");
+
+        $db       = db::create('mysql', self::$driverOptions);
+        $stmt     = $db->query('SELECT * FROM dbObjectTesting');
+        $testData = array('a', 'b', 'c');
+        $rows     = $stmt->fetchAll(PDO::FETCH_OBJ);
+        $this->assertEquals(3, $stmt->rowCount(), 'There should be 3 rows');
+        $this->assertTrue(is_array($rows), 'fetchAll() returns an array');
+        $this->assertEquals(3, sizeof($rows), 'fetchAdd() returns 3 rows');
+        for($n=0;$n<3;$n++){
+            $this->assertTrue(isset($rows[$n]));
+            $row = $rows[$n];
+            $this->assertTrue(is_object($row), "Each row is an object");
+            $this->assertAttributeNotEmpty('id', $row);
+            $this->assertAttributeNotEmpty('timestamp', $row);
+            $this->assertAttributeNotEmpty('value', $row);
+            $this->assertAttributeEquals($testData[$n], 'value', $row);
+        }
+    }
+    function test_fetchAllUsesFetchAssocByDefault(){
+        self::$pdo->exec("INSERT INTO `dbObjectTesting` (`value`) VALUE('a'),('b'),('c')");
+
+        $db       = db::create('mysql', self::$driverOptions);
+        $stmt     = $db->query('SELECT * FROM dbObjectTesting');
+        $testData = array('a', 'b', 'c');
+        $rows     = $stmt->fetchAll();
+        $this->assertEquals(3, $stmt->rowCount(), 'There should be 3 rows');
+        $this->assertTrue(is_array($rows), 'fetchAll() returns an array');
+        $this->assertEquals(3, sizeof($rows), 'fetchAdd() returns 3 rows');
+        for($n=0;$n<3;$n++){
+            $this->assertTrue(isset($rows[$n]));
+            $row = $rows[$n];
+            $this->assertTrue(is_array($row), "Each row is an array");
+            $this->assertEquals(3, sizeof($row), "Each row has 3 elements");
+            $this->assertArrayHasKey('id', $row);
+            $this->assertArrayHasKey('timestamp', $row);
+            $this->assertArrayHasKey('value', $row);
+            $this->assertEquals($testData[$n], $row['value']);
+
         }
     }
 
     # Tests for fetchField()
     #########################################
-    function test_fetchFieldSupportsFETCH_ASSOC(){
-        $db = db::create('mysql', self::$driverOptions);
-        $db->query("INSERT INTO `dbObjectTesting` (`value`) VALUE('a1')");
+    function test_fetchFieldReturnsTheFirstFieldByDefault(){
+        self::$pdo->exec("INSERT INTO `dbObjectTesting` (`value`) VALUE('a')");
 
-        $stmt = $db->query('SELECT * FROM dbObjectTesting');
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
-        $this->assertTrue(is_array($row), "fetch() returns an array");
-        $this->assertEquals(3, sizeof($row), "fetch() returns an array with 3 elements");
-        $this->assertArrayHasKey('id', $row);
-        $this->assertArrayHasKey('timestamp', $row);
-        $this->assertArrayHasKey('value', $row);
-        $this->assertEquals('a1', $row['value']);
+        $db   = db::create('mysql', self::$driverOptions);
+        $stmt = $db->query('SELECT value,id,timestamp FROM dbObjectTesting');
+        $this->assertEquals('a', $stmt->fetchField());
     }
-    function test_fetchFieldSupportsFETCH_NUM(){
-        $db = db::create('mysql', self::$driverOptions);
-        $db->query("INSERT INTO `dbObjectTesting` (`value`) VALUE('a1')");
+    function test_fetchFieldAcceptsNumericKeys(){
+        self::$pdo->exec("INSERT INTO `dbObjectTesting` (`value`) VALUE('a')");
 
-        $stmt = $db->query('SELECT * FROM dbObjectTesting');
-        $row = $stmt->fetch(PDO::FETCH_NUM);
-        $this->assertTrue(is_array($row), "fetch() returns an array");
-        $this->assertEquals(3, sizeof($row), "fetch() returns an array with 3 elements");
-        $this->assertArrayHasKey(0, $row);
-        $this->assertArrayHasKey(1, $row);
-        $this->assertArrayHasKey(2, $row);
-        $this->assertEquals('a1', $row[2]);
+        $db = db::create('mysql', self::$driverOptions);
+        $stmt = $db->query('SELECT id,value,timestamp FROM dbObjectTesting');
+        $this->assertEquals('a', $stmt->fetchField(1));
     }
-    function test_fetchFieldSupportsFETCH_OBJ(){
-        $db = db::create('mysql', self::$driverOptions);
-        $db->query("INSERT INTO `dbObjectTesting` (`value`) VALUE('a1')");
+    function test_fetchFieldAcceptsStringKeys(){
+        self::$pdo->exec("INSERT INTO `dbObjectTesting` (`value`) VALUE('a')");
 
-        $stmt = $db->query('SELECT * FROM dbObjectTesting');
-        $row = $stmt->fetch(PDO::FETCH_OBJ);
-        $this->assertTrue(is_object($row), "fetch() returns an object");
-        $this->assertAttributeNotEmpty('id', $row);
-        $this->assertAttributeNotEmpty('timestamp', $row);
-        $this->assertAttributeNotEmpty('value', $row);
-        $this->assertAttributeEquals('a1', 'value', $row);
-    }
-    function test_fetchFieldUsesFetchAssocByDefault(){
         $db = db::create('mysql', self::$driverOptions);
-        $db->query("INSERT INTO `dbObjectTesting` (`value`) VALUE('a1')");
-
-        $stmt = $db->query('SELECT * FROM dbObjectTesting');
-        $row = $stmt->fetch();
-        $this->assertTrue(is_array($row), "fetch() returns an array");
-        $this->assertEquals(3, sizeof($row), "fetch() returns an array with 3 elements");
-        $this->assertArrayHasKey('id', $row);
-        $this->assertArrayHasKey('timestamp', $row);
-        $this->assertArrayHasKey('value', $row);
-        $this->assertEquals('a1', $row['value']);
+        $stmt = $db->query('SELECT id,value,timestamp FROM dbObjectTesting');
+        $this->assertEquals('a', $stmt->fetchField('value'));
     }
     function test_fetchFieldReturnsRowByRow(){
-        $testData = array('a1','b1','c1');
-        $db = db::create('mysql', self::$driverOptions);
-        $db->query("INSERT INTO `dbObjectTesting` (`value`) VALUE('a1'),('b1'),('c1')");
-        $stmt = $db->query('SELECT * FROM dbObjectTesting');
+        self::$pdo->exec("INSERT INTO `dbObjectTesting` (`value`) VALUE('a'),('b'),('c')");
 
-        for($n=0; $row = $stmt->fetch(PDO::FETCH_ASSOC); $n++){
-            $this->assertTrue(is_array($row));
-            $this->assertEquals(3, sizeof($row));
-            $this->assertArrayHasKey('value', $row);
-            $this->assertEquals($testData[$n], $row['value']);
+        $testData = array('a', 'b', 'c');
+        $db   = db::create('mysql', self::$driverOptions);
+        $stmt = $db->query('SELECT value,id,timestamp FROM dbObjectTesting');
+        $counter = 0;
+        while($field = $stmt->fetchField()){
+            $counter++;
+            $this->assertEquals($testData[$counter-1], $field);
         }
+        $this->assertEquals(3,$counter,'We should have looped 3 times');
     }
 
     # Tests for fetchFieldAll()
     #########################################
-    function test_fetchFieldAllSupportsFETCH_ASSOC(){
-        $db = db::create('mysql', self::$driverOptions);
-        $db->query("INSERT INTO `dbObjectTesting` (`value`) VALUE('a1')");
+    function test_fetchFieldAllReturnsTheFirstFieldByDefault(){
+        self::$pdo->exec("INSERT INTO `dbObjectTesting` (`value`) VALUE('a'),('b'),('c')");
 
-        $stmt = $db->query('SELECT * FROM dbObjectTesting');
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
-        $this->assertTrue(is_array($row), "fetch() returns an array");
-        $this->assertEquals(3, sizeof($row), "fetch() returns an array with 3 elements");
-        $this->assertArrayHasKey('id', $row);
-        $this->assertArrayHasKey('timestamp', $row);
-        $this->assertArrayHasKey('value', $row);
-        $this->assertEquals('a1', $row['value']);
-    }
-    function test_fetchFieldAllSupportsFETCH_NUM(){
-        $db = db::create('mysql', self::$driverOptions);
-        $db->query("INSERT INTO `dbObjectTesting` (`value`) VALUE('a1')");
-
-        $stmt = $db->query('SELECT * FROM dbObjectTesting');
-        $row = $stmt->fetch(PDO::FETCH_NUM);
-        $this->assertTrue(is_array($row), "fetch() returns an array");
-        $this->assertEquals(3, sizeof($row), "fetch() returns an array with 3 elements");
-        $this->assertArrayHasKey(0, $row);
-        $this->assertArrayHasKey(1, $row);
-        $this->assertArrayHasKey(2, $row);
-        $this->assertEquals('a1', $row[2]);
-    }
-    function test_fetchFieldAllSupportsFETCH_OBJ(){
-        $db = db::create('mysql', self::$driverOptions);
-        $db->query("INSERT INTO `dbObjectTesting` (`value`) VALUE('a1')");
-
-        $stmt = $db->query('SELECT * FROM dbObjectTesting');
-        $row = $stmt->fetch(PDO::FETCH_OBJ);
-        $this->assertTrue(is_object($row), "fetch() returns an object");
-        $this->assertAttributeNotEmpty('id', $row);
-        $this->assertAttributeNotEmpty('timestamp', $row);
-        $this->assertAttributeNotEmpty('value', $row);
-        $this->assertAttributeEquals('a1', 'value', $row);
-    }
-    function test_fetchFieldAllUsesFetchAssocByDefault(){
-        $db = db::create('mysql', self::$driverOptions);
-        $db->query("INSERT INTO `dbObjectTesting` (`value`) VALUE('a1')");
-
-        $stmt = $db->query('SELECT * FROM dbObjectTesting');
-        $row = $stmt->fetch();
-        $this->assertTrue(is_array($row), "fetch() returns an array");
-        $this->assertEquals(3, sizeof($row), "fetch() returns an array with 3 elements");
-        $this->assertArrayHasKey('id', $row);
-        $this->assertArrayHasKey('timestamp', $row);
-        $this->assertArrayHasKey('value', $row);
-        $this->assertEquals('a1', $row['value']);
-    }
-    function test_fetchFieldAllReturnsRowByRow(){
-        $testData = array('a1','b1','c1');
-        $db = db::create('mysql', self::$driverOptions);
-        $db->query("INSERT INTO `dbObjectTesting` (`value`) VALUE('a1'),('b1'),('c1')");
-        $stmt = $db->query('SELECT * FROM dbObjectTesting');
-
-        for($n=0; $row = $stmt->fetch(PDO::FETCH_ASSOC); $n++){
-            $this->assertTrue(is_array($row));
-            $this->assertEquals(3, sizeof($row));
-            $this->assertArrayHasKey('value', $row);
-            $this->assertEquals($testData[$n], $row['value']);
+        $db   = db::create('mysql', self::$driverOptions);
+        $stmt = $db->query('SELECT value,id,timestamp FROM dbObjectTesting');
+        $counter = 0;
+        $testData = array('a', 'b', 'c');
+        $rows = $stmt->fetchFieldAll();
+        $this->assertTrue(is_array($rows), 'fetchFieldAll() returns an array');
+        $this->assertEquals(3, sizeof($rows), 'fetchFieldAll() returns 3 rows');
+        foreach($rows as $row){
+            $counter++;
+            $this->assertEquals($testData[$counter-1], $row);
         }
+        $this->assertEquals(3,$counter,'We should have looped 3 times');
+    }
+    function test_fetchFieldAllAcceptsNumericKeys(){
+        self::$pdo->exec("INSERT INTO `dbObjectTesting` (`value`) VALUE('a'),('b'),('c')");
+
+        $db   = db::create('mysql', self::$driverOptions);
+        $stmt = $db->query('SELECT id,value,timestamp FROM dbObjectTesting');
+        $counter = 0;
+        $testData = array('a', 'b', 'c');
+        $rows = $stmt->fetchFieldAll(1);
+        $this->assertTrue(is_array($rows), 'fetchFieldAll() returns an array');
+        $this->assertEquals(3, sizeof($rows), 'fetchFieldAll() returns 3 rows');
+        foreach($rows as $row){
+            $counter++;
+            $this->assertEquals($testData[$counter-1], $row);
+        }
+        $this->assertEquals(3,$counter,'We should have looped 3 times');
+    }
+    function test_fetchFieldAllAcceptsStringKeys(){
+        self::$pdo->exec("INSERT INTO `dbObjectTesting` (`value`) VALUE('a'),('b'),('c')");
+
+        $db   = db::create('mysql', self::$driverOptions);
+        $stmt = $db->query('SELECT id,value,timestamp FROM dbObjectTesting');
+        $counter = 0;
+        $testData = array('a', 'b', 'c');
+        $rows = $stmt->fetchFieldAll('value');
+        $this->assertTrue(is_array($rows), 'fetchFieldAll() returns an array');
+        $this->assertEquals(3, sizeof($rows), 'fetchFieldAll() returns 3 rows');
+        foreach($rows as $row){
+            $counter++;
+            $this->assertEquals($testData[$counter-1], $row);
+        }
+        $this->assertEquals(3,$counter,'We should have looped 3 times');
     }
 
     # Tests for sqlState()
