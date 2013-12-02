@@ -194,7 +194,7 @@ class dbStatement_mysql extends dbStatement{
         }
 
         // We need to convert to the field number
-        if(is_string($field)) $field = array_search($field, $this->fieldNames());
+        if(!is_numeric($field)) $field = array_search($field, $this->fieldNames());
         // Return the requested field
         return $this->pdoStatement->fetchColumn($field);
     }
