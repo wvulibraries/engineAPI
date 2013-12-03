@@ -167,7 +167,8 @@ class dbStatement_mysql extends dbStatement{
             return FALSE;
         }
 
-        return $this->pdoStatement->fetch($fetchMode);
+        $res = $this->pdoStatement->fetch($fetchMode);
+        return (FALSE === $res) ? NULL : $res;
     }
 
     /**
@@ -196,7 +197,8 @@ class dbStatement_mysql extends dbStatement{
         // We need to convert to the field number
         if(!is_numeric($field)) $field = array_search($field, $this->fieldNames());
         // Return the requested field
-        return $this->pdoStatement->fetchColumn($field);
+        $res = $this->pdoStatement->fetchColumn($field);
+        return (FALSE === $res) ? NULL : $res;
     }
 
     /**
