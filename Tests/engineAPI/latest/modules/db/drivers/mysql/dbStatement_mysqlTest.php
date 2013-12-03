@@ -180,6 +180,22 @@ class dbStatement_mysqlTest extends PHPUnit_Extensions_Database_TestCase {
 
     # Tests for fetch()
     #########################################
+    function test_fetchIsOnlyAvailableOnceTheStatementHasBeenExecuted(){
+        $db = db::create('mysql', self::$driverOptions);
+        $stmt = $db->query("SELECT * FROM `dbObjectTesting`", FALSE);
+        $this->assertFalse($stmt->fetch());
+    }
+    function test_fetchAlwaysReturnsNullWhenPastLastRow(){
+        self::$pdo->exec("INSERT INTO `dbObjectTesting` (`value`) VALUE('a')");
+
+        $db   = db::create('mysql', self::$driverOptions);
+        $stmt = $db->query('SELECT * FROM dbObjectTesting');
+        $this->assertEquals(1, $stmt->rowCount(), 'There should be 1 row');
+        $this->assertTrue(is_array($stmt->fetch()), 'fetch() returns the row');
+        $this->assertNull($stmt->fetch(), 'fetch() returns NULL');
+        $this->assertNull($stmt->fetch(), 'fetch() returns NULL');
+        $this->assertNull($stmt->fetch(), 'fetch() returns NULL');
+    }
     function test_fetchSupportsFETCH_ASSOC(){
         self::$pdo->exec("INSERT INTO `dbObjectTesting` (`value`) VALUE('a')");
 
@@ -255,6 +271,11 @@ class dbStatement_mysqlTest extends PHPUnit_Extensions_Database_TestCase {
 
     # Tests for fetchAll()
     #########################################
+    function test_fetchAllIsOnlyAvailableOnceTheStatementHasBeenExecuted(){
+        $db = db::create('mysql', self::$driverOptions);
+        $stmt = $db->query("SELECT * FROM `dbObjectTesting`", FALSE);
+        $this->assertFalse($stmt->fetchAll());
+    }
     function test_fetchAllSupportsFETCH_ASSOC(){
         self::$pdo->exec("INSERT INTO `dbObjectTesting` (`value`) VALUE('a'),('b'),('c')");
 
@@ -343,6 +364,38 @@ class dbStatement_mysqlTest extends PHPUnit_Extensions_Database_TestCase {
 
     # Tests for fetchField()
     #########################################
+    function test_fetchFieldIsOnlyAvailableOnceTheStatementHasBeenExecuted(){
+        $db = db::create('mysql', self::$driverOptions);
+        $stmt = $db->query("SELECT * FROM `dbObjectTesting`", FALSE);
+        $this->assertFalse($stmt->fetchField());
+    }
+    function test_fetchFieldAlwaysReturnsNullWhenPastLastRow(){
+        self::$pdo->exec("INSERT INTO `dbObjectTesting` (`value`) VALUE('a')");
+
+        $db   = db::create('mysql', self::$driverOptions);
+        $stmt = $db->query('SELECT * FROM dbObjectTesting');
+        $this->assertEquals(1, $stmt->rowCount(), 'There should be 1 row');
+        $this->assertTrue(is_string($stmt->fetchField()), 'fetchField() returns the field');
+        $this->assertNull($stmt->fetchField(), 'fetchField() returns NULL');
+        $this->assertNull($stmt->fetchField(), 'fetchField() returns NULL');
+        $this->assertNull($stmt->fetchField(), 'fetchField() returns NULL');
+    }
+    function test_fetchFieldReturnsFalseWhenGivenAnInvalidFieldOffset(){
+        self::$pdo->exec("INSERT INTO `dbObjectTesting` (`value`) VALUE('a')");
+
+        $db   = db::create('mysql', self::$driverOptions);
+        $stmt = $db->query('SELECT * FROM dbObjectTesting');
+        $this->assertFalse($stmt->fetchField(-1), 'fetchField() returns NULL');
+        $this->assertFalse($stmt->fetchField(20), 'fetchField() returns NULL');
+    }
+    function test_fetchFieldReturnsFalseWhenGivenAnInvalidFieldName(){
+        self::$pdo->exec("INSERT INTO `dbObjectTesting` (`value`) VALUE('a')");
+
+        $db   = db::create('mysql', self::$driverOptions);
+        $stmt = $db->query('SELECT * FROM dbObjectTesting');
+        $this->assertFalse($stmt->fetchField('foo'), 'fetchField() returns NULL');
+        $this->assertFalse($stmt->fetchField('bar'), 'fetchField() returns NULL');
+    }
     function test_fetchFieldReturnsTheFirstFieldByDefault(){
         self::$pdo->exec("INSERT INTO `dbObjectTesting` (`value`) VALUE('a')");
 
@@ -380,6 +433,11 @@ class dbStatement_mysqlTest extends PHPUnit_Extensions_Database_TestCase {
 
     # Tests for fetchFieldAll()
     #########################################
+    function test_fetchFieldAllFieldIsOnlyAvailableOnceTheStatementHasBeenExecuted(){
+        $db = db::create('mysql', self::$driverOptions);
+        $stmt = $db->query("SELECT * FROM `dbObjectTesting`", FALSE);
+        $this->assertFalse($stmt->fetchFieldAll());
+    }
     function test_fetchFieldAllReturnsTheFirstFieldByDefault(){
         self::$pdo->exec("INSERT INTO `dbObjectTesting` (`value`) VALUE('a'),('b'),('c')");
 
