@@ -194,8 +194,21 @@ class dbStatement_mysql extends dbStatement{
             return FALSE;
         }
 
-        // We need to convert to the field number
-        if(!is_numeric($field)) $field = array_search($field, $this->fieldNames());
+        // Validate, and convert string to index, the given $field
+        $fieldNames = $this->fieldNames();
+        if(is_numeric($field)){
+            if($field < 0 or $field > (sizeof($fieldNames)-1)){
+                errorHandle::newError(__METHOD__."() Requested field '$field' out of bounds for this result set.", errorHandle::DEBUG);
+                return FALSE;
+            }
+        }else{
+            $field = array_search($field, $fieldNames);
+            if(FALSE === $field){
+                errorHandle::newError(__METHOD__."() Requested field '$field' doesn't exist in result set.", errorHandle::DEBUG);
+                return FALSE;
+            }
+        }
+
         // Return the requested field
         $res = $this->pdoStatement->fetchColumn($field);
         return (FALSE === $res) ? NULL : $res;
