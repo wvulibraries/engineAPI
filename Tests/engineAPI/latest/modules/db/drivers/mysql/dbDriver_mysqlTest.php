@@ -1,6 +1,6 @@
 <?php
 
-require_once __DIR__.'/../../mockPDO.php';
+require_once __DIR__.'/../../pdoMocks.php';
 
 class dbDriver_mysqlTest extends PHPUnit_Extensions_Database_TestCase{
     /**

@@ -1,5 +1,5 @@
 <?php
-require_once 'mockPDO.php';
+require_once 'pdoMocks.php';
 
 class dbTest extends PHPUnit_Framework_TestCase {
     private $pdoStub;
