@@ -46,12 +46,28 @@ class dbStatement_mysqlTest extends PHPUnit_Extensions_Database_TestCase {
 
     # Tests for execute()
     #########################################
+    function test_executeIsOnlyAvailableBeforeExecution(){
+        $db   = db::create('mysql', self::$driverOptions);
+        $stmt = $db->query("SELECT 1");
+        $this->assertFalse($stmt->execute());
+    }
 
     # Tests for bindParam()
     #########################################
+    function test_bindParamIsOnlyAvailableBeforeExecution(){
+        $db   = db::create('mysql', self::$driverOptions);
+        $stmt = $db->query("SELECT 1");
+        $a = NULL;
+        $this->assertFalse($stmt->bindParam(0, $a));
+    }
 
     # Tests for bindValue()
     #########################################
+    function test_bindValueIsOnlyAvailableBeforeExecution(){
+        $db   = db::create('mysql', self::$driverOptions);
+        $stmt = $db->query("SELECT 1");
+        $this->assertFalse($stmt->bindValue(0, NULL));
+    }
 
     # Tests for fieldCount()
     #########################################
