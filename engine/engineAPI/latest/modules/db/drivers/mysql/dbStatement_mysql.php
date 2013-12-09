@@ -14,12 +14,13 @@ class dbStatement_mysql extends dbStatement{
 
     /**
      * {@inheritdoc}
+     * @TODO Add better error checking for passing in a mocked PDOStatement object
      * @author David Gersting
      */
     public function __construct($parentConnection, $sql){
         $this->dbDriver     = $parentConnection;
         $this->pdo          = $this->dbDriver->getPDO();
-        $this->pdoStatement = ($sql instanceof PDOStatement) ? $sql : $this->pdo->prepare($sql);
+        $this->pdoStatement = is_object($sql) ? $sql : $this->pdo->prepare($sql);
     }
 
     /**
