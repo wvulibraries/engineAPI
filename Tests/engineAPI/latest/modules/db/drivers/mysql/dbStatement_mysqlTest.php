@@ -182,10 +182,10 @@ class dbStatement_mysqlTest extends PHPUnit_Extensions_Database_TestCase {
         $db = db::create('mysql', self::$driverOptions);
         // Test SQL that will return a result
         $stmt = $db->query("SELECT * FROM dbObjectTesting");
-        $this->assertEquals(3, $stmt->fieldCount(), "Failed for {$stmt->getSQL()}");
+        $this->assertEquals(6, $stmt->fieldCount(), "Failed for {$stmt->getSQL()}");
         // Test SQL that will not return a result
         $stmt = $db->query("SELECT * FROM dbObjectTesting WHERE `id`='".self::UNDEFINED_TABLE_KEY."'");
-        $this->assertEquals(3, $stmt->fieldCount(), "Failed for {$stmt->getSQL()}");
+        $this->assertEquals(6, $stmt->fieldCount(), "Failed for {$stmt->getSQL()}");
     }
 
     # Tests for fieldNames()
@@ -212,7 +212,7 @@ class dbStatement_mysqlTest extends PHPUnit_Extensions_Database_TestCase {
         $stmt = $db->query("SELECT * FROM dbObjectTesting");
         $fieldNames = $stmt->fieldNames();
         $this->assertTrue(is_array($fieldNames), 'It returns an array');
-        $this->assertEquals(3, sizeof($fieldNames), 'It returns an array with 3 elements');
+        $this->assertEquals(6, sizeof($fieldNames), 'It returns an array with 3 elements');
         $this->assertContains('id', $fieldNames, "It returns the element 'id'");
         $this->assertContains('timestamp', $fieldNames, "It returns the element 'timestamp'");
         $this->assertContains('value', $fieldNames, "It returns the element 'value'");
@@ -221,7 +221,7 @@ class dbStatement_mysqlTest extends PHPUnit_Extensions_Database_TestCase {
         $stmt = $db->query("SELECT * FROM dbObjectTesting WHERE `id`='".self::UNDEFINED_TABLE_KEY."'");
         $fieldNames = $stmt->fieldNames();
         $this->assertTrue(is_array($fieldNames), 'It returns an array');
-        $this->assertEquals(3, sizeof($fieldNames), 'It returns an array with 3 elements');
+        $this->assertEquals(6, sizeof($fieldNames), 'It returns an array with 3 elements');
         $this->assertContains('id', $fieldNames, "It returns the element 'id'");
         $this->assertContains('value', $fieldNames, "It returns the element 'value'");
         $this->assertContains('timestamp', $fieldNames, "It returns the element 'timestamp'");
@@ -313,7 +313,7 @@ class dbStatement_mysqlTest extends PHPUnit_Extensions_Database_TestCase {
         $row  = $stmt->fetch(PDO::FETCH_ASSOC);
         $this->assertEquals(1, $stmt->rowCount(), 'There should be 1 rows');
         $this->assertTrue(is_array($row), "fetch() returns an array");
-        $this->assertEquals(3, sizeof($row), "fetch() returns an array with 3 elements");
+        $this->assertEquals(6, sizeof($row), "fetch() returns an array with 3 elements");
         $this->assertArrayHasKey('id', $row);
         $this->assertArrayHasKey('timestamp', $row);
         $this->assertArrayHasKey('value', $row);
@@ -327,7 +327,7 @@ class dbStatement_mysqlTest extends PHPUnit_Extensions_Database_TestCase {
         $row  = $stmt->fetch(PDO::FETCH_NUM);
         $this->assertEquals(1, $stmt->rowCount(), 'There should be 1 rows');
         $this->assertTrue(is_array($row), "fetch() returns an array");
-        $this->assertEquals(3, sizeof($row), "fetch() returns an array with 3 elements");
+        $this->assertEquals(6, sizeof($row), "fetch() returns an array with 3 elements");
         $this->assertArrayHasKey(0, $row);
         $this->assertArrayHasKey(1, $row);
         $this->assertArrayHasKey(2, $row);
@@ -354,7 +354,7 @@ class dbStatement_mysqlTest extends PHPUnit_Extensions_Database_TestCase {
         $row  = $stmt->fetch();
         $this->assertEquals(1, $stmt->rowCount(), 'There should be 1 rows');
         $this->assertTrue(is_array($row), "fetch() returns an array");
-        $this->assertEquals(3, sizeof($row), "fetch() returns an array with 3 elements");
+        $this->assertEquals(6, sizeof($row), "fetch() returns an array with 3 elements");
         $this->assertArrayHasKey('id', $row);
         $this->assertArrayHasKey('timestamp', $row);
         $this->assertArrayHasKey('value', $row);
@@ -371,7 +371,7 @@ class dbStatement_mysqlTest extends PHPUnit_Extensions_Database_TestCase {
         while($row = $stmt->fetch()){
             $counter++;
             $this->assertTrue(is_array($row));
-            $this->assertEquals(3, sizeof($row));
+            $this->assertEquals(6, sizeof($row));
             $this->assertArrayHasKey('value', $row);
             $this->assertEquals($testData[$counter-1], $row['value']);
         }
@@ -399,7 +399,7 @@ class dbStatement_mysqlTest extends PHPUnit_Extensions_Database_TestCase {
             $this->assertTrue(isset($rows[$n]));
             $row = $rows[$n];
             $this->assertTrue(is_array($row), "Each row is an array");
-            $this->assertEquals(3, sizeof($row), "Each row has 3 elements");
+            $this->assertEquals(6, sizeof($row), "Each row has 3 elements");
             $this->assertArrayHasKey('id', $row);
             $this->assertArrayHasKey('timestamp', $row);
             $this->assertArrayHasKey('value', $row);
@@ -421,7 +421,7 @@ class dbStatement_mysqlTest extends PHPUnit_Extensions_Database_TestCase {
             $this->assertTrue(isset($rows[$n]));
             $row = $rows[$n];
             $this->assertTrue(is_array($row), "Each row is an array");
-            $this->assertEquals(3, sizeof($row), "Each row has 3 elements");
+            $this->assertEquals(6, sizeof($row), "Each row has 3 elements");
             $this->assertArrayHasKey(0, $row);
             $this->assertArrayHasKey(1, $row);
             $this->assertArrayHasKey(2, $row);
@@ -462,7 +462,7 @@ class dbStatement_mysqlTest extends PHPUnit_Extensions_Database_TestCase {
             $this->assertTrue(isset($rows[$n]));
             $row = $rows[$n];
             $this->assertTrue(is_array($row), "Each row is an array");
-            $this->assertEquals(3, sizeof($row), "Each row has 3 elements");
+            $this->assertEquals(6, sizeof($row), "Each row has 3 elements");
             $this->assertArrayHasKey('id', $row);
             $this->assertArrayHasKey('timestamp', $row);
             $this->assertArrayHasKey('value', $row);
