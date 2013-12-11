@@ -55,10 +55,16 @@ class dbStatement_mysqlTest extends PHPUnit_Extensions_Database_TestCase {
     # Tests for bindParam()
     #########################################
     function test_bindParamIsOnlyAvailableBeforeExecution(){
+        $var  = NULL;
         $db   = db::create('mysql', self::$driverOptions);
         $stmt = $db->query("SELECT 1");
-        $a = NULL;
         $this->assertFalse($stmt->bindParam(0, $a));
+    }
+    function test_bindParamCatchesCasesWhenNoPdoStatementHasBeenSet(){
+        $db   = db::create('mysql', self::$driverOptions);
+        $stmt = new dbStatement_mysql($db);
+        $var  = NULL;
+        $this->assertFalse($stmt->bindParam(0, $var));
     }
     function test_bindParamBaseImplementation(){
         $db   = db::create('mysql', self::$driverOptions);
@@ -107,6 +113,11 @@ class dbStatement_mysqlTest extends PHPUnit_Extensions_Database_TestCase {
         $db   = db::create('mysql', self::$driverOptions);
         $stmt = $db->query("SELECT 1");
         $this->assertFalse($stmt->bindValue(0, NULL));
+    }
+    function test_bindValueCatchesCasesWhenNoPdoStatementHasBeenSet(){
+        $db   = db::create('mysql', self::$driverOptions);
+        $stmt = new dbStatement_mysql($db);
+        $this->assertFalse($stmt->bindValue(0, 'abc'));
     }
     function test_bindValueBaseImplementation(){
         $db   = db::create('mysql', self::$driverOptions);
