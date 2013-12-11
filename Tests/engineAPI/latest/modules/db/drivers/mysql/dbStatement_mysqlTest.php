@@ -60,6 +60,46 @@ class dbStatement_mysqlTest extends PHPUnit_Extensions_Database_TestCase {
         $a = NULL;
         $this->assertFalse($stmt->bindParam(0, $a));
     }
+    function test_bindParamBaseImplementation(){
+        $db   = db::create('mysql', self::$driverOptions);
+
+        $pdo = $this->getMock('PDOStatement', array());
+        $pdo->expects($this->once())
+            ->method('bindParam')
+            ->with($this->equalTo(1), $this->equalTo('abc'));
+
+        $var  = 'abc';
+        $stmt = new dbStatement_mysql($db);
+        $stmt->set_pdoStatement($pdo);
+        $stmt->bindParam(1, $var);
+    }
+    function test_bindParamSpecifyingType(){
+        $db   = db::create('mysql', self::$driverOptions);
+
+        $pdo = $this->getMock('PDOStatement', array());
+        $pdo->expects($this->once())
+            ->method('bindParam')
+            ->with($this->equalTo(1), $this->equalTo('abc'), $this->equalTo(PDO::PARAM_STR));
+
+        $var  = 'abc';
+        $stmt = new dbStatement_mysql($db);
+        $stmt->set_pdoStatement($pdo);
+        $stmt->bindParam(1, $var, PDO::PARAM_STR);
+    }
+    function test_bindParamSpecifyingTypeAndLength(){
+        $db   = db::create('mysql', self::$driverOptions);
+
+        $pdo = $this->getMock('PDOStatement', array());
+        $pdo->expects($this->once())
+            ->method('bindParam')
+            ->with($this->equalTo(1), $this->equalTo('abc'), $this->equalTo(PDO::PARAM_STR), $this->equalTo(3));
+
+        $var  = 'abc';
+        $stmt = new dbStatement_mysql($db);
+        $stmt->set_pdoStatement($pdo);
+        $stmt->bindParam(1, $var, PDO::PARAM_STR, 3);
+    }
+
 
     # Tests for bindValue()
     #########################################
