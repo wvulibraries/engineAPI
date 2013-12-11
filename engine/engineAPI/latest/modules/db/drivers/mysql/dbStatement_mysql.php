@@ -14,13 +14,29 @@ class dbStatement_mysql extends dbStatement{
 
     /**
      * {@inheritdoc}
-     * @TODO Add better error checking for passing in a mocked PDOStatement object
      * @author David Gersting
      */
-    public function __construct($parentConnection, $sql){
+    public function __construct($parentConnection, $sql = NULL){
         $this->dbDriver     = $parentConnection;
         $this->pdo          = $this->dbDriver->getPDO();
-        $this->pdoStatement = is_object($sql) ? $sql : $this->pdo->prepare($sql);
+
+        if(is_string($sql) && ($stmt = $this->pdo->prepare($sql)) !== FALSE) {
+            $this->set_pdoStatement($stmt);
+        }
+        else {
+            errorHandle::newError(__METHOD__."() Failed to prepare SQL '$sql'", errorHandle::DEBUG);
+        }
+    }
+
+    public function set_pdoStatement($pdoStatement) {
+        if (!($pdoStatement instanceof PDOStatement)){
+            errorHandle::newError(__METHOD__."() Invalid param passed for pdoStatement. (only PDOStatement allowed) ", errorHandle::DEBUG);
+            return FALSE;
+        }
+
+        $this->pdoStatement = $pdoStatement;
+
+        return TRUE;
     }
 
     /**
