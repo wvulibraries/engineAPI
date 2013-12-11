@@ -68,6 +68,43 @@ class dbStatement_mysqlTest extends PHPUnit_Extensions_Database_TestCase {
         $stmt = $db->query("SELECT 1");
         $this->assertFalse($stmt->bindValue(0, NULL));
     }
+    function test_bindValueBaseImplementation(){
+        $db   = db::create('mysql', self::$driverOptions);
+
+        $pdo = $this->getMock('PDOStatement', array());
+        $pdo->expects($this->once())
+            ->method('bindValue')
+            ->with($this->equalTo(1), $this->equalTo('abc'));
+
+        $stmt = new dbStatement_mysql($db);
+        $stmt->set_pdoStatement($pdo);
+        $stmt->bindValue(1,'abc');
+    }
+    function test_bindValueSpecifyingType(){
+        $db   = db::create('mysql', self::$driverOptions);
+
+        $pdo = $this->getMock('PDOStatement', array());
+        $pdo->expects($this->once())
+            ->method('bindValue')
+            ->with($this->equalTo(1), $this->equalTo('abc'), $this->equalTo(PDO::PARAM_STR));
+
+        $stmt = new dbStatement_mysql($db);
+        $stmt->set_pdoStatement($pdo);
+        $stmt->bindValue(1,'abc', PDO::PARAM_STR);
+    }
+    function test_bindValueSpecifyingTypeAndLength(){
+        $db   = db::create('mysql', self::$driverOptions);
+
+        $pdo = $this->getMock('PDOStatement', array());
+        $pdo->expects($this->once())
+            ->method('bindValue')
+            ->with($this->equalTo(1), $this->equalTo('abc'), $this->equalTo(PDO::PARAM_STR), $this->equalTo(3));
+
+        $stmt = new dbStatement_mysql($db);
+        $stmt->set_pdoStatement($pdo);
+        $stmt->bindValue(1,'abc', PDO::PARAM_STR, 3);
+    }
+
 
     # Tests for fieldCount()
     #########################################
