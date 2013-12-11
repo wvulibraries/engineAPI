@@ -51,6 +51,11 @@ class dbStatement_mysqlTest extends PHPUnit_Extensions_Database_TestCase {
         $stmt = $db->query("SELECT 1");
         $this->assertFalse($stmt->execute());
     }
+    function test_executeCatchesCasesWhenNoPdoStatementHasBeenSet(){
+        $db   = db::create('mysql', self::$driverOptions);
+        $stmt = new dbStatement_mysql($db);
+        $this->assertFalse($stmt->execute());
+    }
 
     # Tests for bindParam()
     #########################################
