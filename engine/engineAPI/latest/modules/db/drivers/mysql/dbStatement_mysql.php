@@ -38,6 +38,11 @@ class dbStatement_mysql extends dbStatement{
             return FALSE;
         }
 
+        if(!$this->pdoStatement){
+            errorHandle::newError(__METHOD__."() - pdoStatement has not been set! (set though set_pdoStatement())", errorHandle::DEBUG);
+            return FALSE;
+        }
+
         if(func_num_args()){
             $args = array();
             for($n=0; $n<func_num_args(); $n++){
@@ -75,6 +80,11 @@ class dbStatement_mysql extends dbStatement{
             return FALSE;
         }
 
+        if(!$this->pdoStatement){
+            errorHandle::newError(__METHOD__."() - pdoStatement has not been set! (set though set_pdoStatement())", errorHandle::DEBUG);
+            return FALSE;
+        }
+
         if(isset($options)) return $this->pdoStatement->bindParam($param, $value, $type, $length, $options);
         if(isset($length))  return $this->pdoStatement->bindParam($param, $value, $type, $length);
         if(isset($type))    return $this->pdoStatement->bindParam($param, $value, $type);
@@ -88,6 +98,11 @@ class dbStatement_mysql extends dbStatement{
     public function bindValue($param, $value, $type=PDO::PARAM_STR, $length=NULL){
         if($this->isExecuted()){
             errorHandle::newError(__METHOD__."() - Method not available! (statement already executed)", errorHandle::DEBUG);
+            return FALSE;
+        }
+
+        if(!$this->pdoStatement){
+            errorHandle::newError(__METHOD__."() - pdoStatement has not been set! (set though set_pdoStatement())", errorHandle::DEBUG);
             return FALSE;
         }
 
