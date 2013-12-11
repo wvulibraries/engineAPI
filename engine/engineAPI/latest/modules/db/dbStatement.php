@@ -84,6 +84,24 @@ abstract class dbStatement{
     }
 
     /**
+     * Setter method for the pdoStatement instance variable
+     *
+     * @param $pdoStatement
+     * @return bool
+     */
+    public function set_pdoStatement($pdoStatement) {
+        if (!($pdoStatement instanceof PDOStatement)){
+            errorHandle::newError(__METHOD__."() Invalid param passed for pdoStatement. (only PDOStatement allowed) ", errorHandle::DEBUG);
+            return FALSE;
+        }
+
+        $this->pdoStatement = $pdoStatement;
+
+        return TRUE;
+    }
+
+
+    /**
      * Return this statement's underlying PDOStatement object
      *
      * @author David Gersting

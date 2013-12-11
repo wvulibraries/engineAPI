@@ -28,17 +28,6 @@ class dbStatement_mysql extends dbStatement{
         }
     }
 
-    public function set_pdoStatement($pdoStatement) {
-        if (!($pdoStatement instanceof PDOStatement)){
-            errorHandle::newError(__METHOD__."() Invalid param passed for pdoStatement. (only PDOStatement allowed) ", errorHandle::DEBUG);
-            return FALSE;
-        }
-
-        $this->pdoStatement = $pdoStatement;
-
-        return TRUE;
-    }
-
     /**
      * {@inheritdoc}
      * @author David Gersting
