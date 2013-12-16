@@ -117,8 +117,10 @@ abstract class dbDriver{
 	 *
 	 * @param string $sql
 	 *        The SQL to prepare
-	 * @param array $params
-	 *        If given, will be use to 'auto-execute' the prepared SQL
+	 * @param array|keyValuePairs|bool|null $params
+     *        If NULL, then $sql is assumed to be ready to execute as-is (and will be auto-executed)
+     *        If FALSE, the the statement is returned for manual manipulation and execution
+     *        Else, $params will be passed to statement's execute() method as-is
 	 * @return dbStatement
 	 */
 	public abstract function query($sql, $params=NULL);
