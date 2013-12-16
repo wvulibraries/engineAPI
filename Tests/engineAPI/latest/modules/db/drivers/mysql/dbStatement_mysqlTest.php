@@ -56,6 +56,51 @@ class dbStatement_mysqlTest extends PHPUnit_Extensions_Database_TestCase {
         $stmt = new dbStatement_mysql($db);
         $this->assertFalse($stmt->execute());
     }
+    function text_executeExecutesThePreparedStatement(){
+        $db   = db::create('mysql', self::$driverOptions);
+        $stmt = $db->query("SELECT 1", FALSE);
+        $this->assertFalse($stmt->isExecuted());
+        $this->assertTrue($stmt->execute());
+        $this->assertTrue($stmt->isExecuted());
+        $this->assertEquals(1, $stmt->fetchField());
+    }
+    function test_executeTakesParamsForThePreparedStatement(){
+        $db   = db::create('mysql', self::$driverOptions);
+
+        $stmt1 = $db->query("INSERT INTO `dbObjectTesting` (a) VALUES(?)", FALSE);
+        $this->assertTrue($stmt1->execute('a'));
+        $verifyRow = $db->query("SELECT * FROM `dbObjectTesting` WHERE id=".$stmt1->insertId()." LIMIT 1")->fetch();
+        $this->assertEquals('a', $verifyRow['a']);
+
+        $stmt2 = $db->query("INSERT INTO `dbObjectTesting` (a,b) VALUES(?,?)", FALSE);
+        $this->assertTrue($stmt2->execute('a','b'));
+        $verifyRow = $db->query("SELECT * FROM `dbObjectTesting` WHERE id=".$stmt1->insertId()." LIMIT 1")->fetch();
+        $this->assertEquals('a', $verifyRow['a']);
+        $this->assertEquals('b', $verifyRow['b']);
+
+        $stmt3 = $db->query("INSERT INTO `dbObjectTesting` (a,b,c) VALUES(?,?,?)", FALSE);
+        $this->assertTrue($stmt3->execute('a','b','c'));
+        $verifyRow = $db->query("SELECT * FROM `dbObjectTesting` WHERE id=".$stmt1->insertId()." LIMIT 1")->fetch();
+        $this->assertEquals('a', $verifyRow['a']);
+        $this->assertEquals('b', $verifyRow['b']);
+        $this->assertEquals('c', $verifyRow['c']);
+    }
+    function test_executeEncodesArrays(){
+        $db   = db::create('mysql', self::$driverOptions);
+        $stmt = $db->query("INSERT INTO `dbObjectTesting` (value) VALUES(?)", FALSE);
+        $this->assertTrue($stmt->execute(array()));
+
+        $testRow = $db->query("SELECT * FROM `dbObjectTesting` WHERE id=".$stmt->insertId()." LIMIT 1")->fetch();
+        $this->assertEquals('a:0:{}', $testRow['value']);
+    }
+    function test_executeEncodesObjects(){
+        $db   = db::create('mysql', self::$driverOptions);
+        $stmt = $db->query("INSERT INTO `dbObjectTesting` (value) VALUES(?)", FALSE);
+        $this->assertTrue($stmt->execute(new stdClass));
+
+        $testRow = $db->query("SELECT * FROM `dbObjectTesting` WHERE id=".$stmt->insertId()." LIMIT 1")->fetch();
+        $this->assertEquals('O:8:"stdClass":0:{}', $testRow['value']);
+    }
 
     # Tests for bindParam()
     #########################################
