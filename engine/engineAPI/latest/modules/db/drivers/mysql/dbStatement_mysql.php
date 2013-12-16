@@ -44,16 +44,15 @@ class dbStatement_mysql extends dbStatement{
         }
 
         if(func_num_args()){
-            $args = array();
-            for($n=0; $n<func_num_args(); $n++){
-                $arg = func_get_arg($n);
-
-                if($arg instanceof keyValuePairs){
-                    foreach($arg as $key => $value){
-                        if(is_object($value) or is_array($value)) $value = serialize($value);
-                        $this->bindValue($key, $value, $this->determineParamType($value));
-                    }
-                }else{
+            if(func_num_args(0) instanceof keyValuePairs){
+                $arg = func_num_args(0);
+                foreach($arg as $key => $value){
+                    if(is_object($value) or is_array($value)) $value = serialize($value);
+                    $this->bindValue($key, $value, $this->determineParamType($value));
+                }
+            }else{
+                for($n=0; $n<func_num_args(); $n++){
+                    $arg = func_get_arg($n);
                     if(is_object($arg) or is_array($arg)) $arg = serialize($arg);
                     $this->bindValue($n+1, $arg, $this->determineParamType($arg));
                 }
