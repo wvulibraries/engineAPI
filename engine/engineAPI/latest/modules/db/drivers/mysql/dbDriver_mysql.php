@@ -134,8 +134,8 @@ class dbDriver_mysql extends dbDriver{
                 return $stmt;
             case !$params:
                 return $stmt;
-            case (is_array($params) and sizeof($params)):
-                call_user_func_array(array($stmt, 'execute'), $params);
+            case is_array($params) || ($params instanceof keyValuePairs):
+                $stmt->execute($params);
                 return $stmt;
         }
     }
