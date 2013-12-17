@@ -295,10 +295,10 @@ class dbStatement_mysql extends dbStatement{
      * {@inheritdoc}
      * @author David Gersting
      */
-  public function errorMsg(){
-      $errorMsg = $this->pdoStatement->errorInfo();
-      return $errorMsg[2];
-  }
+    public function errorMsg(){
+        $errorMsg = $this->pdoStatement->errorInfo();
+        return $errorMsg[2];
+    }
 
     // -----------------------------------------------------------------------------------------------------------------
 
