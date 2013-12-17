@@ -96,7 +96,7 @@ class db implements Countable{
             $dbDriverObj   = new $dbDriverClass($options);
 
             // Save the driver for later if it's been given an alias
-            if(isset($alias)) self::$objects[$alias] = $dbDriverObj;
+            if(!empty($alias)) self::$objects[$alias] = $dbDriverObj;
 
             // Return the new driver object
             return $dbDriverObj;
