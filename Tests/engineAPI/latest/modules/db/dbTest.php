@@ -2,17 +2,10 @@
 require_once 'pdoMocks.php';
 
 class dbTest extends PHPUnit_Framework_TestCase {
-    private $pdoStub;
-
-    function setUp(){
-
-    }
-
     function testItReturnsItselfViaGetInstance(){
         $db = db::getInstance();
         $this->assertInstanceOf('db', $db);
     }
-
 
     # Tests for __get()
     ###########################################################################################
@@ -21,7 +14,7 @@ class dbTest extends PHPUnit_Framework_TestCase {
         $mockPDO = $this->getMock('mockPDO');
         $db      = db::getInstance();
 
-        @$this->assertNull($db->$dbAlias);
+        $this->assertNull($db->$dbAlias);
         $driver = $db->create('mysql', $mockPDO, $dbAlias);
         $this->assertNotNull($db->$dbAlias);
         $this->assertEquals($driver, $db->$dbAlias);
@@ -35,7 +28,7 @@ class dbTest extends PHPUnit_Framework_TestCase {
         $db      = db::getInstance();
         $driver  = $db->create('mysql', $mockPDO);
 
-        @$this->assertNull($db->$dbAlias);
+        $this->assertNull($db->$dbAlias);
         $db->registerAs($driver, $dbAlias);
         $this->assertNotNull($db->$dbAlias);
         $this->assertEquals($driver, $db->$dbAlias);
@@ -60,12 +53,12 @@ class dbTest extends PHPUnit_Framework_TestCase {
         $mockPDO = $this->getMock('mockPDO');
         $db      = db::getInstance();
 
-        @$this->assertNull($db->$dbAlias);
+        $this->assertNull($db->$dbAlias);
         $driver = $db->create('mysql', $mockPDO, $dbAlias);
         $this->assertNotNull($db->$dbAlias);
         $this->assertEquals($driver, $db->$dbAlias);
         $db->unregisterAlias($dbAlias);
-        @$this->assertNull($db->$dbAlias);
+        $this->assertNull($db->$dbAlias);
     }
     function testUnregisterAliasUndefinedAlias(){
         $dbAlias = md5(__METHOD__);
@@ -79,12 +72,12 @@ class dbTest extends PHPUnit_Framework_TestCase {
         $mockPDO = $this->getMock('mockPDO');
         $db      = db::getInstance();
 
-        @$this->assertNull($db->$dbAlias);
+        $this->assertNull($db->$dbAlias);
         $driver = $db->create('mysql', $mockPDO, $dbAlias);
         $this->assertNotNull($db->$dbAlias);
         $this->assertEquals($driver, $db->$dbAlias);
         $db->unregisterObject($driver);
-        @$this->assertNull($db->$dbAlias);
+        $this->assertNull($db->$dbAlias);
     }
     function testUnregisterObjectUsingUnregisteredObject(){
         $dbAlias = md5(__METHOD__);
