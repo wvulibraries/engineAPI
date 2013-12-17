@@ -93,11 +93,11 @@ class dbTest extends PHPUnit_Framework_TestCase {
 
         db::reset();
         $this->assertEquals(0, sizeof($db));
-        @$this->assertNull($db->$dbAlias);
+        $this->assertNull($db->$dbAlias);
         $driver = $db->create('mysql', $mockPDO);
-        @$this->assertNull($db->$dbAlias);
+        $this->assertNull($db->$dbAlias);
         $this->assertFalse($db->unregisterObject($driver));
-        @$this->assertNull($db->$dbAlias);
+        $this->assertNull($db->$dbAlias);
     }
 
     # Tests for listDrivers()
