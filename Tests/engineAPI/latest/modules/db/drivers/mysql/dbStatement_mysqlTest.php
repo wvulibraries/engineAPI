@@ -85,22 +85,6 @@ class dbStatement_mysqlTest extends PHPUnit_Extensions_Database_TestCase {
         $this->assertEquals('b', $verifyRow['b']);
         $this->assertEquals('c', $verifyRow['c']);
     }
-    function test_executeEncodesArrays(){
-        $db   = db::create('mysql', self::$driverOptions);
-        $stmt = $db->query("INSERT INTO `dbObjectTesting` (value) VALUES(?)", FALSE);
-        $this->assertTrue($stmt->execute(array()));
-
-        $testRow = $db->query("SELECT * FROM `dbObjectTesting` WHERE id=".$stmt->insertId()." LIMIT 1")->fetch();
-        $this->assertEquals('a:0:{}', $testRow['value']);
-    }
-    function test_executeEncodesObjects(){
-        $db   = db::create('mysql', self::$driverOptions);
-        $stmt = $db->query("INSERT INTO `dbObjectTesting` (value) VALUES(?)", FALSE);
-        $this->assertTrue($stmt->execute(new stdClass));
-
-        $testRow = $db->query("SELECT * FROM `dbObjectTesting` WHERE id=".$stmt->insertId()." LIMIT 1")->fetch();
-        $this->assertEquals('O:8:"stdClass":0:{}', $testRow['value']);
-    }
 
     # Tests for bindParam()
     #########################################
@@ -687,6 +671,42 @@ class dbStatement_mysqlTest extends PHPUnit_Extensions_Database_TestCase {
         $this->assertRegExp('/You have an error in your SQL syntax.*/', $stmt->errorMsg());
 
         // TODO: Check more errors?
+    }
+
+    # Tests for encoding and decoding objects and arrays
+    #######################################################
+    function test_ItStoresAndReturnsArrays(){
+        $db   = db::create('mysql', self::$driverOptions);
+        $stmt = $db->query("INSERT INTO `dbObjectTesting` (value) VALUES(?)", FALSE);
+        $this->assertTrue($stmt->execute(array('a','b'=>'c')));
+
+        $testRow = $db->query("SELECT * FROM `dbObjectTesting` WHERE id=".$stmt->insertId()." LIMIT 1")->fetch();
+        $this->assertInternalType('array', $testRow['value']);
+        $this->assertEquals(array('a','b'=>'c'), $testRow['value']);
+    }
+    function test_ItStoresAndReturnsObjects(){
+        $obj = new stdClass;
+        $obj->a = 123;
+        $obj->b = array(1,2,3);
+
+        $db   = db::create('mysql', self::$driverOptions);
+        $stmt = $db->query("INSERT INTO `dbObjectTesting` (value) VALUES(?)", FALSE);
+        $this->assertTrue($stmt->execute($obj));
+
+        $testRow = $db->query("SELECT * FROM `dbObjectTesting` WHERE id=".$stmt->insertId()." LIMIT 1")->fetch();
+        $this->assertInternalType('object', $testRow['value']);
+        $this->assertAttributeEquals(123, 'a', $testRow['value']);
+        $this->assertAttributeEquals(array(1,2,3), 'b', $testRow['value']);
+    }
+    function test_ItDoesNotAttemptToDecodeManuallyEncodedArrays(){
+        $db    = db::create('mysql', self::$driverOptions);
+        $stmt  = $db->query("INSERT INTO `dbObjectTesting` (value) VALUES(?)", FALSE);
+        $array = serialize(array());
+        $this->assertTrue($stmt->execute($array));
+
+        $testRow = $db->query("SELECT * FROM `dbObjectTesting` WHERE id=".$stmt->insertId()." LIMIT 1")->fetch();
+        $this->assertInternalType('string', $testRow['value']);
+        $this->assertEquals($array, $testRow['value']);
     }
 }
  
