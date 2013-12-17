@@ -49,13 +49,19 @@ class dbStatement_mysql extends dbStatement {
             if (func_num_args(0) instanceof keyValuePairs) {
                 $arg = func_num_args(0);
                 foreach ($arg as $key => $value) {
-                    $this->bindValue($key, $value, $this->determineParamType($value));
+                    if (!$this->bindValue($key, $value, $this->determineParamType($value))) {
+                        errorHandle::newError(__METHOD__."() Failed to bind value of type ".gettype($value), errorHandle::DEBUG);
+                        return FALSE;
+                    }
                 }
             }
             else {
                 for ($n = 0; $n < func_num_args(); $n++) {
                     $arg = func_get_arg($n);
-                    $this->bindValue($n + 1, $arg, $this->determineParamType($arg));
+                    if (!$this->bindValue($n + 1, $arg, $this->determineParamType($arg))) {
+                        errorHandle::newError(__METHOD__."() Failed to bind value of type ".gettype($arg), errorHandle::DEBUG);
+                        return FALSE;
+                    }
                 }
             }
         }
@@ -112,7 +118,7 @@ class dbStatement_mysql extends dbStatement {
         }
 
         // Make sure the value is encoded as needed
-        $value = $this->encodeObject($value);
+        if($this->dbDriver->autoEncode) $value = $this->encodeObject($value);
 
         // Bind the value
         if (isset($length)) return $this->pdoStatement->bindValue($param, $value, $type, $length);
@@ -217,8 +223,8 @@ class dbStatement_mysql extends dbStatement {
             return NULL;
         }
         else {
-            // @TODO Add flag to turn this off
-            return in_array($fetchMode, array(PDO::FETCH_ASSOC, PDO::FETCH_NUM)) && TRUE
+            // @TODO Remove in_array() call with better decode logic
+            return $this->dbDriver->autoEncode && in_array($fetchMode, array(PDO::FETCH_ASSOC, PDO::FETCH_NUM))
                 ? array_map(array($this, 'decodeObject'), $row)
                 : $row;
         }
@@ -278,8 +284,7 @@ class dbStatement_mysql extends dbStatement {
             return NULL;
         }
         else {
-            // @TODO Add flag to turn this off
-            return (TRUE)
+            return $this->dbDriver->autoEncode
                 ? $this->decodeObject($value)
                 : $value;
         }

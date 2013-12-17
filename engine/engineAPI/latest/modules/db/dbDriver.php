@@ -33,6 +33,12 @@ abstract class dbDriver {
      */
     protected $readOnlyMode = FALSE;
 
+    /**
+     * [Flag] Automatically encode/decode arrays and objects for storage.
+     * If turned off, passing an array or object will trigger an error
+     * @var bool
+     */
+    public $autoEncode = TRUE;
 
     public function __toString() {
         return get_class($this)."\n";

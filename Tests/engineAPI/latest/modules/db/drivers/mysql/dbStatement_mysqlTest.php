@@ -714,7 +714,7 @@ class dbStatement_mysqlTest extends PHPUnit_Extensions_Database_TestCase {
 
     # Tests for encoding and decoding objects and arrays
     #######################################################
-    function test_ItStoresAndReturnsArrays() {
+    function test_itStoresAndReturnsArraysByDefault() {
         $db   = db::create('mysql', self::$driverOptions);
         $stmt = $db->query("INSERT INTO `dbObjectTesting` (value) VALUES(?)", FALSE);
         $this->assertTrue($stmt->execute(array('a', 'b' => 'c')));
@@ -724,7 +724,7 @@ class dbStatement_mysqlTest extends PHPUnit_Extensions_Database_TestCase {
         $this->assertEquals(array('a', 'b' => 'c'), $testRow['value']);
     }
 
-    function test_ItStoresAndReturnsObjects() {
+    function test_itStoresAndReturnsObjectsByDefault() {
         $obj    = new stdClass;
         $obj->a = 123;
         $obj->b = array(1, 2, 3);
@@ -739,7 +739,7 @@ class dbStatement_mysqlTest extends PHPUnit_Extensions_Database_TestCase {
         $this->assertAttributeEquals(array(1, 2, 3), 'b', $testRow['value']);
     }
 
-    function test_ItDoesNotAttemptToDecodeManuallyEncodedArrays() {
+    function test_itDoesNotAttemptToDecodeManuallyEncodedArrays() {
         $db    = db::create('mysql', self::$driverOptions);
         $stmt  = $db->query("INSERT INTO `dbObjectTesting` (value) VALUES(?)", FALSE);
         $array = serialize(array());
@@ -748,6 +748,34 @@ class dbStatement_mysqlTest extends PHPUnit_Extensions_Database_TestCase {
         $testRow = $db->query("SELECT * FROM `dbObjectTesting` WHERE id=".$stmt->insertId()." LIMIT 1")->fetch();
         $this->assertInternalType('string', $testRow['value']);
         $this->assertEquals($array, $testRow['value']);
+    }
+
+    /**
+     * @expectedException PHPUnit_Framework_Error
+     */
+    function test_encodingCanBeTurnedOffAndReturnsFalseWhenPassedAnArray() {
+        $db = db::create('mysql', self::$driverOptions);
+
+        // Turn encoding off!
+        $db->autoEncode = FALSE;
+
+        // Try and pass an array
+        $stmt = $db->query("INSERT INTO `dbObjectTesting` (value) VALUES(?)", FALSE);
+        $this->assertFalse($stmt->execute(array()));
+    }
+
+    /**
+     * @expectedException PHPUnit_Framework_Error
+     */
+    function test_encodingCanBeTurnedOffAndReturnsFalseWhenPassedAnObject() {
+        $db = db::create('mysql', self::$driverOptions);
+
+        // Turn encoding off!
+        $db->autoEncode = FALSE;
+
+        // Try and pass an array
+        $stmt = $db->query("INSERT INTO `dbObjectTesting` (value) VALUES(?)", FALSE);
+        $this->assertFalse($stmt->execute(new stdClass));
     }
 }
  
