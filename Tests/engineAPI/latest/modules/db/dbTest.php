@@ -103,13 +103,12 @@ class dbTest extends PHPUnit_Framework_TestCase {
     # Tests for listDrivers()
     ###########################################################################################
     function testListDrivers(){
-        $this->markTestIncomplete('TODO');
         $ds = DIRECTORY_SEPARATOR;
         db::$driverDir = __DIR__.$ds.'testData'.$ds.'drivers';
         $drivers = db::listDrivers();
         $this->assertTrue(is_array($drivers));
-        $this->assertTrue(1, sizeof($drivers));
-        $this->assertContains('drivera', $drivers);
+        $this->assertEquals(1, sizeof($drivers));
+        $this->assertContains('mysql', $drivers);
     }
 
 }
