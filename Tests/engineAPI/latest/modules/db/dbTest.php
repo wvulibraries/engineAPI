@@ -86,9 +86,7 @@ class dbTest extends PHPUnit_Framework_TestCase {
         $db->unregisterObject($driver);
         @$this->assertNull($db->$dbAlias);
     }
-    function testUnregisterObjectUsingUnregisteredObjecet(){
-        $this->markTestIncomplete('Having issues resetting the db object');
-        errorHandle::errorReporting(errorHandle::E_ALL);
+    function testUnregisterObjectUsingUnregisteredObject(){
         $dbAlias = md5(__METHOD__);
         $db      = db::getInstance();
         $mockPDO = $this->getMock('mockPDO');
@@ -100,10 +98,6 @@ class dbTest extends PHPUnit_Framework_TestCase {
         @$this->assertNull($db->$dbAlias);
         $this->assertFalse($db->unregisterObject($driver));
         @$this->assertNull($db->$dbAlias);
-
-        /*
-         * $driver is being remembered from previous test runs...  need a way to reset it
-         */
     }
 
     # Tests for listDrivers()
