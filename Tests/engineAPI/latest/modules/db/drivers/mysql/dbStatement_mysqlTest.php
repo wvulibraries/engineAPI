@@ -14,26 +14,27 @@ class dbStatement_mysqlTest extends PHPUnit_Extensions_Database_TestCase {
      */
     static $db;
 
-    private function createPDO(){
+    private function createPDO() {
         return new PDO($GLOBALS['DB_DSN'], $GLOBALS['DB_USER'], $GLOBALS['DB_PASSWD']);
     }
 
-    static function setUpBeforeClass(){
+    static function setUpBeforeClass() {
         self::$driverOptions = array(
             'dsn'    => $GLOBALS['DB_DSN'],
             'user'   => $GLOBALS['DB_USER'],
             'pass'   => $GLOBALS['DB_PASSWD'],
             'dbname' => $GLOBALS['DB_DBNAME'],
         );
-        self::$db = db::create('mysql', self::$driverOptions);
+        self::$db            = db::create('mysql', self::$driverOptions);
     }
 
-    public function getConnection(){
+    public function getConnection() {
         self::$pdo = $this->createPDO();
+
         return $this->createDefaultDBConnection(self::$pdo, $GLOBALS['DB_DBNAME']);
     }
 
-    public function getDataSet(){
+    public function getDataSet() {
         self::$pdo->exec(file_get_contents(__DIR__.'/../../testData/drivers/mysql/dbObjectTesting.sql'));
 
         $dataSet = new PHPUnit_Extensions_Database_DataSet_QueryDataSet($this->getConnection());
@@ -46,17 +47,19 @@ class dbStatement_mysqlTest extends PHPUnit_Extensions_Database_TestCase {
 
     # Tests for execute()
     #########################################
-    function test_executeIsOnlyAvailableBeforeExecution(){
+    function test_executeIsOnlyAvailableBeforeExecution() {
         $db   = db::create('mysql', self::$driverOptions);
         $stmt = $db->query("SELECT 1");
         $this->assertFalse($stmt->execute());
     }
-    function test_executeCatchesCasesWhenNoPdoStatementHasBeenSet(){
+
+    function test_executeCatchesCasesWhenNoPdoStatementHasBeenSet() {
         $db   = db::create('mysql', self::$driverOptions);
         $stmt = new dbStatement_mysql($db);
         $this->assertFalse($stmt->execute());
     }
-    function text_executeExecutesThePreparedStatement(){
+
+    function text_executeExecutesThePreparedStatement() {
         $db   = db::create('mysql', self::$driverOptions);
         $stmt = $db->query("SELECT 1", FALSE);
         $this->assertFalse($stmt->isExecuted());
@@ -64,8 +67,9 @@ class dbStatement_mysqlTest extends PHPUnit_Extensions_Database_TestCase {
         $this->assertTrue($stmt->isExecuted());
         $this->assertEquals(1, $stmt->fetchField());
     }
-    function test_executeTakesParamsForThePreparedStatement(){
-        $db   = db::create('mysql', self::$driverOptions);
+
+    function test_executeTakesParamsForThePreparedStatement() {
+        $db = db::create('mysql', self::$driverOptions);
 
         $stmt1 = $db->query("INSERT INTO `dbObjectTesting` (a) VALUES(?)", FALSE);
         $this->assertTrue($stmt1->execute('a'));
@@ -73,13 +77,13 @@ class dbStatement_mysqlTest extends PHPUnit_Extensions_Database_TestCase {
         $this->assertEquals('a', $verifyRow['a']);
 
         $stmt2 = $db->query("INSERT INTO `dbObjectTesting` (a,b) VALUES(?,?)", FALSE);
-        $this->assertTrue($stmt2->execute('a','b'));
+        $this->assertTrue($stmt2->execute('a', 'b'));
         $verifyRow = $db->query("SELECT * FROM `dbObjectTesting` WHERE id=".$stmt1->insertId()." LIMIT 1")->fetch();
         $this->assertEquals('a', $verifyRow['a']);
         $this->assertEquals('b', $verifyRow['b']);
 
         $stmt3 = $db->query("INSERT INTO `dbObjectTesting` (a,b,c) VALUES(?,?,?)", FALSE);
-        $this->assertTrue($stmt3->execute('a','b','c'));
+        $this->assertTrue($stmt3->execute('a', 'b', 'c'));
         $verifyRow = $db->query("SELECT * FROM `dbObjectTesting` WHERE id=".$stmt1->insertId()." LIMIT 1")->fetch();
         $this->assertEquals('a', $verifyRow['a']);
         $this->assertEquals('b', $verifyRow['b']);
@@ -88,20 +92,22 @@ class dbStatement_mysqlTest extends PHPUnit_Extensions_Database_TestCase {
 
     # Tests for bindParam()
     #########################################
-    function test_bindParamIsOnlyAvailableBeforeExecution(){
+    function test_bindParamIsOnlyAvailableBeforeExecution() {
         $var  = NULL;
         $db   = db::create('mysql', self::$driverOptions);
         $stmt = $db->query("SELECT 1");
         $this->assertFalse($stmt->bindParam(0, $a));
     }
-    function test_bindParamCatchesCasesWhenNoPdoStatementHasBeenSet(){
+
+    function test_bindParamCatchesCasesWhenNoPdoStatementHasBeenSet() {
         $db   = db::create('mysql', self::$driverOptions);
         $stmt = new dbStatement_mysql($db);
         $var  = NULL;
         $this->assertFalse($stmt->bindParam(0, $var));
     }
-    function test_bindParamBaseImplementation(){
-        $db   = db::create('mysql', self::$driverOptions);
+
+    function test_bindParamBaseImplementation() {
+        $db = db::create('mysql', self::$driverOptions);
 
         $pdo = $this->getMock('PDOStatement', array());
         $pdo->expects($this->once())
@@ -113,8 +119,9 @@ class dbStatement_mysqlTest extends PHPUnit_Extensions_Database_TestCase {
         $stmt->set_pdoStatement($pdo);
         $stmt->bindParam(1, $var);
     }
-    function test_bindParamSpecifyingType(){
-        $db   = db::create('mysql', self::$driverOptions);
+
+    function test_bindParamSpecifyingType() {
+        $db = db::create('mysql', self::$driverOptions);
 
         $pdo = $this->getMock('PDOStatement', array());
         $pdo->expects($this->once())
@@ -126,8 +133,9 @@ class dbStatement_mysqlTest extends PHPUnit_Extensions_Database_TestCase {
         $stmt->set_pdoStatement($pdo);
         $stmt->bindParam(1, $var, PDO::PARAM_STR);
     }
-    function test_bindParamSpecifyingTypeAndLength(){
-        $db   = db::create('mysql', self::$driverOptions);
+
+    function test_bindParamSpecifyingTypeAndLength() {
+        $db = db::create('mysql', self::$driverOptions);
 
         $pdo = $this->getMock('PDOStatement', array());
         $pdo->expects($this->once())
@@ -143,18 +151,20 @@ class dbStatement_mysqlTest extends PHPUnit_Extensions_Database_TestCase {
 
     # Tests for bindValue()
     #########################################
-    function test_bindValueIsOnlyAvailableBeforeExecution(){
+    function test_bindValueIsOnlyAvailableBeforeExecution() {
         $db   = db::create('mysql', self::$driverOptions);
         $stmt = $db->query("SELECT 1");
         $this->assertFalse($stmt->bindValue(0, NULL));
     }
-    function test_bindValueCatchesCasesWhenNoPdoStatementHasBeenSet(){
+
+    function test_bindValueCatchesCasesWhenNoPdoStatementHasBeenSet() {
         $db   = db::create('mysql', self::$driverOptions);
         $stmt = new dbStatement_mysql($db);
         $this->assertFalse($stmt->bindValue(0, 'abc'));
     }
-    function test_bindValueBaseImplementation(){
-        $db   = db::create('mysql', self::$driverOptions);
+
+    function test_bindValueBaseImplementation() {
+        $db = db::create('mysql', self::$driverOptions);
 
         $pdo = $this->getMock('PDOStatement', array());
         $pdo->expects($this->once())
@@ -163,10 +173,11 @@ class dbStatement_mysqlTest extends PHPUnit_Extensions_Database_TestCase {
 
         $stmt = new dbStatement_mysql($db);
         $stmt->set_pdoStatement($pdo);
-        $stmt->bindValue(1,'abc');
+        $stmt->bindValue(1, 'abc');
     }
-    function test_bindValueSpecifyingType(){
-        $db   = db::create('mysql', self::$driverOptions);
+
+    function test_bindValueSpecifyingType() {
+        $db = db::create('mysql', self::$driverOptions);
 
         $pdo = $this->getMock('PDOStatement', array());
         $pdo->expects($this->once())
@@ -175,10 +186,11 @@ class dbStatement_mysqlTest extends PHPUnit_Extensions_Database_TestCase {
 
         $stmt = new dbStatement_mysql($db);
         $stmt->set_pdoStatement($pdo);
-        $stmt->bindValue(1,'abc', PDO::PARAM_STR);
+        $stmt->bindValue(1, 'abc', PDO::PARAM_STR);
     }
-    function test_bindValueSpecifyingTypeAndLength(){
-        $db   = db::create('mysql', self::$driverOptions);
+
+    function test_bindValueSpecifyingTypeAndLength() {
+        $db = db::create('mysql', self::$driverOptions);
 
         $pdo = $this->getMock('PDOStatement', array());
         $pdo->expects($this->once())
@@ -187,18 +199,19 @@ class dbStatement_mysqlTest extends PHPUnit_Extensions_Database_TestCase {
 
         $stmt = new dbStatement_mysql($db);
         $stmt->set_pdoStatement($pdo);
-        $stmt->bindValue(1,'abc', PDO::PARAM_STR, 3);
+        $stmt->bindValue(1, 'abc', PDO::PARAM_STR, 3);
     }
 
 
     # Tests for fieldCount()
     #########################################
-    function test_fieldCountIsOnlyAvailableOnceTheStatementHasBeenExecuted(){
+    function test_fieldCountIsOnlyAvailableOnceTheStatementHasBeenExecuted() {
         $db   = db::create('mysql', self::$driverOptions);
         $stmt = $db->query("SELECT 1", FALSE);
         $this->assertEquals(0, $stmt->fieldCount());
     }
-    function test_fieldCountSimple(){
+
+    function test_fieldCountSimple() {
         $db   = db::create('mysql', self::$driverOptions);
         $stmt = $db->query("SELECT 1");
         $this->assertEquals(1, $stmt->fieldCount(), "Failed for {$stmt->getSQL()}");
@@ -207,7 +220,8 @@ class dbStatement_mysqlTest extends PHPUnit_Extensions_Database_TestCase {
         $stmt = $db->query("SELECT 1,2,3");
         $this->assertEquals(3, $stmt->fieldCount(), "Failed for {$stmt->getSQL()}");
     }
-    function test_fieldCountLiveQuery(){
+
+    function test_fieldCountLiveQuery() {
         $db = db::create('mysql', self::$driverOptions);
         // Test SQL that will return a result
         $stmt = $db->query("SELECT * FROM dbObjectTesting");
@@ -219,26 +233,28 @@ class dbStatement_mysqlTest extends PHPUnit_Extensions_Database_TestCase {
 
     # Tests for fieldNames()
     #########################################
-    function test_fieldNamesIsOnlyAvailableOnceTheStatementHasBeenExecuted(){
+    function test_fieldNamesIsOnlyAvailableOnceTheStatementHasBeenExecuted() {
         $db         = db::create('mysql', self::$driverOptions);
         $stmt       = $db->query("SELECT 1", FALSE);
         $fieldNames = $stmt->fieldNames();
         $this->assertTrue(is_array($fieldNames));
         $this->assertEquals(0, sizeof($fieldNames));
     }
-    function test_fieldNamesSimple(){
-        $db = db::create('mysql', self::$driverOptions);
-        $stmt = $db->query("SELECT 1 AS a");
+
+    function test_fieldNamesSimple() {
+        $db         = db::create('mysql', self::$driverOptions);
+        $stmt       = $db->query("SELECT 1 AS a");
         $fieldNames = $stmt->fieldNames();
         $this->assertTrue(is_array($fieldNames));
         $this->assertEquals(1, sizeof($fieldNames));
         $this->assertContains('a', $fieldNames);
     }
-    function test_fieldNamesLiveQuery(){
+
+    function test_fieldNamesLiveQuery() {
         $db = db::create('mysql', self::$driverOptions);
 
         // Test SQL that will return a result
-        $stmt = $db->query("SELECT * FROM dbObjectTesting");
+        $stmt       = $db->query("SELECT * FROM dbObjectTesting");
         $fieldNames = $stmt->fieldNames();
         $this->assertTrue(is_array($fieldNames), 'It returns an array');
         $this->assertEquals(6, sizeof($fieldNames), 'It returns an array with 3 elements');
@@ -247,7 +263,7 @@ class dbStatement_mysqlTest extends PHPUnit_Extensions_Database_TestCase {
         $this->assertContains('value', $fieldNames, "It returns the element 'value'");
 
         // Test SQL that will not return a result
-        $stmt = $db->query("SELECT * FROM dbObjectTesting WHERE `id`='".self::UNDEFINED_TABLE_KEY."'");
+        $stmt       = $db->query("SELECT * FROM dbObjectTesting WHERE `id`='".self::UNDEFINED_TABLE_KEY."'");
         $fieldNames = $stmt->fieldNames();
         $this->assertTrue(is_array($fieldNames), 'It returns an array');
         $this->assertEquals(6, sizeof($fieldNames), 'It returns an array with 3 elements');
@@ -259,12 +275,13 @@ class dbStatement_mysqlTest extends PHPUnit_Extensions_Database_TestCase {
 
     # Tests for rowCount()
     #########################################
-    function test_rowCountIsOnlyAvailableOnceTheStatementHasBeenExecuted(){
-        $db = db::create('mysql', self::$driverOptions);
+    function test_rowCountIsOnlyAvailableOnceTheStatementHasBeenExecuted() {
+        $db   = db::create('mysql', self::$driverOptions);
         $stmt = $db->query("SELECT 1", FALSE);
         $this->assertFalse($stmt->rowCount());
     }
-    function test_rowCount(){
+
+    function test_rowCount() {
         $db = db::create('mysql', self::$driverOptions);
 
         $stmt = $db->query("SELECT * FROM `dbObjectTesting`");
@@ -277,12 +294,13 @@ class dbStatement_mysqlTest extends PHPUnit_Extensions_Database_TestCase {
 
     # Tests for affectedRows()
     #########################################
-    function test_affectedRowsIsOnlyAvailableOnceTheStatementHasBeenExecuted(){
-        $db = db::create('mysql', self::$driverOptions);
+    function test_affectedRowsIsOnlyAvailableOnceTheStatementHasBeenExecuted() {
+        $db   = db::create('mysql', self::$driverOptions);
         $stmt = $db->query("SELECT * FROM `dbObjectTesting`", FALSE);
         $this->assertFalse($stmt->affectedRows());
     }
-    function test_affectedRows(){
+
+    function test_affectedRows() {
         $db = db::create('mysql', self::$driverOptions);
 
         // INSERT some rows
@@ -300,16 +318,17 @@ class dbStatement_mysqlTest extends PHPUnit_Extensions_Database_TestCase {
 
     # Tests for insertId()
     #########################################
-    function test_insertIdIsOnlyAvailableOnceTheStatementHasBeenExecuted(){
-        $db = db::create('mysql', self::$driverOptions);
+    function test_insertIdIsOnlyAvailableOnceTheStatementHasBeenExecuted() {
+        $db   = db::create('mysql', self::$driverOptions);
         $stmt = $db->query("SELECT * FROM `dbObjectTesting`", FALSE);
         $this->assertFalse($stmt->insertId());
     }
-    function test_insertId(){
+
+    function test_insertId() {
         $db = db::create('mysql', self::$driverOptions);
         $db->query("INSERT INTO `dbObjectTesting` (`value`) VALUE('a'),('b'),('c')");
 
-        $stmt = $db->query("INSERT INTO `dbObjectTesting` (`value`) VALUES('test')");
+        $stmt     = $db->query("INSERT INTO `dbObjectTesting` (`value`) VALUES('test')");
         $insertID = $stmt->insertId();
 
         $stmt = self::$pdo->query("SELECT `id` FROM dbObjectTesting WHERE `value`='test'LIMIT 1");
@@ -318,12 +337,13 @@ class dbStatement_mysqlTest extends PHPUnit_Extensions_Database_TestCase {
 
     # Tests for fetch()
     #########################################
-    function test_fetchIsOnlyAvailableOnceTheStatementHasBeenExecuted(){
-        $db = db::create('mysql', self::$driverOptions);
+    function test_fetchIsOnlyAvailableOnceTheStatementHasBeenExecuted() {
+        $db   = db::create('mysql', self::$driverOptions);
         $stmt = $db->query("SELECT * FROM `dbObjectTesting`", FALSE);
         $this->assertFalse($stmt->fetch());
     }
-    function test_fetchAlwaysReturnsNullWhenPastLastRow(){
+
+    function test_fetchAlwaysReturnsNullWhenPastLastRow() {
         self::$pdo->exec("INSERT INTO `dbObjectTesting` (`value`) VALUE('a')");
 
         $db   = db::create('mysql', self::$driverOptions);
@@ -334,7 +354,8 @@ class dbStatement_mysqlTest extends PHPUnit_Extensions_Database_TestCase {
         $this->assertNull($stmt->fetch(), 'fetch() returns NULL');
         $this->assertNull($stmt->fetch(), 'fetch() returns NULL');
     }
-    function test_fetchSupportsFETCH_ASSOC(){
+
+    function test_fetchSupportsFETCH_ASSOC() {
         self::$pdo->exec("INSERT INTO `dbObjectTesting` (`value`) VALUE('a')");
 
         $db   = db::create('mysql', self::$driverOptions);
@@ -348,7 +369,8 @@ class dbStatement_mysqlTest extends PHPUnit_Extensions_Database_TestCase {
         $this->assertArrayHasKey('value', $row);
         $this->assertEquals('a', $row['value']);
     }
-    function test_fetchSupportsFETCH_NUM(){
+
+    function test_fetchSupportsFETCH_NUM() {
         self::$pdo->exec("INSERT INTO `dbObjectTesting` (`value`) VALUE('a')");
 
         $db   = db::create('mysql', self::$driverOptions);
@@ -362,7 +384,8 @@ class dbStatement_mysqlTest extends PHPUnit_Extensions_Database_TestCase {
         $this->assertArrayHasKey(2, $row);
         $this->assertEquals('a', $row[2]);
     }
-    function test_fetchSupportsFETCH_OBJ(){
+
+    function test_fetchSupportsFETCH_OBJ() {
         self::$pdo->exec("INSERT INTO `dbObjectTesting` (`value`) VALUE('a')");
 
         $db   = db::create('mysql', self::$driverOptions);
@@ -375,7 +398,8 @@ class dbStatement_mysqlTest extends PHPUnit_Extensions_Database_TestCase {
         $this->assertAttributeNotEmpty('value', $row);
         $this->assertAttributeEquals('a', 'value', $row);
     }
-    function test_fetchUsesFetchAssocByDefault(){
+
+    function test_fetchUsesFetchAssocByDefault() {
         self::$pdo->exec("INSERT INTO `dbObjectTesting` (`value`) VALUE('a')");
 
         $db   = db::create('mysql', self::$driverOptions);
@@ -389,7 +413,8 @@ class dbStatement_mysqlTest extends PHPUnit_Extensions_Database_TestCase {
         $this->assertArrayHasKey('value', $row);
         $this->assertEquals('a', $row['value']);
     }
-    function test_fetchReturnsRowByRow(){
+
+    function test_fetchReturnsRowByRow() {
         self::$pdo->exec("INSERT INTO `dbObjectTesting` (`value`) VALUE('a'),('b'),('c')");
 
         $db       = db::create('mysql', self::$driverOptions);
@@ -397,24 +422,25 @@ class dbStatement_mysqlTest extends PHPUnit_Extensions_Database_TestCase {
         $counter  = 0;
         $testData = array('a', 'b', 'c');
         $this->assertEquals(3, $stmt->rowCount(), 'There should be 3 rows');
-        while($row = $stmt->fetch()){
+        while ($row = $stmt->fetch()) {
             $counter++;
             $this->assertTrue(is_array($row));
             $this->assertEquals(6, sizeof($row));
             $this->assertArrayHasKey('value', $row);
-            $this->assertEquals($testData[$counter-1], $row['value']);
+            $this->assertEquals($testData[$counter - 1], $row['value']);
         }
-        $this->assertEquals(3,$counter,'We should have looped 3 times');
+        $this->assertEquals(3, $counter, 'We should have looped 3 times');
     }
 
     # Tests for fetchAll()
     #########################################
-    function test_fetchAllIsOnlyAvailableOnceTheStatementHasBeenExecuted(){
-        $db = db::create('mysql', self::$driverOptions);
+    function test_fetchAllIsOnlyAvailableOnceTheStatementHasBeenExecuted() {
+        $db   = db::create('mysql', self::$driverOptions);
         $stmt = $db->query("SELECT * FROM `dbObjectTesting`", FALSE);
         $this->assertFalse($stmt->fetchAll());
     }
-    function test_fetchAllSupportsFETCH_ASSOC(){
+
+    function test_fetchAllSupportsFETCH_ASSOC() {
         self::$pdo->exec("INSERT INTO `dbObjectTesting` (`value`) VALUE('a'),('b'),('c')");
 
         $db       = db::create('mysql', self::$driverOptions);
@@ -424,7 +450,7 @@ class dbStatement_mysqlTest extends PHPUnit_Extensions_Database_TestCase {
         $this->assertEquals(3, $stmt->rowCount(), 'There should be 3 rows');
         $this->assertTrue(is_array($rows), 'fetchAll() returns an array');
         $this->assertEquals(3, sizeof($rows), 'fetchAdd() returns 3 rows');
-        for($n=0;$n<3;$n++){
+        for ($n = 0; $n < 3; $n++) {
             $this->assertTrue(isset($rows[$n]));
             $row = $rows[$n];
             $this->assertTrue(is_array($row), "Each row is an array");
@@ -436,7 +462,8 @@ class dbStatement_mysqlTest extends PHPUnit_Extensions_Database_TestCase {
 
         }
     }
-    function test_fetchAllSupportsFETCH_NUM(){
+
+    function test_fetchAllSupportsFETCH_NUM() {
         self::$pdo->exec("INSERT INTO `dbObjectTesting` (`value`) VALUE('a'),('b'),('c')");
 
         $db       = db::create('mysql', self::$driverOptions);
@@ -446,7 +473,7 @@ class dbStatement_mysqlTest extends PHPUnit_Extensions_Database_TestCase {
         $this->assertEquals(3, $stmt->rowCount(), 'There should be 3 rows');
         $this->assertTrue(is_array($rows), 'fetchAll() returns an array');
         $this->assertEquals(3, sizeof($rows), 'fetchAdd() returns 3 rows');
-        for($n=0;$n<3;$n++){
+        for ($n = 0; $n < 3; $n++) {
             $this->assertTrue(isset($rows[$n]));
             $row = $rows[$n];
             $this->assertTrue(is_array($row), "Each row is an array");
@@ -457,7 +484,8 @@ class dbStatement_mysqlTest extends PHPUnit_Extensions_Database_TestCase {
             $this->assertEquals($testData[$n], $row[2]);
         }
     }
-    function test_fetchAllSupportsFETCH_OBJ(){
+
+    function test_fetchAllSupportsFETCH_OBJ() {
         self::$pdo->exec("INSERT INTO `dbObjectTesting` (`value`) VALUE('a'),('b'),('c')");
 
         $db       = db::create('mysql', self::$driverOptions);
@@ -467,7 +495,7 @@ class dbStatement_mysqlTest extends PHPUnit_Extensions_Database_TestCase {
         $this->assertEquals(3, $stmt->rowCount(), 'There should be 3 rows');
         $this->assertTrue(is_array($rows), 'fetchAll() returns an array');
         $this->assertEquals(3, sizeof($rows), 'fetchAdd() returns 3 rows');
-        for($n=0;$n<3;$n++){
+        for ($n = 0; $n < 3; $n++) {
             $this->assertTrue(isset($rows[$n]));
             $row = $rows[$n];
             $this->assertTrue(is_object($row), "Each row is an object");
@@ -477,7 +505,8 @@ class dbStatement_mysqlTest extends PHPUnit_Extensions_Database_TestCase {
             $this->assertAttributeEquals($testData[$n], 'value', $row);
         }
     }
-    function test_fetchAllUsesFetchAssocByDefault(){
+
+    function test_fetchAllUsesFetchAssocByDefault() {
         self::$pdo->exec("INSERT INTO `dbObjectTesting` (`value`) VALUE('a'),('b'),('c')");
 
         $db       = db::create('mysql', self::$driverOptions);
@@ -487,7 +516,7 @@ class dbStatement_mysqlTest extends PHPUnit_Extensions_Database_TestCase {
         $this->assertEquals(3, $stmt->rowCount(), 'There should be 3 rows');
         $this->assertTrue(is_array($rows), 'fetchAll() returns an array');
         $this->assertEquals(3, sizeof($rows), 'fetchAdd() returns 3 rows');
-        for($n=0;$n<3;$n++){
+        for ($n = 0; $n < 3; $n++) {
             $this->assertTrue(isset($rows[$n]));
             $row = $rows[$n];
             $this->assertTrue(is_array($row), "Each row is an array");
@@ -502,12 +531,13 @@ class dbStatement_mysqlTest extends PHPUnit_Extensions_Database_TestCase {
 
     # Tests for fetchField()
     #########################################
-    function test_fetchFieldIsOnlyAvailableOnceTheStatementHasBeenExecuted(){
-        $db = db::create('mysql', self::$driverOptions);
+    function test_fetchFieldIsOnlyAvailableOnceTheStatementHasBeenExecuted() {
+        $db   = db::create('mysql', self::$driverOptions);
         $stmt = $db->query("SELECT * FROM `dbObjectTesting`", FALSE);
         $this->assertFalse($stmt->fetchField());
     }
-    function test_fetchFieldAlwaysReturnsNullWhenPastLastRow(){
+
+    function test_fetchFieldAlwaysReturnsNullWhenPastLastRow() {
         self::$pdo->exec("INSERT INTO `dbObjectTesting` (`value`) VALUE('a')");
 
         $db   = db::create('mysql', self::$driverOptions);
@@ -518,7 +548,8 @@ class dbStatement_mysqlTest extends PHPUnit_Extensions_Database_TestCase {
         $this->assertNull($stmt->fetchField(), 'fetchField() returns NULL');
         $this->assertNull($stmt->fetchField(), 'fetchField() returns NULL');
     }
-    function test_fetchFieldReturnsFalseWhenGivenAnInvalidFieldOffset(){
+
+    function test_fetchFieldReturnsFalseWhenGivenAnInvalidFieldOffset() {
         self::$pdo->exec("INSERT INTO `dbObjectTesting` (`value`) VALUE('a')");
 
         $db   = db::create('mysql', self::$driverOptions);
@@ -526,7 +557,8 @@ class dbStatement_mysqlTest extends PHPUnit_Extensions_Database_TestCase {
         $this->assertFalse($stmt->fetchField(-1), 'fetchField() returns NULL');
         $this->assertFalse($stmt->fetchField(20), 'fetchField() returns NULL');
     }
-    function test_fetchFieldReturnsFalseWhenGivenAnInvalidFieldName(){
+
+    function test_fetchFieldReturnsFalseWhenGivenAnInvalidFieldName() {
         self::$pdo->exec("INSERT INTO `dbObjectTesting` (`value`) VALUE('a')");
 
         $db   = db::create('mysql', self::$driverOptions);
@@ -534,100 +566,107 @@ class dbStatement_mysqlTest extends PHPUnit_Extensions_Database_TestCase {
         $this->assertFalse($stmt->fetchField('foo'), 'fetchField() returns NULL');
         $this->assertFalse($stmt->fetchField('bar'), 'fetchField() returns NULL');
     }
-    function test_fetchFieldReturnsTheFirstFieldByDefault(){
+
+    function test_fetchFieldReturnsTheFirstFieldByDefault() {
         self::$pdo->exec("INSERT INTO `dbObjectTesting` (`value`) VALUE('a')");
 
         $db   = db::create('mysql', self::$driverOptions);
         $stmt = $db->query('SELECT value,id,timestamp FROM dbObjectTesting');
         $this->assertEquals('a', $stmt->fetchField());
     }
-    function test_fetchFieldAcceptsNumericKeys(){
+
+    function test_fetchFieldAcceptsNumericKeys() {
         self::$pdo->exec("INSERT INTO `dbObjectTesting` (`value`) VALUE('a')");
 
-        $db = db::create('mysql', self::$driverOptions);
+        $db   = db::create('mysql', self::$driverOptions);
         $stmt = $db->query('SELECT id,value,timestamp FROM dbObjectTesting');
         $this->assertEquals('a', $stmt->fetchField(1));
     }
-    function test_fetchFieldAcceptsStringKeys(){
+
+    function test_fetchFieldAcceptsStringKeys() {
         self::$pdo->exec("INSERT INTO `dbObjectTesting` (`value`) VALUE('a')");
 
-        $db = db::create('mysql', self::$driverOptions);
+        $db   = db::create('mysql', self::$driverOptions);
         $stmt = $db->query('SELECT id,value,timestamp FROM dbObjectTesting');
         $this->assertEquals('a', $stmt->fetchField('value'));
     }
-    function test_fetchFieldReturnsRowByRow(){
+
+    function test_fetchFieldReturnsRowByRow() {
         self::$pdo->exec("INSERT INTO `dbObjectTesting` (`value`) VALUE('a'),('b'),('c')");
 
         $testData = array('a', 'b', 'c');
-        $db   = db::create('mysql', self::$driverOptions);
-        $stmt = $db->query('SELECT value,id,timestamp FROM dbObjectTesting');
-        $counter = 0;
-        while($field = $stmt->fetchField()){
+        $db       = db::create('mysql', self::$driverOptions);
+        $stmt     = $db->query('SELECT value,id,timestamp FROM dbObjectTesting');
+        $counter  = 0;
+        while ($field = $stmt->fetchField()) {
             $counter++;
-            $this->assertEquals($testData[$counter-1], $field);
+            $this->assertEquals($testData[$counter - 1], $field);
         }
-        $this->assertEquals(3,$counter,'We should have looped 3 times');
+        $this->assertEquals(3, $counter, 'We should have looped 3 times');
     }
 
     # Tests for fetchFieldAll()
     #########################################
-    function test_fetchFieldAllFieldIsOnlyAvailableOnceTheStatementHasBeenExecuted(){
-        $db = db::create('mysql', self::$driverOptions);
+    function test_fetchFieldAllFieldIsOnlyAvailableOnceTheStatementHasBeenExecuted() {
+        $db   = db::create('mysql', self::$driverOptions);
         $stmt = $db->query("SELECT * FROM `dbObjectTesting`", FALSE);
         $this->assertFalse($stmt->fetchFieldAll());
     }
-    function test_fetchFieldAllReturnsTheFirstFieldByDefault(){
+
+    function test_fetchFieldAllReturnsTheFirstFieldByDefault() {
         self::$pdo->exec("INSERT INTO `dbObjectTesting` (`value`) VALUE('a'),('b'),('c')");
 
-        $db   = db::create('mysql', self::$driverOptions);
-        $stmt = $db->query('SELECT value,id,timestamp FROM dbObjectTesting');
-        $counter = 0;
+        $db       = db::create('mysql', self::$driverOptions);
+        $stmt     = $db->query('SELECT value,id,timestamp FROM dbObjectTesting');
+        $counter  = 0;
         $testData = array('a', 'b', 'c');
-        $rows = $stmt->fetchFieldAll();
+        $rows     = $stmt->fetchFieldAll();
         $this->assertTrue(is_array($rows), 'fetchFieldAll() returns an array');
         $this->assertEquals(3, sizeof($rows), 'fetchFieldAll() returns 3 rows');
-        foreach($rows as $row){
+        foreach ($rows as $row) {
             $counter++;
-            $this->assertEquals($testData[$counter-1], $row);
+            $this->assertEquals($testData[$counter - 1], $row);
         }
-        $this->assertEquals(3,$counter,'We should have looped 3 times');
+        $this->assertEquals(3, $counter, 'We should have looped 3 times');
     }
-    function test_fetchFieldAllAcceptsNumericKeys(){
+
+    function test_fetchFieldAllAcceptsNumericKeys() {
         self::$pdo->exec("INSERT INTO `dbObjectTesting` (`value`) VALUE('a'),('b'),('c')");
 
-        $db   = db::create('mysql', self::$driverOptions);
-        $stmt = $db->query('SELECT id,value,timestamp FROM dbObjectTesting');
-        $counter = 0;
+        $db       = db::create('mysql', self::$driverOptions);
+        $stmt     = $db->query('SELECT id,value,timestamp FROM dbObjectTesting');
+        $counter  = 0;
         $testData = array('a', 'b', 'c');
-        $rows = $stmt->fetchFieldAll(1);
+        $rows     = $stmt->fetchFieldAll(1);
         $this->assertTrue(is_array($rows), 'fetchFieldAll() returns an array');
         $this->assertEquals(3, sizeof($rows), 'fetchFieldAll() returns 3 rows');
-        foreach($rows as $row){
+        foreach ($rows as $row) {
             $counter++;
-            $this->assertEquals($testData[$counter-1], $row);
+            $this->assertEquals($testData[$counter - 1], $row);
         }
-        $this->assertEquals(3,$counter,'We should have looped 3 times');
+        $this->assertEquals(3, $counter, 'We should have looped 3 times');
     }
-    function test_fetchFieldAllAcceptsStringKeys(){
+
+    function test_fetchFieldAllAcceptsStringKeys() {
         self::$pdo->exec("INSERT INTO `dbObjectTesting` (`value`) VALUE('a'),('b'),('c')");
 
-        $db   = db::create('mysql', self::$driverOptions);
-        $stmt = $db->query('SELECT id,value,timestamp FROM dbObjectTesting');
-        $counter = 0;
+        $db       = db::create('mysql', self::$driverOptions);
+        $stmt     = $db->query('SELECT id,value,timestamp FROM dbObjectTesting');
+        $counter  = 0;
         $testData = array('a', 'b', 'c');
-        $rows = $stmt->fetchFieldAll('value');
+        $rows     = $stmt->fetchFieldAll('value');
         $this->assertTrue(is_array($rows), 'fetchFieldAll() returns an array');
         $this->assertEquals(3, sizeof($rows), 'fetchFieldAll() returns 3 rows');
-        foreach($rows as $row){
+        foreach ($rows as $row) {
             $counter++;
-            $this->assertEquals($testData[$counter-1], $row);
+            $this->assertEquals($testData[$counter - 1], $row);
         }
-        $this->assertEquals(3,$counter,'We should have looped 3 times');
+        $this->assertEquals(3, $counter, 'We should have looped 3 times');
     }
 
     # Tests for sqlState()
     #########################################
-    function test_sqlState(){
+    function test_sqlState() {
         $db = db::create('mysql', self::$driverOptions);
 
         // No error
@@ -643,7 +682,7 @@ class dbStatement_mysqlTest extends PHPUnit_Extensions_Database_TestCase {
 
     # Tests for errorCode()
     #########################################
-    function test_errorCode(){
+    function test_errorCode() {
         $db = db::create('mysql', self::$driverOptions);
 
         // No error
@@ -659,7 +698,7 @@ class dbStatement_mysqlTest extends PHPUnit_Extensions_Database_TestCase {
 
     # Tests for errorMsg()
     #########################################
-    function test_errorMsg(){
+    function test_errorMsg() {
         $db = db::create('mysql', self::$driverOptions);
 
         // No error
@@ -675,19 +714,20 @@ class dbStatement_mysqlTest extends PHPUnit_Extensions_Database_TestCase {
 
     # Tests for encoding and decoding objects and arrays
     #######################################################
-    function test_ItStoresAndReturnsArrays(){
+    function test_ItStoresAndReturnsArrays() {
         $db   = db::create('mysql', self::$driverOptions);
         $stmt = $db->query("INSERT INTO `dbObjectTesting` (value) VALUES(?)", FALSE);
-        $this->assertTrue($stmt->execute(array('a','b'=>'c')));
+        $this->assertTrue($stmt->execute(array('a', 'b' => 'c')));
 
         $testRow = $db->query("SELECT * FROM `dbObjectTesting` WHERE id=".$stmt->insertId()." LIMIT 1")->fetch();
         $this->assertInternalType('array', $testRow['value']);
-        $this->assertEquals(array('a','b'=>'c'), $testRow['value']);
+        $this->assertEquals(array('a', 'b' => 'c'), $testRow['value']);
     }
-    function test_ItStoresAndReturnsObjects(){
-        $obj = new stdClass;
+
+    function test_ItStoresAndReturnsObjects() {
+        $obj    = new stdClass;
         $obj->a = 123;
-        $obj->b = array(1,2,3);
+        $obj->b = array(1, 2, 3);
 
         $db   = db::create('mysql', self::$driverOptions);
         $stmt = $db->query("INSERT INTO `dbObjectTesting` (value) VALUES(?)", FALSE);
@@ -696,9 +736,10 @@ class dbStatement_mysqlTest extends PHPUnit_Extensions_Database_TestCase {
         $testRow = $db->query("SELECT * FROM `dbObjectTesting` WHERE id=".$stmt->insertId()." LIMIT 1")->fetch();
         $this->assertInternalType('object', $testRow['value']);
         $this->assertAttributeEquals(123, 'a', $testRow['value']);
-        $this->assertAttributeEquals(array(1,2,3), 'b', $testRow['value']);
+        $this->assertAttributeEquals(array(1, 2, 3), 'b', $testRow['value']);
     }
-    function test_ItDoesNotAttemptToDecodeManuallyEncodedArrays(){
+
+    function test_ItDoesNotAttemptToDecodeManuallyEncodedArrays() {
         $db    = db::create('mysql', self::$driverOptions);
         $stmt  = $db->query("INSERT INTO `dbObjectTesting` (value) VALUES(?)", FALSE);
         $array = serialize(array());
