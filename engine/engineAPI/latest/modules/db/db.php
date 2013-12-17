@@ -115,8 +115,9 @@ class db implements Countable{
 	 */
 	public function __get($name){
         $name = trim(strtolower($name));
-        if(self::$objects[$name]) return self::$objects[$name];
-        return NULL;
+        return isset(self::$objects[$name])
+            ? self::$objects[$name]
+            : NULL;
     }
 
 	/**
