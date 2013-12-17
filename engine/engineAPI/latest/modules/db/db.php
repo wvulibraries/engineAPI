@@ -14,6 +14,8 @@ require_once __DIR__.DIRECTORY_SEPARATOR.'dbStatement.php';
  * @package EngineAPI\modules\db
  */
 class db implements Countable{
+    const STORED_OBJECT_MARKER = '%eapi%encodedObject%b223b3d857af21850d1ae44c50ef774760b6c20a%';
+
     /**
      * @var self
      */
