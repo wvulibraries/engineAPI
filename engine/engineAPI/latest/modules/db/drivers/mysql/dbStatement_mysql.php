@@ -10,17 +10,17 @@
  *
  * @package EngineAPI\modules\db\statements\mysql
  */
-class dbStatement_mysql extends dbStatement{
+class dbStatement_mysql extends dbStatement {
 
     /**
      * {@inheritdoc}
      * @author David Gersting
      */
-    public function __construct($parentConnection, $sql = NULL){
-        $this->dbDriver     = $parentConnection;
-        $this->pdo          = $this->dbDriver->getPDO();
+    public function __construct($parentConnection, $sql = NULL) {
+        $this->dbDriver = $parentConnection;
+        $this->pdo      = $this->dbDriver->getPDO();
 
-        if(is_string($sql) && ($stmt = $this->pdo->prepare($sql)) !== FALSE) {
+        if (is_string($sql) && ($stmt = $this->pdo->prepare($sql)) !== FALSE) {
             $this->set_pdoStatement($stmt);
         }
         else {
@@ -32,35 +32,38 @@ class dbStatement_mysql extends dbStatement{
      * {@inheritdoc}
      * @author David Gersting
      */
-    public function execute(){
-        if($this->isExecuted()){
+    public function execute() {
+        if ($this->isExecuted()) {
             errorHandle::newError(__METHOD__."() - Method not available! (statement already executed)", errorHandle::DEBUG);
+
             return FALSE;
         }
 
-        if(!$this->pdoStatement){
+        if (!$this->pdoStatement) {
             errorHandle::newError(__METHOD__."() - pdoStatement has not been set! (set though set_pdoStatement())", errorHandle::DEBUG);
+
             return FALSE;
         }
 
-        if(func_num_args()){
-            if(func_num_args(0) instanceof keyValuePairs){
+        if (func_num_args()) {
+            if (func_num_args(0) instanceof keyValuePairs) {
                 $arg = func_num_args(0);
-                foreach($arg as $key => $value){
+                foreach ($arg as $key => $value) {
                     $this->bindValue($key, $value, $this->determineParamType($value));
                 }
-            }else{
-                for($n=0; $n<func_num_args(); $n++){
+            }
+            else {
+                for ($n = 0; $n < func_num_args(); $n++) {
                     $arg = func_get_arg($n);
-                    $this->bindValue($n+1, $arg, $this->determineParamType($arg));
+                    $this->bindValue($n + 1, $arg, $this->determineParamType($arg));
                 }
             }
         }
 
         // Time to execute the prepared statement!
-        $start  = microtime(TRUE);
-        $result = $this->pdoStatement->execute();
-        $stop   = microtime(TRUE);
+        $start              = microtime(TRUE);
+        $result             = $this->pdoStatement->execute();
+        $stop               = microtime(TRUE);
         $this->executedTime = $stop - $start;
         $this->executedAt   = new DateTime;
 
@@ -71,20 +74,23 @@ class dbStatement_mysql extends dbStatement{
      * {@inheritdoc}
      * @author David Gersting
      */
-    public function bindParam($param, &$value, $type=PDO::PARAM_STR, $length=NULL, $options=NULL){
-        if($this->isExecuted()){
+    public function bindParam($param, &$value, $type = PDO::PARAM_STR, $length = NULL, $options = NULL) {
+        if ($this->isExecuted()) {
             errorHandle::newError(__METHOD__."() - Method not available! (statement already executed)", errorHandle::DEBUG);
+
             return FALSE;
         }
 
-        if(!$this->pdoStatement){
+        if (!$this->pdoStatement) {
             errorHandle::newError(__METHOD__."() - pdoStatement has not been set! (set though set_pdoStatement())", errorHandle::DEBUG);
+
             return FALSE;
         }
 
-        if(isset($options)) return $this->pdoStatement->bindParam($param, $value, $type, $length, $options);
-        if(isset($length))  return $this->pdoStatement->bindParam($param, $value, $type, $length);
-        if(isset($type))    return $this->pdoStatement->bindParam($param, $value, $type);
+        if (isset($options)) return $this->pdoStatement->bindParam($param, $value, $type, $length, $options);
+        if (isset($length)) return $this->pdoStatement->bindParam($param, $value, $type, $length);
+        if (isset($type)) return $this->pdoStatement->bindParam($param, $value, $type);
+
         return $this->pdoStatement->bindParam($param, $value);
     }
 
@@ -92,14 +98,16 @@ class dbStatement_mysql extends dbStatement{
      * {@inheritdoc}
      * @author David Gersting
      */
-    public function bindValue($param, $value, $type=PDO::PARAM_STR, $length=NULL){
-        if($this->isExecuted()){
+    public function bindValue($param, $value, $type = PDO::PARAM_STR, $length = NULL) {
+        if ($this->isExecuted()) {
             errorHandle::newError(__METHOD__."() - Method not available! (statement already executed)", errorHandle::DEBUG);
+
             return FALSE;
         }
 
-        if(!$this->pdoStatement){
+        if (!$this->pdoStatement) {
             errorHandle::newError(__METHOD__."() - pdoStatement has not been set! (set though set_pdoStatement())", errorHandle::DEBUG);
+
             return FALSE;
         }
 
@@ -107,8 +115,9 @@ class dbStatement_mysql extends dbStatement{
         $value = $this->encodeObject($value);
 
         // Bind the value
-        if(isset($length)) return $this->pdoStatement->bindValue($param, $value, $type, $length);
-        if(isset($type))   return $this->pdoStatement->bindValue($param, $value, $type);
+        if (isset($length)) return $this->pdoStatement->bindValue($param, $value, $type, $length);
+        if (isset($type)) return $this->pdoStatement->bindValue($param, $value, $type);
+
         return $this->pdoStatement->bindValue($param, $value);
     }
 
@@ -116,11 +125,13 @@ class dbStatement_mysql extends dbStatement{
      * {@inheritdoc}
      * @author David Gersting
      */
-    public function fieldCount(){
-        if(!$this->isExecuted()){
+    public function fieldCount() {
+        if (!$this->isExecuted()) {
             errorHandle::newError(__METHOD__."() - Method not available! (statement not executed yet)", errorHandle::DEBUG);
+
             return 0;
         }
+
         return $this->pdoStatement->columnCount();
     }
 
@@ -128,18 +139,20 @@ class dbStatement_mysql extends dbStatement{
      * {@inheritdoc}
      * @author David Gersting
      */
-    public function fieldNames(){
-        if(!$this->isExecuted()){
+    public function fieldNames() {
+        if (!$this->isExecuted()) {
             errorHandle::newError(__METHOD__."() - Method not available! (statement not executed yet)", errorHandle::DEBUG);
+
             return array();
         }
 
-        if(!isset($this->fieldNames)){
-            for($n=0; $n<$this->fieldCount(); $n++){
-                $field = $this->pdoStatement->getColumnMeta($n);
+        if (!isset($this->fieldNames)) {
+            for ($n = 0; $n < $this->fieldCount(); $n++) {
+                $field              = $this->pdoStatement->getColumnMeta($n);
                 $this->fieldNames[] = $field['name'];
             }
         }
+
         return $this->fieldNames;
     }
 
@@ -147,11 +160,13 @@ class dbStatement_mysql extends dbStatement{
      * {@inheritdoc}
      * @author David Gersting
      */
-    public function rowCount(){
-        if(!$this->isExecuted()){
+    public function rowCount() {
+        if (!$this->isExecuted()) {
             errorHandle::newError(__METHOD__."() - Method not available! (statement not executed yet)", errorHandle::DEBUG);
+
             return FALSE;
         }
+
         return $this->pdoStatement->rowCount();
     }
 
@@ -159,11 +174,13 @@ class dbStatement_mysql extends dbStatement{
      * {@inheritdoc}
      * @author David Gersting
      */
-    public function affectedRows(){
-        if(!$this->isExecuted()){
+    public function affectedRows() {
+        if (!$this->isExecuted()) {
             errorHandle::newError(__METHOD__."() - Method not available! (statement not executed yet)", errorHandle::DEBUG);
+
             return FALSE;
         }
+
         return $this->pdoStatement->rowCount();
     }
 
@@ -171,11 +188,13 @@ class dbStatement_mysql extends dbStatement{
      * {@inheritdoc}
      * @author David Gersting
      */
-    public function insertId(){
-        if(!$this->isExecuted()){
+    public function insertId() {
+        if (!$this->isExecuted()) {
             errorHandle::newError(__METHOD__."() - Method not available! (statement not executed yet)", errorHandle::DEBUG);
+
             return FALSE;
         }
+
         return $this->pdo->lastInsertId();
     }
 
@@ -183,9 +202,10 @@ class dbStatement_mysql extends dbStatement{
      * {@inheritdoc}
      * @author David Gersting
      */
-    public function fetch($fetchMode=PDO::FETCH_ASSOC){
-        if(!$this->isExecuted()){
+    public function fetch($fetchMode = PDO::FETCH_ASSOC) {
+        if (!$this->isExecuted()) {
             errorHandle::newError(__METHOD__."() - Method not available! (statement not executed yet)", errorHandle::DEBUG);
+
             return FALSE;
         }
 
@@ -193,11 +213,12 @@ class dbStatement_mysql extends dbStatement{
         $row = $this->pdoStatement->fetch($fetchMode);
 
         // Return the result set
-        if($row === FALSE){
+        if ($row === FALSE) {
             return NULL;
-        }else{
+        }
+        else {
             // @TODO Add flag to turn this off
-            return in_array($fetchMode, array(PDO::FETCH_ASSOC, PDO::FETCH_NUM)) && true
+            return in_array($fetchMode, array(PDO::FETCH_ASSOC, PDO::FETCH_NUM)) && TRUE
                 ? array_map(array($this, 'decodeObject'), $row)
                 : $row;
         }
@@ -207,16 +228,18 @@ class dbStatement_mysql extends dbStatement{
      * {@inheritdoc}
      * @author David Gersting
      */
-    public function fetchAll($fetchMode=PDO::FETCH_ASSOC){
-        if(!$this->isExecuted()){
+    public function fetchAll($fetchMode = PDO::FETCH_ASSOC) {
+        if (!$this->isExecuted()) {
             errorHandle::newError(__METHOD__."() - Method not available! (statement not executed yet)", errorHandle::DEBUG);
+
             return FALSE;
         }
 
         $rows = array();
-        while($row = $this->fetch($fetchMode)){
+        while ($row = $this->fetch($fetchMode)) {
             $rows[] = $row;
         }
+
         return $rows;
     }
 
@@ -224,34 +247,39 @@ class dbStatement_mysql extends dbStatement{
      * {@inheritdoc}
      * @author David Gersting
      */
-    public function fetchField($field=0){
-        if(!$this->isExecuted()){
+    public function fetchField($field = 0) {
+        if (!$this->isExecuted()) {
             errorHandle::newError(__METHOD__."() - Method not available! (statement not executed yet)", errorHandle::DEBUG);
+
             return FALSE;
         }
 
         // Validate, and convert string to index, the given $field
         $fieldNames = $this->fieldNames();
-        if(is_numeric($field)){
-            if($field < 0 or $field > (sizeof($fieldNames)-1)){
+        if (is_numeric($field)) {
+            if ($field < 0 or $field > (sizeof($fieldNames) - 1)) {
                 errorHandle::newError(__METHOD__."() Requested field '$field' out of bounds for this result set.", errorHandle::DEBUG);
+
                 return FALSE;
             }
-        }else{
+        }
+        else {
             $field = array_search($field, $fieldNames);
-            if(FALSE === $field){
+            if (FALSE === $field) {
                 errorHandle::newError(__METHOD__."() Requested field '$field' doesn't exist in result set.", errorHandle::DEBUG);
+
                 return FALSE;
             }
         }
 
         // Get and return the requested field
         $value = $this->pdoStatement->fetchColumn($field);
-        if($value === FALSE){
+        if ($value === FALSE) {
             return NULL;
-        }else{
+        }
+        else {
             // @TODO Add flag to turn this off
-            return (true)
+            return (TRUE)
                 ? $this->decodeObject($value)
                 : $value;
         }
@@ -261,16 +289,18 @@ class dbStatement_mysql extends dbStatement{
      * {@inheritdoc}
      * @author David Gersting
      */
-    public function fetchFieldAll($field=0){
-        if(!$this->isExecuted()){
+    public function fetchFieldAll($field = 0) {
+        if (!$this->isExecuted()) {
             errorHandle::newError(__METHOD__."() - Method not available! (statement not executed yet)", errorHandle::DEBUG);
+
             return FALSE;
         }
 
         $rows = array();
-        while($row = $this->fetchField($field)){
+        while ($row = $this->fetchField($field)) {
             $rows[] = $row;
         }
+
         return $rows;
     }
 
@@ -278,7 +308,7 @@ class dbStatement_mysql extends dbStatement{
      * {@inheritdoc}
      * @author David Gersting
      */
-    public function sqlState(){
+    public function sqlState() {
         return $this->pdoStatement->errorCode();
     }
 
@@ -286,8 +316,9 @@ class dbStatement_mysql extends dbStatement{
      * {@inheritdoc}
      * @author David Gersting
      */
-    public function errorCode(){
+    public function errorCode() {
         $errorMsg = $this->pdoStatement->errorInfo();
+
         return $errorMsg[1];
     }
 
@@ -295,21 +326,24 @@ class dbStatement_mysql extends dbStatement{
      * {@inheritdoc}
      * @author David Gersting
      */
-    public function errorMsg(){
+    public function errorMsg() {
         $errorMsg = $this->pdoStatement->errorInfo();
+
         return $errorMsg[2];
     }
 
     // -----------------------------------------------------------------------------------------------------------------
 
-    private function encodeObject($input){
+    private function encodeObject($input) {
         return (is_array($input) || is_object($input))
             ? db::STORED_OBJECT_MARKER.serialize($input)
             : $input;
     }
-    private function decodeObject($input){
-        if(!is_string($input) || 0 !== strpos($input, db::STORED_OBJECT_MARKER)) return $input;
+
+    private function decodeObject($input) {
+        if (!is_string($input) || 0 !== strpos($input, db::STORED_OBJECT_MARKER)) return $input;
         $input = str_replace(db::STORED_OBJECT_MARKER, '', $input);
+
         return (FALSE !== ($output = unserialize($input))) ? $output : FALSE;
     }
 } 
