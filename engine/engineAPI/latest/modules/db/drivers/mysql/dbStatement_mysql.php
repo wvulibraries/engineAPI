@@ -47,13 +47,11 @@ class dbStatement_mysql extends dbStatement{
             if(func_num_args(0) instanceof keyValuePairs){
                 $arg = func_num_args(0);
                 foreach($arg as $key => $value){
-                    if(is_object($value) or is_array($value)) $value = serialize($value);
                     $this->bindValue($key, $value, $this->determineParamType($value));
                 }
             }else{
                 for($n=0; $n<func_num_args(); $n++){
                     $arg = func_get_arg($n);
-                    if(is_object($arg) or is_array($arg)) $arg = serialize($arg);
                     $this->bindValue($n+1, $arg, $this->determineParamType($arg));
                 }
             }
@@ -105,6 +103,10 @@ class dbStatement_mysql extends dbStatement{
             return FALSE;
         }
 
+        // Make sure the value is encoded as needed
+        $value = $this->encodeObject($value);
+
+        // Bind the value
         if(isset($length)) return $this->pdoStatement->bindValue($param, $value, $type, $length);
         if(isset($type))   return $this->pdoStatement->bindValue($param, $value, $type);
         return $this->pdoStatement->bindValue($param, $value);
@@ -187,8 +189,18 @@ class dbStatement_mysql extends dbStatement{
             return FALSE;
         }
 
-        $res = $this->pdoStatement->fetch($fetchMode);
-        return (FALSE === $res) ? NULL : $res;
+        // Get the result set
+        $row = $this->pdoStatement->fetch($fetchMode);
+
+        // Return the result set
+        if($row === FALSE){
+            return NULL;
+        }else{
+            // @TODO Add flag to turn this off
+            return in_array($fetchMode, array(PDO::FETCH_ASSOC, PDO::FETCH_NUM)) && true
+                ? array_map(array($this, 'decodeObject'), $row)
+                : $row;
+        }
     }
 
     /**
@@ -201,7 +213,11 @@ class dbStatement_mysql extends dbStatement{
             return FALSE;
         }
 
-        return $this->pdoStatement->fetchAll($fetchMode);
+        $rows = array();
+        while($row = $this->fetch($fetchMode)){
+            $rows[] = $row;
+        }
+        return $rows;
     }
 
     /**
@@ -229,9 +245,16 @@ class dbStatement_mysql extends dbStatement{
             }
         }
 
-        // Return the requested field
-        $res = $this->pdoStatement->fetchColumn($field);
-        return (FALSE === $res) ? NULL : $res;
+        // Get and return the requested field
+        $value = $this->pdoStatement->fetchColumn($field);
+        if($value === FALSE){
+            return NULL;
+        }else{
+            // @TODO Add flag to turn this off
+            return (true)
+                ? $this->decodeObject($value)
+                : $value;
+        }
     }
 
     /**
@@ -245,8 +268,8 @@ class dbStatement_mysql extends dbStatement{
         }
 
         $rows = array();
-        while($n = $this->fetchField($field)){
-            $rows[] = $n;
+        while($row = $this->fetchField($field)){
+            $rows[] = $row;
         }
         return $rows;
     }
@@ -276,4 +299,17 @@ class dbStatement_mysql extends dbStatement{
       $errorMsg = $this->pdoStatement->errorInfo();
       return $errorMsg[2];
   }
+
+    // -----------------------------------------------------------------------------------------------------------------
+
+    private function encodeObject($input){
+        return (is_array($input) || is_object($input))
+            ? db::STORED_OBJECT_MARKER.serialize($input)
+            : $input;
+    }
+    private function decodeObject($input){
+        if(!is_string($input) || 0 !== strpos($input, db::STORED_OBJECT_MARKER)) return $input;
+        $input = str_replace(db::STORED_OBJECT_MARKER, '', $input);
+        return (FALSE !== ($output = unserialize($input))) ? $output : FALSE;
+    }
 } 
