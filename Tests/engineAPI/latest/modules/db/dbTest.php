@@ -2,14 +2,14 @@
 require_once 'pdoMocks.php';
 
 class dbTest extends PHPUnit_Framework_TestCase {
-    function testItReturnsItselfViaGetInstance(){
+    function testItReturnsItselfViaGetInstance() {
         $db = db::getInstance();
         $this->assertInstanceOf('db', $db);
     }
 
     # Tests for __get()
     ###########################################################################################
-    function testItUsesMagicGetToAllowEasyAccessToCreatedConnections(){
+    function testItUsesMagicGetToAllowEasyAccessToCreatedConnections() {
         $dbAlias = md5(__METHOD__);
         $mockPDO = $this->getMock('mockPDO');
         $db      = db::getInstance();
@@ -22,7 +22,7 @@ class dbTest extends PHPUnit_Framework_TestCase {
 
     # Tests for uegisterAs()
     ###########################################################################################
-    function testRegisterAs(){
+    function testRegisterAs() {
         $dbAlias = md5(__METHOD__);
         $mockPDO = $this->getMock('mockPDO');
         $db      = db::getInstance();
@@ -33,7 +33,8 @@ class dbTest extends PHPUnit_Framework_TestCase {
         $this->assertNotNull($db->$dbAlias);
         $this->assertEquals($driver, $db->$dbAlias);
     }
-    function testRegisterAsWithNameConflict(){
+
+    function testRegisterAsWithNameConflict() {
         $dbAlias = md5(__METHOD__);
         $mockPDO = $this->getMock('mockPDO');
         $db      = db::getInstance();
@@ -48,7 +49,7 @@ class dbTest extends PHPUnit_Framework_TestCase {
 
     # Tests for unregisterAlias()
     ###########################################################################################
-    function testUnregisterAlias(){
+    function testUnregisterAlias() {
         $dbAlias = md5(__METHOD__);
         $mockPDO = $this->getMock('mockPDO');
         $db      = db::getInstance();
@@ -60,14 +61,15 @@ class dbTest extends PHPUnit_Framework_TestCase {
         $db->unregisterAlias($dbAlias);
         $this->assertNull($db->$dbAlias);
     }
-    function testUnregisterAliasUndefinedAlias(){
+
+    function testUnregisterAliasUndefinedAlias() {
         $dbAlias = md5(__METHOD__);
         $this->assertFalse(db::unregisterAlias($dbAlias));
     }
 
     # Tests for unregisterObject()
     ###########################################################################################
-    function testUnregisterObject(){
+    function testUnregisterObject() {
         $dbAlias = md5(__METHOD__);
         $mockPDO = $this->getMock('mockPDO');
         $db      = db::getInstance();
@@ -79,7 +81,8 @@ class dbTest extends PHPUnit_Framework_TestCase {
         $db->unregisterObject($driver);
         $this->assertNull($db->$dbAlias);
     }
-    function testUnregisterObjectUsingUnregisteredObject(){
+
+    function testUnregisterObjectUsingUnregisteredObject() {
         $dbAlias = md5(__METHOD__);
         $db      = db::getInstance();
         $mockPDO = $this->getMock('mockPDO');
@@ -95,10 +98,10 @@ class dbTest extends PHPUnit_Framework_TestCase {
 
     # Tests for listDrivers()
     ###########################################################################################
-    function testListDrivers(){
-        $ds = DIRECTORY_SEPARATOR;
+    function testListDrivers() {
+        $ds            = DIRECTORY_SEPARATOR;
         db::$driverDir = __DIR__.$ds.'testData'.$ds.'drivers';
-        $drivers = db::listDrivers();
+        $drivers       = db::listDrivers();
         $this->assertTrue(is_array($drivers));
         $this->assertEquals(1, sizeof($drivers));
         $this->assertContains('mysql', $drivers);
