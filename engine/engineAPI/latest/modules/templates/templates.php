@@ -98,14 +98,14 @@ class templates {
 	 * @param string $object
 	 * @return bool Always TRUE
 	 */
-	public static function defTempPatterns($pattern,$function,$object) {
-		$class            = get_class($object);
+	public static function defTempPatterns($pattern,$function,$object,$class=NULL) {
+		$class            = (is_string($class))?$class:get_class($object);
 		$temp             = array();
 		$temp['pattern']  = $pattern;
 		$temp['function'] = $function;
 		$temp['object']   = $object;
 		self::$moduleTemplateEngine[$class][] = $temp;
-		return TRUE;
+		return(TRUE);
 	}
 
 	/**
