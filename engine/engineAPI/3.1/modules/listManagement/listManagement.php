@@ -127,9 +127,9 @@ class listManagement {
 
 		$engine   = EngineAPI::singleton();
 
-		$obj      = $engine->retTempObj("listManagement");
-
 		$attPairs = attPairs($matches[1]);
+		$class    = (isset($attPairs['class']))?$attPairs['class']:"listManagement";
+		$obj      = $engine->retTempObj($class);
 
 		$addGet = (isset($attPairs['addGet']) && strtolower($attPairs['addGet']) == "false")?FALSE:TRUE;
 		$debug  = (isset($attPairs['debug'])  && strtolower($attPairs['debug'])  == "true")?TRUE:FALSE;
