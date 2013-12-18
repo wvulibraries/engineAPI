@@ -9,7 +9,7 @@
  *
  * @package EngineAPI\modules\db
  */
-abstract class dbStatement{
+abstract class dbStatement {
     /**
      * @var dbDriver
      */
@@ -26,7 +26,7 @@ abstract class dbStatement{
      * [Flag] Make this statement as executed
      * @var bool
      */
-    protected $isExecuted=FALSE;
+    protected $isExecuted = FALSE;
     /**
      * The timestamp of when the statement was executed
      * @var DateTime
@@ -54,9 +54,9 @@ abstract class dbStatement{
         PDO::PARAM_STR,
         PDO::PARAM_LOB);
 
-    public function __toString(){
+    public function __toString() {
         $debugEnv = TRUE; // TODO: switch to EngineAPI environments (when they are done)
-        if($debugEnv){
+        if ($debugEnv) {
             $header = sprintf('%s(%s)', __CLASS__, $this->pdo->getAttribute(PDO::ATTR_DRIVER_NAME));
             $width  = strlen($this->getSQL()) + 10;
             $return = str_repeat("=", $width)."\n";
@@ -66,22 +66,42 @@ abstract class dbStatement{
             $return .= sprintf("Executed at: %s\n", $this->executedAt->format('g:i:s a'));
             $return .= sprintf("Execute time: %Fs\n", $this->executedTime);
             $return .= str_repeat("-", $width)."\n";
-            if('0000' != $this->errorCode()){
+            if ('0000' != $this->errorCode()) {
                 $return .= sprintf("Error: [%s] %s\n", $this->errorCode(), $this->errorMsg());
                 $return .= str_repeat("-", $width)."\n";
             }
             $return .= sprintf("Row count: %d\n", $this->rowCount());
             $return .= sprintf("Field count: %d\n", $this->fieldCount());
-            if($this->fieldCount()) $return .= sprintf("Field names: %s\n", implode(',', $this->fieldNames()));
+            if ($this->fieldCount()) $return .= sprintf("Field names: %s\n", implode(',', $this->fieldNames()));
             $return .= sprintf("Affected rows: %d\n", $this->affectedRows());
             $return .= sprintf("Insert ID: %d\n", $this->insertId());
             $return .= str_repeat("=", $width)."\n";
 
             return $return;
-        }else{
+        }
+        else {
             return get_class($this)."\n";
         }
     }
+
+    /**
+     * Setter method for the pdoStatement instance variable
+     *
+     * @param $pdoStatement
+     * @return bool
+     */
+    public function set_pdoStatement($pdoStatement) {
+        if (!($pdoStatement instanceof PDOStatement)) {
+            errorHandle::newError(__METHOD__."() Invalid param passed for pdoStatement. (only PDOStatement allowed) ", errorHandle::DEBUG);
+
+            return FALSE;
+        }
+
+        $this->pdoStatement = $pdoStatement;
+
+        return TRUE;
+    }
+
 
     /**
      * Return this statement's underlying PDOStatement object
@@ -89,7 +109,7 @@ abstract class dbStatement{
      * @author David Gersting
      * @return PDOStatement
      */
-    public function getStatement(){
+    public function getStatement() {
         return $this->pdoStatement;
     }
 
@@ -99,7 +119,7 @@ abstract class dbStatement{
      * @author David Gersting
      * @return bool
      */
-    public function isExecuted(){
+    public function isExecuted() {
         return isset($this->executedAt);
     }
 
@@ -109,7 +129,7 @@ abstract class dbStatement{
      * @author David Gersting
      * @return string
      */
-    public function getSQL(){
+    public function getSQL() {
         return $this->pdoStatement->queryString;
     }
 
@@ -120,8 +140,8 @@ abstract class dbStatement{
      * @param $data
      * @return bool|int
      */
-    protected function determineParamType($data){
-        switch(gettype($data)){
+    protected function determineParamType($data) {
+        switch (gettype($data)) {
             case 'boolean':
                 return PDO::PARAM_BOOL;
             case 'integer':
@@ -136,6 +156,7 @@ abstract class dbStatement{
                 return PDO::PARAM_STR;
             case 'resource':
                 errorHandle::newError(__METHOD__."() - Unsupported param type! (can't store a resource)", errorHandle::DEBUG);
+
                 return FALSE;
         }
     }
@@ -150,15 +171,15 @@ abstract class dbStatement{
      */
     public abstract function __construct($parentConnection, $sql);
 
-	/**
-	 * Execute the prepared SQL
-	 *
-	 * This method MUST accept an unknown number of params (via PHP's func_get_args)
-	 * @example execute(1, "abc", (float)3.25)
-	 *
-	 * @return bool
-	 */
-	public abstract function execute();
+    /**
+     * Execute the prepared SQL
+     *
+     * This method MUST accept an unknown number of params (via PHP's func_get_args)
+     * @example execute(1, "abc", (float)3.25)
+     *
+     * @return bool
+     */
+    public abstract function execute();
 
     /**
      * Manually bind a param to the prepared statement
@@ -173,7 +194,7 @@ abstract class dbStatement{
      *
      * @return mixed
      */
-    public abstract function bindParam($param, &$var, $type=PDO::PARAM_STR, $length=NULL, $options=NULL);
+    public abstract function bindParam($param, &$var, $type = PDO::PARAM_STR, $length = NULL, $options = NULL);
 
     /**
      * Manually bind a param to the prepared statement
@@ -187,94 +208,101 @@ abstract class dbStatement{
      *
      * @return mixed
      */
-    public abstract function bindValue($param, $value, $type=PDO::PARAM_STR, $length=NULL);
+    public abstract function bindValue($param, $value, $type = PDO::PARAM_STR, $length = NULL);
 
-	/**
-	 * Return the number of fields in the prepared SQL/result
-	 * (depending on the state of the statement)
-	 *
-	 * @return int
-	 */
-	public abstract function fieldCount();
+    /**
+     * Return the number of fields in the prepared SQL/result
+     * (will always be 0 until the statement is executed)
+     *
+     * @return int
+     */
+    public abstract function fieldCount();
 
-	/**
-	 * Return an array of field names in the result
-	 * (will be a blank array until the statement is executed)
-	 *
-	 * @return array
-	 */
-	public abstract function fieldNames();
+    /**
+     * Return an array of field names in the result
+     * (will be a blank array until the statement is executed)
+     *
+     * @return array
+     */
+    public abstract function fieldNames();
 
-	/**
-	 * Return the number of rows in the result
-	 *
-	 * @return int
-	 */
-	public abstract function rowCount();
+    /**
+     * Return the number of rows in the result
+     *
+     * @return int
+     */
+    public abstract function rowCount();
 
-	/**
-	 * Return the number of rows which were affected by the executed SQL
-	 *
-	 * @return int
-	 */
-	public abstract function affectedRows();
+    /**
+     * Return the number of rows which were affected by the executed SQL
+     *
+     * @return int
+     */
+    public abstract function affectedRows();
 
-	/**
-	 * Return the last insertID from the executed SQL
-	 *
-	 * @return int
-	 */
-	public abstract function insertId();
+    /**
+     * Return the last insertID from the executed SQL
+     *
+     * @return int
+     */
+    public abstract function insertId();
 
-	/**
-	 * Fetch one row at a time from the result setup according to the current fetch mode.
-	 *
-	 * @param $fetchMode
-	 *        The 'Fetch mode' to use. See FETCH_* constants on dbStatement
-	 * @return mixed
-	 */
-	public abstract function fetch($fetchMode=PDO::FETCH_ASSOC);
+    /**
+     * Fetch one row at a time from the result setup according to the current fetch mode.
+     *
+     * @param $fetchMode
+     *        The 'Fetch mode' to use. See FETCH_* constants on dbStatement
+     * @return mixed
+     */
+    public abstract function fetch($fetchMode = PDO::FETCH_ASSOC);
 
-	/**
-	 * Return an array of all rows from the result set.
-	 *
-	 * @param $fetchMode
-	 *        The 'Fetch mode' to use. See FETCH_* constants on dbStatement
-	 * @return array
-	 */
-	public abstract function fetchAll($fetchMode=PDO::FETCH_ASSOC);
+    /**
+     * Return an array of all rows from the result set.
+     *
+     * @param $fetchMode
+     *        The 'Fetch mode' to use. See FETCH_* constants on dbStatement
+     * @return array
+     */
+    public abstract function fetchAll($fetchMode = PDO::FETCH_ASSOC);
 
-	/**
-	 * Return only the given field from one row at a time. (Defaults to the 1st field)
-	 *
-	 * @param int|string $field
-	 *        Either the index (base 0) or the name of the field to fetch
+    /**
+     * Return only the given field from one row at a time. (Defaults to the 1st field)
+     *
+     * @param int|string $field
+     *        Either the index (base 0) or the name of the field to fetch
      *        Note: passing the index is often faster
-	 * @return mixed
-	 */
-	public abstract function fetchField($field=0);
+     * @return mixed
+     */
+    public abstract function fetchField($field = 0);
 
-	/**
-	 * Return an array of all rows of only the given field. (Defaults to the 1st field)
-	 *
-	 * @param int|string $field
-	 *        Either the index (base 0) or the name of the field to fetch
+    /**
+     * Return an array of all rows of only the given field. (Defaults to the 1st field)
+     *
+     * @param int|string $field
+     *        Either the index (base 0) or the name of the field to fetch
      *        Note: passing the index is often faster
-	 * @return mixed
-	 */
-	public abstract function fetchFieldAll($field=0);
+     * @return mixed
+     */
+    public abstract function fetchFieldAll($field = 0);
 
-	/**
-	 * The error code/number of the last error *driver specific*
-	 *
-	 * @return int
-	 */
-	public abstract function errorCode();
+    /**
+     * The SQLSTATE (ANSI SQL-92) of the last database operation
+     *
+     * @return int
+     */
+    public abstract function sqlState();
 
-	/**
-	 * The error message of the last error *driver specific*
-	 *
-	 * @return string
-	 */
-	public abstract function errorMsg();
+    /**
+     * The error code/number of the last error *driver specific*
+     *
+     * @return string
+     */
+    public abstract function errorCode();
+
+    /**
+     * The error message of the last error *driver specific*
+     *
+     * @return string
+     */
+    public abstract function errorMsg();
 }

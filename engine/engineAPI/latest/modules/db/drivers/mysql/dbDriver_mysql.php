@@ -13,7 +13,7 @@ require_once __DIR__.DIRECTORY_SEPARATOR.'dbStatement_mysql.php';
  *
  * @package EngineAPI\modules\db\drivers\mysql
  */
-class dbDriver_mysql extends dbDriver{
+class dbDriver_mysql extends dbDriver {
     const PDO_DRIVER      = 'mysql';
     const DEFAULT_HOST    = 'localhost';
     const DEFAULT_PORT    = '3306';
@@ -34,36 +34,37 @@ class dbDriver_mysql extends dbDriver{
      * Construct a MySQL
      *
      * @author David Gersting
-     * @param array $params
+     * @param array|string|pdo $params
      */
-    public function __construct($params=array()){
-        if($params instanceof PDO){
-            $this->pdo = $params;
-            $this->debugInfo['Connected to'] = $this->pdo->getAttribute(PDO::ATTR_CONNECTION_STATUS);
-        }elseif(is_string($params)){
-            $this->pdo = new PDO($params);
-            $this->debugInfo['Connected to'] = $this->pdo->getAttribute(PDO::ATTR_CONNECTION_STATUS);
-        }elseif(is_array($params)){
-            if(isset($params['pdo']) and $params['pdo'] instanceof PDO){
-                $this->pdo = $params['pdo'];
+    public function __construct($params = array()) {
+        try {
+            // Allow PDO object
+            if (is_object($params)) {
+                if (!($params instanceof PDO)) throw new Exception('Unsupported object passed in! (object passed: '.get_class($params).')');
+                $this->pdo = $params;
+                // $this->debugInfo['Connected to'] = $this->pdo->getAttribute(PDO::ATTR_CONNECTION_STATUS);
+            }
+            elseif (is_string($params)) {
+                $this->pdo                       = new PDO($params);
                 $this->debugInfo['Connected to'] = $this->pdo->getAttribute(PDO::ATTR_CONNECTION_STATUS);
-            }elseif(isset($params['dsn'])){
-                $dsn = $this->extractParam('dsn', $params);
-                $this->pdo = new PDO($dsn, $params);
-                $this->debugInfo['DSN'] = $dsn;
-                $this->debugInfo['Connected to'] = $this->pdo->getAttribute(PDO::ATTR_CONNECTION_STATUS);
-            }else{
+            }
+            elseif (is_array($params)) {
                 // Build the DSN string
-                $query            = array();
-                $query['dbname']  = $this->extractParam('dbName', $params);
-                $query['charset'] = $this->extractParam('charset', $params, self::DEFAULT_CHARSET);
-
-                // A socket file will take precedence over a host:port pair
-                if(isset($params['socket'])){
-                    $query['unix_socket'] = $this->extractParam('socket', $params);
-                }else{
-                    $query['host'] = $this->extractParam('host', $params, self::DEFAULT_HOST);
-                    $query['port'] = $this->extractParam('port', $params, self::DEFAULT_PORT);
+                if (isset($params['dsn'])) {
+                    $dsn = $params['dsn'];
+                }
+                else {
+                    $query            = array();
+                    $query['dbname']  = $this->extractParam('dbName', $params);
+                    $query['charset'] = $this->extractParam('charset', $params, self::DEFAULT_CHARSET);
+                    if (isset($params['socket'])) {
+                        $query['unix_socket'] = $this->extractParam('socket', $params);
+                    }
+                    else {
+                        $query['host'] = $this->extractParam('host', $params, self::DEFAULT_HOST);
+                        $query['port'] = $this->extractParam('port', $params, self::DEFAULT_PORT);
+                    }
+                    $dsn = $this->buildDSN(self::PDO_DRIVER, $query);
                 }
 
                 // Figure out the user/pass
@@ -71,13 +72,17 @@ class dbDriver_mysql extends dbDriver{
                 $pass = $this->extractParam('pass', $params, self::DEFAULT_PASS);
 
                 // Create the PDO object!
-                $dsn = $this->buildDSN(self::PDO_DRIVER, $query);
-                $this->pdo = new PDO($dsn, $user, $pass, $params);
-                $this->debugInfo['DSN'] = $dsn;
+                $this->pdo                       = new PDO($dsn, $user, $pass, $params);
+                $this->debugInfo['DSN']          = $dsn;
                 $this->debugInfo['Connected to'] = $this->pdo->getAttribute(PDO::ATTR_CONNECTION_STATUS);
             }
-        }else{
-            errorHandle::newError(__METHOD__."() - Unknown params passed!", errorHandle::DEBUG);
+            else {
+                throw new Exception('Unsupported $params passed!');
+            }
+
+        }catch(Exception $e) {
+            errorHandle::newError(__METHOD__."() {$e->getMessage()} thrown from line {$e->getLine()}", errorHandle::DEBUG);
+
             return FALSE;
         }
 
@@ -88,31 +93,33 @@ class dbDriver_mysql extends dbDriver{
      * Class destructor
      * @author David Gersting
      */
-    public function __destruct(){
+    public function __destruct() {
         $this->destroy();
     }
 
-    public function __toString(){
+    public function __toString() {
         $debugEnv = TRUE; // TODO: switch to EngineAPI environments (when they are done)
-        if($debugEnv){
+        if ($debugEnv) {
             $header = sprintf('%s(%s)', __CLASS__, $this->pdo->getAttribute(PDO::ATTR_DRIVER_NAME));
             $width  = strlen($header) + 20;
             $return = str_repeat("=", $width)."\n";
             $return .= str_pad($header, $width, ' ', STR_PAD_BOTH)."\n";
             $return .= str_repeat("=", $width)."\n";
             $return .= sprintf("Opened at: %s\n", $this->createdAt->format('g:i:s a'));
+            $return .= sprintf("Read-only Mode: %s\n", ($this->isReadOnly() ? 'Yes' : 'No'));
             $return .= sprintf("In transaction: %s\n", ($this->inTransaction() ? sprintf('Yes (depth: %s)', $this->transNestingCounter) : 'No'));
-            if($this->inTransaction()) $return .= sprintf("Rollback only: %s\n", ($this->transRollbackOnly ? 'Yes' : 'No'));
-            if(is_array($this->debugInfo) and sizeof($this->debugInfo)){
+            if ($this->inTransaction()) $return .= sprintf("Rollback only: %s\n", ($this->transRollbackOnly ? 'Yes' : 'No'));
+            if (is_array($this->debugInfo) and sizeof($this->debugInfo)) {
                 $return .= str_repeat("-", $width)."\n";
-                foreach($this->debugInfo as $label => $data){
+                foreach ($this->debugInfo as $label => $data) {
                     $return .= "$label: $data\n";
                 }
             }
             $return .= str_repeat("=", $width)."\n";
 
             return $return;
-        }else{
+        }
+        else {
             parent::__toString();
         }
     }
@@ -121,21 +128,24 @@ class dbDriver_mysql extends dbDriver{
      * {@inheritdoc}
      * @author David Gersting
      */
-    public function query($sql, $params=NULL){
-        if($this->isReadOnly() and !$this->chkReadOnlySQL($sql)){
+    public function query($sql, $params = NULL) {
+        if ($this->isReadOnly() and !$this->chkReadOnlySQL($sql)) {
             errorHandle::newError(__METHOD__."() - Driver is in read-only mode!", errorHandle::DEBUG);
+
             return FALSE;
         }
 
         $stmt = new dbStatement_mysql($this, $sql);
-        switch(true){
+        switch (TRUE) {
             case !isset($params):
                 $stmt->execute();
+
                 return $stmt;
             case !$params:
                 return $stmt;
-            case (is_array($params) and sizeof($params)):
-                call_user_func_array(array($stmt, 'execute'), $params);
+            case is_array($params) || ($params instanceof keyValuePairs):
+                $stmt->execute($params);
+
                 return $stmt;
         }
     }
@@ -144,20 +154,7 @@ class dbDriver_mysql extends dbDriver{
      * {@inheritdoc}
      * @author David Gersting
      */
-    public function exec($sql){
-        if($this->isReadOnly() and !$this->chkReadOnlySQL($sql)){
-            errorHandle::newError(__METHOD__."() - Driver is in read-only mode!", errorHandle::DEBUG);
-            return FALSE;
-        }
-
-        return $this->exec($sql);
-    }
-
-    /**
-     * {@inheritdoc}
-     * @author David Gersting
-     */
-    public function escape($var){
+    public function escape($var) {
         return $this->pdo->quote($var);
     }
 
@@ -165,8 +162,9 @@ class dbDriver_mysql extends dbDriver{
      * {@inheritdoc}
      * @author David Gersting
      */
-    public function beginTransaction(){
+    public function beginTransaction() {
         $this->transNestingCounter++;
+
         return $this->transNestingCounter == 1
             ? $this->pdo->beginTransaction()
             : TRUE;
@@ -176,18 +174,21 @@ class dbDriver_mysql extends dbDriver{
      * {@inheritdoc}
      * @author David Gersting
      */
-    public function commit(){
-        if(!$this->inTransaction() or !$this->transNestingCounter){
+    public function commit() {
+        if (!$this->inTransaction() or !$this->transNestingCounter) {
             errorHandle::newError(__METHOD__."() Cannot commit when not in a transaction!", errorHandle::DEBUG);
+
             return FALSE;
         }
 
         $this->transNestingCounter--;
-        if(!$this->transNestingCounter){
-            if(!$this->transRollbackOnly){
+        if (!$this->transNestingCounter) {
+            if (!$this->transRollbackOnly) {
                 return $this->pdo->commit();
-            }else{
+            }
+            else {
                 $this->transRollbackOnly = FALSE;
+
                 return $this->pdo->rollBack();
             }
         }
@@ -197,17 +198,20 @@ class dbDriver_mysql extends dbDriver{
      * {@inheritdoc}
      * @author David Gersting
      */
-    public function rollback(){
-        if(!$this->inTransaction() or !$this->transNestingCounter){
+    public function rollback() {
+        if (!$this->inTransaction() or !$this->transNestingCounter) {
             errorHandle::newError(__METHOD__."() Cannot rollback when not in a transaction!", errorHandle::DEBUG);
+
             return FALSE;
         }
 
         $this->transNestingCounter--;
-        if(!$this->transNestingCounter){
+        if (!$this->transNestingCounter) {
             return $this->pdo->rollBack();
-        }else{
+        }
+        else {
             $this->transRollbackOnly = TRUE;
+
             return TRUE;
         }
     }
@@ -216,15 +220,15 @@ class dbDriver_mysql extends dbDriver{
      * {@inheritdoc}
      * @author David Gersting
      */
-    public function inTransaction(){
-        return $this->pdo->inTransaction();
+    public function inTransaction() {
+        return ($this->transNestingCounter > 0 and $this->pdo->inTransaction());
     }
 
     /**
      * {@inheritdoc}
      * @author David Gersting
      */
-    public function readOnly($newState=TRUE){
+    public function readOnly($newState = TRUE) {
         $this->readOnlyMode = (bool)$newState;
     }
 
@@ -232,9 +236,9 @@ class dbDriver_mysql extends dbDriver{
      * {@inheritdoc}
      * @author David Gersting
      */
-    public function destroy(){
+    public function destroy() {
         // If we're in a transaction, roll it back!
-        while($this->inTransaction()){
+        while ($this->inTransaction()) {
             $this->rollback();
         }
 

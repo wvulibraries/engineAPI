@@ -94,10 +94,6 @@ Returns a dbStatement object for fine-grained prepared statement operations. Int
 
 If params are provided, the query is executed. 
 
-#### exec(sql)
-
-Run a query where you only expect a bool result (ex: DELETE/DROP/TRUNCATE/etc)
-
 #### escape(var)
 
 Escape the given var for safe inclusion into SQL
@@ -210,13 +206,17 @@ Return only the given field from one row at a time.
 
 Return an array of all rows of only the given field.
 
+#### sqlState()
+
+The SQLSTATE (ANSI SQL-92) of the last database operation
+
 #### errorCode()
 
-Return the error Code/Number for the last error
+The error message of the last error *driver specific*
 
 #### errorMsg()
 
-Return the error message for the last error
+The error message of the last error *driver specific*
 
 
 ---

@@ -38,6 +38,7 @@ rm -f /etc/httpd/conf/httpd.conf
 ln -s /vagrant/serverConfiguration/php.ini /etc/php.ini
 ln -s /vagrant/serverConfiguration/vagrant_httpd.conf /etc/httpd/conf/httpd.conf
 
+mkdir -p $SERVERURL/$DOCUMENTROOT/javascript/
 ln -s /tmp/git/engineAPI/engine/template/distribution/public_html/js $SERVERURL/$DOCUMENTROOT/javascript/distribution
 
 mkdir -p /vagrant/serverConfiguration/serverlogs

@@ -9,7 +9,7 @@
  *
  * @package EngineAPI\modules\db
  */
-abstract class dbDriver{
+abstract class dbDriver {
     /**
      * @var PDO
      */
@@ -33,8 +33,14 @@ abstract class dbDriver{
      */
     protected $readOnlyMode = FALSE;
 
+    /**
+     * [Flag] Automatically encode/decode arrays and objects for storage.
+     * If turned off, passing an array or object will trigger an error
+     * @var bool
+     */
+    public $autoEncode = TRUE;
 
-    public function __toString(){
+    public function __toString() {
         return get_class($this)."\n";
     }
 
@@ -45,21 +51,23 @@ abstract class dbDriver{
      *
      * @author David Gersting
      * @param string|int $param
-     * @param array $params
-     * @param mixed $default
+     * @param array      $params
+     * @param mixed      $default
      * @return mixed
      */
-    public function extractParam($param, &$params, $default=NULL){
+    public function extractParam($param, &$params, $default = NULL) {
         // Make operation case-insensitive
         $params = array_change_key_case($params, CASE_LOWER);
         $param  = strtolower($param);
 
         // Use array_key_exists() because we need to get a null or false value
-        if(array_key_exists($param, $params)){
+        if (array_key_exists($param, $params)) {
             $return = $params[$param];
             unset($params[$param]);
+
             return $return;
-        }else{
+        }
+        else {
             return $default;
         }
     }
@@ -69,11 +77,12 @@ abstract class dbDriver{
      *
      * @author David Gersting
      * @param string $driver
-     * @param array $params
+     * @param array  $params
      * @return string string
      */
-    public function buildDSN($driver, $params){
+    public function buildDSN($driver, $params) {
         $driver = trim(strtolower($driver));
+
         return "$driver:".http_build_query((array)$params, '', ';');
     }
 
@@ -83,15 +92,16 @@ abstract class dbDriver{
      * @author David Gersting
      * @return PDO
      */
-    public function getPDO(){
+    public function getPDO() {
         return $this->pdo;
     }
 
     /**
      * Return TRUE if driver is in read-only mode
+     *
      * @return bool
      */
-    public function isReadOnly(){
+    public function isReadOnly() {
         return $this->readOnlyMode;
     }
 
@@ -101,71 +111,66 @@ abstract class dbDriver{
      * @param $sql
      * @return bool
      */
-    public function chkReadOnlySQL($sql){
+    public function chkReadOnlySQL($sql) {
         // Remove SQL comments
         $sql = preg_replace('/^--.*?$/', '', $sql);
         // There's got to be a better way to combine this...
-        if(preg_match('/^\s*(?:ALTER|CREATE|DELETE|INSERT|UPDATE|DROP|TRUNCATE|RENAME|REPLACE|LOAD DATA)/i', $sql)) return FALSE;
-        if(preg_match('/;\s*(?:ALTER|CREATE|DELETE|INSERT|UPDATE|DROP|TRUNCATE|RENAME|REPLACE|LOAD DATA)/i', $sql)) return FALSE;
+        if (preg_match('/^\s*(?:ALTER|CREATE|DELETE|INSERT|UPDATE|DROP|TRUNCATE|RENAME|REPLACE|LOAD DATA)/i', $sql)) return FALSE;
+        if (preg_match('/;\s*(?:ALTER|CREATE|DELETE|INSERT|UPDATE|DROP|TRUNCATE|RENAME|REPLACE|LOAD DATA)/i', $sql)) return FALSE;
+
         return TRUE;
     }
 
     // -------------------------------
 
-	/**
-	 * Prepare the given SQL for execution
-	 *
-	 * @param string $sql
-	 *        The SQL to prepare
-	 * @param array $params
-	 *        If given, will be use to 'auto-execute' the prepared SQL
-	 * @return dbStatement
-	 */
-	public abstract function query($sql, $params=NULL);
+    /**
+     * Prepare the given SQL for execution
+     *
+     * @param string                        $sql
+     *        The SQL to prepare
+     * @param array|keyValuePairs|bool|null $params
+     *        If NULL, then $sql is assumed to be ready to execute as-is (and will be auto-executed)
+     *        If FALSE, the the statement is returned for manual manipulation and execution
+     *        Else, $params will be passed to statement's execute() method as-is
+     * @return dbStatement
+     */
+    public abstract function query($sql, $params = NULL);
 
-	/**
-	 * Execute a raw SQL statement against the database
-	 *
-	 * @param $sql
-	 * @return dbStatement
-	 */
-	public abstract function exec($sql);
+    /**
+     * Escape the given var to use used safely in SQL for this driver
+     *
+     * @param $var
+     * @return string
+     */
+    public abstract function escape($var);
 
-	/**
-	 * Escape the given var to use used safely in SQL for this driver
-	 *
-	 * @param $var
-	 * @return string
-	 */
-	public abstract function escape($var);
+    /**
+     * Start a transaction
+     *
+     * @return bool
+     */
+    public abstract function beginTransaction();
 
-	/**
-	 * Start a transaction
-	 *
-	 * @return bool
-	 */
-	public abstract function beginTransaction();
+    /**
+     * Commit (cancel) the current transaction
+     *
+     * @return bool
+     */
+    public abstract function commit();
 
-	/**
-	 * Commit (cancel) the current transaction
-	 *
-	 * @return bool
-	 */
-	public abstract function commit();
+    /**
+     * Rollback (cancel) the current transaction
+     *
+     * @return bool
+     */
+    public abstract function rollback();
 
-	/**
-	 * Rollback (cancel) the current transaction
-	 *
-	 * @return bool
-	 */
-	public abstract function rollback();
-
-	/**
-	 * Return TRUE if currently in a transaction
-	 *
-	 * @return bool
-	 */
-	public abstract function inTransaction();
+    /**
+     * Return TRUE if currently in a transaction
+     *
+     * @return bool
+     */
+    public abstract function inTransaction();
 
     /**
      * Place this connection into 'Read Only' mode.
@@ -177,12 +182,12 @@ abstract class dbDriver{
      * @param bool $newState
      * @return bool
      */
-	public abstract function readOnly($newState=TRUE);
+    public abstract function readOnly($newState = TRUE);
 
-	/**
-	 * Disconnect the underlying driver and self-destruct
-	 *
-	 * @return bool
-	 */
-	public abstract function destroy();
+    /**
+     * Disconnect the underlying driver and self-destruct
+     *
+     * @return bool
+     */
+    public abstract function destroy();
 }
