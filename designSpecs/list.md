@@ -45,7 +45,7 @@ If I delete, for example, a subject heading. and that subject heading is being u
 
 accomplishing this may need the form Builder module to have some additional 'smarts' beyond the "matchOn" options. If possible, I would like to put everything into their and have the form builder object know about all the linked tables based on the match on's. Perhaps "match on" needs to be renamed to "linked information" or somethine similar. 
 
-## Form Creator
+## Form Builder
 
 Responsible for drawing and rendering the form and all information back to the browser
 
@@ -68,13 +68,15 @@ little to no HTML should be in the code itself.
 
 ### Methods
 
-#### displayInsertForm($addQueryString = TRUE)
+#### displayInsertForm($formAction=NULL)
 
 displays the insert form
 
-if $addQueryString is true, it adds the query string from the browser to the form action definition
+$formAction is the action URL, if NULL use current URL
 
-#### displayEditTable($addQueryString = TRUE)
+#### displayEditTable($formAction=NULL)
+
+$formAction is the action URL, if NULL use current URL
 
 The edit table should show a set of fields in a strip. these fields should be editable (if appropriate), and submitted as a whole. 
 
@@ -86,45 +88,45 @@ See the RSS template for an example of repeat blocks if needed.
 
 Simple Example:
 
-	{formCreator var="formTitle"}
+	{formBuilder var="formTitle"}
 
-	{formCreator var="formBegin"}
+	{formBuilder var="formBegin"}
 
-	{formCreator display="fields"}
+	{formBuilder display="fields"}
 
-	{formCreator var="formEnd"} 
+	{formBuilder var="formEnd"} 
 
 Example with Field Sets:
 
-	{formCreator var="formTitle"}
+	{formBuilder var="formTitle"}
 
-	{formCreator var="formBegin"}
+	{formBuilder var="formBegin"}
 
 	<!-- this will add the fieldset and the legend automatically -->
-	{formCreator fieldsetBegin="myFieldSetName"}
-	{formCreator display="myFieldSetName"}
-	{formCreator fieldsetEnd="myFieldSetName"}
+	{formBuilder fieldsetBegin="myFieldSetName"}
+	{formBuilder display="myFieldSetName"}
+	{formBuilder fieldsetEnd="myFieldSetName"}
 
-	{formCreator var="formEnd"} 
+	{formBuilder var="formEnd"} 
 
 There is no reason this couldn't be done by hand if something more complicated was needed
 
-	{formCreator var="formTitle"}
+	{formBuilder var="formTitle"}
 
-	{formCreator var="formBegin"}
+	{formBuilder var="formBegin"}
 
 	<!-- this will add the fieldset and the legend automatically -->
 	<div id="foo">
-	{formCreator display="myFieldSetName"}
+	{formBuilder display="myFieldSetName"}
 	</div>
 
 	<div id="bar">
-	{formCreator display="myOtherFieldSetName"}
+	{formBuilder display="myOtherFieldSetName"}
 	</div>
 
-	{formCreator var="formEnd"} 
+	{formBuilder var="formEnd"} 
 
-## form builder
+## Field Builder
 
 builds the form objects that the submitter and creator will use
 
@@ -161,7 +163,7 @@ labelID
 labelClass
 :Class name to append to the class of the label
 	
-	* Every label should already have a class of "engineAPIFormCreatorLabel"
+	* Every label should already have a class of "engineAPIformBuilderLabel"
 	* Every class of a required fiels should also have a class of "required"
 
 fieldcss
@@ -174,7 +176,7 @@ required
 :Sets the required flag on the element. Also checks it on submit
 
 type
-:the input type. Text, radio, select, hidden, etc ... See the old list object for 'custom' types, such as 'wysiwyg' and 'multiselect'
+:the input type. Text, radio, select, hidden, etc ... See the old list object for 'custom' types, such as 'wysiwyg' and 'multiselect'. Also take HTML5 types with fall-backs
 
 readonly
 :field is readonly. when submitting the original value should be used instead of what is submitted.
@@ -182,36 +184,33 @@ readonly
 disabled
 :field is disabled. when submitting data should be ignored entirely
 
-options
-: an array of settings or options that a particular field may need, that isn't defined elsewhere 
-
 selectValues
 : options for a select box
 : should be an array of arrays and support values, labels, and option groups
-
-selectedValues
-: options that are selected in select inputs (or multiselect). could be a single value or an array
 
 value
 : the value to put into the value attribute
 
 validate
-: which validation method to use from the validation module
+: which validation method to use from the validation module. string(built-in validation) or callback(custom validation)
 
-matchOn
+linkedTo
 : used to join linking tables. 
 : should be an array with
 	
 	* field : This is the field that we are pulling
 	* table : this is the table we are pulling the field from
 	* key : this is the key for the table we are pulling the field from. This is the "known" value that will be replaced in the rendered form
+	* relationship : Relationship rules (cascade, setNull, ignore, fail, etc)
 
 original
-: the original value of the object.
-: in the current version, we place this into the HTML as a hidden field. It would be safer to put it into the session variable. 
+: *removed from options* Will be done implicitly in session
 
 placeholder
 : placeholder text.
+
+disableStyling
+: If TRUE, disable rendering of label and field CSS (defaults to FALSE)
 
 help
 : help for the field. Should be an array. Check the current list object to make sure all values are accounted for
@@ -223,7 +222,7 @@ help
 dragAndDrop
 : Boolean. Is this field able to be dragged and dropped for ordering purposes in the browser?
 
-showInEdit
+showInEditStrip
 : If true, this field is shown in the "edit strip" that is displayed in the edit table.
 
 fieldSet
@@ -232,10 +231,15 @@ fieldSet
 sortOrder
 : The order that this field should appear. Everything that does not have a sort order should be placed after fields that do, and added in the order in which they were added the the object
 
-events
-: array. when an event is caught, something should happen. this is where it is defined. Should be jquery compatible
-: This is just the binding action. the javascript to actually handle it should be handled elsewhere by the developer
-: Should this even be here? (or should the developer handle it elsewhere?)
+labelMetadata
+: Array of key->value pairs of attributes to include on the label
+: * Special 'data' element to contain key->value pairs for data-*="" attributes
+: * Exclude functional attributes such as disabled and readonly (These must be done explicitly in the general field options)
+
+fieldMetadata
+: Array of key->value pairs of attributes to include on the <input> tag
+: * Special 'data' element to contain key->value pairs for data-*="" attributes
+: * Exclude functional attributes such as disabled and readonly (These must be done explicitly in the general field options)
 
 #### removeField(string $fieldName)
 
@@ -249,23 +253,15 @@ modifies an existing field.
 
 $fieldName is the name of the field. $option is the index. $value is the new value that should be assigned
 
-#### disableAllFields()
+#### modifyAllField($option,$value)
 
-set the disabled option to TRUE for all fields. 
+*same as modifyField except implicity applies modification to all fields*
 
-#### list($type,$hidden=TRUE,$plaintext=FALSE)
+#### getField($name)
 
-return a list of all the fields
+Returns the field definition for the given field, or NULL if no field defined
 
-* type can be "fields" or "fieldnames"
-	* fields : returns the whole array
-	* fieldnames : returns just the name attribute of each field
-* if hidden is true, return hidden fields as well
-* if plaintext is true, return plain text fields as well.
+#### getFieldNames()
 
-
-
-
-
-
+Returns array of all fieldNames
 
