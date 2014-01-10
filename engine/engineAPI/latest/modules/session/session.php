@@ -211,7 +211,7 @@ class session{
 	 * @param EngineAPI $engineAPI
 	 * @return session
 	 */
-	public static function singlton($options=array(),$engineAPI=NULL){
+	public static function singleton($options=array(),$engineAPI=NULL){
 		if(!self::$instance) self::$instance = new self($options,$engineAPI);
 		return self::$instance;
 	}

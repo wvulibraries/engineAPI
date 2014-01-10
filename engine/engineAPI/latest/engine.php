@@ -246,7 +246,7 @@ class EngineAPI{
 
 		// Initialize the session and if we are not in CLI mode start the session
 
-		session::singlton(NULL,$this);
+		session::singleton(NULL,$this);
 		if(!isCLI() and !session::started()) session::start();
 
 		// Cross Site Request Forgery Check
