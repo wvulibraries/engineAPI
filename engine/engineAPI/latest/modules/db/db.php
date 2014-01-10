@@ -101,8 +101,12 @@ class db implements Countable {
             // Return the new driver object
             return $dbDriverObj;
         }catch(Exception $e) {
-            errorHandle::newError(__METHOD__."() {$e->getMessage()} thrown from line {$e->getLine()}", errorHandle::DEBUG);
-
+            $msg = __METHOD__."() {$e->getMessage()} thrown from line {$e->getLine()}";
+            if(class_exists('errorHandle')){
+                errorHandle::newError($msg, errorHandle::DEBUG);
+            }else{
+                error_log($msg);
+            }
             return FALSE;
         }
     }

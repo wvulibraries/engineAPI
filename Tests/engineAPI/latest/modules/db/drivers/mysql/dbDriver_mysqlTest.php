@@ -78,12 +78,11 @@ class dbDriver_mysqlTest extends PHPUnit_Extensions_Database_TestCase {
     # Tests for escape()
     #########################################
     function test_escape() {
-        $this->assertEquals("'\'foo\''", self::$db->escape("'foo'")); // single-quotes
-        $this->assertEquals("'\\\"foo\\\"'", self::$db->escape('"foo"')); // double-quotes
-        $this->assertEquals("'\\n'", self::$db->escape("\n")); // new-line
-        $this->assertEquals("'\\r'", self::$db->escape("\r")); // carriage-return
-        $this->assertEquals("'\\0'", self::$db->escape("\x00")); // null-character
-        $this->assertEquals("'\\Z'", self::$db->escape("\x1a")); // substitute-character
+        $this->assertEquals("\'foo\'", self::$db->escape("'foo'"), 'single-quotes');
+        $this->assertEquals("\\\"foo\\\"", self::$db->escape('"foo"'), 'double-quotes');
+        $this->assertEquals("\\\n", self::$db->escape("\n"), 'new-line');
+        $this->assertEquals("\\\r", self::$db->escape("\r"), 'carriage-return');
+        $this->assertEquals('', self::$db->escape("\x00"), 'null-character');
     }
 
     # Tests for inTransaction()

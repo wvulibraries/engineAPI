@@ -155,7 +155,10 @@ class dbDriver_mysql extends dbDriver {
      * @author David Gersting
      */
     public function escape($var) {
-        return $this->pdo->quote($var);
+        // Remove any NULL-bytes (most likely a hack attempt)
+        $var = str_replace("\0", "", $var);
+        // Escape special chars (replacement for mysql_real_escape_string())
+        return preg_replace("|([\n\r'\"\\\\])|", "\\\\$1", $var);
     }
 
     /**
