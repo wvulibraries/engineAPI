@@ -80,31 +80,8 @@ class autoloader {
 				require_once self::$availableModules[$className];
 				return TRUE;
 			}
-
-			// Can't throw exceptions in php 5.2 from an autoloader, but you can
-			// catch it from this eval block.
-
-			if (preg_match('/^[^a-zA-Z_\x7f-\xff]/',$className)) {
-				eval("throw new Exception('Class $className not found', 1001);");
-				return FALSE;
-			}
-
-			eval("
-				class $className {
-					function __construct() {
-						throw new Exception('Class $className not found', 1001);
-					}
-					static function __callstatic(\$m, \$args) {
-						throw new Exception('Class $className not found', 1001);
-					}
-					function x_notaclass_x(){}
-				}
-				");
-
-			return FALSE;
 		}
 
-		return;
 	}
 
 	/**
