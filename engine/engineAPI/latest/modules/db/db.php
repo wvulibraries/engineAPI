@@ -113,6 +113,8 @@ class db implements Countable {
 
     /**
      * Returns TRUE if the given named connection has been defined
+     *
+     * @author David Gersting
      * @param $name
      * @return bool
      */
@@ -122,18 +124,27 @@ class db implements Countable {
     }
 
     /**
-     * [PHP Magic Method] Allow drivers to be called via virtual static methods (eg: $db->system->...)
+     * Returns the given named connection or NULL if it hasn't been defined yet
      *
      * @author David Gersting
-     * @param $name
+     * @param string $name
      * @return dbDriver
      */
-    public function __get($name) {
+    public static function get($name){
         $name = trim(strtolower($name));
 
         return isset(self::$objects[$name])
             ? self::$objects[$name]
             : NULL;
+    }
+
+    /**
+     * [PHP Magic Method] Allow drivers to be called via virtual static methods (eg: $db->system->...)
+     *
+     * @see self::get()
+     */
+    public function __get($name) {
+        return self::get($name);
     }
 
     /**
