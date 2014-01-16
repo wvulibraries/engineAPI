@@ -7,21 +7,24 @@
 class logger {
 	
 	private static $classInstance;
-	private $database;
+    /**
+     * @var dbDriver
+     */
+    private $database;
 
 	function __construct() {
 
 	}
 
 	public static function getInstance($database = NULL) {
-		if (!isset(self::$classInstance)) { 
+		if (!isset(self::$classInstance)) {
 
-			if (!$database instanceof engineDB) {
-				return FALSE;
-			}
+            if(isempty($database) || !db::exists($database)){
+                return FALSE;
+            }
 
 			self::$classInstance = new self();
-			self::$classInstance->set_database($database);
+			self::$classInstance->set_database(db::get($database));
 		}
 
 		return self::$classInstance;
@@ -29,7 +32,7 @@ class logger {
 
 	public function set_database($database) {
 
-		if ($database instanceof engineDB) {
+		if ($database instanceof dbDriver) {
 			$this->database = $database;
 			return TRUE;
 		}
@@ -47,9 +50,8 @@ class logger {
 	public function log($type="access",$function=NULL,$message=NULL) {
 
 		$engineVars = enginevars::getInstance()->export();
-		$engineDB = $this->database;
 
-		if (!$engineVars['log'] || $engineDB->status === FALSE) {
+		if (!$engineVars['log']) {
 			return FALSE;
 		}
 
@@ -62,22 +64,9 @@ class logger {
 		$useragent = isset($_SERVER['HTTP_USER_AGENT'])?$_SERVER['HTTP_USER_AGENT']:NULL;
 		$site      = isset($engineVars['server'])?$engineVars['server']:NULL;
 
-		$query = sprintf(
-			"INSERT INTO log (date,ip,referrer,resource,useragent,function,type,message,querystring,site) VALUES('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s')",
-			$engineDB->escape($date),
-			$engineDB->escape($ip),
-			$engineDB->escape($referrer),
-			$engineDB->escape($resource),
-			$engineDB->escape($useragent),
-			$engineDB->escape($function),
-			$engineDB->escape($type),
-			$engineDB->escape($message),
-			$engineDB->escape($queryStr),
-			$engineDB->escape($site)
-			);
-
-		$engineDB->sanitize = FALSE;
-		$results = $engineDB->query($query);
+        $sql = 'INSERT INTO log (date,ip,referrer,resource,useragent,function,type,message,querystring,site) VALUES(?,?,?,?,?,?,?,?,?,?)';
+        $params = array($date,$ip,$referrer,$resource,$useragent,$function,$type,$message,$queryStr,$site);
+        $this->database->query($sql, $params);
 
 		return TRUE;
 	}
