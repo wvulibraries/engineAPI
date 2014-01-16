@@ -112,6 +112,16 @@ class db implements Countable {
     }
 
     /**
+     * Returns TRUE if the given named connection has been defined
+     * @param $name
+     * @return bool
+     */
+    public static function exists($name){
+        $name = trim(strtolower($name));
+        return isset(self::$drivers[$name]);
+    }
+
+    /**
      * [PHP Magic Method] Allow drivers to be called via virtual static methods (eg: $db->system->...)
      *
      * @author David Gersting

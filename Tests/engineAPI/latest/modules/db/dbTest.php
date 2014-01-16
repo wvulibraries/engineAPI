@@ -7,6 +7,18 @@ class dbTest extends PHPUnit_Framework_TestCase {
         $this->assertInstanceOf('db', $db);
     }
 
+    # Tests for exists()
+    ###########################################################################################
+    function testItAllowsYouToTestThatAConnectionExists(){
+        $dbAlias = md5(__METHOD__);
+        $mockPDO = $this->getMock('mockPDO');
+        $db      = db::getInstance();
+
+        $this->assertFalse(db::exists($dbAlias));
+        $driver = $db->create('mysql', $mockPDO, $dbAlias);
+        $this->assertTrue(db::exists($dbAlias));
+    }
+
     # Tests for __get()
     ###########################################################################################
     function testItUsesMagicGetToAllowEasyAccessToCreatedConnections() {
