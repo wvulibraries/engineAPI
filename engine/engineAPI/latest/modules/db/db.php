@@ -120,7 +120,7 @@ class db implements Countable {
      */
     public static function exists($name){
         $name = trim(strtolower($name));
-        return isset(self::$drivers[$name]);
+        return isset(self::$objects[$name]);
     }
 
     /**
