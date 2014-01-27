@@ -566,6 +566,7 @@ class errorHandle
      * @static
      * @param string $logLocation
      * @return bool
+	 * @TODO Bug on line 576 (db handling)
      */
     private static function recordError($logLocation)
     {
