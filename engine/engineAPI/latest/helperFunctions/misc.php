@@ -122,7 +122,7 @@ function attPairs($attpairs) {
  * @return string
  */
 function removeQueryStringVar($qs, $var) {
-
+	errorHandle::deprecated();
 	return queryString::getInstance()->remove($var,$qs);
 
 }
