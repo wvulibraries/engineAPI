@@ -560,6 +560,33 @@ class errorHandle
         if(defined('fatal_ERROR') and FATAL_ERROR) exit();
     }
 
+	/**
+	 * Record a the usage of a deprecated function
+	 *
+	 * Usage:
+	 * `errorHandle::deprecated()` or `errorHandle::deprecated('some custom message')`
+	 */
+	public static function deprecated($msg=''){
+		// If a msg was passed, wrap it for inclusion in the error low
+		if(!isempty($msg)) $msg = " (msg: $msg)";
+
+		// Variables
+		$backtrace    = debug_backtrace();
+		$deprecated   = $backtrace[1];
+		$calledFrom   = $backtrace[2];
+		$deprecatedFn = isset($deprecated['class'])
+			? $deprecated['class'].$deprecated['type'].$deprecated['function']
+			: $deprecated['function'];
+
+		// Log the deprecated function
+		error_log(sprintf('[Deprecated] %s() called from %s:%s%s',
+			$deprecatedFn,
+			$calledFrom['file'],
+			$calledFrom['line'],
+			$msg
+		));
+	}
+
     /**
      * This is a helper funcion for newError()
      * This method will take the current error and record it in the specified location
@@ -1027,7 +1054,6 @@ class errorHandle
 	/**
 	 * Record an success message and return HTML message
 	 *
-	 * @deprecated
 	 * @param string $msg
 	 * @return string
 	 */
@@ -1040,7 +1066,6 @@ class errorHandle
 	/**
 	 * Record an warning message and return HTML message
 	 *
-	 * @deprecated
 	 * @param string $msg
 	 * @return string
 	 */
@@ -1053,7 +1078,6 @@ class errorHandle
 	/**
 	 * Generates an HTML list of error/success/warning messages
 	 *
-	 * @deprecated
 	 * @param string $type Type of message to generate (all, error, success, warning)
 	 * @return bool|string
 	 */
@@ -1123,7 +1147,6 @@ class errorHandle
 	/**
 	 * Adds a message onto an errorStack inside EngineAPI
 	 *
-	 * @deprecated
 	 * @param string $type Type of message
 	 * @param string $message
 	 * @return string
