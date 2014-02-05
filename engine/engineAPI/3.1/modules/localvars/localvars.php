@@ -118,6 +118,7 @@ class localvars {
 	 * @return array
 	 */
 	public static function export() {
+		errorHandle::deprecated();
 		return self::$localvars;
 	}
 

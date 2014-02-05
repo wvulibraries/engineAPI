@@ -296,6 +296,7 @@ class fileHandler {
 	 * @return bool|string
 	 */
 	public function dbInsert($table,$fields) {
+		errorHandle::deprecated();
 
 		$sqlStr = NULL;
 
