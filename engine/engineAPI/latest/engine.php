@@ -16,7 +16,6 @@ $engineVarsPrivate = array();
 
 $accessControl   = array();
 $moduleFunctions = array();
-$engineDB        = NULL;
 $DEBUG           = NULL;
 
 /**
@@ -27,6 +26,7 @@ $DEBUG           = NULL;
  */
 class EngineAPI{
 	const VERSION='4.0';
+	const DB_CONNECTION = 'engineDB';
 
 	/**
 	 * The EngineAPI instance
@@ -117,18 +117,6 @@ class EngineAPI{
 	 */
 	private $dbTables = array();
 
-	/**
-	 * The EngineAPI database object
-	 * @var engineDB
-	 */
-	private $engineDB = NULL;
-
-	/**
-	 * The database object
-	 * @var engineDB
-	 */
-	public $openDB = NULL;
-
 	# Module Template Mathes and function calls for displayTemplate()
 	###################################################################
 	
@@ -212,18 +200,11 @@ class EngineAPI{
 		// Setup Current Working Directory
 		$this->cwd = getcwd();
 
-		// Setup default database connections
-		$this->dbUsername = $this->privatevars->get(array('mysql','username'),NULL);
-		$this->dbPassword = $this->privatevars->get(array('mysql','password'),NULL);
-		$this->dbPort     = $this->privatevars->get(array('mysql','port'),NULL);
-		$this->dbServer   = $this->privatevars->get(array('mysql','server'),NULL);
-
-		// Startup engines database connection
-		require_once self::$engineDir."/modules/database/engineDB.php";
-		$this->engineDB = new engineDB($this->privatevars->get(array('mysql','username')),$this->privatevars->get(array('mysql','password')),$this->privatevars->get(array('mysql','server')),$this->privatevars->get(array('mysql','port')),$enginevars->get('logDB'),FALSE);
+		// Setup engine database connections
+        db::create($this->privatevars->get(array('engineDB','driver')), $this->privatevars->get(array('engineDB','driverOptions')), self::DB_CONNECTION);
 
 		// Start up the logging
-		$logger = logger::getInstance($this->engineDB);
+		$logger = logger::getInstance('engineDB');
 		$logger->log();
 		
 		// Access Control and login inits can't be off loaded to onLoad.php like they should be
@@ -245,7 +226,6 @@ class EngineAPI{
 		server::cleanQueryStringReferer(); // $_SERVER['QUERY_STRING']
 
 		// Initialize the session and if we are not in CLI mode start the session
-
 		session::singleton(NULL,$this);
 		if(!isCLI() and !session::started()) session::start();
 
@@ -312,89 +292,6 @@ class EngineAPI{
 		errorHandle::newError(__METHOD__."() - Access Denied to privateVar '$varName' for file '$file' and function '$function'!", errorHandle::DEBUG);
 
 		return FALSE;
-	}
-
-	/**
-	 * Returns the internal engineDB object
-	 * Restricted to EngineAPI and its modules
-	 *
-	 * @return engineDB|bool
-	 */
-	public function getEngineDB(){
-		$callingFile = realpath(callingFile());
-		$engineDir   = realpath(self::$engineDir);
-		if(0 === strpos($callingFile, $engineDir)){
-			// Valid
-			return $this->engineDB;
-		}else{
-			// Invalid
-			$callingFile = callingFunction();
-			errorHandle::newError(__METHOD__."() - Access denied to getEngineDB '".callingFunction()."()' in $callingFile", errorHandle::DEBUG);
-			return FALSE;
-		}
-	}
-
-	/**
-	 * Connect to MySQL Database
-	 *
-	 * @param $action
-	 *        username - Sets the username
-	 *        password - Sets the password
-	 *        port - Sets the port
-	 *        database - Sets the database name
-	 *
-	 * @param string $value
-	 * @param bool $state
-	 * @return bool|engineDB
-	 */
-	public function dbConnect($action,$value,$state=FALSE) {
-		if (!isset($value)) {
-			return FALSE;
-		}
-
-		if ($action == "username") {
-			$this->dbUsername = $value;
-		}
-		else if ($action == "password") {
-			$this->dbPassword = $value;
-		}
-		else if ($action == "port") {
-			$this->dbPort     = $value;
-		}
-		else if ($action == "server") {
-			$this->dbServer   = $value;
-		}
-		else if ($action == "database") {
-
-			$this->dbDatabase = $value;
-
-			// Open up the database connections
-			if (isset($this->dbUsername) && isset($this->dbPassword) && isset($this->dbPort) && isset($this->dbServer) && isset($this->dbDatabase)) {
-
-				if (!isnull($this->openDB)) {
-					// die;
-				}
-
-				$dbObject = new engineDB($this->dbUsername,$this->dbPassword,$this->dbServer,$this->dbPort,$this->dbDatabase);
-
-				if ($state === FALSE) {
-					return $dbObject;
-				}
-				else {
-					$this->openDB = $dbObject;
-					return TRUE;
-				}
-
-			}
-			else {
-				$this->openDB = null;
-				return FALSE;
-			}
-
-		}
-
-		return TRUE;
-
 	}
 
 	/**
