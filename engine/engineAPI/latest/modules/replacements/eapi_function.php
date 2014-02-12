@@ -31,7 +31,7 @@ class eapi_function {
 
 		$attPairs      = attPairs($matches[1]);
 		
-		if (!isset($attPairs['function']) && isempty($attPairs['function'])) {
+		if (!isset($attPairs['function']) && is_empty($attPairs['function'])) {
 			return(FALSE);
 		}
 		

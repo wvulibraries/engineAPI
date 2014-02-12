@@ -20,7 +20,7 @@ class logger {
 	public static function getInstance($database = NULL) {
 		if (!isset(self::$classInstance)) {
 
-            if(isempty($database) || !db::exists($database)) return FALSE;
+            if(is_empty($database) || !db::exists($database)) return FALSE;
 
 			self::$classInstance = new self();
 			self::$classInstance->set_database(db::get($database));

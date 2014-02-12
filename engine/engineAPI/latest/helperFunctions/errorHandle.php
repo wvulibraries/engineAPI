@@ -568,7 +568,7 @@ class errorHandle
 	 */
 	public static function deprecated($msg=''){
 		// If a msg was passed, wrap it for inclusion in the error low
-		if(!isempty($msg)) $msg = " (msg: $msg)";
+		if(!is_empty($msg)) $msg = " (msg: $msg)";
 
 		// Variables
 		$backtrace    = debug_backtrace();

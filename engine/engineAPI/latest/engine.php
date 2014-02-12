@@ -280,7 +280,7 @@ class EngineAPI{
 
 		$privateVariable = privatevars::get(array('privateVars',$varName));
 
-		if (!isempty($privateVariable)) {
+		if (!is_empty($privateVariable)) {
 			foreach ($privateVariable as $I=>$V) {
 				if (basename($file) == $V['file'] && $engineDir === TRUE && $V['function'] == $function) {
 					return $this->$varName;

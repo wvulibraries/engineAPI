@@ -31,7 +31,7 @@ class eapi_includes {
 
 		$attPairs      = attPairs($matches[1]);
 		
-		if(!isset($attPairs['file']) && isempty($attPairs['type'])) return(FALSE);
+		if(!isset($attPairs['file']) && is_empty($attPairs['type'])) return(FALSE);
 
 		$regex           = NULL;
 		$condition       = "REQUEST_URI";
