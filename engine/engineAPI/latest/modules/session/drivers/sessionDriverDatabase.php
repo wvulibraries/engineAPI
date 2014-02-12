@@ -71,13 +71,21 @@ class sessionDriverDatabase implements sessionDriverInterface{
 			$this->db = db::get(EngineAPI::DB_CONNECTION);
 		}
 
-		$this->isReady = session_set_save_handler(
-			array($this, 'open'),
-			array($this, 'close'),
-			array($this, 'read'),
-			array($this, 'write'),
-			array($this, 'destroy'),
-			array($this, 'gc'));
+		// Make sure the table actually exists
+		$res = $this->db->query('SELECT 1 FROM `'.$this->db->escape($this->options['tableName']).'` LIMIT 1');
+		if ($res->errorCode()) {
+			// Error! (The table must not exist)
+			$this->isReady = FALSE;
+		} else {
+			// Ok, the table exists
+			$this->isReady = session_set_save_handler(
+				array($this, 'open'),
+				array($this, 'close'),
+				array($this, 'read'),
+				array($this, 'write'),
+				array($this, 'destroy'),
+				array($this, 'gc'));
+		}
 	}
 
 	/**
