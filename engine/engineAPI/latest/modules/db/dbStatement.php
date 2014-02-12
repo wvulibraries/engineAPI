@@ -23,11 +23,6 @@ abstract class dbStatement {
      */
     protected $pdoStatement;
     /**
-     * [Flag] Make this statement as executed
-     * @var bool
-     */
-    protected $isExecuted = FALSE;
-    /**
      * The timestamp of when the statement was executed
      * @var DateTime
      */
