@@ -11,8 +11,7 @@ class validate {
 	}
 
 	public static function getInstance() {
-		$c = __CLASS__;
-		$validate = new $c;
+		$validate = new self;
 		$validate->set_enginevars(enginevars::getInstance());
 		return $validate;
 	}
