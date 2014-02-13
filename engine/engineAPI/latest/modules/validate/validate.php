@@ -4,21 +4,10 @@
  * @package EngineAPI\modules\validate
  */
 class validate {
-
+	/**
+	 * @var enginevars
+	 */
 	private $enginevars;
-
-	function __construct() {
-	}
-
-	public static function getInstance() {
-		$validate = new self;
-		$validate->set_enginevars(enginevars::getInstance());
-		return $validate;
-	}
-
-	public function set_enginevars($enginevars) {
-		$this->enginevars = $enginevars;
-	}
 
 	/**
 	 * Mapping of available validators and their human-readable names
@@ -43,7 +32,31 @@ class validate {
 		"noSpaces"             => "No Spaces",
 		"noSpecialChars"       => "No Special Characters",
 		"date"                 => "date"
-		);
+	);
+
+	/**
+	 * Class constructor
+	 */
+	function __construct() {
+	}
+
+	/**
+	 * Returns validate instance
+	 * @return validate
+	 */
+	public static function getInstance() {
+		$validate = new self;
+		$validate->set_enginevars(enginevars::getInstance());
+		return $validate;
+	}
+
+	/**
+	 * Sets the internal engineVars instance to use
+	 * @param $enginevars
+	 */
+	public function set_enginevars($enginevars) {
+		$this->enginevars = $enginevars;
+	}
 
 	/**
 	 * Returns the mapping array available validators
@@ -56,27 +69,29 @@ class validate {
 	}
 
 	/**
-	 * Returns true if if validationType is a valid validator
+	 * Returns true if validationType is a valid validator (case insensitive)
 	 *
 	 * @param $validationType
 	 * @return bool
 	 */
 	public function isValidMethod($validationType) {
-
-		if (array_key_exists($validationType,$this->validationMethods())) {
-			return(TRUE);
-		}
-
-		return(FALSE);
-
+		$validationType = trim(strtolower($validationType));
+		$availableTypes = array_map(function($n){ return trim(strtolower($n)); }, array_keys($this->availableMethods));
+		return in_array($validationType, $availableTypes);
 	}
 
+	/**
+	 * Get human readable error message based on given validate method
+	 * @param string $method The validate method name to use
+	 * @param string $data   User data to include in message. (if omitted, a generic message will be created)
+	 * @return string
+	 */
 	function getErrorMessage($method, $data=NULL){
 		$return = isset($data)
 			? "Entry '".htmlSanitize($data)."' not valid"
 			: 'Invalid';
 
-		switch(strtolower($method)) {
+		switch(trim(strtolower($method))) {
 			case 'url':
 			case 'optionalurl':
 				return $return . ': URL';
@@ -87,7 +102,7 @@ class validate {
 				return $return . ': Phone Number';
 			case 'ipaddr':
 				return $return . ': IP Address';
-			case 'ipaddrRange':
+			case 'ipaddrrange':
 				return $return . ': IP Address Range';
 			case 'date':
 				return $return . ': Date';
