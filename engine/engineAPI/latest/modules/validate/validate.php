@@ -72,6 +72,46 @@ class validate {
 
 	}
 
+	function getErrorMessage($method, $data=NULL){
+		$return = isset($data)
+			? "Entry '".htmlSanitize($data)."' not valid"
+			: 'Invalid';
+
+		switch(strtolower($method)) {
+			case 'url':
+			case 'optionalurl':
+				return $return . ': URL';
+			case 'email':
+			case 'internalemail':
+				return $return . ': Email Address';
+			case 'phone':
+				return $return . ': Phone Number';
+			case 'ipaddr':
+				return $return . ': IP Address';
+			case 'ipaddrRange':
+				return $return . ': IP Address Range';
+			case 'date':
+				return $return . ': Date';
+			case 'integer':
+			case 'integerspaces':
+				return $return . ': Integer';
+			case 'alphanumeric':
+				return $return . ': Letters and Numbers';
+			case 'alphanumericnospaces':
+				return $return . ': Letters and Numbers Without Spaces';
+			case 'alpha':
+				return $return . ': Letters Only';
+			case 'alphanospaces':
+				return $return . ': Letters Without Spaces';
+			case 'nospaces':
+				return $return . ': No Spaces';
+			case 'nospecialchars':
+				return $return . ': No Special Characters';
+			default:
+				return $return . '.';
+		}
+	}
+
 	/**
 	 * Applies a supplied testName validation to members of a CSV string
 	 *
