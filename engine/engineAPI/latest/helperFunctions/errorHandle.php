@@ -565,6 +565,7 @@ class errorHandle
 	 *
 	 * Usage:
 	 * `errorHandle::deprecated()` or `errorHandle::deprecated('some custom message')`
+	 * @TODO Add code to detect if calledFrom is the autoloader, if so go 1 step further
 	 */
 	public static function deprecated($msg=''){
 		// If a msg was passed, wrap it for inclusion in the error low
@@ -1041,7 +1042,6 @@ class errorHandle
 	/**
 	 * Record an error message and return HTML message
 	 *
-	 * @deprecated
 	 * @param string $msg
 	 * @return string
 	 */
