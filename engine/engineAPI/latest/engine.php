@@ -204,9 +204,9 @@ class EngineAPI{
         db::create($this->privatevars->get(array('engineDB','driver')), $this->privatevars->get(array('engineDB','driverOptions')), self::DB_CONNECTION);
 
 		// Start up the logging
-		$logger = logger::getInstance('engineDB');
+		$logger = logger::getInstance(self::DB_CONNECTION);
 		$logger->log();
-		
+
 		// Access Control and login inits can't be off loaded to onLoad.php like they should be
 		// because engine and private vars needs to be created with engineAPI
 		// constructor variables first. (enginedir and site)
