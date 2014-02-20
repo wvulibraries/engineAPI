@@ -557,12 +557,12 @@ class errorHandle
 			: $deprecated['function'];
 
 		// Log the deprecated function
-		error_log(sprintf('[Deprecated] %s() called from %s:%s%s',
+		$errorMsg = sprintf('[Deprecated] %s() called from %s:%s%s',
 			$deprecatedFn,
 			$calledFrom['file'],
 			$calledFrom['line'],
-			$msg
-		));
+			$msg);
+		self::newError($errorMsg, self::DEBUG);
 	}
 
     /**
