@@ -10,7 +10,6 @@ class eapi_function {
 	private $function = "eapi_function::templateMatches";
 	
 	function __construct() {
-		errorHandle::deprecated();
 		EngineAPI::defTempPatterns($this->pattern,$this->function,$this);
 		EngineAPI::defTempPatterns("/\{engine name=\"function\"\s+(.+?)\}/",$this->function,$this);
 	}

@@ -21,7 +21,6 @@ class eapi_session {
 	 * @return mixed|null
 	 */
 	public static function sessionGet($matches) {
-		errorHandle::deprecated();
 		$engine        = EngineAPI::singleton();
 		$eapi_function = $engine->retTempObj("eapi_function");
 		$attPairs      = attPairs($matches[1]);

@@ -10,7 +10,6 @@ class eapi_includes {
 	private $function = "eapi_includes::templateMatches";
 	
 	function __construct() {
-		errorHandle::deprecated();
 		EngineAPI::defTempPatterns($this->pattern,$this->function,$this);
 		EngineAPI::defTempPatterns("/\{engine name=\"include\"\s+(.+?)\}/",$this->function,$this);
 	}
