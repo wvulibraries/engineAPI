@@ -178,7 +178,7 @@ function array_getLastIndex($array) {
  * @return array|mixed
  */
 function buildECMSArray($array) {
-	errorHandle::deprecated();
+	deprecated();
 
 	$enginevars = enginevars::getInstance();
 	

@@ -16,7 +16,7 @@
  * @deprecated
  */
 function mres($var){
-	errorHandle::deprecated();
+	deprecated();
 	return mysql_real_escape_string($var);
 }
 

@@ -47,7 +47,7 @@ function is_odd($number) {
  * @return bool
  */
 function isint($var) {
-	errorHandle::deprecated();
+	deprecated();
 	return (bool)validate::getInstance()->integer($var);
 }
 
@@ -99,7 +99,7 @@ function isnull($var,$strict=TRUE) {
  * @deprecated
  */
 function isempty($var,$strict=TRUE) {
-	errorHandle::deprecated();
+	deprecated();
 	return is_empty($var, $strict);
 }
 

@@ -322,7 +322,7 @@ class EngineAPI{
 	 * @return array
 	 */
 	public function dbTablesExport() {
-		errorHandle::deprecated();
+		deprecated();
 		$dbTablesArray = array();
 
 		$dbTablesArray                             = $this->dbTables;

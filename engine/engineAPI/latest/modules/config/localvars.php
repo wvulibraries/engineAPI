@@ -169,7 +169,7 @@ class localvars extends config {
 	 * @todo #bug Usage of $this in static context around lines 174 and 188
      */
     public static function dbImport($tblName, $nameField, $valueField, $params=array()){
-		errorHandle::deprecated();
+		deprecated();
         // Handle default params
         $params = array_merge(array(
             'dbConn'    => $this->database,

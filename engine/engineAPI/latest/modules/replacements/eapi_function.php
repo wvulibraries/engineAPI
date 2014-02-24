@@ -17,7 +17,7 @@ class eapi_function {
 	private $function = "eapi_function::templateMatches";
 
 	function __construct() {
-		errorHandle::deprecated();
+		deprecated();
 		templates::defTempPatterns($this->pattern,$this->function,$this);
 		templates::defTempPatterns("/\{engine name=\"function\"\s+(.+?)\}/",$this->function,$this);
 	}
@@ -29,7 +29,7 @@ class eapi_function {
 	 * @return bool
 	 */
 	public static function templateMatches($matches) {
-		errorHandle::deprecated();
+		deprecated();
 
 		$attPairs      = attPairs($matches[1]);
 		
