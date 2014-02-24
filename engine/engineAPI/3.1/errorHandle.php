@@ -538,33 +538,6 @@ class errorHandle
         if(defined('fatal_ERROR') and FATAL_ERROR) exit();
     }
 
-	/**
-	 * Record a the usage of a deprecated function
-	 *
-	 * Usage:
-	 * `errorHandle::deprecated()` or `errorHandle::deprecated('some custom message')`
-	 */
-	public static function deprecated($msg=''){
-		// If a msg was passed, wrap it for inclusion in the error low
-		if(!isempty($msg)) $msg = " (msg: $msg)";
-
-		// Variables
-		$backtrace    = debug_backtrace();
-		$deprecated   = $backtrace[1];
-		$calledFrom   = $backtrace[2];
-		$deprecatedFn = isset($deprecated['class'])
-			? $deprecated['class'].$deprecated['type'].$deprecated['function']
-			: $deprecated['function'];
-
-		// Log the deprecated function
-		$errorMsg = sprintf('[Deprecated] %s() called from %s:%s%s',
-			$deprecatedFn,
-			$calledFrom['file'],
-			$calledFrom['line'],
-			$msg);
-		self::newError($errorMsg, self::DEBUG);
-	}
-
     /**
      * This is a helper funcion for newError()
      * This method will take the current error and record it in the specified location

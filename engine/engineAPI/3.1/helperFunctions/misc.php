@@ -362,4 +362,29 @@ function castAs($input,$cast){
 	}
 }
 
+function deprecated($msg=''){
+	// Backtrace logic
+	$backtrace    = debug_backtrace();
+	$deprecated   = $backtrace[1];
+	$calledFrom   = $backtrace[2];
+	$deprecatedFn = isset($deprecated['class'])
+		? $deprecated['class'].$deprecated['type'].$deprecated['function']
+		: $deprecated['function'];
+
+	// Create error message
+	if(!isempty($msg)) $msg = " (msg: $msg)";
+	$errorMsg = sprintf('[Deprecated] %s() called from %s:%s%s',
+		$deprecatedFn,
+		$calledFrom['file'],
+		$calledFrom['line'],
+		$msg);
+
+	// How do we record this?
+	if(class_exists('errorHandle', FALSE)){
+		errorHandle::newError($errorMsg, errorHandle::DEBUG);
+	}else{
+		error_log($errorMsg);
+	}
+}
+
 ?>

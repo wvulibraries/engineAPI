@@ -10,6 +10,7 @@ class eapi_includes {
 	private $function = "eapi_includes::templateMatches";
 	
 	function __construct() {
+		deprecated();
 		EngineAPI::defTempPatterns($this->pattern,$this->function,$this);
 		EngineAPI::defTempPatterns("/\{engine name=\"include\"\s+(.+?)\}/",$this->function,$this);
 	}
@@ -21,7 +22,7 @@ class eapi_includes {
 	 * @return bool
 	 */
 	public static function templateMatches($matches) {
-		errorHandle::deprecated();
+		deprecated();
 		$engine        = EngineAPI::singleton();
 		$eapi_function = $engine->retTempObj("eapi_function");
 		$attPairs      = attPairs($matches[1]);

@@ -35,7 +35,7 @@ class fileList {
 	 * @return string
 	 */
 	public function printObject() {
-		errorHandle::deprecated();
+		deprecated();
 		$output  = "<pre>";
 		$output .= obsafe_print_r($this->files);
 		$output .= "</pre>";

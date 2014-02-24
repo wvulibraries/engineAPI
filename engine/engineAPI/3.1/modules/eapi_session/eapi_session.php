@@ -5,6 +5,7 @@
  */
 class eapi_session {
 	function __construct() {
+		deprecated();
 		EngineAPI::defTempPatterns("/\{csrf\s+(.+?)\}/","eapi_session::csrf",$this);
 		EngineAPI::defTempPatterns("/\{engine name=\"csrf\"\s*(.*?)\}/","eapi_session::csrf",$this);
 		EngineAPI::defTempPatterns("/\{engine name=\"insertCSRF\"\s*(.*?)\}/","eapi_session::csrf",$this);
@@ -20,7 +21,7 @@ class eapi_session {
 	 * @return mixed|null
 	 */
 	public static function sessionGet($matches) {
-		errorHandle::deprecated();
+		deprecated();
 		$engine        = EngineAPI::singleton();
 		$eapi_function = $engine->retTempObj("eapi_function");
 		$attPairs      = attPairs($matches[1]);
@@ -37,7 +38,7 @@ class eapi_session {
 	 * @return mixed|null|string
 	 */
 	public static function csrf($matches) {
-		errorHandle::deprecated();
+		deprecated();
 		$engine        = EngineAPI::singleton();
 		$eapi_session  = $engine->retTempObj("eapi_session");
 		$attPairs      = attPairs($matches[1]);
@@ -59,7 +60,7 @@ class eapi_session {
 	 * @return mixed|null|string
 	 */
 	public static function csrfGet($matches) {
-		errorHandle::deprecated();
+		deprecated();
 		$output = sessionInsertCSRF(FALSE);
 		return($output);
 	}
@@ -72,7 +73,7 @@ class eapi_session {
 	 * @return bool|string
 	 */
 	public static function templateMatches($matches) {
-		errorHandle::deprecated();
+		deprecated();
 		$engine        = EngineAPI::singleton();
 		$eapi_function = $engine->retTempObj("eapi_function");
 		$attPairs      = attPairs($matches[1]);
