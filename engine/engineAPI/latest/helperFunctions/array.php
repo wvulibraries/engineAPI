@@ -178,8 +178,9 @@ function array_getLastIndex($array) {
  * @return array|mixed
  */
 function buildECMSArray($array) {
-	
-    $enginevars = enginevars::getInstance();
+	deprecated();
+
+	$enginevars = enginevars::getInstance();
 	
 	$output = "";
 	if(is_array($array)) {

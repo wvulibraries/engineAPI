@@ -166,8 +166,10 @@ class localvars extends config {
      *          + namespace - A namespace to put the imported settings into (default: '')
      *          + sqlWhere  - SQL Where clause to use for sql statement
      * @return bool|int     - Returns number of localVars created, or bool FALSE on error
+	 * @todo #bug Usage of $this in static context around lines 174 and 188
      */
     public static function dbImport($tblName, $nameField, $valueField, $params=array()){
+		deprecated();
         // Handle default params
         $params = array_merge(array(
             'dbConn'    => $this->database,

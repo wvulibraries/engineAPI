@@ -211,7 +211,7 @@ class session{
 	 * @param EngineAPI $engineAPI
 	 * @return session
 	 */
-	public static function singlton($options=array(),$engineAPI=NULL){
+	public static function singleton($options=array(),$engineAPI=NULL){
 		if(!self::$instance) self::$instance = new self($options,$engineAPI);
 		return self::$instance;
 	}
@@ -658,11 +658,27 @@ class session{
 
 	/**
 	 * Destroy (delete) an item from the session data
-	 * @param $name
+	 * @param string $name
+	 * @param string $location
+	 *        Location to delete $name from (default to data)
+	 * @return bool
 	 */
-	public static function destroy($name){
+	public static function destroy($name,$location='data'){
+		// Define the valid locations, also sets the search order
+		$validLocations = array('private','data','flash');
+
+		// Normalize name
 		$name = self::normalizeName($name);
-		unset(self::$sessionData['data'][$name]);
+
+		// Make sure location is valid
+		if(!in_array($location, $validLocations)){
+			errorHandle::newError(__METHOD__."() - Invalid location '$location' requested. (valid: ".implode(',', $validLocations).")", errorHandle::DEBUG);
+			return FALSE;
+		}
+
+		// Delete it!
+		unset(self::$sessionData[$location][$name]);
+		return TRUE;
 	}
 
 	/**

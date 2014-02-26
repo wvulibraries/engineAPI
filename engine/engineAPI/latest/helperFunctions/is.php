@@ -47,6 +47,7 @@ function is_odd($number) {
  * @return bool
  */
 function isint($var) {
+	deprecated();
 	return (bool)validate::getInstance()->integer($var);
 }
 
@@ -87,7 +88,7 @@ function isnull($var,$strict=TRUE) {
 
 
 /**
- * Alias for isempty()
+ * Alias for is_empty()
  *
  * @see isempty()
  * @param mixed $var
@@ -97,8 +98,9 @@ function isnull($var,$strict=TRUE) {
  * @return bool
  * @deprecated
  */
-function is_empty($var,$strict=TRUE) {
-	return isempty($var, $strict);
+function isempty($var,$strict=TRUE) {
+	deprecated();
+	return is_empty($var, $strict);
 }
 
 /**
@@ -111,7 +113,7 @@ function is_empty($var,$strict=TRUE) {
  *        Pass-through for isnull() [Defaults to TRUE]
  * @return bool
  */
-function isempty($var,$strict=TRUE) {
+function is_empty($var,$strict=TRUE) {
 
 	if (!isset($var)) {
 		return(TRUE);

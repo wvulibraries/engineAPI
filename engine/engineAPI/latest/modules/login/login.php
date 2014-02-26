@@ -31,7 +31,7 @@ class login {
 	 * @return bool
 	 */
 	public static function login() {
-
+		deprecated();
 		if (isnull(self::$loginType)) return FALSE;
 
 		if (isset($this->loginFunctions[$loginType])) {

@@ -306,6 +306,7 @@ function normalizeArray($input,$delimiter=','){
  * @return string
  **/
 function dateToUnix($str) {
+	deprecated();
 
     $dateDelims = "[- \/.]";
     $date       = "(0[1-9]|1[012])".$dateDelims."(0[1-9]|[12][0-9]|3[01])".$dateDelims."((?:19|20)\d\d)"; // mm/dd/yyyy
@@ -375,7 +376,8 @@ function unixToDate($time,$format=NULL) {
  * @return string
  **/
 function lc($string) {
-    return (strtolower($string));
+	deprecated();
+	return (strtolower($string));
 }
 
 /**
@@ -387,6 +389,7 @@ function lc($string) {
  * @return string
  **/
 function uc($string) {
+	deprecated();
     return (strtoupper($string));
 }
 

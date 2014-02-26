@@ -13,6 +13,7 @@
  * @return bool
  */
 function internalEmail($email) {
+	deprecated();
 	return(email::internalEmailAddr($email));
 }
 
@@ -24,6 +25,7 @@ function internalEmail($email) {
  * @return string
  */
 function webHelper_errorMsg($message) {
+	deprecated();
 	return(errorHandle::errorMsg($message));
 }
 
@@ -35,6 +37,7 @@ function webHelper_errorMsg($message) {
  * @return string
  */
 function webHelper_successMsg($message) {
+	deprecated();
 	return(errorHandle::successMsg($message));
 }
 
@@ -46,6 +49,7 @@ function webHelper_successMsg($message) {
  * @return null
  */
 function engine_isMobileBrowser() {
+	deprecated();
 	return(mobileBrowsers::isMobileBrowser());
 }
 
@@ -59,6 +63,7 @@ function engine_isMobileBrowser() {
  * @return string
  */
 function dateDropDown($attPairs,$engine=null) {
+	deprecated();
 	$date = new date();
 	return($date->dateDropDown($attPairs,$engine=null));
 }
@@ -73,6 +78,7 @@ function dateDropDown($attPairs,$engine=null) {
  * @return string
  */
 function timeDropDown($attPairs,$engine=null) {
+	deprecated();
 	$date = new date();
 	return($date->timeDropDown($attPairs,$engine=null));
 }
@@ -88,6 +94,7 @@ function timeDropDown($attPairs,$engine=null) {
  * @return mixed
  */
 function filelist($dir,$template,$engine) {
+	deprecated();
 
 	$enginevars = enginevars::getInstance();
 
@@ -107,6 +114,7 @@ function filelist($dir,$template,$engine) {
  * @see debug::printENV()
  */
 function printENV(){
+	deprecated();
 	debug::printENV();
 	return;
 }
@@ -122,6 +130,7 @@ function printENV(){
  * @return string
  */
 function obsafe_print_r($var, $return = TRUE, $level = 0) {
+	deprecated();
 	$return = debug::obsafe_print_r($var, $return, $level);
 	if (!is_empty($return)) {
 		return($return);

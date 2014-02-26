@@ -566,6 +566,7 @@ class errorHandle
      * @static
      * @param string $logLocation
      * @return bool
+	 * @TODO Bug on line 576 (db handling)
      */
     private static function recordError($logLocation)
     {
@@ -1013,7 +1014,6 @@ class errorHandle
 	/**
 	 * Record an error message and return HTML message
 	 *
-	 * @deprecated
 	 * @param string $msg
 	 * @return string
 	 */
@@ -1026,7 +1026,6 @@ class errorHandle
 	/**
 	 * Record an success message and return HTML message
 	 *
-	 * @deprecated
 	 * @param string $msg
 	 * @return string
 	 */
@@ -1039,7 +1038,6 @@ class errorHandle
 	/**
 	 * Record an warning message and return HTML message
 	 *
-	 * @deprecated
 	 * @param string $msg
 	 * @return string
 	 */
@@ -1052,7 +1050,6 @@ class errorHandle
 	/**
 	 * Generates an HTML list of error/success/warning messages
 	 *
-	 * @deprecated
 	 * @param string $type Type of message to generate (all, error, success, warning)
 	 * @return bool|string
 	 */
@@ -1122,7 +1119,6 @@ class errorHandle
 	/**
 	 * Adds a message onto an errorStack inside EngineAPI
 	 *
-	 * @deprecated
 	 * @param string $type Type of message
 	 * @param string $message
 	 * @return string

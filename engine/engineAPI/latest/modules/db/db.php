@@ -32,7 +32,7 @@ class db implements Countable {
     /**
      * @var dbDriver[]
      */
-    private static $objects = array();
+    private static $connections = array();
 
     public static function getInstance() {
         return new self;
@@ -45,7 +45,7 @@ class db implements Countable {
      * @return int
      */
     public function count() {
-        return sizeof(self::$objects);
+        return sizeof(self::$connections);
     }
 
     /**
@@ -57,12 +57,12 @@ class db implements Countable {
      * @param bool $destroyObjects
      */
     public static function reset($destroyObjects = TRUE) {
-        foreach (self::$objects as $object) {
+        foreach (self::$connections as $object) {
             if ($destroyObjects) $object->destroy();
             self::unregisterObject($object);
         }
         self::$drivers = array();
-        self::$objects = array();
+        self::$connections = array();
     }
 
     /**
@@ -86,7 +86,7 @@ class db implements Countable {
 
         try {
             // Make sure alias isn't already taken
-            if (isset($alias) and !empty($alias) and isset(self::$objects[$alias])) throw new Exception('Alias already registered!');
+            if (isset($alias) and !empty($alias) and isset(self::$connections[$alias])) throw new Exception('Alias already registered!');
 
             // Make sure requested driver is a valid one
             if (!self::loadDriver($driver)) throw new Exception('Failed to load driver!');
@@ -96,30 +96,55 @@ class db implements Countable {
             $dbDriverObj   = new $dbDriverClass($options);
 
             // Save the driver for later if it's been given an alias
-            if (!empty($alias)) self::$objects[$alias] = $dbDriverObj;
+            if (!empty($alias)) self::$connections[$alias] = $dbDriverObj;
 
             // Return the new driver object
             return $dbDriverObj;
         }catch(Exception $e) {
-            errorHandle::newError(__METHOD__."() {$e->getMessage()} thrown from line {$e->getLine()}", errorHandle::DEBUG);
-
+            $msg = __METHOD__."() {$e->getMessage()} thrown from line {$e->getLine()}";
+            if(class_exists('errorHandle')){
+                errorHandle::newError($msg, errorHandle::DEBUG);
+            }else{
+                error_log($msg);
+            }
             return FALSE;
         }
     }
 
     /**
-     * [PHP Magic Method] Allow drivers to be called via virtual static methods (eg: $db->system->...)
+     * Returns TRUE if the given named connection has been defined
      *
      * @author David Gersting
      * @param $name
+     * @return bool
+     */
+    public static function exists($name){
+        $name = trim(strtolower($name));
+        return isset(self::$connections[$name]);
+    }
+
+    /**
+     * Returns the given named connection or NULL if it hasn't been defined yet
+     *
+     * @author David Gersting
+     * @param string $name
      * @return dbDriver
      */
-    public function __get($name) {
+    public static function get($name){
         $name = trim(strtolower($name));
 
-        return isset(self::$objects[$name])
-            ? self::$objects[$name]
+        return isset(self::$connections[$name])
+            ? self::$connections[$name]
             : NULL;
+    }
+
+    /**
+     * [PHP Magic Method] Allow drivers to be called via virtual static methods (eg: $db->system->...)
+     *
+     * @see self::get()
+     */
+    public function __get($name) {
+        return self::get($name);
     }
 
     /**
@@ -132,13 +157,13 @@ class db implements Countable {
      */
     public static function registerAs(dbDriver $driver, $alias) {
         $alias = trim(strtolower($alias));
-        if (isset(self::$objects[$alias])) {
+        if (isset(self::$connections[$alias])) {
             errorHandle::newError(__METHOD__."() - Alias already exists!", errorHandle::DEBUG);
 
             return FALSE;
         }
         else {
-            self::$objects[$alias] = $driver;
+            self::$connections[$alias] = $driver;
 
             return TRUE;
         }
@@ -153,8 +178,8 @@ class db implements Countable {
      */
     public static function unregisterAlias($alias) {
         $alias = trim(strtolower($alias));
-        if (isset(self::$objects[$alias])) {
-            unset(self::$objects[$alias]);
+        if (isset(self::$connections[$alias])) {
+            unset(self::$connections[$alias]);
 
             return TRUE;
         }
@@ -172,10 +197,10 @@ class db implements Countable {
      */
     public static function unregisterObject(dbDriver $driver) {
         $removedCounter = 0;
-        foreach (self::$objects as $alias => $object) {
+        foreach (self::$connections as $alias => $object) {
             if ($driver === $object) {
                 $removedCounter++;
-                unset(self::$objects[$alias]);
+                unset(self::$connections[$alias]);
             }
         }
 

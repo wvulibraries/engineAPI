@@ -322,7 +322,7 @@ class fileHandler {
 	 * @return bool|string
 	 */
 	public function dbInsert($table,$fields) {
-
+		deprecated();
 		$sqlStr = NULL;
 
 		foreach ($fields as $val) {

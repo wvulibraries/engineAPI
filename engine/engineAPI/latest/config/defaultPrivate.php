@@ -8,10 +8,14 @@
 
 global $engineVarsPrivate;//MySQL Information
 
-$engineVarsPrivate['mysql']['server']   = "localhost";
-$engineVarsPrivate['mysql']['port']     = "3306";
-$engineVarsPrivate['mysql']['username'] = "username";
-$engineVarsPrivate['mysql']['password'] = 'password';
+$engineVarsPrivate['engineDB']['driver']        = 'mysql';
+$engineVarsPrivate['engineDB']['driverOptions'] = array(
+    'host'   => 'localhost',
+    'port'   => 3306,
+    'user'   => 'username',
+    'pass'   => 'password',
+    'dbName' => 'engineCMS'
+);
 
 $engineVarsPrivate["privateVars"]["engineDB"] = array(
 	array(
