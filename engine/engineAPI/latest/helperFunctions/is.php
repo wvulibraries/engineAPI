@@ -152,7 +152,15 @@ function is_empty($var,$strict=TRUE) {
  * @return bool
  */
 function isCLI() {
-	return (PHP_SAPI == 'cli' || (@is_numeric($_SERVER['argc']) && $_SERVER['argc'] > 0));
+    if(defined('STDIN') || php_sapi_name() == 'cli') {
+        return true;
+    }
+     
+    if( empty($_SERVER['REMOTE_ADDR']) and !isset($_SERVER['HTTP_USER_AGENT']) and count($_SERVER['argv']) > 0) {
+        return true;
+    } 
+     
+    return false;
 }
 
 /**
