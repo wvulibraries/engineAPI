@@ -45,6 +45,10 @@ class http
         return TRUE;
     }
 
+	/**
+	 * Checks that any POST has a valid CSRF Token included with it
+	 * If a token is not found, or is invalid script execution is halted!
+	 */
 	public static function checkCSRF(){
 		// No post? Then we don't care about CSRF
 		if(!sizeof($_POST)) return;
