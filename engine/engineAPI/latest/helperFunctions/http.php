@@ -76,7 +76,7 @@ class http
 	 * @todo #bug Checking $_GET and not $_POST on line 79 (won't build clean POST unless GET is set)
      */
     public static function cleanPost() {
-        if(isset($_GET)) {
+        if(isset($_POST)) {
 
             $temp = array();
 
