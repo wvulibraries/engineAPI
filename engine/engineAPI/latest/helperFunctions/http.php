@@ -45,6 +45,19 @@ class http
         return TRUE;
     }
 
+	public static function checkCSRF(){
+		// No post? Then we don't care about CSRF
+		if(!sizeof($_POST)) return;
+
+		try{
+			if (!isset($_POST['__csrfID'])) throw new Exception('No CSRF ID');
+			if (!isset($_POST['__csrfToken'])) throw new Exception('No CSRF Token');
+			if (!session::csrfTokenCheck($_POST['__csrfID'], $_POST['__csrfToken'])) throw new Exception('Invalid CSRF');
+		}catch(Exception $e){
+			die("CSRF check failed! ({$e->getMessage()})");
+		}
+	}
+
     /**
      * rebuilds the $_GET variable with sanitized HTML, MYSQL, and unsanitized raw values.
      * Builds a pre EngineAPI 4.0 cleanGET array in the $_GET variable

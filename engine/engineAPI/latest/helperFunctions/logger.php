@@ -54,14 +54,14 @@ class logger {
 
 		// setup the variables
 		$date      = time();
-		$ip        = isset($_SERVER['REMOTE_ADDR'])     ? $_SERVER['REMOTE_ADDR']     : NULL;
-		$referrer  = isset($_SERVER['HTTP_REFERER'])    ? $_SERVER['HTTP_REFERER']    : NULL;
-		$resource  = isset($_SERVER['REQUEST_URI'])     ? $_SERVER['REQUEST_URI']     : NULL;
-		$queryStr  = isset($_SERVER['QUERY_STRING'])    ? $_SERVER['QUERY_STRING']    : NULL;
-		$useragent = isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : NULL;
-		$site      = isset($engineVars['server'])       ? $engineVars['server']       : NULL;
+		$ip        = isset($_SERVER['REMOTE_ADDR'])     ? $_SERVER['REMOTE_ADDR']     : '';
+		$referrer  = isset($_SERVER['HTTP_REFERER'])    ? $_SERVER['HTTP_REFERER']    : '';
+		$resource  = isset($_SERVER['REQUEST_URI'])     ? $_SERVER['REQUEST_URI']     : '';
+		$queryStr  = isset($_SERVER['QUERY_STRING'])    ? $_SERVER['QUERY_STRING']    : '';
+		$useragent = isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : '';
+		$site      = isset($engineVars['server'])       ? $engineVars['server']       : '';
 
-		$sql    = 'INSERT INTO log (date,ip,referrer,resource,useragent,function,type,message,querystring,site) VALUES(?,?,?,?,?,?,?,?,?,?)';
+		$sql    = 'INSERT INTO log (`date`,ip,referrer,resource,useragent,function,`type`,message,querystring,site) VALUES(?,?,?,?,?,?,?,?,?,?)';
 		$params = array($date, $ip, $referrer, $resource, $useragent, $function, $type, $message, $queryStr, $site);
 		$this->database->query($sql, $params);
 
