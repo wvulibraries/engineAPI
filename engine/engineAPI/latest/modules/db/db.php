@@ -131,6 +131,7 @@ class db implements Countable {
      * @return dbDriver
      */
     public static function get($name){
+		if($name instanceof dbDriver) return $name;
         $name = trim(strtolower($name));
 
         return isset(self::$connections[$name])
