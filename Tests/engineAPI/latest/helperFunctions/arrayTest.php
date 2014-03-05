@@ -247,6 +247,30 @@ class arrayTest extends PHPUnit_Framework_TestCase {
 
 	}
 
+
+	public function testArrayGet()
+	{
+		$array = array('names' => array('developer' => 'taylor'));
+		$this->assertEquals('taylor', array_get($array, 'names.developer'));
+		$this->assertEquals('dayle', array_get($array, 'names.otherDeveloper', 'dayle'));
+	}
+
+
+	public function testArraySet()
+	{
+		$array = array();
+		array_set($array, 'names.developer', 'taylor');
+		$this->assertEquals('taylor', $array['names']['developer']);
+	}
+
+
+	public function testArrayUnset()
+	{
+		$array = array('names' => array('developer' => 'taylor', 'otherDeveloper' => 'dayle'));
+		array_unset($array, 'names.developer');
+		$this->assertFalse(isset($array['names']['developer']));
+		$this->assertTrue(isset($array['names']['otherDeveloper']));
+	}
 }
 
 ?>
