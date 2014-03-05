@@ -172,6 +172,14 @@ class errorHandle
     }
 
 	/**
+	 * Returns TRUE if the errorHandle is ready to receive errors
+	 * @return bool
+	 */
+	public static function isReady(){
+		return (self::$instance instanceof self);
+	}
+
+	/**
 	 * No cloning allowed!
 	 */
 	private function __clone(){}
