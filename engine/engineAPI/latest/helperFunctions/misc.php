@@ -384,7 +384,7 @@ function deprecated($msg=''){
 		: $deprecated['function'];
 
 	// Create error message
-	if(!isempty($msg)) $msg = " (msg: $msg)";
+	if(!is_empty($msg)) $msg = " (msg: $msg)";
 	$errorMsg = sprintf('[Deprecated] %s() called from %s:%s%s',
 		$deprecatedFn,
 		$calledFrom['file'],
