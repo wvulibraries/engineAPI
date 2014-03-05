@@ -369,6 +369,24 @@ function castAs($input,$cast){
 }
 
 /**
+ * Fix a broken object
+ *
+ * Attempt to fix a broken object due to bad serialization / unserialization
+ * This can happen when the object is unserialized before the object's definition has been loaded
+ * For example: When you save an object in the session, then session_start() is called before that object is available again
+ *
+ * @see http://stackoverflow.com/a/1173769
+ * @param mixed $object
+ * @return mixed
+ */
+function fixObject(&$object){
+	if (!is_object($object) && gettype($object) == 'object') {
+		return ($object = unserialize(serialize($object)));
+	}
+	return $object;
+}
+
+/**
  * Mark a method/function/feature as deprecated
  *
  * @author David Gersting
