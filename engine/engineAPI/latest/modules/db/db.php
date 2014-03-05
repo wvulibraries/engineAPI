@@ -102,7 +102,7 @@ class db implements Countable {
             return $dbDriverObj;
         }catch(Exception $e) {
             $msg = __METHOD__."() {$e->getMessage()} thrown from line {$e->getLine()}";
-            if(class_exists('errorHandle')){
+            if(class_exists('errorHandle') && errorHandle::isReady()){
                 errorHandle::newError($msg, errorHandle::DEBUG);
             }else{
                 error_log($msg);
