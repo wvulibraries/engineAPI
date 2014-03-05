@@ -224,7 +224,6 @@ class EngineAPI{
 		login::init();
 
 		// Clean variables
-		http::checkCSRF();                 // Check CSRF Token
 		http::cleanPost();                 // $_POST
 		http::cleanGet();                  // $_GET
 		http::removeRequest();             // kill off $_REQUEST

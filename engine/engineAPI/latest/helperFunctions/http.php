@@ -11,32 +11,21 @@ class http
      */
     public function  __construct(){}
 
-    public static function csrfCheck() {
+	/**
+	 * Checks that any POST has a valid CSRF Token included with it
+	 * If a token is not found, or is invalid script execution is halted!
+	 */
+	public static function csrfCheck() {
+		// No post? Then we don't care about CSRF
+		if(!sizeof($_POST)) return;
 
-        if(!empty($_POST)){
-            if(!isset($_POST['csrfToken']) or !isset($_POST['csrfID'])){
-                $msg = "Engine Security - CSRF Check Failed - No token/id provided";
-                error_log($msg);
-                die($msg);
-            }
-            if(!session::csrfTokenCheck($_POST['csrfID'], $_POST['csrfToken'])){
-                $msg = "Engine Security - CSRF Check Failed - Invalid token/id provided";
-                error_log($msg);
-                die($msg);
-            }
-
-            $server = $this->getHTTP_REFERERServer($_SERVER['HTTP_REFERER']);
-            if($server != $enginevars->get('server')) {
-                error_log("HTTP Referer check failed. Possible Cross Site Request Forgery Attack!");
-                echo "HTTP Referer check failed. Possible Cross Site Request Forgery Attack!<br />";
-                echo "_SERVER: ".$_SERVER['HTTP_REFERER']."<br />";
-                echo "server: ".$server."<br />";
-                exit;
-            }
-        }
-
-        return TRUE;
-
+		try{
+			if (!isset($_POST['MYSQL']['__csrfID'])) throw new Exception('No CSRF ID');
+			if (!isset($_POST['MYSQL']['__csrfToken'])) throw new Exception('No CSRF Token');
+			if (!session::csrfTokenCheck($_POST['MYSQL']['__csrfID'], $_POST['MYSQL']['__csrfToken'])) throw new Exception('Invalid CSRF');
+		}catch(Exception $e){
+			die("CSRF check failed! ({$e->getMessage()})");
+		}
     }
 
     public static function removeRequest() {
@@ -44,23 +33,6 @@ class http
 
         return TRUE;
     }
-
-	/**
-	 * Checks that any POST has a valid CSRF Token included with it
-	 * If a token is not found, or is invalid script execution is halted!
-	 */
-	public static function checkCSRF(){
-		// No post? Then we don't care about CSRF
-		if(!sizeof($_POST)) return;
-
-		try{
-			if (!isset($_POST['__csrfID'])) throw new Exception('No CSRF ID');
-			if (!isset($_POST['__csrfToken'])) throw new Exception('No CSRF Token');
-			if (!session::csrfTokenCheck($_POST['__csrfID'], $_POST['__csrfToken'])) throw new Exception('Invalid CSRF');
-		}catch(Exception $e){
-			die("CSRF check failed! ({$e->getMessage()})");
-		}
-	}
 
     /**
      * rebuilds the $_GET variable with sanitized HTML, MYSQL, and unsanitized raw values.
