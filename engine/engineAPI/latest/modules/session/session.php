@@ -599,6 +599,9 @@ class session{
 					break;
 				}
 			}
+			if(isset(self::$sessionData['flash']['__old__'][$name])){
+				$result = self::$sessionData['flash']['__old__'][$name];
+			}
 		}
 
 		// Was a result never found?  (if so, use $default)
