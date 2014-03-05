@@ -496,9 +496,12 @@ class session{
 	 * Clears all session data
 	 */
 	public static function clear(){
-		self::$sessionData['data']  = array();
-		self::$sessionData['flash'] = array(
-			'__old__' => self::$sessionData['flash']['__old__']
+		self::$sessionData = array(
+			'csrf' => array(),
+			'data' => array(),
+			'flash' => array(
+				'__old__' => array()
+			)
 		);
 		self::sync();
 	}
