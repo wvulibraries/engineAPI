@@ -165,6 +165,9 @@ class EngineAPI{
 	 * @param string $site Name of the site config to use
 	 */
 	private function __construct($site="default") {
+		// Set UTC as our system timezone. (This can be changed latter if needed)
+		date_default_timezone_set('UTC');
+
 		self::$engineDir = dirname(__FILE__);
 
 		require_once self::$engineDir."/loader.php";
