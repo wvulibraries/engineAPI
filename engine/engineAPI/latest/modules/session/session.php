@@ -22,7 +22,9 @@ class session{
 	/**
 	 * Internal placeholder for NULL
 	 */
-	const NULL='__NULL__1B3D7B90B01DDF1413A49751448B80A27CAE480AA0AB31CCA00F686BE5E51A10';
+	const NULL  = '__NULL__68RO5cLS1JZHKTO2u6OgeQXN854112PT';
+	const TRUE  = '__TRUE__Hw4yMEX4O46TF33fIk2HXA2L272IhDRC';
+	const FALSE = '__FALSE__5SV34oP28522Kzrao7R2c675O37EtdFm';
 
 	/**
 	 * @var self
@@ -293,7 +295,7 @@ class session{
 		return sprintf('<input type="hidden" name="csrfID" id="csrfID" value="%s">', $matches[1]);
 	}
 
-		/**
+	/**
 	 * Restore a previous session
 	 *
 	 * @see self::__construct()
@@ -357,13 +359,8 @@ class session{
 
 		// Setup the basic SESSION layout (if it's needed)
 		if(!sizeof(self::$sessionData)){
-			self::$sessionData = array(
-				'fingerprint' => self::browserFingerprint(),
-				'csrf'        => array(),
-				'private'     => array(),
-				'data'        => array(),
-				'flash'       => array('__old__' => array()),
-			);
+			self::$sessionData['fingerprint'] = self::browserFingerprint();
+			self::clear();
 		}
 
 		// Before we do anything else, check the browser's fingerprint
@@ -496,13 +493,10 @@ class session{
 	 * Clears all session data
 	 */
 	public static function clear(){
-		self::$sessionData = array(
-			'csrf' => array(),
-			'data' => array(),
-			'flash' => array(
-				'__old__' => array()
-			)
-		);
+		self::$sessionData['csrf']    = array();
+		self::$sessionData['private'] = array();
+		self::$sessionData['data']    = array();
+		self::$sessionData['flash']   = array('__old__' => array());
 		self::sync();
 	}
 
@@ -587,28 +581,33 @@ class session{
 				errorHandle::newError(__METHOD__."() - Invalid location '$location' requested. (valid: ".implode(',', $validLocations).")", errorHandle::DEBUG);
 				return $default;
 			}
-			// Okay, return the data if it exists
-			$result = isset(self::$sessionData[$location][$name])
-				? self::$sessionData[$location][$name]
-				: $default;
+			$result = array_get(self::$sessionData[$location], $name);
 		}else{
 			// Okay, start looking for the data
 			foreach($validLocations as $location){
-				if(isset(self::$sessionData[$location][$name])){
-					$result = self::$sessionData[$location][$name];
-					break;
-				}
+				$result = array_get(self::$sessionData[$location], $name);
+				if(NULL !== $result) break;
 			}
-			if(isset(self::$sessionData['flash']['__old__'][$name])){
-				$result = self::$sessionData['flash']['__old__'][$name];
-			}
+			if(!isset($result) || NULL === $result) $result = array_get(self::$sessionData['flash']['__old__'], $name);
 		}
 
-		// Was a result never found?  (if so, use $default)
-		if(!isset($result)) $result = $default;
+		// Catch the case where the requested value doesn't exist
+		if($result === NULL) $result = $default;
 
-		// Return the result and catch any encoded 'null' values
-		return $result == self::NULL ? NULL : $result;
+		// Return the value (taking care of the encoded booleans)
+		switch($result){
+			case self::NULL:
+				return NULL;
+
+			case self::TRUE:
+				return TRUE;
+
+			case self::FALSE:
+				return FALSE;
+
+			default:
+				return $result;
+		}
 	}
 
 	/**
@@ -653,11 +652,15 @@ class session{
 			$location='data';
 		}
 
-		// Encode 'Null' value
-		if(is_null($value)) $value = self::NULL;
+		// Encode booleans (NULL, TRUE, FALSE)
+		if(NULL === $value) $value = self::NULL;
+		if(TRUE === $value) $value = self::TRUE;
+		if(FALSE === $value) $value = self::FALSE;
 
-		// Set value, re-sync _SESSION, and return
-		self::$sessionData[$location][$name] = $value;
+		// Expand dot-notation and set the value
+		array_set(self::$sessionData[$location], $name, $value);
+
+		// Sync _SESSION, and return
 		self::sync();
 		return TRUE;
 	}
@@ -682,8 +685,10 @@ class session{
 			return FALSE;
 		}
 
-		// Delete it!
-		unset(self::$sessionData[$location][$name]);
+		// Delete it! (if it exists)
+		array_unset(self::$sessionData[$location], $name);
+
+		self::sync();
 		return TRUE;
 	}
 
