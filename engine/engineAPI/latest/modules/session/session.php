@@ -591,6 +591,9 @@ class session{
 			if(!isset($result) || NULL === $result) $result = array_get(self::$sessionData['flash']['__old__'], $name);
 		}
 
+		// The result might be a broken object, try and fix it!
+		fixObject($result);
+
 		// Catch the case where the requested value doesn't exist
 		if($result === NULL) $result = $default;
 
