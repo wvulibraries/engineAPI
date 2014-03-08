@@ -548,7 +548,8 @@ class session{
 			foreach($validLocations as $location){
 				if(isset(self::$sessionData[$location][$name])) return TRUE;
 			}
-			return FALSE;
+			// Last chance is for old flash data. If it's not there, it's not anywhere
+			return isset(self::$sessionData['flash']['__old__'][$name]);
 		}
 	}
 
