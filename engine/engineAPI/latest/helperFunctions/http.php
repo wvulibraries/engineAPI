@@ -123,26 +123,26 @@ class http
         return TRUE;
     }
 
-    /**
-     * Redirect the browser to the given URL.
-     * (Warning: This will terminate script execution)
-     *
-     * @param string $url
-     * @param int $statusCode
-     * @param bool $exit
-     */
-    public static function redirect($url, $statusCode=307, $exit=TRUE) {
-        $statusCode = is_null($statusCode) ? 307 : (int)$statusCode;
-        $validCodes = array(301,307);
-        if(!in_array($statusCode, $validCodes)){
-            trigger_error(__METHOD__."() - Invalid HTTP status code", E_USER_NOTICE);
-            $statusCode=307;
-        }
+	/**
+	 * Redirect the browser to the given URL.
+	 * (Warning: This will terminate script execution)
+	 *
+	 * @param string $url
+	 * @param int $statusCode
+	 * @param bool $exit
+	 * @return bool
+	 */
+	public static function redirect($url, $statusCode=307, $exit=TRUE) {
+		if(!preg_match('/^3\d\d$/', $statusCode)){
+			trigger_error(__METHOD__."() - Invalid HTTP status code", E_USER_NOTICE);
+			return FALSE;
+		}
 
-        self::sendStatus($statusCode);
-        header(sprintf("Location: %s", trim($url)));
-        if($exit) exit();
-    }
+		self::sendStatus($statusCode);
+		header(sprintf("Location: %s", trim($url)));
+		if($exit) exit();
+		return TRUE;
+	}
 
     /**
      * Send the requested HTTP status code to the browser
