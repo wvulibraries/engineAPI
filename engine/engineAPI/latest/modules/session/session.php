@@ -392,6 +392,9 @@ class session{
 		unset(self::$sessionData['flash']['__old__']);
 		self::$sessionData['flash'] = array('__old__' => self::$sessionData['flash']);
 
+		// Perform garbage cleanup on ourselves
+		self::gc();
+
 		// Lastly, flag the session as started, re-sync $_SESSION, and return
 		self::$started = TRUE;
 		self::sync();
