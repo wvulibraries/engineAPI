@@ -542,14 +542,14 @@ class session{
 				return FALSE;
 			}
 			// Okay, return the data if it exists
-			return isset(self::$sessionData[$location][$name]);
+			return NULL !== array_get(self::$sessionData[$location], $name);
 		}else{
 			// Okay, start looking for the data
 			foreach($validLocations as $location){
-				if(isset(self::$sessionData[$location][$name])) return TRUE;
+				if(NULL !== array_get(self::$sessionData[$location], $name)) return TRUE;
 			}
 			// Last chance is for old flash data. If it's not there, it's not anywhere
-			return isset(self::$sessionData['flash']['__old__'][$name]);
+			return NULL !== array_get(self::$sessionData['flash']['__old__'], $name);
 		}
 	}
 
