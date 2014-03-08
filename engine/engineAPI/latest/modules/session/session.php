@@ -388,13 +388,9 @@ class session{
 			});
 		});
 
-		// Update the flash data
-		$newFlash = array('__old__'=>array());
-		foreach(self::$sessionData['flash'] as $key => $value){
-			if($key == '__old__') continue;
-			$newFlash['__old__'][$key] = $value;
-		}
-		self::$sessionData['flash'] = $newFlash;
+		// Expire the old flash data
+		unset(self::$sessionData['flash']['__old__']);
+		self::$sessionData['flash'] = array('__old__' => self::$sessionData['flash']);
 
 		// Lastly, flag the session as started, re-sync $_SESSION, and return
 		self::$started = TRUE;
