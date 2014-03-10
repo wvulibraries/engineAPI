@@ -270,8 +270,8 @@ class session{
 	 */
 	public static function templateHandler_csrf(){
 		$csrf    = self::csrfTokenRequest();
-		$output  = sprintf('<input type="hidden" name="csrfID" id="csrfID" value="%s">', $csrf[0]);
-		$output .= sprintf('<input type="hidden" name="csrfToken" id="csrfToken" value="%s">', $csrf[1]);
+		$output  = sprintf('<input type="hidden" name="__csrfID" id="__csrfID" value="%s">', $csrf[0]);
+		$output .= sprintf('<input type="hidden" name="__csrfToken" id="__csrfToken" value="%s">', $csrf[1]);
 		return $output;
 	}
 
@@ -449,11 +449,13 @@ class session{
 	 */
 	public static function csrfTokenRequest(){
 		$csrfID    = uniqid();
-		$csrfToken = md5(uniqid(mt_rand(), true));
-		self::$sessionData['csrf'][$csrfID] = array(
-			'id'      => $csrfID,
-			'token'   => $csrfToken,
-			'created' => time());
+		$csrfToken = md5(uniqid(mt_rand(), TRUE));
+		$options   = array(
+			'location' => 'csrf',
+			'timeout' => self::$options['csrfTimeout']
+		);
+
+		self::set($csrfID, $csrfToken, $options);
 		self::sync();
 		return array($csrfID,$csrfToken);
 	}
@@ -467,23 +469,12 @@ class session{
 	 */
 	public static function csrfTokenCheck($id,$token){
 		if(isset(self::$sessionData['csrf'][$id])){
-			$validCSRF = self::$sessionData['csrf'][$id];
-
-			// Has the token timmed out?
-			if(($validCSRF['created']+self::$options['csrfTimeout']) < time()){
-				// Yes - kill the session and return FALSE
+			if($token === self::$sessionData['csrf'][$id]){
 				unset(self::$sessionData['csrf'][$id]);
 				self::sync();
-				return FALSE;
-			}else{
-				// No, but is the passes token correct?
-				if($token === $validCSRF['token']){
-					unset(self::$sessionData['csrf'][$id]);
-					self::sync();
-					return TRUE;
-				}
-				return FALSE;
+				return TRUE;
 			}
+			return FALSE;
 		}
 		return FALSE;
 	}
@@ -492,10 +483,11 @@ class session{
 	 * Clears all session data
 	 */
 	public static function clear(){
-		self::$sessionData['csrf']    = array();
-		self::$sessionData['private'] = array();
-		self::$sessionData['data']    = array();
-		self::$sessionData['flash']   = array('__old__' => array());
+		self::$sessionData['csrf']     = array();
+		self::$sessionData['private']  = array();
+		self::$sessionData['data']     = array();
+		self::$sessionData['timeouts'] = array();
+		self::$sessionData['flash']    = array('__old__' => array());
 		self::sync();
 	}
 
@@ -557,6 +549,51 @@ class session{
 	}
 
 	/**
+	 * Check that the requested data location is value for the given user
+	 * @param string $location
+	 * @param string $name
+	 * @return bool
+	 */
+	private static function checkLocation($location, $name=NULL){
+		$callingFile = realpath(callingFile(FALSE, 2));
+		switch($location){
+			case 'csrf':
+			case 'timeouts':
+				if($callingFile != __FILE__){
+					errorHandle::newError(__METHOD__."() - Access denied for set $location", errorHandle::DEBUG);
+					return FALSE;
+				}
+				return TRUE;
+
+			case 'private':
+				$engineDir = realpath(EngineAPI::$engineDir);
+				if(0 !== strpos($callingFile, $engineDir)){
+					// Invalid
+					errorHandle::newError(__METHOD__."() - Access denied for set private", errorHandle::DEBUG);
+					return FALSE;
+				}
+				return TRUE;
+
+			case 'flash':
+				if($name == '__old__'){
+					errorHandle::newError(__METHOD__."() - Invalid name for flash data '$name'! (Reserved word)", errorHandle::DEBUG);
+					return FALSE;
+				}
+				return TRUE;
+
+			case 'data':
+				return TRUE;
+
+			default:
+				errorHandle::newError(__METHOD__."() - Invalid location! '$location'!", errorHandle::DEBUG);
+				return FALSE;
+
+		}
+	}
+
+
+
+	/**
 	 * Get a value from the session
 	 *
 	 * @param string $name
@@ -569,26 +606,21 @@ class session{
 	 * @return mixed
 	 */
 	public static function get($name,$default=NULL,$location=NULL){
-		// Define the valid locations, also sets the search order
-		$validLocations = array('private','data','flash');
 		// Normalize name
 		$name = self::normalizeName($name);
 
 		// Was a specific location requested?
 		if($location){
-			// Is it a valid location?
-			if(!in_array($location, $validLocations)){
-				errorHandle::newError(__METHOD__."() - Invalid location '$location' requested. (valid: ".implode(',', $validLocations).")", errorHandle::DEBUG);
-				return $default;
-			}
+			// Check the location
+			if(!self::checkLocation($location, $name)) return FALSE;
+			// Get the requested value
 			$result = array_get(self::$sessionData[$location], $name);
 		}else{
 			// Okay, start looking for the data
-			foreach($validLocations as $location){
-				$result = array_get(self::$sessionData[$location], $name);
+			foreach(array('private','data','flash','flash.__old__') as $location){
+				$result = array_get(self::$sessionData, "$location.$name");
 				if(NULL !== $result) break;
 			}
-			if(!isset($result) || NULL === $result) $result = array_get(self::$sessionData['flash']['__old__'], $name);
 		}
 
 		// The result might be a broken object, try and fix it!
@@ -620,40 +652,29 @@ class session{
 	 *        Name of the value to set
 	 * @param mixed $value
 	 *        Value to be set
-	 * @param bool $isFlash
-	 *        Is this 'flash' data?
-	 *        Flash data will only live for one request
-	 * @param bool $isPrivate
-	 *        Is this 'private' data
-	 *        (Only EngineAPI and its modules can use this)
+	 * @param array $options
+	 *        Options for this session data
+	 *         - location
+	 *           Sets the location to save this data (valid: data, flash, private)
+	 *           Notes:
+	 *            - Flash data will only live for one request
+	 *            - Only EngineAPI and its modules can use private
+	 *         - timeout
+	 *           Lets you set a timeout for the data.
+	 *           This can either be UNIX timestamp or the number of seconds the data should live
 	 * @return bool
 	 *         Was the setting successful?
 	 */
-	public static function set($name,$value,$isFlash=FALSE,$isPrivate=FALSE){
+	public static function set($name,$value,$options=array()){
 		// Normalize name
 		$name = self::normalizeName($name);
 
-		// Determine location and do any security/sanity checks
-		if($isPrivate){
-			$callingFile = realpath(callingFile());
-			$engineDir   = realpath(EngineAPI::$engineDir);
-			if(0 === strpos($callingFile, $engineDir)){
-				// Valid
-				$location='private';
-			}else{
-				// Invalid
-				errorHandle::newError(__METHOD__."() - Access denied for set private", errorHandle::DEBUG);
-				return FALSE;
-			}
-		}elseif($isFlash){
-			if($name == '__old__'){
-				errorHandle::newError(__METHOD__."() - Invalid name for flash data '$name'! (Reserved word)", errorHandle::DEBUG);
-				return FALSE;
-			}
-			$location='flash';
-		}else{
-			$location='data';
-		}
+		$options = array_merge(array(
+			'location' => 'data',
+		), (array)$options);
+
+		// Check the location
+		if(!self::checkLocation($options['location'], $name)) return FALSE;
 
 		// Encode booleans (NULL, TRUE, FALSE)
 		if(NULL === $value) $value = self::NULL;
@@ -661,7 +682,16 @@ class session{
 		if(FALSE === $value) $value = self::FALSE;
 
 		// Expand dot-notation and set the value
-		array_set(self::$sessionData[$location], $name, $value);
+		array_set(self::$sessionData[ $options['location'] ], $name, $value);
+
+		// Is there a timeout set for this data?
+		if(isset($options['timeout'])){
+			$now = time();
+			// If the timeout is less than time, add time to it (this gives us 'timeout in n seconds from now')
+			if($options['timeout'] < $now) $options['timeout'] += $now;
+			// Record this timeout
+			self::$sessionData['timeouts'][ $options['timeout'] ][] = $options['location'].".$name";
+		}
 
 		// Sync _SESSION, and return
 		self::sync();
@@ -676,17 +706,11 @@ class session{
 	 * @return bool
 	 */
 	public static function destroy($name,$location='data'){
-		// Define the valid locations, also sets the search order
-		$validLocations = array('private','data','flash');
-
 		// Normalize name
 		$name = self::normalizeName($name);
 
-		// Make sure location is valid
-		if(!in_array($location, $validLocations)){
-			errorHandle::newError(__METHOD__."() - Invalid location '$location' requested. (valid: ".implode(',', $validLocations).")", errorHandle::DEBUG);
-			return FALSE;
-		}
+		// Check the location
+		if(!self::checkLocation($location, $name)) return FALSE;
 
 		// Delete it! (if it exists)
 		array_unset(self::$sessionData[$location], $name);
@@ -776,11 +800,18 @@ class session{
 	/**
 	 * Perform garbage collection for this session
 	 */
-	public static function gc(){
-		// Kill off old csrf tokens
-		foreach(self::$sessionData['csrf'] as $csrfID => $csrf){
-			if(($csrf['created']+self::$options['csrfTimeout']) < time()){
-				unset(self::$sessionData['csrf'][$csrfID]);
+	private static function gc(){
+		// Kill off old, timed-out, data
+		if (sizeof(self::$sessionData['timeouts'])) {
+			$now = time();
+			foreach (self::$sessionData['timeouts'] as $dieAt => $names) {
+				if ($dieAt <= $now){
+					foreach($names as $name){
+						list($location,$name) = explode('.', $name, 2);
+						self::destroy($name, $location);
+					}
+					self::destroy($dieAt, 'timeouts');
+				}
 			}
 		}
 
