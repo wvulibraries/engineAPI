@@ -157,6 +157,12 @@ class errorHandle
      */
     public static $uiClassWarning = 'warningMessage';
 
+	/**
+	 * [errorStack] Custom callback for pretty print
+	 * @var
+	 */
+	private static $prettyPrintCallback;
+
     private $enginevars;
 
     /**
@@ -1020,6 +1026,28 @@ class errorHandle
     }
 
 	/**
+	 * Register a custom callback to handle call to prettyPrint()
+	 *
+	 * The callback should expect 2 params:
+	 * - The engineAPI error stack
+	 * - The type as passes to prettyPrint()
+	 *
+	 * @see self::prettyPrint()
+	 * @param callable $callback
+	 */
+	public static function registerPrettyPrintCallback($callback){
+		self::$prettyPrintCallback = $callback;
+	}
+
+	/**
+	 * Clears (removes) a previously registered prettyPrint callback
+	 * @see self::registerPrettyPrintCallback()
+	 */
+	public static function clearPrettyPrintCallback(){
+		self::$prettyPrintCallback = NULL;
+	}
+
+	/**
 	 * Record an error message and return HTML message
 	 *
 	 * @param string $msg
@@ -1069,12 +1097,28 @@ class errorHandle
         }
 
 		$engine = EngineAPI::singleton();
+
+		// If there's a custom prettyPrint callback registered use it!
+		if (!isnull(self::$prettyPrintCallback)) {
+			if (is_callable(self::$prettyPrintCallback)) {
+				return call_user_func(self::$prettyPrintCallback, $engine->errorStack, $type);
+			} else {
+				errorHandle::newError(__METHOD__."() Cannot call registered prettyPrint callback!", errorHandle::DEBUG);
+				return FALSE;
+			}
+		}
+
 		$output = '<ul class="errorPrettyPrint">';
 		if ($type == "all") {
 			if (!isset($engine->errorStack['all']) || !is_array($engine->errorStack['all'])) {
 				return(FALSE);
 			}
 			foreach ($engine->errorStack['all'] as $V){
+				if (!is_string($V['message'])) {
+					errorHandle::newError(__METHOD__."() Custom message (non-string) found in error stack! (Did you forget to register a custom prettyPrint callback?)", errorHandle::DEBUG);
+					return FALSE;
+				}
+
 				switch ($V['type']) {
 					case self::ERROR:
 						$class = self::$uiClassError;
@@ -1113,6 +1157,11 @@ class errorHandle
 					break;
 			}
 			foreach ($engine->errorStack[$type] as $V){
+				if (!is_string($V)) {
+					errorHandle::newError(__METHOD__."() Custom message (non-string) found in error stack! (Did you forget to register a custom prettyPrint callback?)", errorHandle::DEBUG);
+					return FALSE;
+				}
+
 				$output .= "<li>";
 				$output .= '<span class="'.$class.'">';
 				$output .= $V;
