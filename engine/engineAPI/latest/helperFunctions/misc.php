@@ -63,12 +63,14 @@ function callingFunction(){
 
 /**
  * Determine the calling line from the backtrace
+ * @param int $stepsBack
+ *        The number of steps to go back in the backtrace [Default: 1]
  * @return string
  */
-function callingLine(){
+function callingLine($stepsBack=1){
 	$backtrace = debug_backtrace();
-	return isset($backtrace[1]['line'])
-		? (string)$backtrace[1]['line']
+	return isset($backtrace[$stepsBack]['line'])
+		? (string)$backtrace[$stepsBack]['line']
 		: 'unknown';
 }
 
@@ -76,14 +78,16 @@ function callingLine(){
  * Determine the calling file from the backtrace
  * @param bool $basename
  *        If TRUE, return the base name of the file [Default: FALSE]
+ * @param int $stepsBack
+ *        The number of steps to go back in the backtrace [Default: 1]
  * @return string
  */
-function callingFile($basename=FALSE){
+function callingFile($basename=FALSE, $stepsBack=1){
 	$backtrace = debug_backtrace();
-	if(isset($backtrace[1]['file'])){
+	if(isset($backtrace[$stepsBack]['file'])){
 		return $basename
-			? (string)basename($backtrace[1]['file'])
-			: (string)$backtrace[1]['file'];
+			? (string)basename($backtrace[$stepsBack]['file'])
+			: (string)$backtrace[$stepsBack]['file'];
 	}else{
 		return 'unknown';
 	}
