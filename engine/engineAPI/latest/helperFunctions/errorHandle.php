@@ -1028,9 +1028,9 @@ class errorHandle
 	/**
 	 * Register a custom callback to handle call to prettyPrint()
 	 *
-	 * The callback should expect 2 params:
-	 * - The engineAPI error stack
-	 * - The type as passes to prettyPrint()
+	 * The callback should match the signature `string callbackFn($errorStack, $type)`:
+	 * - $errorStack The engineAPI error stack
+	 * - $type The type as passes to prettyPrint()
 	 *
 	 * @see self::prettyPrint()
 	 * @param callable $callback
