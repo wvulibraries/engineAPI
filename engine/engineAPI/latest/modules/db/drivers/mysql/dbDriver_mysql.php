@@ -45,13 +45,13 @@ class dbDriver_mysql extends dbDriver {
                 // $this->debugInfo['Connected to'] = $this->pdo->getAttribute(PDO::ATTR_CONNECTION_STATUS);
             }
             elseif (is_string($params)) {
-                $this->pdo                       = new PDO($params);
+				$this->createPDO($params);
                 $this->debugInfo['Connected to'] = $this->pdo->getAttribute(PDO::ATTR_CONNECTION_STATUS);
             }
             elseif (is_array($params)) {
                 // Build the DSN string
                 if (isset($params['dsn'])) {
-                    $dsn = $params['dsn'];
+					$dsn = $this->extractParam('dsn', $params);
                 }
                 else {
                     $query            = array();
@@ -72,7 +72,7 @@ class dbDriver_mysql extends dbDriver {
                 $pass = $this->extractParam('pass', $params, self::DEFAULT_PASS);
 
                 // Create the PDO object!
-                $this->pdo                       = new PDO($dsn, $user, $pass, $params);
+				$this->createPDO($dsn, $user, $pass, $params);
                 $this->debugInfo['DSN']          = $dsn;
                 $this->debugInfo['Connected to'] = $this->pdo->getAttribute(PDO::ATTR_CONNECTION_STATUS);
             }

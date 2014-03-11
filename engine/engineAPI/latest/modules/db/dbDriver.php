@@ -15,6 +15,11 @@ abstract class dbDriver {
      */
     protected $pdo;
 
+	/**
+	 * @var array
+	 */
+	protected $connectionParams;
+
     /**
      * Transaction nesting counter
      * @var int
@@ -43,6 +48,13 @@ abstract class dbDriver {
     public function __toString() {
         return get_class($this)."\n";
     }
+
+	public function __sleep(){
+		return array('connectionParams','readOnlyMode','autoEncode');
+	}
+	public function __wakeup(){
+		$this->createPDO();
+	}
 
     /**
      * Extract a given param from a list of params
@@ -85,6 +97,13 @@ abstract class dbDriver {
 
         return "$driver:".http_build_query((array)$params, '', ';');
     }
+
+	protected function createPDO(){
+		$obj = new ReflectionClass('PDO');
+		if(!sizeof($this->connectionParams)) $this->connectionParams = func_get_args();
+		$this->pdo = $obj->newInstanceArgs($this->connectionParams);
+		return $this->pdo;
+	}
 
     /**
      * Return this driver's underlying PDO object
