@@ -5,7 +5,7 @@ namespace{
 		$buffer = $src;
 
 		// Remove comments
-		$buffer .= preg_replace('!/\*[^*]*\*+([^/][^*]*\*+)*/!', '', $buffer);
+		$buffer = preg_replace('!/\*[^*]*\*+([^/][^*]*\*+)*/!', '', $buffer);
 
 		// Remove space after colons
 		$buffer = str_replace(': ', ':', $buffer);
