@@ -164,6 +164,14 @@ function isCLI() {
 }
 
 /**
+ * Returns TRUE if the request is an AJAX request
+ * @return bool
+ */
+function isAJAX(){
+	return (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest');
+}
+
+/**
  * Determines if the current version of PHP is greater then the supplied value
  *
  * Since there is the potential for this function to be used in many places,
