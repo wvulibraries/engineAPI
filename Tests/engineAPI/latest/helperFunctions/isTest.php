@@ -49,28 +49,31 @@ class isTest extends PHPUnit_Framework_TestCase {
 		$this->assertFalse(isnull(1234));
 	}
 
-	public function test_isempty_EmptyReturnsTrue() {
+	public function test_is_empty_EmptyReturnsTrue() {
 		// Using an undefined variable
 		$this->setExpectedException('PHPUnit_Framework_Error_Notice');
 
-		$this->assertTrue(isempty($foo));
-		$this->assertTrue(isempty(''));
-		$this->assertTrue(isempty(NULL,FALSE));
-		$this->assertTrue(isempty(NULL,TRUE));
-		$this->assertTrue(isempty(NULL));
-		$this->assertTrue(isempty(FALSE));
-		$this->assertTrue(isempty(array()));
+		$this->assertTrue(is_empty($foo));
+		$this->assertTrue(is_empty(''));
+		$this->assertTrue(is_empty(NULL,FALSE));
+		$this->assertTrue(is_empty(NULL,TRUE));
+		$this->assertTrue(is_empty(NULL));
+		$this->assertTrue(is_empty('NULL',FALSE));
+		$this->assertTrue(is_empty('NULL',TRUE));
+		$this->assertTrue(is_empty('NULL'));
+		$this->assertTrue(is_empty(FALSE));
+		$this->assertTrue(is_empty(array()));
 	}
 
-	public function test_isempty_NotEmptyReturnsFalse() {
+	public function test_is_empty_NotEmptyReturnsFalse() {
 		$a = 'foo';
-		$this->assertFalse(isempty($a));
-		$this->assertFalse(isempty(array('')));
-		$this->assertFalse(isempty(array('foo')));
-		$this->assertFalse(isempty(array(NULL)));
-		$this->assertFalse(isempty(0));
-		$this->assertFalse(isempty('0'));
-		$this->assertFalse(isempty('foo'));
+		$this->assertFalse(is_empty($a));
+		$this->assertFalse(is_empty(array('')));
+		$this->assertFalse(is_empty(array('foo')));
+		$this->assertFalse(is_empty(array(NULL)));
+		$this->assertFalse(is_empty(0));
+		$this->assertFalse(is_empty('0'));
+		$this->assertFalse(is_empty('foo'));
 	}
 
 	public function test_isCLI_RunningFromCommandLine() {
