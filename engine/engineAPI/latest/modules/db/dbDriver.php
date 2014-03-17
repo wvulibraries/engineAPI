@@ -99,9 +99,14 @@ abstract class dbDriver {
     }
 
 	protected function createPDO(){
-		$obj = new ReflectionClass('PDO');
-		if(!sizeof($this->connectionParams)) $this->connectionParams = func_get_args();
-		$this->pdo = $obj->newInstanceArgs($this->connectionParams);
+		try{
+			$obj = new ReflectionClass('PDO');
+			if(!sizeof($this->connectionParams)) $this->connectionParams = func_get_args();
+			$this->pdo = $obj->newInstanceArgs($this->connectionParams);
+		}catch (PDOException $e){
+			errorHandle::newError(__METHOD__."() Failed to create PDO object! ({$e->getMessage()})", errorHandle::HIGH);
+			return FALSE;
+		}
 		return $this->pdo;
 	}
 
