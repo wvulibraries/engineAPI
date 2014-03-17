@@ -45,7 +45,7 @@ class dbDriver_mysql extends dbDriver {
                 // $this->debugInfo['Connected to'] = $this->pdo->getAttribute(PDO::ATTR_CONNECTION_STATUS);
             }
             elseif (is_string($params)) {
-				$this->createPDO($params);
+				if(!$this->createPDO($params)) die('Failed to connect to database!');
                 $this->debugInfo['Connected to'] = $this->pdo->getAttribute(PDO::ATTR_CONNECTION_STATUS);
             }
             elseif (is_array($params)) {
@@ -72,7 +72,7 @@ class dbDriver_mysql extends dbDriver {
                 $pass = $this->extractParam('pass', $params, self::DEFAULT_PASS);
 
                 // Create the PDO object!
-				$this->createPDO($dsn, $user, $pass, $params);
+				if(!$this->createPDO($dsn, $user, $pass, $params)) die('Failed to connect to database!');
                 $this->debugInfo['DSN']          = $dsn;
                 $this->debugInfo['Connected to'] = $this->pdo->getAttribute(PDO::ATTR_CONNECTION_STATUS);
             }
