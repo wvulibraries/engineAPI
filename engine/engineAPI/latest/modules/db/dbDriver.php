@@ -104,7 +104,7 @@ abstract class dbDriver {
 			if(!sizeof($this->connectionParams)) $this->connectionParams = func_get_args();
 			$this->pdo = $obj->newInstanceArgs($this->connectionParams);
 		}catch (PDOException $e){
-			errorHandle::newError(__METHOD__."() Failed to create PDO object! ({$e->getMessage()})", errorHandle::HIGH);
+			trigger_error(__METHOD__."() Failed to create PDO object! ({$e->getMessage()})", E_USER_ERROR);
 			return FALSE;
 		}
 		return $this->pdo;
