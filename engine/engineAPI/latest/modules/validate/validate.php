@@ -155,7 +155,7 @@ class validate {
     }
 
 	/**
-	 * Returns TRUE if input is not present (ie an empty string or Null)
+	 * Returns TRUE if input is present (ie NOT an empty string or Null)
 	 * @param string $input
 	 * @return bool
 	 */
