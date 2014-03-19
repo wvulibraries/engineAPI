@@ -160,7 +160,7 @@ class validate {
 	 * @return bool
 	 */
 	public function present($input){
-		return (strlen(trim($input)) > 0);
+		return !is_empty($input);
 	}
 
 	/**
