@@ -1108,69 +1108,54 @@ class errorHandle
 			}
 		}
 
+		if(isset($engine->errorStack[$type]) && sizeof($engine->errorStack[$type])){
+			return self::makePrettyPrint($engine->errorStack[$type]);
+		}
+
+		return '';
+	}
+
+	/**
+	 * Generate pretty print HTML based on given error stack
+	 * @param array $errorStack   The stack of errors to print
+	 * @param string $assumedType The assumed error type if we can't determine it
+	 * @return string
+	 */
+	public static function makePrettyPrint($errorStack, $assumedType=self::ERROR){
 		$output = '<ul class="errorPrettyPrint">';
-		if ($type == "all") {
-			if (!isset($engine->errorStack['all']) || !is_array($engine->errorStack['all'])) {
-				return(FALSE);
+		foreach($errorStack as $error){
+			if(is_array($error)){
+				$text = $error['message'];
+				$type = $error['type'];
+			}else{
+				$text = $error;
+				$type = $assumedType;
 			}
-			foreach ($engine->errorStack['all'] as $V){
-				if (!is_string($V['message'])) {
-					errorHandle::newError(__METHOD__."() Custom message (non-string) found in error stack! (Did you forget to register a custom prettyPrint callback?)", errorHandle::DEBUG);
-					return FALSE;
-				}
 
-				switch ($V['type']) {
-					case self::ERROR:
-						$class = self::$uiClassError;
-						break;
-					case self::SUCCESS:
-						$class = self::$uiClassSuccess;
-						break;
-					case self::WARNING:
-						$class = self::$uiClassWarning;
-						break;
-					default:
-						break;
-				}
-
-				$output .= "<li>";
-				$output .= '<span class="'.$class.'">';
-				$output .= $V['message'];
-				$output .= "</span>";
-				$output .= "</li>";
-			}
-		}else{
-			if (!isset($engine->errorStack[$type]) || !is_array($engine->errorStack[$type])) {
-				return(FALSE);
-			}
+			// Map Message Type -> CSS Class
 			switch ($type) {
-				case errorHandle::ERROR:
-					$class = "errorMessage";
+				case self::ERROR:
+					$class = self::$uiClassError;
 					break;
-				case errorHandle::SUCCESS:
-					$class = "successMessage";
+				case self::SUCCESS:
+					$class = self::$uiClassSuccess;
 					break;
-				case errorHandle::WARNING:
-					$class = "warningMessage";
+				case self::WARNING:
+					$class = self::$uiClassWarning;
 					break;
 				default:
+					/*
+					 * A little trick:
+					 * If $assumedType isn't in the cases above, it becomes the CSS class.
+					 * (This is useful if we want to print a custom error stack with a custom CSS class)
+					 */
+					$class = $type;
 					break;
 			}
-			foreach ($engine->errorStack[$type] as $V){
-				if (!is_string($V)) {
-					errorHandle::newError(__METHOD__."() Custom message (non-string) found in error stack! (Did you forget to register a custom prettyPrint callback?)", errorHandle::DEBUG);
-					return FALSE;
-				}
 
-				$output .= "<li>";
-				$output .= '<span class="'.$class.'">';
-				$output .= $V;
-				$output .= "</span>";
-				$output .= "</li>";
-			}
+			$output .= sprintf('<li class="%s">%s</li>', $class, $text);
 		}
-		$output .= '</ul>';
-		return($output);
+		return "$output</ul>";
 	}
 
 	/**
