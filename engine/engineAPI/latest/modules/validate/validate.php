@@ -15,7 +15,6 @@ class validate {
 	 * @var array
 	 */
 	private $availableMethods = array(
-		"present"            => "Is required",
 		"regexp"               => "Regular Expression",
 		"phoneNumber"          => "Phone Number",
 		"ipAddr"               => "ipAddr",
@@ -153,15 +152,6 @@ class validate {
             return TRUE;
         }
     }
-
-	/**
-	 * Returns TRUE if input is present (ie NOT an empty string or Null)
-	 * @param string $input
-	 * @return bool
-	 */
-	public function present($input){
-		return !is_empty($input);
-	}
 
 	/**
 	 * Validates against a regular expression
