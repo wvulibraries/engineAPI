@@ -418,25 +418,37 @@ class validate {
 	}
 
 	/**
-	 * Validates as a valid date format
+	 * Validates as a valid date format, YYYY-[MM-[DD]]
 	 *
 	 * @param string $test
 	 * @return bool
 	 */
 	public function date($test) {
-		// Parse the date
-		$parseData = date_parse($test);
 
-		// If there were any errors or warnings during parse, date failed!
-		if($parseData['warning_count'] || $parseData['error_count']) return FALSE;
+		// match 4 digit year
+		if (preg_match("/^\d{4}$/", $test)) return TRUE;
 
-		// Now we need to check both to catch both MM/DD/YYYY and DD/MM/YYYY
-		$chkDate1 = checkdate($parseData['month'],$parseData['day'],$parseData['year']);
-		$chkDate2 = checkdate($parseData['day'],$parseData['month'],$parseData['year']);
-		if(!$chkDate1 and !$chkDate2) return FALSE;
+		// YYYY-MM-DD
+		// YYYY-MM
+		// YYYY
+		if (preg_match("/^\d{4}(-[01][1-9](-([0-2][0-9]|[3][01]))?)?$/",$test)) {
 
-		// If we get here, the date is valid
-		return TRUE;
+			$parseDate = date_parse($test);
+			if ((is_empty($parseDate['errors']) // No errors
+				&& $parseDate['month']          // has a month
+				// && $parseDate['day']            // has a day
+				&& $parseDate['year']           // has a year
+				&& checkdate($parseDate['month'],$parseDate['day'],$parseDate['year']))
+				||
+				preg_match("/^\d{4}$/", $test)
+				) {
+
+					return TRUE;
+			}
+
+		}
+
+		return FALSE;
 	}
 
 	/**

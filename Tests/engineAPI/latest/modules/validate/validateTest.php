@@ -320,9 +320,17 @@ class validateTest extends PHPUnit_Framework_TestCase {
 	}
 
 	public function test_date_valid() {
-		$this->assertTrue($this->validate->date("2013/10/31"));
-		$this->assertTrue($this->validate->date("10/31/2013"));
-		$this->assertTrue($this->validate->date("October 31st, 2013"));
+
+		$dates   = array("1904-01-02","1904-01","1904","1904-02-29");
+		$badDates = array("1904/01/02","1904-1-2","1904-23-32","1904-12-32","1903-02-29");
+
+		foreach ($dates as $test) {
+			$this->assertTrue($this->validate->date($test));
+		}
+		foreach ($badDates as $test) {
+			$this->assertFalse($this->validate->date($test));
+		}
+
 	}
 
 	public function test_date_invalid() {
