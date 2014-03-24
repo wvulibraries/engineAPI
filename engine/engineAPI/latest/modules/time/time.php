@@ -2,6 +2,16 @@
 
 class time {
 	
+	public function convert($time,$precision=FALSE) {
+	
+
+
+		if (is_int($time) || is_float($time)) return $this->toTime($time,$precision);
+		if (is_string($time)) return $this->toSeconds($time,$precision);
+	
+		return FALSE;
+	}
+	
 	public function toSeconds($string,$precision=FALSE) {
 		
 		$timeInfo = date_parse($string);
