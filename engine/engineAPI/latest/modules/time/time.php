@@ -26,6 +26,23 @@ class time {
 		return $seconds;
 		
 	}
+	
+	
+	public function toTime($seconds, $tweelveHour = FALSE) {
+		
+		if ($tweelveHour === TRUE) {
+			$convert = "g:i:sa";
+		}
+		else if ($tweelveHour === FALSE) {
+			$convert = "H:i:s";
+		}
+		else {
+			$convert = $tweelveHour;
+		}
+
+		return gmdate($convert,$seconds);
+		
+	}
 
 }
 
