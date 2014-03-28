@@ -49,7 +49,11 @@ abstract class dbStatement {
         PDO::PARAM_STR,
         PDO::PARAM_LOB);
 
-    public function __toString() {
+	/**
+	 * [Magic Method] What to do when this object is used as a string
+	 * @return string
+	 */
+	public function __toString() {
         $debugEnv = TRUE; // TODO: switch to EngineAPI environments (when they are done)
 
 		return $debugEnv
@@ -102,7 +106,6 @@ abstract class dbStatement {
 
         return TRUE;
     }
-
 
     /**
      * Return this statement's underlying PDOStatement object

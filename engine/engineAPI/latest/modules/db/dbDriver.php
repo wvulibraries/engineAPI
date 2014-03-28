@@ -45,13 +45,25 @@ abstract class dbDriver {
      */
     public $autoEncode = TRUE;
 
-    public function __toString() {
+	/**
+	 * [Magic Method] What to do when this object is used as a string
+	 * @return string
+	 */
+	public function __toString() {
         return get_class($this)."\n";
     }
 
+	/**
+	 * [Magic Method] Returns array of object attributes which should be saved when serialized
+	 * @return array
+	 */
 	public function __sleep(){
 		return array('connectionParams','readOnlyMode','autoEncode');
 	}
+
+	/**
+	 * [Magic Method] Callback method to wake $this back up after being de-serialized
+	 */
 	public function __wakeup(){
 		$this->createPDO();
 	}
@@ -98,6 +110,10 @@ abstract class dbDriver {
         return "$driver:".http_build_query((array)$params, '', ';');
     }
 
+	/**
+	 * Create the PDO object
+	 * @return bool|object
+	 */
 	protected function createPDO(){
 		try{
 			$obj = new ReflectionClass('PDO');
