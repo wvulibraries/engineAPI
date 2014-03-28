@@ -145,6 +145,14 @@ abstract class dbDriver {
         return TRUE;
     }
 
+	/**
+	 * Returns TRUE if we're currently connected
+	 * @return bool
+	 */
+	public function isConnected(){
+		return ($this->pdo instanceof PDO);
+	}
+
     // -------------------------------
 
     /**
