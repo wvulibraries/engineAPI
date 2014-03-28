@@ -51,33 +51,39 @@ abstract class dbStatement {
 
     public function __toString() {
         $debugEnv = TRUE; // TODO: switch to EngineAPI environments (when they are done)
-        if ($debugEnv) {
-            $header = sprintf('%s(%s)', __CLASS__, $this->pdo->getAttribute(PDO::ATTR_DRIVER_NAME));
-            $width  = strlen($this->getSQL()) + 10;
-            $return = str_repeat("=", $width)."\n";
-            $return .= str_pad($header, $width, ' ', STR_PAD_BOTH)."\n";
-            $return .= str_repeat("=", $width)."\n";
-            $return .= sprintf("SQL: %s\n", $this->getSQL());
-            $return .= sprintf("Executed at: %s\n", $this->executedAt->format('g:i:s a'));
-            $return .= sprintf("Execute time: %Fs\n", $this->executedTime);
-            $return .= str_repeat("-", $width)."\n";
-            if ('0000' != $this->errorCode()) {
-                $return .= sprintf("Error: [%s] %s\n", $this->errorCode(), $this->errorMsg());
-                $return .= str_repeat("-", $width)."\n";
-            }
-            $return .= sprintf("Row count: %d\n", $this->rowCount());
-            $return .= sprintf("Field count: %d\n", $this->fieldCount());
-            if ($this->fieldCount()) $return .= sprintf("Field names: %s\n", implode(',', $this->fieldNames()));
-            $return .= sprintf("Affected rows: %d\n", $this->affectedRows());
-            $return .= sprintf("Insert ID: %d\n", $this->insertId());
-            $return .= str_repeat("=", $width)."\n";
 
-            return $return;
-        }
-        else {
-            return get_class($this)."\n";
-        }
+		return $debugEnv
+			? $this->getDebug()
+			: get_class($this);
     }
+
+	/**
+	 * Returns a lot of debugging information about this statement
+	 * @return string
+	 */
+	public function getDebug(){
+		$header = sprintf('%s(%s)', __CLASS__, $this->pdo->getAttribute(PDO::ATTR_DRIVER_NAME));
+		$width  = strlen($this->getSQL()) + 10;
+		$return = str_repeat("=", $width)."\n";
+		$return .= str_pad($header, $width, ' ', STR_PAD_BOTH)."\n";
+		$return .= str_repeat("=", $width)."\n";
+		$return .= sprintf("SQL: %s\n", $this->getSQL());
+		$return .= sprintf("Executed at: %s\n", $this->executedAt->format('g:i:s a'));
+		$return .= sprintf("Execute time: %Fs\n", $this->executedTime);
+		$return .= str_repeat("-", $width)."\n";
+		if ('0000' != $this->errorCode()) {
+			$return .= sprintf("Error: [%s] %s\n", $this->errorCode(), $this->errorMsg());
+			$return .= str_repeat("-", $width)."\n";
+		}
+		$return .= sprintf("Row count: %d\n", $this->rowCount());
+		$return .= sprintf("Field count: %d\n", $this->fieldCount());
+		if ($this->fieldCount()) $return .= sprintf("Field names: %s\n", implode(',', $this->fieldNames()));
+		$return .= sprintf("Affected rows: %d\n", $this->affectedRows());
+		$return .= sprintf("Insert ID: %d\n", $this->insertId());
+		$return .= str_repeat("=", $width)."\n";
+
+		return $return;
+	}
 
     /**
      * Setter method for the pdoStatement instance variable
