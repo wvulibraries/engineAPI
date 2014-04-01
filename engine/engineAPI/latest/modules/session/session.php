@@ -125,9 +125,9 @@ class session{
 		 * Catch any really stupid options
 		 *   - gcMaxlifetime is less than cookieLifetime
 		 */
-		if(self::$options['gcMaxlifetime'] < self::$options['cookieLifetime']){
-			errorHandle::newError(__METHOD__."() - gcMaxlifetime is less than cookieLifetime! Setting gcMaxlifetime to gcMaxlifetime", errorHandle::LOW);
-			self::$options['gcMaxlifetime'] = self::$options['cookieLifetime'];
+		if(self::$options['gcMaxlifetime'] < self::$options['cookieLifetime'] || (self::$options['gcMaxlifetime'] > 0 && !self::$options['cookieLifetime'])){
+			error_log(__METHOD__."() - gcMaxlifetime is less than cookieLifetime! Setting cookieLifetime to gcMaxlifetime");
+			self::$options['cookieLifetime'] = self::$options['gcMaxlifetime'];
 		}
 
 		// Set the session cookie params
