@@ -17,6 +17,9 @@ class http
 	 */
 	public static function csrfCheck() {
 		// No post? Then we don't care about CSRF
+		echo '<pre>'.print_r($_POST, true).'</pre>';
+		echo '<pre>'.print_r($_COOKIE, true).'</pre>';
+		echo '<pre>'.print_r($_SESSION, true).'</pre>';
 		if(!sizeof($_POST)) return;
 
 		try{
@@ -96,7 +99,7 @@ class http
 
         $value  = (string)$value;
         
-        $_GET['MYSQL'][$var] = $engine->openDB->escape($value);
+        $_GET['MYSQL'][$var] = dbSanitize($value);
         $_GET['HTML'][$var]  = htmlSanitize($value);
         $_GET['RAW'][$var]   = $value;
 
@@ -116,7 +119,7 @@ class http
 
         if (!is_array($value)) $value  = (string)$value;
         
-        $_POST['MYSQL'][$var] = $engine->openDB->escape($value);
+        $_POST['MYSQL'][$var] = dbSanitize($value);
         $_POST['HTML'][$var]  = htmlSanitize($value);
         $_POST['RAW'][$var]   = $value;
 
