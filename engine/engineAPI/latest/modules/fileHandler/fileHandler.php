@@ -5,8 +5,8 @@
  */
 class fileHandler {
 	/**
-	 * Instance of engienDB
-	 * @var engineDB
+	 * Instance of dbDriver
+	 * @var dbDriver
 	 */
 	private $database;
 	/**
@@ -36,8 +36,7 @@ class fileHandler {
 	 * @param engineDB $database
 	 */
 	function __construct($database=NULL) {
-		$engine         = EngineAPI::singleton();
-		$this->database = ($database instanceof engineDB) ? $database : $engine->openDB;
+		$this->database = ($database instanceof dbDriver) ? $database : db::get('appDB');
 	}
 
 	/**
@@ -160,22 +159,21 @@ class fileHandler {
 			$select .= (empty($select)?"":", ").$val;
 		}
 
-		$sql = sprintf("SELECT `%s` FROM `%s` WHERE `%s`='%s' LIMIT 1",
+		$sql = sprintf("SELECT `%s` FROM `%s` WHERE `%s`=? LIMIT 1",
 			$select,
 			$this->database->escape($table),
-			$fields['name'],
-			$name
+			$fields['name']
 			);
-		$sqlResult = $this->database->query($sql);
+		$sqlResult = $this->database->query($sql, array($name));
 
-		if ($sqlResult['affectedRows'] == 0) {
+		if (!$sqlResult->rowCount()) {
 			if ($this->debug === TRUE) {
 				errorHandle::newError($name." not found in ".$table,errorHandle::DEBUG);
 			}
 			return FALSE;
 		}
 
-		$file = mysql_fetch_assoc($sqlResult['result']);
+		$file = $sqlResult->fetch();
 
 		$output['name'] = $file[$fields['name']];
 		$output['type'] = $file[$fields['type']];
@@ -209,18 +207,15 @@ class fileHandler {
 			$fileType = $files['type'][$i];
 			$fileData = file_get_contents($files['tmp_name'][$i]);
 
-			$sql = sprintf("INSERT INTO `%s` SET `%s`='%s', `%s`='%s', `%s`='%s'",
+			$sql = sprintf("INSERT INTO `%s` SET `%s`=?, `%s`=?, `%s`=?",
 				$this->database->escape($table),
 				$this->database->escape($fields['name']),
 				$this->database->escape($files['name'][$i]),
-				$this->database->escape($fields['data']),
-				$this->database->escape(file_get_contents($files['tmp_name'][$i])),
-				$this->database->escape($fields['type']),
-				$this->database->escape($fileType)
+				$this->database->escape($fields['data'])
 				);
-			$sqlResult = $this->database->query($sql);
+			$sqlResult = $this->database->query($sql, array(file_get_contents($files['tmp_name'][$i]),$fields['type'],$fileType));
 
-			if (!$sqlResult['result']) {
+			if ($sqlResult->errorCode()) {
 				if ($this->debug === TRUE) {
 					errorHandle::newError("Failed to store ".$fileName." in ".$table,errorHandle::DEBUG);
 				}
@@ -340,7 +335,7 @@ class fileHandler {
 			);
 		$sqlResult = $this->database->query($sql);
 
-		if (!$sqlResult['result']) {
+		if ($sqlResult->errorCode()) {
 			return errorHandle::errorMsg("Insert Error.");
 		}
 
@@ -364,7 +359,7 @@ class fileHandler {
 
 		$sql = sprintf("SHOW FIELDS FROM `$oldTable`");
 		$sqlResult = $this->database->query($sql);
-		while($row = mysql_fetch_array($sqlResult['result'],  MYSQL_ASSOC)) {
+		while($row = $sqlResult->fetch()) {
 			$oldTableFields[$row['Field']] = TRUE;
 		}
 
@@ -373,20 +368,19 @@ class fileHandler {
 
 		$sql = sprintf("SHOW FIELDS FROM `$newTable`");
 		$sqlResult = $this->database->query($sql);
-		while($row = mysql_fetch_array($sqlResult['result'],  MYSQL_ASSOC)) {
+		while($row = $sqlResult->fetch()) {
 			$newTableFields[$row['Field']] = TRUE;
 		}
 
 
 		// Grab data from oldTable from the database
-		$sql = sprintf("SELECT * FROM `%s` WHERE `%s` = '%s'",
+		$sql = sprintf("SELECT * FROM `%s` WHERE `%s` = ?",
 			$this->database->escape($oldTable),
-			$this->database->escape($fields['id']['field']),
-			$this->database->escape($fields['id']['value'])
+			$this->database->escape($fields['id']['field'])
 			);
-		$sqlResult = $this->database->query($sql);
+		$sqlResult = $this->database->query($sql, array($fields['id']['value']));
 
-		$row = mysql_fetch_assoc($sqlResult['result']);
+		$row = $sqlResult->fetch();
 
 		// save and nullify old ID
 		$oldID = $row[$fields['id']['field']];
@@ -418,20 +412,19 @@ class fileHandler {
 			);
 		$sqlResult = $this->database->query($sql);
 
-		if (!$sqlResult['result']) {
+		if ($sqlResult->errorCode()) {
 			return(FALSE);
 		}
 
 		$return       = array();
-		$return['id'] = $sqlResult['id'];
+		$return['id'] = $sqlResult->insertId();
 
 		// delete record from old table
-		$sql = sprintf("DELETE FROM `%s` WHERE `%s` = '%s' LIMIT 1",
+		$sql = sprintf("DELETE FROM `%s` WHERE `%s` = ? LIMIT 1",
 			$this->database->escape($oldTable),
-			$this->database->escape($fields['id']['field']),
-			$oldID
+			$this->database->escape($fields['id']['field'])
 			);
-		$sqlResult = $this->database->query($sql);
+		$sqlResult = $this->database->query($sql, array($oldID));
 
 		// generate new filename based on $newID
 		if ($mysqlFileName === TRUE) {
@@ -473,18 +466,15 @@ class fileHandler {
 		$newName = $paddedID.".".$ext;
 
 		if ($updateDB === TRUE) {
-			$sql = sprintf("UPDATE `%s` SET `%s` = '%s', `%s` = '%s' WHERE `%s` = '%s'",
+			$sql = sprintf("UPDATE `%s` SET `%s` = ?, `%s` = ? WHERE `%s` = ?",
 				$this->database->escape($table),
 				$this->database->escape($fields['name']['field']),
-				$this->database->escape($newName),
 				$this->database->escape($fields['dir']['field']),
-				$this->database->escape($dir),
-				$this->database->escape($fields['id']['field']),
-				$this->database->escape($ID)
+				$this->database->escape($fields['id']['field'])
 				);
-			$sqlResult = $this->database->query($sql);
+			$sqlResult = $this->database->query($sql, array($newName,$dir,$ID));
 
-			if (!$sqlResult['result']) {
+			if ($sqlResult->errorCode()) {
 				return FALSE;
 			}
 		}
@@ -716,20 +706,19 @@ class fileHandler {
 				// used when a value is stored in the database instead
 				if (isset($attPairs['lookup']) && !is_empty($attPairs['lookup'])) {
 					foreach ($attPairs['lookup'] as $key => $value) {
-						$sql = sprintf("SELECT `%s` FROM `%s`.`%s` WHERE `%s`='%s' LIMIT 1",
+						$sql = sprintf("SELECT `%s` FROM `%s`.`%s` WHERE `%s`=? LIMIT 1",
 							$this->database->escape($value['field']),
 							$this->database->escape($value['database']),
 							$this->database->escape($value['table']),
-							$this->database->escape($value['matchOn']),
-							$this->database->escape($file)
+							$this->database->escape($value['matchOn'])
 							);
-						$sqlResult = $this->database->query($sql);
+						$sqlResult = $this->database->query($sql, array($file));
 
-						if ($sqlResult['affectedRows'] == 0) {
+						if ($sqlResult->rowCount() == 0) {
 							continue(2);
 						}
 
-						$row = mysql_fetch_array($sqlResult['result'], MYSQL_NUM);
+						$row = $sqlResult->fetch(PDO::FETCH_NUM);
 						$tmp[$key] = $row[0];
 					}
 
