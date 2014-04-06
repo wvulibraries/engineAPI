@@ -132,10 +132,17 @@ class router {
 
 	}
 
+	/**
+	 * For routing with callbacks. The parsed ServerURI and variables are passed to the callback function
+	 * 
+	 * @return mixed from callback function
+	 */
 	public function route() {
 
-		$route = $this->matchRoute();
+		$route     = $this->matchRoute();
+		$variables = $this->getVariables();
 
+		return $this->definedRoutes[$route]['callback']($this->serverURI,$variables);
 
 	}
 
