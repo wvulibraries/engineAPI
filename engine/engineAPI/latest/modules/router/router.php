@@ -2,8 +2,9 @@
 
 class router {
 
-	private $definedRoutes = array();
-	private $serverURI     = NULL;
+	private static $instance = NULL;
+	private $definedRoutes   = array();	
+	private $serverURI       = NULL;
 
 	private function __construct() {
 		$this->setServerURI();
