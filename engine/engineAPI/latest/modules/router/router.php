@@ -15,8 +15,11 @@ class router {
 	 * @return validate
 	 */
 	public static function getInstance() {
-		$router = new self;
-		return $router;
+		if (!isset(self::$instance)) {
+            self::$instance = new __CLASS__;
+        }
+
+        return self::$instance;
 	}
 
 	/**
