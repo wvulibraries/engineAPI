@@ -70,8 +70,8 @@ class mailSender {
 	 */
 	private $engine;
 	/**
-	 * The instance of engineDB
-	 * @var engineDB
+	 * The instance of dbDriver
+	 * @var dbDriver
 	 */
 	private $database;
 	/**
@@ -93,7 +93,7 @@ class mailSender {
 	 */
 	function __construct($database=NULL) {
 		$this->engine   = EngineAPI::singleton();
-		$this->database = ($database instanceof engineDB) ? $database : $this->engine->openDB;
+		$this->database = ($database instanceof dbDriver) ? $database : db::get('appDB');
 		$this->set_enginevars(enginevars::getInstance());
 	}
 
@@ -368,20 +368,14 @@ class mailSender {
 		//   body         blob           Yes           NULL
 		foreach ($emails as $email) {
 			
-			$sql = sprintf("INSERT INTO %s (sendID,sender,recipient,subject,body) VALUES ('%s','%s','%s','%s','%s')",
-				$this->database->escape($dbInfo['table']),
-				$this->database->escape($sendID),
-				$this->database->escape($email['sender']),
-				$this->database->escape($email['recipient']),
-				$this->database->escape($email['subject']),
-				$this->database->escape($email['body'])
+			$sql = sprintf("INSERT INTO %s (sendID,sender,recipient,subject,body) VALUES (?,?,?,?,?)",
+				$this->database->escape($dbInfo['table'])
 				);
-			$sqlResult = $this->database->query($sql);
+			$sqlResult = $this->database->query($sql, array($sendID,$email['sender'],$email['recipient'],$email['subject'],$email['body']));
 
 			if ($this->debug === TRUE) {
-				if (!$sqlResult['result']) {
-					errorHandle::errorMsg($sqlResult['error']."<br />");
-					errorHandle::errorMsg($sqlResult['query']."<br />");
+				if ($sqlResult->errorCode()) {
+					errorHandle::errorMsg($sqlResult->getDebug()."<br />");
 				}
 			}
 

@@ -53,7 +53,7 @@ class http
             unset($_GET);
 
             $_GET = $temp;
-        }    
+        }
 
         return TRUE;
     }
@@ -78,7 +78,7 @@ class http
             unset($_POST);
 
             $_POST = $temp;
-        }    
+        }
 
         return TRUE;
     }
@@ -95,8 +95,8 @@ class http
     public static function setGet($var,$value) {
 
         $value  = (string)$value;
-        
-        $_GET['MYSQL'][$var] = $engine->openDB->escape($value);
+
+        $_GET['MYSQL'][$var] = dbSanitize($value);
         $_GET['HTML'][$var]  = htmlSanitize($value);
         $_GET['RAW'][$var]   = $value;
 
@@ -115,8 +115,8 @@ class http
     public static function setPost($var,$value) {
 
         if (!is_array($value)) $value  = (string)$value;
-        
-        $_POST['MYSQL'][$var] = $engine->openDB->escape($value);
+
+        $_POST['MYSQL'][$var] = dbSanitize($value);
         $_POST['HTML'][$var]  = htmlSanitize($value);
         $_POST['RAW'][$var]   = $value;
 

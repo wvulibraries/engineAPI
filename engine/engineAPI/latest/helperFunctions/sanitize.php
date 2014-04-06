@@ -37,7 +37,7 @@ function dbSanitize($var, $quotes = FALSE) {
     }
 	//clean strings
     else if (is_string($var)) {
-        $var = mysql_real_escape_string($var);
+        $var = db::get('appDB')->escape($var);
         if ($quotes) {
             $var = "'". $var ."'";
         }
