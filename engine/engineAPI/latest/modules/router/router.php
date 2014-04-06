@@ -5,6 +5,18 @@ class router {
 	private $definedRoutes = array();
 	private $serverURI     = NULL;
 
+	private function __construct() {
+		$this->setServerURI();
+	}
+
+	/**
+	 * Returns validate instance
+	 * @return validate
+	 */
+	public static function getInstance() {
+		$router = new self;
+		return $router;
+	}
 
 	/**
 	 * Define a new route that can be matched on
