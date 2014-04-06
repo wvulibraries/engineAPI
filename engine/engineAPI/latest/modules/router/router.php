@@ -3,6 +3,7 @@
 class router {
 
 	private $definedRoutes = array();
+	private $serverURI     = NULL;
 
 
 	/**
