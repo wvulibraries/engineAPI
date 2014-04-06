@@ -160,6 +160,15 @@ class router {
 	}
 
 
+	/**
+	 * Splits the given URI by "/" accounting for "/" inside variable {} blocks
+	 * Parses variables into name and value according to parseVariable() method.
+	 * 
+	 * @param  string $uri URI to parse
+	 * @return array      $parsedArray['URI']    = original URI
+	 *                    $parsedArracy['count'] = how many 'pieces' to the path in the URL
+	 *                    $parsedArray['items']  = array('path' => the uri element, 'variable' = parseVariable return) 
+	 */
 	private function parseURI($uri) {
 
 		// Splits on forward slashes, '/', unless they are in a {} block
