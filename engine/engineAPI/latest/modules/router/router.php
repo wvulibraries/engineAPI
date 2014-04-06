@@ -4,6 +4,15 @@ class router {
 
 	private $definedRoutes = array();
 
+
+	/**
+	 * Define a new route that can be matched on
+	 * @param  string $uri      complete url, from document root. Can contain variables, and validation requirements. 
+	 *                          example:
+	 *                          /users/edit/{ID=integer}
+	 * @param  string $callback a string to a valid function that is executed when 
+	 * @return bool           true on success, false otherwise
+	 */
 	public function defineRoute($uri,$callback=NULL) {
 		
 		if (!isnull($callback) && is_function($callback) === FALSE) {
@@ -20,6 +29,10 @@ class router {
 
 	}
 
+	/**
+	 * returns a parsed uri from the redirect
+	 * @return array See parseURI for the return
+	 */
 	private function getServerURI() {
 		return $this->parseURI($_SERVER['REDIRECT_SCRIPT_URL']);
 	}
@@ -57,6 +70,10 @@ class router {
 
 	}
 
+	/**
+	 * Return the variables array
+	 * @return array [description]
+	 */
 	public function getVariables() {
 
 		$route = $this->matchRoute();
@@ -82,11 +99,14 @@ class router {
 
 	}
 
+	/**
+	 * Parse the provided variable string, {varName[=validation]}
+	 * @param  string $item variable string
+	 * @return array  $variable['name']
+	 *                $variable['validation']
+	 *                $variable['regex']
+	 */
 	private function parseVariable($item) {
-
-		// $variable['name']
-		// $variable['validation']
-		// $variable['regex']
 		
 		$item = str_replace("{", "", $item);
 		$item = str_replace("}", "", $item);
@@ -105,6 +125,7 @@ class router {
 		return $variable;
 
 	}
+
 
 	private function parseURI($uri) {
 
