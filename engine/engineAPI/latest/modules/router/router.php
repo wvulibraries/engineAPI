@@ -61,6 +61,13 @@ class router {
 
 		return $this->serverURI;
 	}
+
+	/**
+	 * Returns the parsed serverURI
+	 * @return array See parseURI for the return array
+	 */
+	public function getServerURI() {
+		return $this->serverURI;
 	}
 
 	/**
