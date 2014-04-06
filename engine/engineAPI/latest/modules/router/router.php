@@ -44,10 +44,23 @@ class router {
 
 	/**
 	 * returns a parsed uri from the redirect
-	 * @return array See parseURI for the return
+	 * @param string $uri URI to parse and set as serverURI, optional, if null system uses $_SERVER value
+	 * @return array|bool See parseURI for the return array. If non-strong passed in for $URI returns FALSE
 	 */
-	private function getServerURI() {
-		return $this->parseURI($_SERVER['REDIRECT_SCRIPT_URL']);
+	public function setServerURI($uri=NULL) {
+
+		if (isnull($uri)) {
+			$this->serverURI = $this->parseURI($_SERVER['REDIRECT_SCRIPT_URL']);
+		}
+		else {
+
+			if (!is_string($uri)) return FALSE;
+
+			$this->serverURI = $uri;
+		}
+
+		return $this->serverURI;
+	}
 	}
 
 	/**
