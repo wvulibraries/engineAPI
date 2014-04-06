@@ -80,11 +80,9 @@ class router {
 	 */
 	private function matchRoute() {
 
-		if (($serverURI = $this->getServerURI()) === FALSE) return FALSE;
-
 		foreach ($this->definedRoutes as $definedRoute) {
 
-			if ($definedRoute['count'] != $serverURI['count']) continue;
+			if ($definedRoute['count'] != $this->serverURI['count']) continue;
 
 			foreach ($definedRoute['items'] as $I=>$V) {
 
@@ -93,7 +91,7 @@ class router {
 				if ($definedRoute['variable'] === FALSE) continue;
 
 				// If the path's do not match, we skip to the next defined route
-				if ($definedRoute['items'][$I]['path'] != $serverURI['items'][$I]['path']) {
+				if ($definedRoute['items'][$I]['path'] != $this->serverURI['items'][$I]['path']) {
 					continue 2;
 				}
 
@@ -122,7 +120,7 @@ class router {
 			// @TODO check validations
 			// if it doesnt validate, set an error message, a debug, and return false
 
-			$variables[$item['variable']['name']] = $serverURI['items'][$I]['URI'];
+			$variables[$item['variable']['name']] = $this->serverURI['items'][$I]['URI'];
 		}
 
 		return $variables;
