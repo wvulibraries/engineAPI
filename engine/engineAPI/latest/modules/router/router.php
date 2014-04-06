@@ -6,17 +6,22 @@ class router {
 	private $definedRoutes   = array();	
 	private $serverURI       = NULL;
 
-	private function __construct() {
+	private function __construct($uri=NULL) {
 		$this->setServerURI();
+
+		if (!isnull($uri)) {
+			$this->defineRoute($uri);
+		}
 	}
 
 	/**
 	 * Returns validate instance
 	 * @return validate
 	 */
-	public static function getInstance() {
+	public static function getInstance($uri=NULL) {
 		if (!isset(self::$instance)) {
-            self::$instance = new __CLASS__;
+			$c = __CLASS__;
+            self::$instance = new $c($uri);
         }
 
         return self::$instance;
