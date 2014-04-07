@@ -225,7 +225,7 @@ class router {
 
 		foreach ($items as $item) {
 
-			if (is_variable($item)) {
+			if ($this->is_variable($item)) {
 				$variable = $this->parseVariable($item);
 			}
 			else {
