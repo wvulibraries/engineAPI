@@ -213,7 +213,7 @@ class router {
 
 		// Splits on forward slashes, '/', unless they are in a {} block
 		// does not support nested {}
-		$items = preg_split("/\/(?![^{]*})/",$URI);
+		$items = preg_split("/\/(?![^{]*})/",$uri);
 
 		if (is_empty($items[0])) array_shift($items);
 
