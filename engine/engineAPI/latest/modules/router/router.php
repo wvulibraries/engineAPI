@@ -220,7 +220,7 @@ class router {
 		if (is_empty($items)) return FALSE;
 
 		$parsedURI          = array();
-		$parsedURI['URI']   = $URI;
+		$parsedURI['URI']   = $uri;
 		$parsedURI['count'] = count($items);
 
 		foreach ($items as $item) {
