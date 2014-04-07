@@ -190,7 +190,7 @@ class router {
 		if (isset($item[1]) && !is_empty($item[1]) && validate::isValidMethod($item[1])) {
 			$variable['validation'] = $item[1];
 		}
-		else if (isset($item[1]) && !is_empty($item[1]) {
+		else if (isset($item[1]) && !is_empty($item[1])) {
 			$variable['validation'] = "regexp";
 			$variable['regex']      = $item[1];
 		}
