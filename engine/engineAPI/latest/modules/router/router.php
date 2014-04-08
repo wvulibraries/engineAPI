@@ -194,7 +194,8 @@ class router {
 	 */
 	public function route() {
 
-		$route     = $this->matchRoute();
+		if (($route = $this->matchRoute()) === FALSE) return FALSE;
+
 		$variables = $this->getVariables();
 
 		return $this->definedRoutes[$route]['callback']($this->serverURI,$variables);
