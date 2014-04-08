@@ -106,6 +106,21 @@ class router {
 	}
 
 	/**
+	 * does the server uri match one of the defined routes?
+	 * @return boolean TRUE on match, FALSE otherwise
+	 */
+	public function match() {
+
+		if ($this->matchRoute() !== FALSE) {
+			return TRUE;
+		}
+		else {
+			return FALSE;
+		}
+		
+	}
+
+	/**
 	 * Determine which defined route we are using based on the server URI
 	 * @return [type] [description]
 	 */
