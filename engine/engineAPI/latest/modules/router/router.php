@@ -111,18 +111,24 @@ class router {
 	 */
 	private function matchRoute() {
 
+		if (is_empty($this->definedRoutes)) return FALSE;
+
+		print "<pre>";
+		var_dump($this->serverURI);
+		print "</pre>";
+
 		foreach ($this->definedRoutes as $definedRoute) {
 
-			if ($definedRoute['count'] != $this->serverURI['count']) continue;
+			if ($definedRoute['rule']['count'] != $this->serverURI['count']) continue;
 
-			foreach ($definedRoute['items'] as $I=>$V) {
+			foreach ($definedRoute['rule']['items'] as $I=>$V) {
 
 				// we are skipping variables here, if we don't have a match, 
 				// we shouldn't be populating variables
-				if ($definedRoute['variable'] === FALSE) continue;
+				if ($V['variable'] !== FALSE) continue;
 
 				// If the path's do not match, we skip to the next defined route
-				if ($definedRoute['items'][$I]['path'] != $this->serverURI['items'][$I]['path']) {
+				if ($V['path'] != $this->serverURI['items'][$I]['path']) {
 					continue 2;
 				}
 
