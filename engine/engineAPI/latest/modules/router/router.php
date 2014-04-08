@@ -113,10 +113,6 @@ class router {
 
 		if (is_empty($this->definedRoutes)) return FALSE;
 
-		print "<pre>";
-		var_dump($this->serverURI);
-		print "</pre>";
-
 		foreach ($this->definedRoutes as $definedRoute) {
 
 			if ($definedRoute['rule']['count'] != $this->serverURI['count']) continue;
