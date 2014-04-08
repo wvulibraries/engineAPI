@@ -196,6 +196,8 @@ class router {
 	 */
 	private function parseVariable($item) {
 		
+		if (!$this->is_variable($item)) return FALSE;
+
 		$item = str_replace("{", "", $item);
 		$item = str_replace("}", "", $item);
 		$item = explode("=",$item);
@@ -240,12 +242,7 @@ class router {
 
 		foreach ($items as $item) {
 
-			if ($this->is_variable($item)) {
-				$variable = $this->parseVariable($item);
-			}
-			else {
-				$variable = FALSE;
-			}
+			$variable = $this->parseVariable($item);
 
 			$parsedURI['items'][] = array('path' => $item, 'variable' => $variable);
 		}
