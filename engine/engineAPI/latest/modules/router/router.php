@@ -147,13 +147,13 @@ class router {
 		if (($route = $this->matchRoute()) === FALSE) return FALSE;
 
 		$variables = array();
-		foreach ($route['items'] as $I=>$item) {
+		foreach ($route['rule']['items'] as $I=>$item) {
 			if ($item['variable'] === FALSE) continue;
 
 			// @TODO check validations
 			// if it doesnt validate, set an error message, a debug, and return false
 
-			$variables[$item['variable']['name']] = $this->serverURI['items'][$I]['URI'];
+			$variables[$item['variable']['name']] = $this->serverURI['items'][$I]['path'];
 		}
 
 		return $variables;
