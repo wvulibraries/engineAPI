@@ -142,7 +142,7 @@ class router {
 	 */
 	public function getVariables() {
 
-		$route = $this->matchRoute();
+		if (($route = $this->matchRoute()) === FALSE) return FALSE;
 
 		$variables = array();
 		foreach ($route['items'] as $I=>$item) {
