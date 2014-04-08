@@ -257,7 +257,9 @@ class router {
 
 		$variable['name'] = $item[0];
 
-		if (isset($item[1]) && !is_empty($item[1])) {
+		$validate = validate::getInstance();
+
+		if (isset($item[1]) && !is_empty($item[1]) && $validate->isValidMethod($item[1])) {
 			$variable['validation'] = $item[1];
 		}
 		else if (isset($item[1]) && !is_empty($item[1])) {
