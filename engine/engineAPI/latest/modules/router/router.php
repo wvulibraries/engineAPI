@@ -54,6 +54,18 @@ class router {
 	}
 
 	/**
+	 * reset the router instance.
+	 * @return boolean TRUE
+	 */
+	public static function resetInstance() {
+		if (isset(self::$instance)) {
+			self::$instance = NULL; 
+		}
+
+		return TRUE;
+	}
+
+	/**
 	 * Define a new route that can be matched on
 	 * @param  string $uri      complete url, from document root. Can contain variables, and validation requirements. 
 	 *                          example:
@@ -117,7 +129,7 @@ class router {
 		else {
 			return FALSE;
 		}
-		
+
 	}
 
 	/**
