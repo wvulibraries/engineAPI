@@ -165,6 +165,29 @@ class router {
 
 	}
 
+	private function validateVariable($item,$variable) {
+
+		if (isset($variable['validation'])) {
+
+			$validate = new validate;
+
+			if (!$validate->isValidMethod($variable['validation'])) {
+				errorHandle::newError(__METHOD__."() - Invalid validation method defined.", errorHandle::DEBUG);
+				return FALSE;
+			}
+
+			if ($variable['validation'] != "regexp" && $validate->$variable['validation']($item) === FALSE) {
+				return FALSE;
+			}
+			else if (isset($variable['regex']) && $validate->$variable['validation']($variable['regex'],$item) === FALSE) {
+				return FALSE;
+			}
+		}
+
+		return TRUE;
+
+	}
+
 	/**
 	 * Return the variables array
 	 * @return array [description]
