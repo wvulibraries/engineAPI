@@ -173,6 +173,21 @@ class router {
 	}
 
 	/**
+	 * determine if a string represents a variable
+	 * @param  string  $item string to be tested
+	 * @return boolean       TRUE if the string could be a variable, false otherwise
+	 */
+	private function is_variable($item) {
+
+		if (preg_match('/^{(.+?)}$/',$item)) {
+			return TRUE;
+		}
+
+		return FALSE;
+
+	}
+
+	/**
 	 * Parse the provided variable string, {varName[=validation]}
 	 * @param  string $item variable string
 	 * @return array  $variable['name']
