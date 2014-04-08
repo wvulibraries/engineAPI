@@ -200,8 +200,10 @@ class router {
 		foreach ($route['rule']['items'] as $I=>$item) {
 			if ($item['variable'] === FALSE) continue;
 
-			// @TODO check validations
-			// if it doesnt validate, set an error message, a debug, and return false
+			if ($this->validateVariable($this->serverURI['items'][$I]['path'],$item['variable']) === FALSE) {
+				errorHandle::newError(__METHOD__."() - Validation Error.", errorHandle::DEBUG);
+				return FALSE;
+			}
 
 			$variables[$item['variable']['name']] = $this->serverURI['items'][$I]['path'];
 		}
