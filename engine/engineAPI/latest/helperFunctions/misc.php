@@ -218,7 +218,7 @@ function recurseInsert($file,$type="php",$regex=NULL,$condition="REQUEST_URI",$c
 	// File wasn't found above, check for it in the template directory
 	if (!isnull($engine) && isnull($foundFile)) {
 		if(file_exists(templates::currentTemplate()."/$file")) {
-			$foundFile = $templates::currentTemplate()."/$file";
+			$foundFile = templates::currentTemplate()."/$file";
 		}
 	}
 	// If $engine is null, check $enginevars->get("currentTemplate")
