@@ -105,6 +105,7 @@ class dbDriver_mysql extends dbDriver {
             $return = str_repeat("=", $width)."\n";
             $return .= str_pad($header, $width, ' ', STR_PAD_BOTH)."\n";
             $return .= str_repeat("=", $width)."\n";
+			$return .= sprintf("Connected: %s\n", ($this->isConnected() ? 'Yes' : 'No'));
             $return .= sprintf("Opened at: %s\n", $this->createdAt->format('g:i:s a'));
             $return .= sprintf("Read-only Mode: %s\n", ($this->isReadOnly() ? 'Yes' : 'No'));
             $return .= sprintf("In transaction: %s\n", ($this->inTransaction() ? sprintf('Yes (depth: %s)', $this->transNestingCounter) : 'No'));
