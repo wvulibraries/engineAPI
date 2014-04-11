@@ -37,7 +37,15 @@ function dbSanitize($var, $quotes = FALSE) {
     }
 	//clean strings
     else if (is_string($var)) {
-        $var = db::get('appDB')->escape($var);
+        /* @TODO  db::get('appDB') not guaranteed to be available, especially
+         * when sanitizing $_GET and $_POST. db::get('engineDB') could be a
+         * different driver, so it could be giving a bad sanitization.
+         * Also, the application could be using any connection name, not
+         * necessarily 'appDB'. There has to be a better way to do this without
+         * breaking everything.
+         */
+        $db  = !isnull(db::get('appDB')) ? db::get('appDB') : db::get('engineDB');
+        $var = $db->escape($var);
         if ($quotes) {
             $var = "'". $var ."'";
         }
