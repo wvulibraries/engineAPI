@@ -277,7 +277,7 @@ $engineVars['session'] = array(
 	// Length of time after which a csrf token will no longer be accepted (will have no effect if cookieLifetime is less)
 	'csrfTimeout' => 86400,
 	// Length of time the session's cookie should live
-	'cookieLifetime' => '',
+	'cookieLifetime' => 604800,
 	// The session cookie's path param (controls what paths the cookie is visible on)
 	'cookiePath' => '',
 	// The session cookie's domain param (controls what domain the cookie is visible on)
