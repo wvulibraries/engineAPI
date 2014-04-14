@@ -1,48 +1,33 @@
 <?php
-/**
- * EngineAPI enginevars module
- * @package EngineAPI\modules\enginevars
- */
+
 class enginevars extends config {
 
-	/**
-	 * @var self
-	 */
 	private static $classInstance;
+	protected $variables = array();
 
-	/**
-	 * Class contructor
-	 *
-	 * @param $engineDir The directory path for EngineAPI
-	 * @param $site      The site to use
-	 */
-	public function __construct($engineDir, $site) {
-		$defaults = self::loadconfig($engineDir."/config/default.php");
+	function __construct($engineDir,$site) {
+		$defaults = parent::loadconfig($engineDir."/config/default.php");
+		$siteVars = ($site != "default" && is_readable($engineDir."/config/".$site.".php"))?parent::loadconfig($engineDir."/config/".$site.".php"):array();
 
-		$sitePath = $engineDir."/config/".$site.".php";
-		$siteVars = ($site != "default" && is_readable($sitePath))
-			? self::loadconfig($sitePath)
-			: array('engineVars' => array());
+		$ev1 = $defaults['engineVars'];
+		$ev2 = isset($siteVars['engineVars'])?$siteVars['engineVars']:array();
 
-		$this->variables = array_merge($defaults['engineVars'], $siteVars['engineVars']);
+		$this->variables = array_merge($ev1,$ev2);
+
+		// $this->configObject = config::getInstance();
 	}
 
-	/**
-	 * Create or retrieve an enginevars object
-	 *
-	 * @param $engineDir The directory path for EngineAPI
-	 * @param $site      The site to use (default: "default")
-	 * @return bool|self
-	 */
-	public static function getInstance($engineDir=NULL, $site="default") {
-		if (!isset(self::$classInstance)) {
+	public static function getInstance($engineDir=NULL,$site="default") {
+		if (!isset(self::$classInstance)) { 
+
 			if (isnull($engineDir)) return FALSE;
 
-			self::$classInstance = new self($engineDir, $site);
+			self::$classInstance = new self($engineDir,$site);
 		}
 
 		return self::$classInstance;
 	}
 
 }
+
 ?>

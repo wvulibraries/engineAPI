@@ -1,48 +1,34 @@
 <?php
-/**
- * EngineAPI privatevars module
- * @package EngineAPI\modules\privatevars
- */
+
 class privatevars extends config {
 
-	/**
-	 * @var self
-	 */
 	private static $classInstance;
+	protected $variables = array();
 
-	/**
-	 * Class contructor
-	 *
-	 * @param $engineDir The directory path for EngineAPI
-	 * @param $site      The site to use
-	 */
-	public function __construct($engineDir, $site) {
-		$defaults = self::loadconfig($engineDir."/config/defaultPrivate.php");
+	function __construct($engineDir,$site) {
+		$defaults = parent::loadconfig($engineDir."/config/defaultPrivate.php");
+		$siteVars = ($site != "default" && is_readable($engineDir."/config/".$site."Private.php"))?parent::loadconfig($engineDir."/config/".$site."Private.php"):array();
 
-		$sitePath = $engineDir."/config/".$site."Private.php";
-		$siteVars = ($site != "default" && is_readable($sitePath))
-			? self::loadconfig($sitePath)
-			: array('engineVarsPrivate' => array());
+		$ev1 = $defaults['engineVarsPrivate'];
+		$ev2 = isset($siteVars['engineVarsPrivate'])?$siteVars['engineVarsPrivate']:array();
 
-		$this->variables = array_merge($defaults['engineVarsPrivate'], $siteVars['engineVarsPrivate']);
+		$this->variables = array_merge($ev1,$ev2);
+
+		// $this->configObject = config::getInstance();
 	}
 
-	/**
-	 * Create or retrieve a privatevars object
-	 *
-	 * @param $engineDir The directory path for EngineAPI
-	 * @param $site      The site to use (default: "default")
-	 * @return bool|self
-	 */
-	public static function getInstance($engineDir=NULL, $site="default") {
-		if (!isset(self::$classInstance)) {
+	public static function getInstance($engineDir=NULL,$site="default") {
+		if (!isset(self::$classInstance)) { 
+
 			if (isnull($engineDir)) return FALSE;
 
-			self::$classInstance = new self($engineDir, $site);
+			self::$classInstance = new self($engineDir,$site);
 		}
 
 		return self::$classInstance;
 	}
 
+
 }
+
 ?>
