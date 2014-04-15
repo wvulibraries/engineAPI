@@ -23,7 +23,7 @@ class localvars extends config {
 			self::$classInstance = new self();
 
 			// @TODO this needs updated with new database info
-			self::$classInstance->set_database(EngineAPI::singleton()->openDB);
+			//self::$classInstance->set_database(EngineAPI::singleton()->openDB);
 		}
 
 		return self::$classInstance;
