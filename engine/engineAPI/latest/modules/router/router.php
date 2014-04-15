@@ -308,4 +308,8 @@ class router {
 
 	}
 
+	private function getURI() {
+		return (isset($_SERVER['REDIRECT_SCRIPT_URL']))?$_SERVER['REDIRECT_SCRIPT_URL']:$_SERVER['REQUEST_URI'];	
+	}
+
 }
