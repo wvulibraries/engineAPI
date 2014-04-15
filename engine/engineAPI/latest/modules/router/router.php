@@ -97,7 +97,7 @@ class router {
 	public function setServerURI($uri=NULL) {
 
 		if (isnull($uri)) {
-			$this->serverURI = $this->parseURI($_SERVER['REDIRECT_SCRIPT_URL']);
+			$this->serverURI = $this->parseURI($this->getURI());
 		}
 		else {
 
