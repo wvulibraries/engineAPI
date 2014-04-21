@@ -140,13 +140,15 @@ class dbDriver_mysql extends dbDriver {
         switch (TRUE) {
             case !isset($params):
                 $stmt->execute();
-
                 return $stmt;
             case !$params:
                 return $stmt;
             case is_array($params) || ($params instanceof keyValuePairs):
 				call_user_func_array(array($stmt,'execute'), $params);
                 return $stmt;
+			default:
+				errorHandle::newError(__METHOD__."() Invalid usage!", errorHandle::HIGH);
+				return FALSE;
         }
     }
 
