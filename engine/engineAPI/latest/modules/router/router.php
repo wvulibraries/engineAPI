@@ -15,8 +15,9 @@ class router {
 	}
 
 	/**
-	 * Returns validate instance
-	 * @return validate
+	 * Returns router instance
+	 * @param string $uri
+	 * @return self
 	 */
 	public static function getInstance($uri=NULL) {
 		if (!isset(self::$instance)) {
@@ -29,7 +30,7 @@ class router {
 
 	/**
 	 * reset the router instance.
-	 * @return boolean TRUE
+	 * @return bool TRUE
 	 */
 	public static function resetInstance() {
 		if (isset(self::$instance)) {
@@ -93,7 +94,7 @@ class router {
 
 	/**
 	 * does the server uri match one of the defined routes?
-	 * @return boolean TRUE on match, FALSE otherwise
+	 * @return bool TRUE on match, FALSE otherwise
 	 */
 	public function match() {
 
@@ -108,7 +109,7 @@ class router {
 
 	/**
 	 * Determine which defined route we are using based on the server URI
-	 * @return [type] [description]
+	 * @return array [type] [description]
 	 */
 	private function matchRoute() {
 
@@ -204,7 +205,7 @@ class router {
 	/**
 	 * determine if a string represents a variable
 	 * @param  string  $item string to be tested
-	 * @return boolean       TRUE if the string could be a variable, false otherwise
+	 * @return bool       TRUE if the string could be a variable, false otherwise
 	 */
 	private function is_variable($item) {
 
