@@ -266,8 +266,11 @@ class router {
 
 		if (is_empty($items[0])) array_shift($items);
 
-		// If the last item is a GET string, drop it
-		if ($items[ sizeof($items)-1 ][0] == '?') array_pop($items);
+		// If the last item is a GET string, blank it
+		$lastItem = $items[ sizeof($items)-1 ];
+		if (!is_empty($lastItem) && $lastItem[0] == '?'){
+			$items[ sizeof($items)-1 ] = '';
+		}
 
 		if (is_empty($items)) return FALSE;
 
