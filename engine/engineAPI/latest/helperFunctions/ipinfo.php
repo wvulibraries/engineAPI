@@ -144,30 +144,40 @@ class ipAddr {
 
 }
 
-
+/**
+ * @deprecated
+ * @see ipAddr::rangeCheckArray()
+ */
 function userInfoIPRangeCheckArray($ipRanges,$checkIP = NULL) {
-	
+	deprecated();
 	return ipAddr::rangeCheckArray($ipRanges,$checkIP = NULL);	
 }
 
+/**
+ * @deprecated
+ * @see ipAddr::rangeCheck()
+ */
 function userInfoIPRangeCheck($ip,$checkIP = NULL) {
-
+	deprecated();
 	return ipAddr::rangeCheck($ip,$checkIP = NULL);
 	
 }
 
+/**
+ * @deprecated
+ * @see ipAddr::check()
+ */
 function ipRangeCheck($ipRanges,$checkIP = NULL) {
+	deprecated();
 	return ipAddr::check($ipRanges,$checkIP = NULL);
 }
 
 /**
- * Determine if the user is on or off campus
- *
- * @param string $checkIP The IP to check, defaults to $_SERVER['REMOTE_ADDR']
- * @return bool
+ * @deprecated
+ * @see ipAddr::onsite()
  */
 function onCampus($checkIP = NULL) {
-	
+	deprecated();
 	return ipAddr::onsite($checkIP = NULL);
 	
 }
