@@ -38,7 +38,6 @@ class config {
 					$prevTemp = &$this->variables[$V];
 				}
 				else if ($count == $arrayLen) {
-                    // $prevTemp[$V] = $value;
 					if ($prevTemp[$V] = $value) {
 						return TRUE;
 					}
