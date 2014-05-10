@@ -11,14 +11,17 @@ class localvars extends config {
 	 * Class constructor
 	 */
 	public function __construct() {
+        // Register {local ...} engine tags
 		templates::defTempPatterns("/\{local\s+(.+?)\}/", "localvars::templateMatches", $this);
 	}
 
 	public static function getInstance() {
+		// Cache self if it's not already cached
 		if (!isset(self::$classInstance)) {
 			self::$classInstance = new self;
 		}
 
+		// Return cached instance
 		return self::$classInstance;
 	}
 
@@ -32,10 +35,12 @@ class localvars extends config {
 		$attrPairs = attPairs($matches[1]);
 		$variable  = self::get_static($attrPairs['var']);
 
+        // Return the variable if it exists
 		if (!is_empty($variable)) {
 			return $variable;
 		}
 
+        // Doesn't exist or is empty, return an empty string
 		return '';
 	}
 
