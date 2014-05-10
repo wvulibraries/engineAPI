@@ -5,29 +5,6 @@ class config {
 	private static $classInstance;
 
 	public function __construct() {
-		//@TODO this isn't DRY. Needs refactoring
-
-		// setup private config variables
-		// require $engineDir."/config/defaultPrivate.php";
-		// if ($site != "default" && $site != "defaultPrivate"){
-		// 	$siteConfigFile = $engineDir."/config/".$site."Private.php";
-		// 	require_once $siteConfigFile;
-		// }
-		// $this->variables['private'] = $engineVarsPrivate;
-		// unset($engineVarsPrivate);
-
-		// // setup $engineVars
-		// require $engineDir."/config/default.php";
-		// if ($site != "default" && $site != "defaultPrivate"){
-		// 	$siteConfigFile = $engineDir."/config/".$site.".php";
-		// 	require_once $siteConfigFile;
-		// }
-		// $this->variables['engine'] = $engineVars;
-		// unset($engineVars);
-
-		// $this->variables['local'] = array();
-
-		// $this->set("engine", "engineDir", $engineDir);
 	}
 
 	public function loadConfig($file) {
@@ -35,14 +12,6 @@ class config {
 		require $file;
 		$varsAfter  = array_keys(get_defined_vars());
 		return compact(array_diff($varsAfter, $varsBefore));
-
-		// require $file;
-		// if ($site != "default" && $site != "defaultPrivate"){
-		// 	$siteConfigFile = $engineDir."/config/".$site."Private.php";
-		// 	require_once $siteConfigFile;
-		// }
-		// $this->variables['private'] = $engineVarsPrivate;
-		// unset($engineVarsPrivate);
 	}
 
 	public static function getInstance($engineDir=NULL, $site="default") {

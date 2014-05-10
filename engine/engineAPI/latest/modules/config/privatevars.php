@@ -3,23 +3,20 @@
 class privatevars extends config {
 
 	private static $classInstance;
-	protected $variables = array();
 
-	function __construct($engineDir, $site) {
-		$defaults = parent::loadconfig($engineDir."/config/defaultPrivate.php");
-		$siteVars = ($site != "default" && is_readable($engineDir."/config/".$site."Private.php"))?parent::loadconfig($engineDir."/config/".$site."Private.php"):array();
+	public function __construct($engineDir, $site) {
+		$defaults = self::loadconfig($engineDir."/config/defaultPrivate.php");
 
-		$ev1 = $defaults['engineVarsPrivate'];
-		$ev2 = isset($siteVars['engineVarsPrivate'])?$siteVars['engineVarsPrivate']:array();
+		$sitePath = $engineDir."/config/".$site."Private.php";
+		$siteVars = ($site != "default" && is_readable($sitePath))
+			? self::loadconfig($sitePath)
+			: array('engineVarsPrivate' => array());
 
-		$this->variables = array_merge($ev1, $ev2);
-
-		// $this->configObject = config::getInstance();
+		$this->variables = array_merge($defaults['engineVarsPrivate'], $siteVars['engineVarsPrivate']);
 	}
 
 	public static function getInstance($engineDir=NULL, $site="default") {
 		if (!isset(self::$classInstance)) {
-
 			if (isnull($engineDir)) return FALSE;
 
 			self::$classInstance = new self($engineDir, $site);
