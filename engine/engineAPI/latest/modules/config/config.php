@@ -16,8 +16,8 @@ class config {
 		return compact(array_diff($varsAfter, $varsBefore));
 	}
 
-		return new self();
 	public static function getInstance() {
+		return new self;
 	}
 
 	public function is_set($name) {
@@ -83,22 +83,23 @@ class config {
 						$prevTemp = &$this->variables[$V];
 					}
 					else {
-						return(NULL);
+						return NULL;
 					}
-
 				}
 				else {
 					if (!isset($prevTemp[$V])) {
-						return(NULL);
+						return NULL;
 					}
 					else {
 						$prevTemp = &$prevTemp[$V];
 					}
+
 					if ($count == $arrayLen) {
-						return($prevTemp);
+						return $prevTemp;
 					}
 				}
 			}
+
 			return $default;
 		}
 

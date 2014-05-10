@@ -16,7 +16,7 @@ class localvars extends config {
 
 	public static function getInstance() {
 		if (!isset(self::$classInstance)) {
-			self::$classInstance = new self();
+			self::$classInstance = new self;
 		}
 
 		return self::$classInstance;
@@ -36,10 +36,10 @@ class localvars extends config {
 		$variable = self::get_static($attPairs['var']);
 
 		if (!is_empty($variable)) {
-			return($variable);
+			return $variable;
 		}
 
-		return("");
+		return '';
 	}
 
 	public static function export_static() {
