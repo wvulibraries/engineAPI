@@ -2,9 +2,9 @@
 
 class config {
 
-	private static $classInstance;
 	const NULL_VALUE = '%eapi%1ee6ba19c95e25f677e7963c6ce293b4%api%';
 
+	protected $variables = array();
 
 	public function __construct() {
 	}
@@ -16,8 +16,8 @@ class config {
 		return compact(array_diff($varsAfter, $varsBefore));
 	}
 
-	public static function getInstance($engineDir=NULL, $site="default") {
 		return new self();
+	public static function getInstance() {
 	}
 
 	public function is_set($name) {

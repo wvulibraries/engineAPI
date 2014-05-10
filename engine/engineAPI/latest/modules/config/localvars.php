@@ -6,14 +6,12 @@
 class localvars extends config {
 
 	private static $classInstance;
-	protected $variables = array();
 	protected $database;
 
 	/**
 	 * Class constructor
 	 */
 	function __construct() {
-		$this->configObject = config::getInstance();
 		templates::defTempPatterns("/\{local\s+(.+?)\}/", "localvars::templateMatches", $this);
 	}
 

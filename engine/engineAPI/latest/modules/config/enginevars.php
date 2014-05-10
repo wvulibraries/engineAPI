@@ -3,7 +3,6 @@
 class enginevars extends config {
 
 	private static $classInstance;
-	protected $variables = array();
 
 	function __construct($engineDir, $site) {
 		$defaults = parent::loadconfig($engineDir."/config/default.php");
@@ -13,8 +12,6 @@ class enginevars extends config {
 		$ev2 = isset($siteVars['engineVars'])?$siteVars['engineVars']:array();
 
 		$this->variables = array_merge($ev1, $ev2);
-
-		// $this->configObject = config::getInstance();
 	}
 
 	public static function getInstance($engineDir=NULL, $site="default") {
