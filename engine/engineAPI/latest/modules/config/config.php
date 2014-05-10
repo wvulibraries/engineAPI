@@ -3,6 +3,8 @@
 class config {
 
 	private static $classInstance;
+	const NULL_VALUE = '%eapi%1ee6ba19c95e25f677e7963c6ce293b4%api%';
+
 
 	public function __construct() {
 	}
@@ -53,7 +55,7 @@ class config {
 		}
 
 		if (isnull($value) && $null === TRUE) {
-			$this->variables[$name] = "%eapi%1ee6ba19c95e25f677e7963c6ce293b4%api%";
+			$this->variables[$name] = self::NULL_VALUE;
 			return TRUE;
 		}
 
@@ -101,7 +103,7 @@ class config {
 		}
 
 		if (array_key_exists($name, $this->variables)) {
-			if ($this->variables[$name] == "%eapi%1ee6ba19c95e25f677e7963c6ce293b4%api%") {
+			if ($this->variables[$name] == self::NULL_VALUE) {
 				return NULL;
 			}
 			return $this->variables[$name];
