@@ -6,9 +6,6 @@ class config {
 
 	protected $variables = array();
 
-	public function __construct() {
-	}
-
 	public function loadConfig($file) {
 		$varsBefore = array_keys(get_defined_vars());
 		require $file;
