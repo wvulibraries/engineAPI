@@ -13,12 +13,12 @@ class localvars extends config {
 	 * Class constructor
 	 */
 	function __construct() {
-		$this->configObject = config::getInstance(); 
-		templates::defTempPatterns("/\{local\s+(.+?)\}/","localvars::templateMatches",$this);
+		$this->configObject = config::getInstance();
+		templates::defTempPatterns("/\{local\s+(.+?)\}/", "localvars::templateMatches", $this);
 	}
 
 	public static function getInstance() {
-		if (!isset(self::$classInstance)) { 
+		if (!isset(self::$classInstance)) {
 
 			self::$classInstance = new self();
 
@@ -30,11 +30,10 @@ class localvars extends config {
 	}
 
 	public function set_database($database) {
-
 		if ($database instanceof engineDB) {
 			$this->database = $database;
 			return TRUE;
-		} 
+		}
 
 		return FALSE;
 	}
@@ -46,11 +45,10 @@ class localvars extends config {
 	 * @return string
 	 */
 	public static function templateMatches($matches) {
-
 		$attPairs      = attPairs($matches[1]);
 
 		$localvars = self::export_static();
-		
+
 		$variable = self::get_static($attPairs['var']);
 
 		if (!is_empty($variable)) {
@@ -58,7 +56,6 @@ class localvars extends config {
 		}
 
 		return("");
-		
 	}
 
 	public static function export_static() {
@@ -79,19 +76,19 @@ class localvars extends config {
 	 * @param bool $null
 	 * @return bool
 	 */
-	// public function set($var,$value,$null=FALSE) {
-		
-	// 	return $this->configObject->set(self::CONFIG_TYPE,$var,$value,$null);
-		
+	// public function set($var, $value, $null=FALSE) {
+
+	// 	return $this->configObject->set(self::CONFIG_TYPE, $var, $value, $null);
+
 	// }
-	// public function add($var,$value,$null=FALSE) {
-		
-	// 	return $this->set($var,$value,$null);
+	// public function add($var, $value, $null=FALSE) {
+
+	// 	return $this->set($var, $value, $null);
 
 	// }
 
 	// public function is_set($name) {
-	// 	return $this->configObject->is_set(self::CONFIG_TYPE,$name);
+	// 	return $this->configObject->is_set(self::CONFIG_TYPE, $name);
 	// }
 
 	/**
@@ -101,10 +98,10 @@ class localvars extends config {
 	 * @param string $default
 	 * @return mixed
 	 */
-	// public function get($var,$default="") {
-		
-	// 	return $this->configObject->get(self::CONFIG_TYPE,$var,$default);
-		
+	// public function get($var, $default="") {
+
+	// 	return $this->configObject->get(self::CONFIG_TYPE, $var, $default);
+
 	// }
 
 	/**
@@ -114,14 +111,14 @@ class localvars extends config {
 	 * @return bool
 	 */
 	// public function remove($var) {
-		
-	// 	return $this->configObject->remove(self::CONFIG_TYPE,$var);
-		
+
+	// 	return $this->configObject->remove(self::CONFIG_TYPE, $var);
+
 	// }
 	// public function del($var) {
-		
-	// 	return $this->remove(self::CONFIG_TYPE,$var);
-		
+
+	// 	return $this->remove(self::CONFIG_TYPE, $var);
+
 	// }
 
 	/**
@@ -138,10 +135,10 @@ class localvars extends config {
 	 *        Pass-through to self::add()
 	 * @return mixed
 	 */
-	// public function variable($var,$value=NULL,$null=FALSE) {
-		
-	// 	return $this->configObject->variable(self::CONFIG_TYPE,$var,$value,$null);
-		
+	// public function variable($var, $value=NULL, $null=FALSE) {
+
+	// 	return $this->configObject->variable(self::CONFIG_TYPE, $var, $value, $null);
+
 	// }
 
 	/**
@@ -178,12 +175,12 @@ class localvars extends config {
         ), (array)$params);
 
         // Run SQL
-        $dbSettings = $params['dbConn']->query(sprintf("SELECT `%s`,`%s` FROM `%s` WHERE %s",
+        $dbSettings = $params['dbConn']->query(sprintf("SELECT `%s`, `%s` FROM `%s` WHERE %s",
             $params['dbConn']->escape($nameField),
             $params['dbConn']->escape($valueField),
             $params['dbConn']->escape($tblName),
             $params['dbConn']->escape($params['sqlWhere'])));
-        if($dbSettings['result']){
+        if ($dbSettings['result']){
             $settingCount = 0;
             while($row = mysql_fetch_assoc($dbSettings['result'])){
                 $this->add($params['namespace'].$row[ $nameField ], $row[ $valueField ]);
@@ -196,5 +193,4 @@ class localvars extends config {
         }
     }
 }
-
 ?>
