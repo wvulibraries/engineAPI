@@ -6,7 +6,6 @@
 class localvars extends config {
 
 	private static $classInstance;
-	protected $database;
 
 	/**
 	 * Class constructor
