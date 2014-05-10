@@ -65,10 +65,12 @@ class config {
 		return FALSE;
 	}
 
-	public function get($name, $default="") {
-		// @TODO private ACLs need to be put into place
-		// @TODO should only return a type if it is called from self:: or from the correct
-		// 		 class
+	public function get($name, $default='') {
+		/*
+		 * @TODO: private ACLs need to be put into place
+		 * should only return a type if it is called from self:: or from the
+		 * correct class
+		 */
 
 		if (is_array($name)) {
 			$arrayLen = count($name);
