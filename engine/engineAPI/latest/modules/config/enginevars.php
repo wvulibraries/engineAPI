@@ -4,7 +4,7 @@ class enginevars extends config {
 
 	private static $classInstance;
 
-	function __construct($engineDir, $site) {
+	public function __construct($engineDir, $site) {
 		$defaults = self::loadconfig($engineDir."/config/default.php");
 
 		$sitePath = $engineDir."/config/".$site.".php";

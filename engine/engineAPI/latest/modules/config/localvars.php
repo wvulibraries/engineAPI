@@ -10,7 +10,7 @@ class localvars extends config {
 	/**
 	 * Class constructor
 	 */
-	function __construct() {
+	public function __construct() {
 		templates::defTempPatterns("/\{local\s+(.+?)\}/", "localvars::templateMatches", $this);
 	}
 
