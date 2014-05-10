@@ -18,7 +18,9 @@ class config {
 	}
 
 	public function is_set($name) {
-		if (isset($this->variables[$name])) return TRUE;
+		if (isset($this->variables[$name])) {
+			return TRUE;
+		}
 
 		return FALSE;
 	}
