@@ -5,6 +5,9 @@
  */
 class localvars extends config {
 
+	/**
+	 * @var self
+	 */
 	private static $classInstance;
 
 	/**
@@ -15,6 +18,10 @@ class localvars extends config {
 		templates::defTempPatterns("/\{local\s+(.+?)\}/", "localvars::templateMatches", $this);
 	}
 
+	/**
+	 * Create or retrieve a localvars object
+	 * @return self
+	 */
 	public static function getInstance() {
 		// Cache self if it's not already cached
 		if (!isset(self::$classInstance)) {
@@ -27,8 +34,7 @@ class localvars extends config {
 
 	/**
 	 * Engine tag handler
-	 * @param $matches
-	 *        Matches passed by template handler
+	 * @param $matches Matches passed by template handler
 	 * @return string
 	 */
 	public static function templateMatches($matches) {
@@ -44,10 +50,21 @@ class localvars extends config {
 		return '';
 	}
 
+	/**
+	 * Static wrapper for export()
+	 * @see config::export()
+	 * @return array
+	 */
 	public static function export_static() {
 		return self::getInstance()->export();
 	}
 
+	/**
+	 * Static wrapper for get()
+	 * @see config::get()
+	 * @param string $var
+	 * @return string
+	 */
 	public static function get_static($var) {
 		return self::getInstance()->get($var);
 	}

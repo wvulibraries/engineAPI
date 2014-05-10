@@ -1,11 +1,21 @@
 <?php
-
+/**
+ * EngineAPI config module
+ * @package EngineAPI\modules\config
+ */
 class config {
 
 	const NULL_VALUE = '%eapi%1ee6ba19c95e25f677e7963c6ce293b4%api%';
 
+	/**
+	 * @var array The array of variables being stored
+	 */
 	protected $variables = array();
 
+	/**
+	 * Load a config file and return the variables
+	 * @return array
+	 */
 	public function loadConfig($file) {
 		// Store variables before including $file
 		$varsBefore = array_keys(get_defined_vars());
@@ -20,10 +30,19 @@ class config {
 		return compact(array_diff($varsAfter, $varsBefore));
 	}
 
+	/**
+	 * Create a config object
+	 * @return self
+	 */
 	public static function getInstance() {
 		return new self;
 	}
 
+	/**
+	 * Returns whether a variable is set or not
+	 * @param string $name
+	 * @return bool
+	 */
 	public function is_set($name) {
 		// Check if variable exists
 		if (isset($this->variables[$name])) {
@@ -35,6 +54,13 @@ class config {
 		return FALSE;
 	}
 
+	/**
+	 * Set the value of a variable
+	 * @param string $name  The variable to set
+	 * @param string $value The value being set
+	 * @param bool   $null  Whether to set a null value (default: false)
+	 * @return bool
+	 */
 	public function set($name, $value, $null=FALSE) {
 		// If $name is an array of more than 1 item, treat it as an array
 		if (is_array($name) === TRUE && count($name) > 1) {
@@ -78,6 +104,12 @@ class config {
 		return FALSE;
 	}
 
+	/**
+	 * Get the value of a variable
+	 * @param string $name    The variable to get
+	 * @param string $default The default value, if not set (default: '')
+	 * @return string
+	 */
 	public function get($name, $default='') {
 		/*
 		 * @TODO: private ACLs need to be put into place
@@ -135,6 +167,11 @@ class config {
 		return $default;
 	}
 
+	/**
+	 * Remove a variable
+	 * @param string The name of the variable to remove
+	 * @return bool
+	 */
 	public function remove($name) {
 		// Check if variable exists
 		if (array_key_exists($name, $this->variables)) {
@@ -147,6 +184,14 @@ class config {
 		return FALSE;
 	}
 
+	/**
+	 * Get or set a variable
+	 * If no $value is passed, get the variable; if $value is passed, set the variable
+	 * @param string $name  The variable to get/set
+	 * @param string $value If provided, the value to set
+	 * @param bool   $null  Whether to set a null value (default: false)
+	 * @return bool|string
+	 */
 	public function variable($name, $value=NULL, $null=FALSE) {
 		// Get variable if only $name is passed
 		if (isnull($value) && $null === FALSE) {
@@ -157,6 +202,10 @@ class config {
 		return $this->set($name, $value, $null);
 	}
 
+	/**
+	 * Return all of the variables set
+	 * @return array
+	 */
 	public function export() {
 		return $this->variables;
 	}

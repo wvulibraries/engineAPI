@@ -1,9 +1,21 @@
 <?php
-
+/**
+ * EngineAPI enginevars module
+ * @package EngineAPI\modules\enginevars
+ */
 class enginevars extends config {
 
+	/**
+	 * @var self
+	 */
 	private static $classInstance;
 
+	/**
+	 * Class contructor
+	 *
+	 * @param $engineDir The directory path for EngineAPI
+	 * @param $site      The site to use
+	 */
 	public function __construct($engineDir, $site) {
 		// Load default variables
 		$defaults = self::loadconfig($engineDir."/config/default.php");
@@ -18,6 +30,13 @@ class enginevars extends config {
 		$this->variables = array_merge($defaults['engineVars'], $siteVars['engineVars']);
 	}
 
+	/**
+	 * Create or retrieve an enginevars object
+	 *
+	 * @param $engineDir The directory path for EngineAPI
+	 * @param $site      The site to use (default: "default")
+	 * @return bool|self
+	 */
 	public static function getInstance($engineDir=NULL, $site="default") {
 		// Cache self if it's not already cached
 		if (!isset(self::$classInstance)) {
