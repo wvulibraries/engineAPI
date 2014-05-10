@@ -37,17 +37,15 @@ class config {
 					$this->variables[$V] = array();
 					$prevTemp = &$this->variables[$V];
 				}
+				else if ($count == $arrayLen) {
+                    // $prevTemp[$V] = $value;
+					if ($prevTemp[$V] = $value) {
+						return TRUE;
+					}
+				}
 				else {
-					if ($count == $arrayLen) {
-                        // $prevTemp[$V] = $value;
-						if ($prevTemp[$V] = $value) {
-							return TRUE;
-						}
-					}
-					else {
-						$prevTemp[$V] = array();
-						$prevTemp = &$prevTemp[$V];
-					}
+					$prevTemp[$V] = array();
+					$prevTemp = &$prevTemp[$V];
 				}
 			}
 

@@ -29,11 +29,8 @@ class localvars extends config {
 	 * @return string
 	 */
 	public static function templateMatches($matches) {
-		$attPairs      = attPairs($matches[1]);
-
-		$localvars = self::export_static();
-
-		$variable = self::get_static($attPairs['var']);
+		$attrPairs = attPairs($matches[1]);
+		$variable  = self::get_static($attrPairs['var']);
 
 		if (!is_empty($variable)) {
 			return $variable;
@@ -43,13 +40,11 @@ class localvars extends config {
 	}
 
 	public static function export_static() {
-		$localvars = self::getInstance();
-		return $localvars->export();
+		return self::getInstance()->export();
 	}
 
 	public static function get_static($var) {
-		$localvars = self::getInstance();
-		return $localvars->get($var);
+		return self::getInstance()->get($var);
 	}
 
 }
