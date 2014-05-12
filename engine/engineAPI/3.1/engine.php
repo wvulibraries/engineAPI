@@ -950,6 +950,7 @@ class EngineAPI{
 	 * @return array
 	 */
 	public function dbTablesExport() {
+		deprecated();
 		$dbTablesArray = array();
 
 		$dbTablesArray                             = $this->dbTables;
@@ -967,6 +968,7 @@ class EngineAPI{
 	 * @return bool
 	 */
 	public function login($loginType) {
+		deprecated();
 		if (isset($this->loginFunctions[$loginType])) {
 			if($this->loginFunctions[$loginType](trim($this->cleanPost['RAW']['username']),$this->cleanPost['RAW']['password'])) {
 				return(TRUE);
@@ -1058,10 +1060,12 @@ class EngineAPI{
 
 	/**
 	 * Um... huh?
+	 * @deprecated
 	 * @param $referer
 	 * @return null
 	 */
 	private function getHTTP_REFERERServer($referer) {
+		deprecated();
 
 		$server = NULL;
 
@@ -1367,6 +1371,7 @@ class EngineAPI{
 	 * @return bool|null|string
 	 */
 	public function localVars($variable,$value=NULL,$null=FALSE) {
+		deprecated();
 		return localvars::variable($variable,$value,$null);
 	}
 
@@ -1379,6 +1384,7 @@ class EngineAPI{
 	 * @return array
 	 */
 	public function localVarsExport() {
+		deprecated();
 		return localvars::export();
 	}
 }
