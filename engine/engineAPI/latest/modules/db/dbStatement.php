@@ -299,6 +299,15 @@ abstract class dbStatement {
     }
 
     /**
+     * Return TRUE if an error has occured, FALSE otherwise
+     * 
+     * @return bool
+     */
+    public function error(){
+        return $this->sqlState() != 0000;
+    }
+
+    /**
      * The error code/number of the last error *driver specific*
      *
      * @return string
