@@ -294,19 +294,27 @@ abstract class dbStatement {
      *
      * @return int
      */
-    public abstract function sqlState();
+    public function sqlState(){
+        return $this->pdoStatement->errorCode();
+    }
 
     /**
      * The error code/number of the last error *driver specific*
      *
      * @return string
      */
-    public abstract function errorCode();
+    public function errorCode(){
+        $errorMsg = $this->pdoStatement->errorInfo();
+        return $errorMsg[1];
+    }
 
     /**
      * The error message of the last error *driver specific*
      *
      * @return string
      */
-    public abstract function errorMsg();
+    public abstract function errorMsg(){
+        $errorMsg = $this->pdoStatement->errorInfo();
+        return $errorMsg[2];
+    }
 }

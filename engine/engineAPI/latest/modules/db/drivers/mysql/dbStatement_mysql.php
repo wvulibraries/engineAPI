@@ -309,34 +309,6 @@ class dbStatement_mysql extends dbStatement {
         return $rows;
     }
 
-    /**
-     * {@inheritdoc}
-     * @author David Gersting
-     */
-    public function sqlState() {
-        return $this->pdoStatement->errorCode();
-    }
-
-    /**
-     * {@inheritdoc}
-     * @author David Gersting
-     */
-    public function errorCode() {
-        $errorMsg = $this->pdoStatement->errorInfo();
-
-        return $errorMsg[1];
-    }
-
-    /**
-     * {@inheritdoc}
-     * @author David Gersting
-     */
-    public function errorMsg() {
-        $errorMsg = $this->pdoStatement->errorInfo();
-
-        return $errorMsg[2];
-    }
-
     // -----------------------------------------------------------------------------------------------------------------
 
     private function encodeObject($input) {
