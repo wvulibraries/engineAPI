@@ -322,7 +322,7 @@ abstract class dbStatement {
      *
      * @return string
      */
-    public abstract function errorMsg(){
+    public function errorMsg(){
         $errorMsg = $this->pdoStatement->errorInfo();
         return $errorMsg[2];
     }
