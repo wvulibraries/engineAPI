@@ -67,9 +67,13 @@ class dbDriver_mysql extends dbDriver {
                     $dsn = $this->buildDSN(self::PDO_DRIVER, $query);
                 }
 
-                // Figure out the user/pass
-                $user = $this->extractParam('user', $params, self::DEFAULT_USER);
-                $pass = $this->extractParam('pass', $params, self::DEFAULT_PASS);
+                // Deterime username ('username' or 'user')
+                $user = $this->extractParam('username', $params);
+				if(!$user) $user = $this->extractParam('user', $params, self::DEFAULT_USER);
+
+				// Deterime password ('password' or 'pass')
+				$pass = $this->extractParam('password', $params);
+				if(!$pass) $pass = $this->extractParam('pass', $params, self::DEFAULT_PASS);
 
                 // Create the PDO object!
 				if(!$this->createPDO($dsn, $user, $pass, $params)) die('Failed to connect to database!');
