@@ -304,7 +304,7 @@ abstract class dbStatement {
      * @return bool
      */
     public function error(){
-        return $this->sqlState() != 0000;
+        return $this->sqlState() != '00000';
     }
 
     /**
@@ -322,7 +322,7 @@ abstract class dbStatement {
      *
      * @return string
      */
-    public abstract function errorMsg(){
+    public function errorMsg(){
         $errorMsg = $this->pdoStatement->errorInfo();
         return $errorMsg[2];
     }
