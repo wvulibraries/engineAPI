@@ -24,18 +24,18 @@ class login {
 	}
 
 	/**
-	 * Process a login (Is this deprecated?)
-	 *
-	 * @deprecated
+	 * Process a login
 	 * @param $loginType
 	 * @return bool
 	 */
 	public static function login() {
-		deprecated();
 		if (isnull(self::$loginType)) return FALSE;
 
-		if (isset($this->loginFunctions[$loginType])) {
-			if($this->loginFunctions[$loginType](trim($_POST['RAW']['username']),$_POST['RAW']['password'])) {
+		if (isset(self::$loginFunctions[self::$loginType])) {
+
+			$loginFunction = self::$loginFunctions[self::$loginType];
+
+			if($loginFunction(trim($_POST['RAW']['username']),$_POST['RAW']['password'])) {
 				return TRUE;
 			}
 		}
