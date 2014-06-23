@@ -79,8 +79,8 @@ class ldapSearch
             
             if(isset($configKey)){
                 $configKey = trim($configKey);
-                if(@$this->enginevars->is_set(array("ldapDomain",trim($configKey)))){
-                    foreach($this->enginevars->get("ldapDomain")[ trim($configKey) ] as $key => $value){
+                if(@$this->enginevars->is_set(array("ldapDomain",$configKey))){
+                    foreach($this->enginevars->get("ldapDomain")[ $configKey ] as $key => $value){
                         $this->$key = $value;
                     }
                 }
