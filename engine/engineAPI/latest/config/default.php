@@ -52,7 +52,7 @@ $engineVars['JAVAURL']    = $engineVars['WEBROOT'] ."/javascript";
 $engineVars['engineInc']  = $engineVars['WEBROOT'] ."/engineIncludes";
 
 //Support Pages
-$engineVars['loginPage']    = $engineVars['engineInc'] ."/login-3.0.php";
+$engineVars['loginPage']    = $engineVars['engineInc'] ."/login-4.0.php";
 $engineVars['logoutPage']   = $engineVars['engineInc'] ."/logout.php";
 $engineVars['downloadPage'] = $engineVars['engineInc'] ."/download.php";
 
