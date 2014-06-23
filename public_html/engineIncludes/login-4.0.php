@@ -1,34 +1,32 @@
 <?php
+require_once '/home/www.libraries.wvu.edu/phpincludes/engine/engineAPI/4.0/engine.php';
+$engine = EngineAPI::singleton();
+errorHandle::errorReporting(errorHandle::E_ALL);
 
 require_once("/home/library/public_html/includes/engineHeader.php");
 
-login::$loginType = "ldap"; //mysql
+login::$loginType = "ldap"; //"mysql"
 
-$enginevars = enginevars::getInstance();
+$localVars  = localvars::getInstance();
+$engineVars = enginevars::getInstance();
 
-if($enginevars::get('forceSSLLogin') === TRUE && (!isset($_SERVER['HTTPS']) or is_empty($_SERVER['HTTPS']))){
-        $enginevars::get('loginPage') = str_replace("http://","https://",$enginevars::get('loginPage'));
-        header("Location: ".$enginevars::get('loginPage')."?".$_SERVER['QUERY_STRING']);
+if($engineVars->get('forceSSLLogin') === TRUE && (!isset($_SERVER['HTTPS']) or is_empty($_SERVER['HTTPS']))){
+        $engineVars->set('loginPage',str_replace("http://","https://",$engineVars->get('loginPage')));
+        header("Location: ".$engineVars->get('loginPage')."?".$_SERVER['QUERY_STRING']);
         exit;
 }
 
-$localvars = localvars::getInstance();
 
-$localvars->set('pageTitle',"Login Page");
-// localvars::add("excludeToolbar","TRUE");
-
-// Domain for ldap login
-$localvars->set("domain","wvu-ad");
-
-
+$localVars->set('pageTitle',"Login Page");
+$localVars->set("domain","wvu-ad");
 
 $authFail  = FALSE; // Authorization to the current resource .. we may end up not using this
 $loginFail = FALSE; // Login Success/Failure
 
 if (!session::get("page") && isset($engine->cleanGet['HTML']['page'])) {
-	$page = $engine->cleanGet['HTML']['page']; 
-	if (isset($engine->cleanGet['HTML']['qs'])) {
-		$qs = urldecode($engine->cleanGet['HTML']['qs']);
+	$page = $_GET['HTML']['page']; 
+	if (isset($_GET['HTML']['qs'])) {
+		$qs = urldecode($_GET['HTML']['qs']);
 		$qs = preg_replace('/&amp;amp;/','&',$qs);
 		$qs = preg_replace('/&amp;/','&',$qs);
 	}
@@ -42,27 +40,26 @@ if (!session::get("page") && isset($engine->cleanGet['HTML']['page'])) {
 }
 
 //Login processing:
-if (isset($engine->cleanPost['HTML']['loginSubmit'])) {
-	if (!isset($engine->cleanPost['HTML']['username']) || !isset($engine->cleanPost['HTML']['password'])) {
+if (isset($_POST['HTML']['loginSubmit'])) {
+	if (!isset($_POST['HTML']['username']) || !isset($_POST['HTML']['password'])) {
 		$authFail  = TRUE;
 		$loginFail = TRUE;
 	}
 	else {
-		
 		if (login::login()) {
 //            die(__LINE__.' - '.__FILE__);
-            if(isset($engine->cleanGet['HTML']['url'])) {
-				header("Location: ".$engine->cleanGet['HTML']['URL'] ) ;
+            if(isset($_GET['HTML']['url'])) {
+				header("Location: ".$_GET['HTML']['URL'] ) ;
 			}
 			else {
 				
 				// if (debugNeeded("login")) {
 				// 	debugDisplay("login","\$_SESSION",1,"Contents of the \$_SESSION array.",$_SESSION);
 				// }
-				if (session::set("page")) {
+				if (session::get("page")) {
 					$url = sprintf("%s?%s",
 						session::get("page"),
-						session::set("qs")
+						session::get("qs")
 						);
 
 					header("Location: ".$url );
@@ -70,7 +67,7 @@ if (isset($engine->cleanPost['HTML']['loginSubmit'])) {
 					exit;
 				}
 				else {
-					header("Location: ".enginevars::getInstance()->get("WEBROOT") );
+					header("Location: ".$engineVars->get('WEBROOT') );
 				}
 
 			}
@@ -83,17 +80,9 @@ if (isset($engine->cleanPost['HTML']['loginSubmit'])) {
 
 }
 
-$engine->eTemplate("load","library2012.1col");
-$engine->eTemplate("include","header");
+templates::load("library2012.1col");
+templates::display('header');
 ?>
-
-
-<?php
-// if (debugNeeded("login")) {
-// 	debugDisplay("login","\$_SESSION",1,"Contents of the \$_SESSION array.",$_SESSION);
-// }
-?>
-
 
 <h1>Login</h1>
 
@@ -110,7 +99,7 @@ if(isset($page)) {
 ?>
 
 <form name="loginForm" action="<?php print $_SERVER['PHP_SELF']?><?php if(isset($page)){ echo "?page=".$page; if(isset($qs)) { echo "&qs=".(urlencode($qs)); } } ?>" method="post">
-	{engine name="insertCSRF"}
+	{csrf}
 	
 	<table>
 		<tr>
@@ -142,5 +131,6 @@ document.loginForm.username.focus();
 </script>
 
 <?php
-$engine->eTemplate("include","footer");
+templates::display('footer');
+?>
 ?>
