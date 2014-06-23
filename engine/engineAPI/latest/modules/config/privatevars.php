@@ -1,34 +1,54 @@
 <?php
-
+/**
+ * EngineAPI privatevars module
+ * @package EngineAPI\modules\privatevars
+ */
 class privatevars extends config {
 
+	/**
+	 * @var self
+	 */
 	private static $classInstance;
-	protected $variables = array();
 
-	function __construct($engineDir,$site) {
-		$defaults = parent::loadconfig($engineDir."/config/defaultPrivate.php");
-		$siteVars = ($site != "default" && is_readable($engineDir."/config/".$site."Private.php"))?parent::loadconfig($engineDir."/config/".$site."Private.php"):array();
+	/**
+	 * Class contructor
+	 *
+	 * @param $engineDir The directory path for EngineAPI
+	 * @param $site      The site to use
+	 */
+	public function __construct($engineDir, $site) {
+		// Load default variables
+		$defaults = self::loadconfig($engineDir."/config/defaultPrivate.php");
 
-		$ev1 = $defaults['engineVarsPrivate'];
-		$ev2 = isset($siteVars['engineVarsPrivate'])?$siteVars['engineVarsPrivate']:array();
+		// Load site specific variables
+		$sitePath = $engineDir."/config/".$site."Private.php";
+		$siteVars = ($site != "default" && is_readable($sitePath))
+			? self::loadconfig($sitePath)
+			: array('engineVarsPrivate' => array());
 
-		$this->variables = array_merge($ev1,$ev2);
-
-		// $this->configObject = config::getInstance();
+		// Override defaults with site variables and save as instance variables
+		$this->variables = array_merge($defaults['engineVarsPrivate'], $siteVars['engineVarsPrivate']);
 	}
 
-	public static function getInstance($engineDir=NULL,$site="default") {
-		if (!isset(self::$classInstance)) { 
-
+	/**
+	 * Create or retrieve a privatevars object
+	 *
+	 * @param $engineDir The directory path for EngineAPI
+	 * @param $site      The site to use (default: "default")
+	 * @return bool|self
+	 */
+	public static function getInstance($engineDir=NULL, $site="default") {
+		// Cache self if it's not already cached
+		if (!isset(self::$classInstance)) {
+			// Require Engine directory
 			if (isnull($engineDir)) return FALSE;
 
-			self::$classInstance = new self($engineDir,$site);
+			self::$classInstance = new self($engineDir, $site);
 		}
 
+		// Return cached instance
 		return self::$classInstance;
 	}
 
-
 }
-
 ?>

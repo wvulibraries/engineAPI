@@ -1,33 +1,54 @@
 <?php
-
+/**
+ * EngineAPI enginevars module
+ * @package EngineAPI\modules\enginevars
+ */
 class enginevars extends config {
 
+	/**
+	 * @var self
+	 */
 	private static $classInstance;
-	protected $variables = array();
 
-	function __construct($engineDir,$site) {
-		$defaults = parent::loadconfig($engineDir."/config/default.php");
-		$siteVars = ($site != "default" && is_readable($engineDir."/config/".$site.".php"))?parent::loadconfig($engineDir."/config/".$site.".php"):array();
+	/**
+	 * Class contructor
+	 *
+	 * @param $engineDir The directory path for EngineAPI
+	 * @param $site      The site to use
+	 */
+	public function __construct($engineDir, $site) {
+		// Load default variables
+		$defaults = self::loadconfig($engineDir."/config/default.php");
 
-		$ev1 = $defaults['engineVars'];
-		$ev2 = isset($siteVars['engineVars'])?$siteVars['engineVars']:array();
+		// Load site specific variables
+		$sitePath = $engineDir."/config/".$site.".php";
+		$siteVars = ($site != "default" && is_readable($sitePath))
+			? self::loadconfig($sitePath)
+			: array('engineVars' => array());
 
-		$this->variables = array_merge($ev1,$ev2);
-
-		// $this->configObject = config::getInstance();
+		// Override defaults with site variables and save as instance variables
+		$this->variables = array_merge($defaults['engineVars'], $siteVars['engineVars']);
 	}
 
-	public static function getInstance($engineDir=NULL,$site="default") {
-		if (!isset(self::$classInstance)) { 
-
+	/**
+	 * Create or retrieve an enginevars object
+	 *
+	 * @param $engineDir The directory path for EngineAPI
+	 * @param $site      The site to use (default: "default")
+	 * @return bool|self
+	 */
+	public static function getInstance($engineDir=NULL, $site="default") {
+		// Cache self if it's not already cached
+		if (!isset(self::$classInstance)) {
+			// Require Engine directory
 			if (isnull($engineDir)) return FALSE;
 
-			self::$classInstance = new self($engineDir,$site);
+			self::$classInstance = new self($engineDir, $site);
 		}
 
+		// Return cached instance
 		return self::$classInstance;
 	}
 
 }
-
 ?>
