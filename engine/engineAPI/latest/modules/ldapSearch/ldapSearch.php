@@ -67,9 +67,9 @@ class ldapSearch
      */
     public function __construct($configKey=NULL) {
 
-        if (isnull($configKey)) return;
-
         $this->set_enginevars(enginevars::getInstance());
+
+        if (isnull($configKey)) return;
 
         // We need to figure out of the configKey is just an LDAP URL, or if its a configKey
         $urlInfo = parse_url($configKey);
