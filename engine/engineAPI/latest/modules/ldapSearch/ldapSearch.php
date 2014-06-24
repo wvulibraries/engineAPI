@@ -67,6 +67,8 @@ class ldapSearch
      */
     public function __construct($configKey=NULL) {
 
+        if (isnull($configKey)) return;
+
         $this->set_enginevars(enginevars::getInstance());
 
         // We need to figure out of the configKey is just an LDAP URL, or if its a configKey
@@ -76,19 +78,15 @@ class ldapSearch
             if(isset($urlInfo['port'])) $this->ldapServerPort = $urlInfo['port'];
         }
         else {
-            
-            if (isset($configKey)) {
 
-                $configKey = trim($configKey);
-                if (@$this->enginevars->is_set(array("ldapDomain",$configKey))) {
-					$ldapDomain = $this->enginevars->get("ldapDomain");
-					foreach($ldapDomain[ $configKey ] as $key => $value){
-                        $this->$key = $value;
-                    }
+            $configKey = trim($configKey);
+            if (@$this->enginevars->is_set(array("ldapDomain",$configKey))) {
+                $ldapDomain = $this->enginevars->get("ldapDomain");
+                foreach($ldapDomain[ $configKey ] as $key => $value) {
+                    $this->$key = $value;
                 }
-
             }
-            
+
         }
 
     }
