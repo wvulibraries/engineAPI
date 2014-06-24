@@ -82,13 +82,16 @@ class ldapSearch
 
             $ldapDomain = $this->enginevars->get("ldapDomain");
 
-            if (@$this->enginevars->is_set(array("ldapDomain",$configKey))) {
-
+            if (array_key_exists($configKey, $ldapDomain)) {
+                
                 $ldapDomain = $this->enginevars->get("ldapDomain");
                 foreach($ldapDomain[ $configKey ] as $key => $value) {
                     $this->$key = $value;
                 }
 
+            }
+            else {
+                errorHandle::newError(__METHOD__."() - Domain missing from config: ".$configKey, errorHandle::DEBUG);
             }
 
         }
