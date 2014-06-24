@@ -33,18 +33,17 @@ function ldapLogin($username,$password)
 	             $groupsClean[] = $group['cn'];
 	        }
 
-			$_SESSION['groups']   = $groupsClean;
-			$_SESSION['ou']       = getOU($user);
-			$_SESSION['username'] = strtolower($username);
-			$_SESSION['authType'] = "ldap";
+	        session::set("groups",$groupsClean);
+	        session::set("ou",getOU($user));
+	        session::set("username",strtolower($username));
+	        session::set("authType","ldap");
 
             // Proposed new layout:
-            $_SESSION['authType'] = "ldap";
-            $_SESSION['auth_ldap'] = array(
+            session::set("auth_ldap",array(
                 'groups'   => $groups,
                 'userDN'   => $user,
                 'username' => $username
-            );
+            ));
             
 	        return TRUE;
         }else{
