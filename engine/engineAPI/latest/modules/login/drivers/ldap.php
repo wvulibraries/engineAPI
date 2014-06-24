@@ -32,7 +32,7 @@ function ldapLogin($username,$password)
 	             $group = $ldapSearch->getAttributes($group,'cn');
 	             $groupsClean[] = $group['cn'];
 	        }
-                                          echo __FUNCTION__.'()';
+
 			$_SESSION['groups']   = $groupsClean;
 			$_SESSION['ou']       = getOU($user);
 			$_SESSION['username'] = strtolower($username);
