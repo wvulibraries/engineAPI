@@ -69,7 +69,8 @@ class ldapSearch
 
         $this->set_enginevars(enginevars::getInstance());
 
-        if (isnull($configKey)) return;
+        $configKey = trim($configKey);
+        if (isnull($configKey) || is_empty($configKey)) return;
 
         // We need to figure out of the configKey is just an LDAP URL, or if its a configKey
         $urlInfo = parse_url($configKey);
@@ -79,12 +80,15 @@ class ldapSearch
         }
         else {
 
-            $configKey = trim($configKey);
+            $ldapDomain = $this->enginevars->get("ldapDomain");
+
             if (@$this->enginevars->is_set(array("ldapDomain",$configKey))) {
+
                 $ldapDomain = $this->enginevars->get("ldapDomain");
                 foreach($ldapDomain[ $configKey ] as $key => $value) {
                     $this->$key = $value;
                 }
+
             }
 
         }
@@ -164,9 +168,6 @@ class ldapSearch
         // If we're not connected, fix that.
         if(is_null($this->ldap)) $this->ldap =& $this->connect();
         if($this->ldap){
-            print "<pre>";
-            var_dump($this->ldap);
-            print "</pre>";
             return (bool)ldap_bind($this->ldap, $bindRDN, $password);
         }else{
             errorHandle::newError(__METHOD__.'() - No LDAP connection available to bind to.', errorHandle::HIGH);
