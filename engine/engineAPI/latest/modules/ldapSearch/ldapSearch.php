@@ -65,28 +65,32 @@ class ldapSearch
      * @param string $configKey
      *        This can either be the name of an engineVars LDAP array, or a fully qualified LDAP URL
      */
-    public function __construct($configKey=NULL)
-    {
+    public function __construct($configKey=NULL) {
 
         $this->set_enginevars(enginevars::getInstance());
 
         // We need to figure out of the configKey is just an LDAP URL, or if its a configKey
         $urlInfo = parse_url($configKey);
-        if(isset($urlInfo['scheme'])){
+        if (isset($urlInfo['scheme'])) {
             $this->ldapServer = sprintf('%s://%s', $urlInfo['scheme'], $urlInfo['host']);
             if(isset($urlInfo['port'])) $this->ldapServerPort = $urlInfo['port'];
-        }else{
+        }
+        else {
             
-            if(isset($configKey)){
+            if (isset($configKey)) {
+
                 $configKey = trim($configKey);
-                if(@$this->enginevars->is_set(array("ldapDomain",$configKey))){
+                if (@$this->enginevars->is_set(array("ldapDomain",$configKey))) {
 					$ldapDomain = $this->enginevars->get("ldapDomain");
 					foreach($ldapDomain[ $configKey ] as $key => $value){
                         $this->$key = $value;
                     }
                 }
+
             }
+            
         }
+
     }
 
     /**
@@ -162,6 +166,9 @@ class ldapSearch
         // If we're not connected, fix that.
         if(is_null($this->ldap)) $this->ldap =& $this->connect();
         if($this->ldap){
+            print "<pre>";
+            var_dump($this->ldap);
+            print "</pre>";
             return (bool)ldap_bind($this->ldap, $bindRDN, $password);
         }else{
             errorHandle::newError(__METHOD__.'() - No LDAP connection available to bind to.', errorHandle::HIGH);
