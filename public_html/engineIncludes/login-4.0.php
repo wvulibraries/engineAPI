@@ -3,7 +3,7 @@ require_once '/home/www.libraries.wvu.edu/phpincludes/engine/engineAPI/4.0/engin
 $engine = EngineAPI::singleton();
 errorHandle::errorReporting(errorHandle::E_ALL);
 
-require_once("/home/library/public_html/includes/engineHeader.php");
+recurseInsert("includes/engineHeader.php","php");
 
 login::$loginType = "ldap"; //"mysql"
 
@@ -53,9 +53,6 @@ if (isset($_POST['HTML']['loginSubmit'])) {
 			}
 			else {
 				
-				// if (debugNeeded("login")) {
-				// 	debugDisplay("login","\$_SESSION",1,"Contents of the \$_SESSION array.",$_SESSION);
-				// }
 				if (session::get("page")) {
 					$url = sprintf("%s?%s",
 						session::get("page"),
@@ -79,6 +76,17 @@ if (isset($_POST['HTML']['loginSubmit'])) {
 	}
 
 }
+
+print "<pre>";
+var_dump(session::name());
+print "</pre>";
+print "<pre>";
+var_dump(session::id());
+print "</pre>";
+
+print "<pre>";
+var_dump($_SESSION);
+print "</pre>";
 
 templates::load("library2012.1col");
 templates::display('header');
@@ -132,5 +140,4 @@ document.loginForm.username.focus();
 
 <?php
 templates::display('footer');
-?>
 ?>
