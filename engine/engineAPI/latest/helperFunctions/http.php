@@ -132,7 +132,7 @@ class http
 	 * @param bool $exit
 	 * @return bool
 	 */
-	public static function redirect($url, $statusCode=307, $exit=TRUE) {
+	public static function redirect($url, $statusCode=308, $exit=TRUE) {
 		if(!preg_match('/^3\d\d$/', $statusCode)){
 			trigger_error(__METHOD__."() - Invalid HTTP status code", E_USER_NOTICE);
 			return FALSE;

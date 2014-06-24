@@ -279,7 +279,7 @@ $engineVars['session'] = array(
 	// Length of time the session's cookie should live
 	'cookieLifetime' => 604800,
 	// The session cookie's path param (controls what paths the cookie is visible on)
-	'cookiePath' => '',
+	'cookiePath' => '/',
 	// The session cookie's domain param (controls what domain the cookie is visible on)
 	'cookieDomain' => '',
 	// If TRUE, the cookie will only be valid over https
