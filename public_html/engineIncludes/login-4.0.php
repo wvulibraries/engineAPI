@@ -11,11 +11,10 @@ $localVars  = localvars::getInstance();
 $engineVars = enginevars::getInstance();
 
 if($engineVars->get('forceSSLLogin') === TRUE && (!isset($_SERVER['HTTPS']) or is_empty($_SERVER['HTTPS']))){
-        $engineVars->set('loginPage',str_replace("http://","https://",$engineVars->get('loginPage')));
-        header("Location: ".$engineVars->get('loginPage')."?".$_SERVER['QUERY_STRING']);
-        exit;
+	$engineVars->set('loginPage',str_replace("http://","https://",$engineVars->get('loginPage')));
+	header("Location: ".$engineVars->get('loginPage')."?".$_SERVER['QUERY_STRING']);
+	exit;
 }
-
 
 $localVars->set('pageTitle',"Login Page");
 $localVars->set("domain","wvu-ad");
@@ -24,7 +23,7 @@ $authFail  = FALSE; // Authorization to the current resource .. we may end up no
 $loginFail = FALSE; // Login Success/Failure
 
 if (!session::get("page") && isset($engine->cleanGet['HTML']['page'])) {
-	$page = $_GET['HTML']['page']; 
+	$page = $_GET['HTML']['page'];
 	if (isset($_GET['HTML']['qs'])) {
 		$qs = urldecode($_GET['HTML']['qs']);
 		$qs = preg_replace('/&amp;amp;/','&',$qs);
@@ -36,7 +35,6 @@ if (!session::get("page") && isset($engine->cleanGet['HTML']['page'])) {
 
 	session::set("page",$page);
 	session::set("qs",$qs);
-
 }
 
 //Login processing:
@@ -47,12 +45,11 @@ if (isset($_POST['HTML']['loginSubmit'])) {
 	}
 	else {
 		if (login::login()) {
-//            die(__LINE__.' - '.__FILE__);
-            if(isset($_GET['HTML']['url'])) {
+			if(isset($_GET['HTML']['url'])) {
 				header("Location: ".$_GET['HTML']['URL'] ) ;
 			}
 			else {
-				
+
 				if (session::get("page")) {
 					$url = sprintf("%s?%s",
 						session::get("page"),
@@ -72,21 +69,10 @@ if (isset($_POST['HTML']['loginSubmit'])) {
 		else {
 			$loginFail = TRUE;
 		}
-		
+
 	}
 
 }
-
-print "<pre>";
-var_dump(session::name());
-print "</pre>";
-print "<pre>";
-var_dump(session::id());
-print "</pre>";
-
-print "<pre>";
-var_dump($_SESSION);
-print "</pre>";
 
 templates::load("library2012.1col");
 templates::display('header');
@@ -108,7 +94,7 @@ if(isset($page)) {
 
 <form name="loginForm" action="<?php print $_SERVER['PHP_SELF']?><?php if(isset($page)){ echo "?page=".$page; if(isset($qs)) { echo "&qs=".(urlencode($qs)); } } ?>" method="post">
 	{csrf}
-	
+
 	<table>
 		<tr>
 			<td>
@@ -119,7 +105,7 @@ if(isset($page)) {
 			</td>
 		</tr>
 		<tr>
-			<td>	
+			<td>
 				<label for="password">Password:</label>
 			</td>
 			<td>
@@ -127,12 +113,11 @@ if(isset($page)) {
 			</td>
 		</tr>
 	</table>
-	
+
 	<br />
-	
+
 	<input type="submit" name="loginSubmit" value="Login" />
 </form>
-
 
 <script>
 document.loginForm.username.focus();
