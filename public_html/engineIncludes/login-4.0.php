@@ -11,9 +11,8 @@ $localVars  = localvars::getInstance();
 $engineVars = enginevars::getInstance();
 
 if($engineVars->get('forceSSLLogin') === TRUE && (!isset($_SERVER['HTTPS']) or is_empty($_SERVER['HTTPS']))){
-	$engineVars->set('loginPage',str_replace("http://","https://",$engineVars->get('loginPage')));
-	header("Location: ".$engineVars->get('loginPage')."?".$_SERVER['QUERY_STRING']);
-	exit;
+	$engineVars->set('loginPage', str_replace("http://", "https://", $engineVars->get('loginPage')));
+	http::redirect($engineVars->get('loginPage')."?".$_SERVER['QUERY_STRING']);
 }
 
 $localVars->set('pageTitle',"Login Page");
@@ -45,19 +44,13 @@ if (isset($_POST['HTML']['loginSubmit'])) {
 	}
 	else if (login::login()) {
 		if(isset($_GET['HTML']['url'])) {
-			header("Location: ".$_GET['HTML']['URL'] ) ;
+			http::redirect($_GET['HTML']['url']);
 		}
 		else if (session::get("page")) {
-			$url = sprintf("%s?%s",
-				session::get("page"),
-				session::get("qs")
-			);
-
-			header("Location: ".$url );
-			exit;
+			http::redirect(session::get("page").'?'.session::get("qs"));
 		}
 		else {
-			header("Location: ".$engineVars->get('WEBROOT') );
+			http::redirect($engineVars->get('WEBROOT'));
 		}
 	}
 	else {
