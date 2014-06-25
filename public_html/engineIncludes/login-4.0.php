@@ -21,7 +21,7 @@ $localVars->set("domain","wvu-ad");
 $authFail  = FALSE; // Authorization to the current resource .. we may end up not using this
 $loginFail = FALSE; // Login Success/Failure
 
-if (!session::get("page") && isset($engine->cleanGet['HTML']['page'])) {
+if (!session::get("page") && isset($_GET['HTML']['page'])) {
 	$page = $_GET['HTML']['page'];
 	if (isset($_GET['HTML']['qs'])) {
 		$qs = urldecode($_GET['HTML']['qs']);
