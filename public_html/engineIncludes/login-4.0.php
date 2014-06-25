@@ -43,35 +43,26 @@ if (isset($_POST['HTML']['loginSubmit'])) {
 		$authFail  = TRUE;
 		$loginFail = TRUE;
 	}
-	else {
-		if (login::login()) {
-			if(isset($_GET['HTML']['url'])) {
-				header("Location: ".$_GET['HTML']['URL'] ) ;
-			}
-			else {
+	else if (login::login()) {
+		if(isset($_GET['HTML']['url'])) {
+			header("Location: ".$_GET['HTML']['URL'] ) ;
+		}
+		else if (session::get("page")) {
+			$url = sprintf("%s?%s",
+				session::get("page"),
+				session::get("qs")
+			);
 
-				if (session::get("page")) {
-					$url = sprintf("%s?%s",
-						session::get("page"),
-						session::get("qs")
-						);
-
-					header("Location: ".$url );
-
-					exit;
-				}
-				else {
-					header("Location: ".$engineVars->get('WEBROOT') );
-				}
-
-			}
+			header("Location: ".$url );
+			exit;
 		}
 		else {
-			$loginFail = TRUE;
+			header("Location: ".$engineVars->get('WEBROOT') );
 		}
-
 	}
-
+	else {
+		$loginFail = TRUE;
+	}
 }
 
 templates::load("library2012.1col");
