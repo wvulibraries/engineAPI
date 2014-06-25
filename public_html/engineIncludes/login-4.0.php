@@ -26,8 +26,8 @@ if (!session::get("page") && isset($engine->cleanGet['HTML']['page'])) {
 	$page = $_GET['HTML']['page'];
 	if (isset($_GET['HTML']['qs'])) {
 		$qs = urldecode($_GET['HTML']['qs']);
-		$qs = preg_replace('/&amp;amp;/','&',$qs);
-		$qs = preg_replace('/&amp;/','&',$qs);
+		$qs = str_replace('&amp;amp;', '&', $qs);
+		$qs = str_replace('&amp;', '&', $qs);
 	}
 	else {
 		$qs = "";
