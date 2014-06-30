@@ -38,7 +38,7 @@ class templates {
 		if (file_exists($enginevars->get("tempDir").DIRECTORY_SEPARATOR.$template)) {
 
 			self::$template = $enginevars->get("tempDir").DIRECTORY_SEPARATOR.$template;
-			$enginevars->get("currentTemplate", self::$template);
+			$enginevars->set("currentTemplate", self::$template);
 			return TRUE;
 
 		}
