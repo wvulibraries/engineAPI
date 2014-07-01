@@ -8,9 +8,8 @@ class eapi_includes {
 	//Template Stuff
 	private $pattern = "/\{eapi_include\s+(.+?)\}/";
 	private $function = "eapi_includes::templateMatches";
-	
+
 	function __construct() {
-		deprecated();
 		EngineAPI::defTempPatterns($this->pattern,$this->function,$this);
 		EngineAPI::defTempPatterns("/\{engine name=\"include\"\s+(.+?)\}/",$this->function,$this);
 	}
@@ -26,7 +25,7 @@ class eapi_includes {
 		$engine        = EngineAPI::singleton();
 		$eapi_function = $engine->retTempObj("eapi_function");
 		$attPairs      = attPairs($matches[1]);
-		
+
 		if(!isset($attPairs['file']) && isempty($attPairs['type'])) return(FALSE);
 
 		$regex           = NULL;
@@ -38,7 +37,7 @@ class eapi_includes {
 		if(isset($attPairs['caseInsensitive'])) $regex = $attPairs['caseInsensitive'];
 
 		$output = recurseInsert($attPairs['file'],$attPairs['type'],$regex,$condition,$caseInsensitive);
-		
+
 		return($output);
 	}
 }
