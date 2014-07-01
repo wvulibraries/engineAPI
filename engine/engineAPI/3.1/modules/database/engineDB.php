@@ -73,7 +73,7 @@ class engineDB {
 
     public $inTransaction     = FALSE;
     public $transactionCount  = 0;
-	public $transactionAction = NULL; 
+	public $transactionAction = NULL;
 
     /**
      * Class constructor
@@ -152,8 +152,8 @@ class engineDB {
 	        $string = ($string) ? 1 : 0;
 	    }
 	    else if (is_array($string)) {
-	    	foreach ($string as &$val) {
-	    		$val = mysql_real_escape_string(&$val);
+	    	foreach ($string as $I => $val) {
+	    		$string[$I] = mysql_real_escape_string($val);
 	    	}
 
 	    	return($string);
@@ -247,7 +247,7 @@ class engineDB {
 	* + errorNumber Any error number produced
 	* + error Any error message produced
 	* + info Results of mysql_info()
-	* + id Results of insert_if()	
+	* + id Results of insert_if()
 	* + query The original SQL query that was used
 	* Else the return depends on the SQL query performed:
 	* + INSERT - int (insert id)
@@ -259,13 +259,13 @@ class engineDB {
 	*/
 	public function sqlResult($query) {
 		$sqlResult = $this->query($query);
-		
+
 		if (!$sqlResult['result']) {
 			errorHandle::newError(__METHOD__."() - Error: ".$sqlResult['error'], errorHandle::DEBUG);
 			errorHandle::newError(__METHOD__."() - Query: ".$query, errorHandle::DEBUG);
 			return FALSE;
 		}
-		
+
 		if (!isnull($sqlResult['numrows']) && $sqlResult['numrows'] > 1) {
 			$temp = array();
 			while($row = mysql_fetch_array($sqlResult['result'],  MYSQL_ASSOC)) {
@@ -418,11 +418,11 @@ class engineDB {
 		else if ($this->transactionCount < 0) {
 			return(FALSE);
 		}
-		
+
 		$error = FALSE;
-		
+
 		if ($this->transactionAction === TRUE) {
-			
+
 			$sql = sprintf("COMMIT");
 			$this->sanitize = FALSE;
 			$sqlResult      = $this->query($sql);
@@ -430,9 +430,9 @@ class engineDB {
 			if (!$sqlResult['result']) {
 				$error = TRUE;
 			}
-			
+
 		}
-		
+
 		if ($this->transactionAction === FALSE || isnull($this->transactionAction)) {
 			$sql = sprintf("ROLLBACK");
 			$this->sanitize = FALSE;
@@ -442,8 +442,8 @@ class engineDB {
 				$error = TRUE;
 			}
 		}
-		
-		if ($error === FALSE) { 
+
+		if ($error === FALSE) {
 			if ($autocommit == FALSE) {
 				$sql = sprintf("SET AUTOCOMMIT=1");
 				$this->sanitize = FALSE;
@@ -453,10 +453,10 @@ class engineDB {
 					return FALSE;
 				}
 			}
-			
+
 			$this->inTransaction = FALSE;
 		}
-        
+
 		return !$error;
 	}
 
@@ -466,18 +466,18 @@ class engineDB {
      * @return bool
      */
 	public function transRollback() {
-		
+
 		errorHandle::newError(__METHOD__."() - Rolled Back.", errorHandle::DEBUG);
-		
+
 		$this->transactionAction = FALSE;
-		
+
 		return TRUE;
 	}
 
     /**
      * Commits (saves) the transaction to the database
 	 *
-     * @return bool TRUE if transaction will be committed. FALSE if its already set for rollback. 
+     * @return bool TRUE if transaction will be committed. FALSE if its already set for rollback.
      */
 	public function transCommit() {
 

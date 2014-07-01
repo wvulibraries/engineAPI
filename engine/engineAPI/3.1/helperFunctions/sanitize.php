@@ -24,9 +24,9 @@ function mres($var){
  */
 function dbSanitize($var, $quotes = FALSE) {
 	//run each array item through this function (by reference)
-    if (is_array($var)) {         
-        foreach ($var as &$val) {
-            $val = dbSanitize($val);
+    if (is_array($var)) {
+        foreach ($var as $I => $val) {
+            $var[$I] = dbSanitize($val);
         }
     }
 	//clean strings
@@ -37,11 +37,11 @@ function dbSanitize($var, $quotes = FALSE) {
         }
     }
 	//convert null variables to SQL NULL
-    else if (isnull($var)) {   
+    else if (isnull($var)) {
         $var = "NULL";
     }
 	//convert boolean variables to binary boolean
-    else if (is_bool($var)) {   
+    else if (is_bool($var)) {
         $var = ($var) ? 1 : 0;
     }
     return $var;
@@ -64,15 +64,15 @@ function htmlSanitize($var, $flags=ENT_QUOTES, $charSet="UTF-8", $doubleEncode=T
 	if(!isset($var)) return(FALSE);
 
 	//run each array item through this function (by reference)
-    if (is_array($var)) {         
-        foreach ($var as &$val) {
-            $val = htmlSanitize($val);
+    if (is_array($var)) {
+        foreach ($var as $I => $val) {
+            $var[$I] = htmlSanitize($val);
         }
     }
 	else {
 		$var = htmlentities($var, $flags, $charSet, $doubleEncode);
 	}
-	
+
 	return($var);
 }
 
@@ -86,13 +86,13 @@ function htmlSanitize($var, $flags=ENT_QUOTES, $charSet="UTF-8", $doubleEncode=T
  * @return array|bool|string
  */
 function jsonSanitize($var,$type="mysql") {
-	
+
 	$type = strtolower($type);
-	
+
 	if ($type != "mysql" && $type != "html") {
 		return($type);
 	}
-	
+
 	switch($type) {
 		case "mysql":
 			$sanitizeFunction = "dbSanitize";
@@ -104,9 +104,9 @@ function jsonSanitize($var,$type="mysql") {
 			return(FALSE);
 			break;
 	}
-	
+
 	$varSanitized = array();
-	
+
 	foreach((array)$var as $I=>$V) {
 		$index = $sanitizeFunction($I);
 
@@ -116,21 +116,21 @@ function jsonSanitize($var,$type="mysql") {
 		else {
 			$value = $sanitizeFunction($V);
 		}
-		
+
 		$varSanitized[$index] = $value;
-		
+
 	}
-	
+
 	return($varSanitized);
 }
 
-/** 
+/**
  * remove \r from a string if the $engineVar 'stripCarriageReturns' is TRUE
  * If you modify that variable to use this functions its best to return it to
  * its original state
  *
  * @param string $string
- * @return string 
+ * @return string
  */
 function stripCarriageReturns($string) {
 
@@ -140,14 +140,14 @@ function stripCarriageReturns($string) {
 		$string = str_replace("\r","",$string);
 	}
 
-	return($string);	
+	return($string);
 }
 
-/** 
- * remove \r and \n from a string 
+/**
+ * remove \r and \n from a string
  *
  * @param string $string
- * @return string 
+ * @return string
  */
 function stripNewLines($string) {
 	$string = str_replace("\r","",$string);
