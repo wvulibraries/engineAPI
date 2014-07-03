@@ -419,6 +419,15 @@ class session{
 	}
 
 	/**
+	 * Overwrites the session data with the provided array
+	 * @param array $data
+	 */
+	public static function import($data){
+		self::$sessionData['data'] = $data;
+		self::sync();
+	}
+
+	/**
 	 * Returns the session's ID
 	 * @return string
 	 */
