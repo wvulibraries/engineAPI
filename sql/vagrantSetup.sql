@@ -1,3 +1,4 @@
+DROP DATABASE IF EXISTS `EngineAPI`;
 CREATE DATABASE EngineAPI;
 
 CREATE USER 'username'@'localhost' IDENTIFIED BY 'password';
