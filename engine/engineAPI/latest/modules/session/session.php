@@ -420,11 +420,22 @@ class session{
 
 	/**
 	 * Overwrites the session data with the provided array
-	 * @param array $data
+	 * @param array|string $data Raw data array or serialized string
 	 */
 	public static function import($data){
-		self::$sessionData['data'] = $data;
+		self::$sessionData['data'] = is_string($data)
+			? unserialize($data)
+			: $data;
 		self::sync();
+	}
+
+	/**
+	 * Export session data suitable for import
+	 * @see self::import
+	 * @return string Serialized session data
+	 */
+	public static function export(){
+		return serialize(self::$sessionData['data']);
 	}
 
 	/**
