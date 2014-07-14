@@ -18,11 +18,11 @@ class authUser extends authEntity{
 			$this->db->escape($userKey),
 			$this->db->escape($userKey)));
 
-		if(!$dbUser['numRows']){
+		if(!$dbUser->rowCount()){
 			errorHandle::newError(__METHOD__."() - No user found with userKey '$userKey'!", errorHandle::DEBUG);
 		}else{
 			// Save the meta data
-			$this->metaData = mysql_fetch_assoc($dbUser['result']);
+			$this->metaData = $dbUser->fetch();
 		}
 
 		// Do I auto-expand the tree?
@@ -60,8 +60,8 @@ class authUser extends authEntity{
 			$dbMemberOf = $this->db->query(sprintf("SELECT `group` FROM `%s` WHERE `user`='%s'",
 				$this->db->escape($this->tblUsers2Groups),
 				$this->db->escape($this->getMetaData('ID'))));
-			if($dbMemberOf['numRows']){
-				while($row = mysql_fetch_assoc($dbMemberOf['result'])){
+			if($dbMemberOf->rowCount()){
+				while($row = $dbMemberOf->fetch()){
 					$this->memberOf[] = auth::getEntity("gid:".$row['group'], TRUE);
 				}
 			}

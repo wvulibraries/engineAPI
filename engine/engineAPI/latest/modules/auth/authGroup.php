@@ -17,11 +17,11 @@ class authGroup extends authEntity{
 			$this->db->escape($this->tblGroups),
 			$this->db->escape($groupKey),
 			$this->db->escape($groupKey)));
-		if(!$dbGroup['numRows']){
+		if(!$dbGroup->rowCount()){
 			errorHandle::newError(__METHOD__."() - No group found with groupKey '$groupKey'!", errorHandle::DEBUG);
 		}else{
 			// Save the metadata
-			$this->metaData = mysql_fetch_assoc($dbGroup['result']);
+			$this->metaData = $dbGroup->fetch();
 		}
 
 		// Do I auto-expand the tree?
@@ -66,8 +66,8 @@ class authGroup extends authEntity{
 				implode(',', $changedFields),
 				$this->db->escape($this->getMetaData('ID')));
 			$dbUpdate = $this->db->query($sql);
-			if(!$dbUpdate['numRows']){
-				errorHandle::newError(__METHOD__."() - Failed to update group! (SQL Error: ".$dbUpdate['error'].")", errorHandle::DEBUG);
+			if(!$dbUpdate->rowCount()){
+				errorHandle::newError(__METHOD__."() - Failed to update group! (SQL Error: ".$dbUpdate->errorMsg().")", errorHandle::DEBUG);
 			}else{
 				// Save the new metadata
 				foreach(array_keys($changedFields) as $field){
@@ -92,8 +92,8 @@ class authGroup extends authEntity{
 				$this->db->escape($this->getMetaData('ID')),
 				$this->db->escape($this->tblUsers2Groups),
 				$this->db->escape($this->getMetaData('ID'))));
-			if($dbMembers['numRows']){
-				while($row = mysql_fetch_assoc($dbMembers['result'])){
+			if($dbMembers->rowCount()){
+				while($row = $dbMembers->fetch()){
 					$objID = ($row['entityType'] == 'group') ? 'gid:'.$row['ID'] : 'uid:'.$row['ID'];
 					$this->members[] = auth::getEntity($objID, TRUE);
 				}
@@ -102,8 +102,8 @@ class authGroup extends authEntity{
 			$dbMemberOf = $this->db->query(sprintf("SELECT `parentGroup` FROM `%s` WHERE `childGroup`='%s'",
 				$this->db->escape($this->tblGroups2Groups),
 				$this->db->escape($this->getMetaData('ID'))));
-			if($dbMemberOf['numRows']){
-				while($row = mysql_fetch_assoc($dbMemberOf['result'])){
+			if($dbMemberOf->rowCount()){
+				while($row = $dbMemberOf->fetch()){
 					$this->memberOf[] = auth::getEntity("gid:".$row['parentGroup'], TRUE);
 				}
 			}

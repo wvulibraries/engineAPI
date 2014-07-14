@@ -15,8 +15,8 @@ class authObject extends authCommon{
 		$dbObject = $this->db->query(sprintf("SELECT * FROM `%s` WHERE `ID`='%s' LIMIT 1",
 			$this->db->escape($this->tblObjects),
 			$this->db->escape($this->objectID)));
-		if($dbObject['numRows']){
-			$row = mysql_fetch_assoc($dbObject['result']);
+		if($dbObject->rowCount()){
+			$row = $dbObject->fetch();
 			foreach($row as $field => $value){
 				$this->metaData[$field] = $value;
 			}
@@ -74,7 +74,7 @@ class authObject extends authCommon{
 	{
 		$children = array();
 		$dbObjects = $this->db->query(sprintf("SELECT `ID` FROM `%s` WHERE `parent`='%s'", $this->db->escape($this->tblObjects), $this->db->escape($this->getMetaData('ID'))));
-		while($row = mysql_fetch_assoc($dbObjects['result'])){
+		while($row = $dbObjects->fetch()){
 			$children[] = auth::getObject($row['ID']);
 		}
 		return $children;
@@ -109,7 +109,7 @@ class authObject extends authCommon{
 		}
 
 		$dbAuthorizations = $this->db->query($sql);
-		while($row = mysql_fetch_assoc($dbAuthorizations['result'])){
+		while($row = $dbAuthorizations->fetch()){
 			$authorizations[] = $row;
 		}
 		return $authorizations;
@@ -124,7 +124,7 @@ class authObject extends authCommon{
 		$dbDelete = $this->db->query(sprintf("DELETE FROM `%s` WHERE `authObjectID`='%s' AND `inheritedFrom` <> ''",
 			$this->db->escape($this->tblAuthorizations),
 			$this->db->escape($this->getMetaData('ID'))));
-		return $dbDelete['errorNumber']==0;
+		return !$dbDelete->error();
 	}
 
 	/**
@@ -145,8 +145,7 @@ class authObject extends authCommon{
 		// Save the new value to the object's metaData (testing for it to be successful)
 		if(!auth::updateObject($this->objectID, array('inherits' => $newState))){
 			errorHandle::newError(__METHOD__."() - Failed to save the new inheritance state", errorHandle::DEBUG);
-			$this->db->transRollback();
-			$this->db->transEnd();
+			$this->db->rollback();
 			return FALSE;
 		}else{
 			if($newState){
@@ -155,13 +154,11 @@ class authObject extends authCommon{
 				 * We need to get my parent, and propagate it's permissions down to me
 				 */
 				if($this->getParent()->propagateInheritance($this->objectID)){
-					$this->db->transCommit();
-					$this->db->transEnd();
+					$this->db->commit();
 					return TRUE;
 				}else{
 					errorHandle::newError(__METHOD__."() - Propagate changes failed!", errorHandle::HIGH);
-					$this->db->transRollback();
-					$this->db->transEnd();
+					$this->db->rollback();
 					return FALSE;
 				}
 			}else{
@@ -183,21 +180,18 @@ class authObject extends authCommon{
 						$this->db->escape($this->objectID)));
 				}
 
-				if($dbAction['errorNumber']){
-					errorHandle::newError(__METHOD__."() - Failed to update authorizations in the database! (SQL Error: ".$dbAction['error'].")", errorHandle::CRITICAL);
-					$this->db->transRollback();
-					$this->db->transEnd();
+				if($dbAction->error()){
+					errorHandle::newError(__METHOD__."() - Failed to update authorizations in the database! (SQL Error: ".$dbAction->errorMsg().")", errorHandle::CRITICAL);
+					$this->db->rollback();
 					return FALSE;
 				}else{
 					// Now propagate these changes down to my children
 					if($this->propagateInheritance()){
-						$this->db->transCommit();
-						$this->db->transEnd();
+						$this->db->commit();
 						return TRUE;
 					}else{
 						errorHandle::newError(__METHOD__."() - Propagate changes failed!", errorHandle::HIGH);
-						$this->db->transRollback();
-						$this->db->transEnd();
+						$this->db->rollback();
 						return FALSE;
 					}
 				}
@@ -221,7 +215,7 @@ class authObject extends authCommon{
 			$this->db->escape($this->tblAuthorizations),
 			$this->db->escape($this->tblPermissions),
 			$this->db->escape($this->getMetaData('ID'))));
-		while($row = mysql_fetch_assoc($dbAuthorizations['result'])){
+		while($row = $dbAuthorizations->fetch()){
 			$authorizations[] = $row;
 		}
 
@@ -238,8 +232,7 @@ class authObject extends authCommon{
 			// Clear the child's inherited authorizations
 			if(!$child->clearInheritance()){
 				errorHandle::newError(__METHOD__."() - An error occurred while clearing an object's inheritance!", errorHandle::DEBUG);
-				$this->db->transRollback();
-				$this->db->transEnd();
+				$this->db->rollback();
 				return FALSE;
 			}
 			// Now, we loop on each of MY authorizations, and grant them down to the child
@@ -247,8 +240,7 @@ class authObject extends authCommon{
 				$inheritedFrom = $authorization['inheritedFrom'] ? $authorization['inheritedFrom'] : $this->getMetaData('ID');
 				if(!$child->grant($authorization['authEntity'],$authorization['permissionName'],$authorization['permissionObject'],(bool)$authorization['inheritable'],$authorization['policy'],$inheritedFrom)){
 					errorHandle::newError(__METHOD__."() - An error occurred with a grant!", errorHandle::DEBUG);
-					$this->db->transRollback();
-					$this->db->transEnd();
+					$this->db->rollback();
 					return FALSE;
 				}
 			}
@@ -257,8 +249,7 @@ class authObject extends authCommon{
 		}
 
 		// Lastly, we need to commit everything we've done
-		$this->db->transCommit();
-		$this->db->transEnd();
+		$this->db->commit();
 		return TRUE;
 	}
 
@@ -284,7 +275,7 @@ class authObject extends authCommon{
 			$this->db->escape($permissionID),
 			$this->db->escape($policy),
 			$this->db->escape($this->objectID)));
-		if(mysql_result($dbAuthorizationCheck['result'], 0, 'i')){
+		if($dbAuthorizationCheck->fetchField()){
 			errorHandle::newError(__METHOD__."() - Authorization already exists - move along now. (Entity: $entity PermissionID: $permissionID Policy: $policy ObjectID: {$this->objectID})", errorHandle::DEBUG);
 			return TRUE;
 		}else{
@@ -298,8 +289,8 @@ class authObject extends authCommon{
 				$this->db->escape($this->objectID),
 				$this->db->escape((int)$inheritable),
 				$this->db->escape($inheritedFrom)));
-			if($dbAddAuthorization['errorNumber']){
-				errorHandle::newError(__METHOD__.sprintf("() - SQL Error! (%s:%s)",$dbAddAuthorization['errorNumber'],$dbAddAuthorization['error']), errorHandle::MEDIUM);
+			if($dbAddAuthorization->error()){
+				errorHandle::newError(__METHOD__.sprintf("() - SQL Error! (%s:%s)",$dbAddAuthorization->errorCode(),$dbAddAuthorization->errorMsg()), errorHandle::MEDIUM);
 				return FALSE;
 			}
 		}
@@ -307,12 +298,10 @@ class authObject extends authCommon{
 		// Lastly, we need to propagate these changes down the object's tree
 		if($this->autoPropagate && $inheritable === TRUE){
 			if($this->propagateInheritance()){
-				$this->db->transCommit();
-				$this->db->transEnd();
+				$this->db->commit();
 				return TRUE;
 			}else{
-				$this->db->transRollback();
-				$this->db->transEnd();
+				$this->db->rollback();
 				return FALSE;
 			}
 		}else{
@@ -344,15 +333,14 @@ class authObject extends authCommon{
 			// Disable autoPropaget (we'll manualy trigger it at the end)
 			$this->autoPropagate = FALSE;
 			// For each authorization, remove it
-			while($row = mysql_fetch_assoc($dbAllAuths['result'])){
+			while($row = $dbAllAuths->fetch()){
 				$this->revoke($entity,$row['permissionID']);
 			}
 			// Manually trigger propagation
 			$this->propagateInheritance();
 			$this->autoPropagate = TRUE;
 			// Lastly, commit and end the transaction
-			$this->db->transCommit();
-			$this->db->transEnd();
+			$this->db->commit();
 		}else{
 			// Get to the permissionID
 			$permissionID = is_numeric($permissionName) ? $permissionName : auth::lookupPermission($permissionName,$permissionOrigin);
@@ -363,13 +351,13 @@ class authObject extends authCommon{
 				$this->db->escape($permissionID),
 				$this->db->escape($this->objectID)));
 
-			if(!$dbAuthorizationLookup['numRows']){
+			if(!$dbAuthorizationLookup->rowCount()){
 				errorHandle::newError(__METHOD__."() - Can't locate authorization!", errorHandle::MEDIUM);
 				return FALSE;
 			}
 
 			// Is this a local permission?
-			$authRow = mysql_fetch_assoc($dbAuthorizationLookup['result']);
+			$authRow = $dbAuthorizationLookup->fetch();
 			if(!$authRow['inheritedFrom']){
 				// Yes - We just need to remove this authorization
 				$dbRevoke = $this->db->query(sprintf("DELETE FROM `%s` WHERE `ID`='%s' LIMIT 1",

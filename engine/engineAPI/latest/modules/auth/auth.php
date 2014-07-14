@@ -174,7 +174,7 @@ class auth extends authCommon{
 		$dbObjCheck = $authCommon->db->query(sprintf("SELECT COUNT(`ID`) AS `i` FROM `%s` WHERE `ID`='%s'",
 			$authCommon->db->escape($authCommon->tblObjects),
 			$authCommon->db->escape($id)));
-		if(mysql_result($dbObjCheck['result'],0,'i')){
+		if($dbObjCheck->fetchField()){
 			errorHandle::newError(__METHOD__."() - Object already exists!", errorHandle::DEBUG);
 			return FALSE;
 		}else{
@@ -183,7 +183,7 @@ class auth extends authCommon{
 				$dbObjCheck = $authCommon->db->query(sprintf("SELECT COUNT(`ID`) AS `i` FROM `%s` WHERE `ID`='%s'",
 					$authCommon->db->escape($authCommon->tblObjects),
 					$authCommon->db->escape($parent)));
-				if(!mysql_result($dbObjCheck['result'],0,'i')){
+				if(!$dbObjCheck->fetchField()){
 					errorHandle::newError(__METHOD__."() - Parent object dosen't exists!", errorHandle::DEBUG);
 					return FALSE;
 				}
@@ -209,8 +209,8 @@ class auth extends authCommon{
 				$authCommon->db->escape($authCommon->tblObjects),
 				implode(',', $dbFields),
 				implode(',', $dbValues)));
-			if($dbObjRegister['errorNumber']){
-				errorHandle::newError(__METHOD__."() - SQL Error! (".$dbObjRegister['error'].")", errorHandle::DEBUG);
+			if($dbObjRegister->error()){
+				errorHandle::newError(__METHOD__."() - SQL Error! (".$dbObjRegister->errorMsg().")", errorHandle::DEBUG);
 				return FALSE;
 			}else{
 				// The last thing we need to do is get to this object's parents (if there is one) and trigger authorization propagation
@@ -232,7 +232,7 @@ class auth extends authCommon{
 		$authCommon = new parent();
 
 		// Start the transaction
-		$authCommon->db->transBegin($authCommon->tblObjects);
+		$authCommon->db->beginTransaction();
 
 		// Delete all the authorizations this object has
 		$dbAuthDelete = $authCommon->db->query(sprintf("DELETE FROM `%s` WHERE `authObjectID`='%s'",
@@ -244,7 +244,7 @@ class auth extends authCommon{
 			$authCommon->db->escape($authCommon->tblObjects),
 			$authCommon->db->escape($id)));
 
-		if(!$dbAuthDelete['errorNumber'] and !$dbObjDelete['errorNumber']){
+		if(!$dbAuthDelete->error() and !$dbObjDelete->error()){
 			// Get all the children, and kill them too :) (while listening for an error)
 			$children = $authCommon->getChildren($id,FALSE);
 			foreach($children as $child){
@@ -252,20 +252,17 @@ class auth extends authCommon{
 				if(!self::$fn($child['ID'])){
 					// An error occurred in a child!
 					errorHandle::newError(__METHOD__."() - Error encountered with child '".$child['ID']."'", errorHandle::DEBUG);
-					$authCommon->db->transRollback();
-					$authCommon->db->transEnd();
+					$authCommon->db->rollback();
 				}
 			}
 
 			// If we're here, we're done
-			$authCommon->db->transCommit();
-			$authCommon->db->transEnd();
+			$authCommon->db->commit();
 			return TRUE;
 		}else{
-			if($dbAuthDelete['errorNumber']) errorHandle::newError(__METHOD__."() - Failed to remove authorizations for object '$id'. (SQL Error: ".$dbAuthDelete['error'].")", errorHandle::DEBUG);
-			if($dbObjDelete['errorNumber'])  errorHandle::newError(__METHOD__."() - Failed to remove object '$id'. (SQL Error: ".$dbObjDelete['error'].")", errorHandle::DEBUG);
-			$authCommon->db->transRollback();
-			$authCommon->db->transEnd();
+			if($dbAuthDelete->error()) errorHandle::newError(__METHOD__."() - Failed to remove authorizations for object '$id'. (SQL Error: ".$dbAuthDelete->errorMsg().")", errorHandle::DEBUG);
+			if($dbObjDelete->error())  errorHandle::newError(__METHOD__."() - Failed to remove object '$id'. (SQL Error: ".$dbObjDelete->errorMsg().")", errorHandle::DEBUG);
+			$authCommon->db->rollback();
 			return FALSE;
 		}
 	}
@@ -292,7 +289,7 @@ class auth extends authCommon{
 			implode(',', $dbFields),
 			$authCommon->db->escape($object)));
 
-		if(!$dbObjUpdate['errorNumber']){
+		if(!$dbObjUpdate->error()){
 			/*
 			 * The move worked!
 			 * Now, we need to know if the object moved. If so, we need to trigger propagation on it's NEW parent in order to apply it's new location's permissions
@@ -309,7 +306,7 @@ class auth extends authCommon{
 				return TRUE;
 			}
 		}else{
-			errorHandle::newError(__METHOD__."() - SQL Error! (".$dbObjUpdate['error'].")", errorHandle::DEBUG);
+			errorHandle::newError(__METHOD__."() - SQL Error! (".$dbObjUpdate->errorMsg().")", errorHandle::DEBUG);
 			return FALSE;
 		}
 	}
@@ -331,7 +328,7 @@ class auth extends authCommon{
 		$sql = sprintf("SELECT * FROM `%s`", $authCommon->db->escape($authCommon->tblGroups));
 		if(isset($orderBy)) $sql .= " ORDER BY $orderBy";
 		$dbGroups = $authCommon->db->query($sql);
-		while($row = mysql_fetch_assoc($dbGroups['result'])){
+		while($row = $dbGroups->fetch()){
 			$groups[] = $returnObject ? self::getGroup($row['ID'], TRUE) : $row;
 		}
 		return $groups;
@@ -352,7 +349,7 @@ class auth extends authCommon{
 		$sql = sprintf("SELECT * FROM `%s` WHERE ID NOT IN (SELECT `childGroup` FROM `%s`)", $authCommon->db->escape($authCommon->tblGroups), $authCommon->db->escape($authCommon->tblGroups2Groups));
 		if(isset($orderBy)) $sql .= " ORDER BY $orderBy";
 		$dbGroups = $authCommon->db->query($sql);
-		while($row = mysql_fetch_assoc($dbGroups['result'])){
+		while($row = $dbGroups->fetch()){
 			$groups[] = $returnObject ? self::getGroup($row['ID'], TRUE) : $row;
 		}
 		return $groups;
@@ -383,13 +380,13 @@ class auth extends authCommon{
 		}
 
 		$dbGroup = $authCommon->db->query(sprintf("SELECT %s FROM `%s` WHERE `ldapDN`='%s' LIMIT 1", $fieldsMySQL, $authCommon->db->escape($authCommon->tblGroups), $authCommon->db->escape($dn)));
-		if(!$dbGroup['numRows']){
+		if(!$dbGroup->rowCount()){
 			return NULL;
 		}else{
 			if(sizeof($fields) > 1 or $fields[0] == '*'){
-				return mysql_fetch_assoc($dbGroup['result']);
+				return $dbGroup->fetch();
 			}else{
-				return mysql_result($dbGroup['result'], 0, $fields[0]);
+				return $dbGroup->fetchField($fields[0]);
 			}
 		}
 	}
@@ -424,11 +421,11 @@ class auth extends authCommon{
 				$dbGroupID = $authCommon->db->query(sprintf("SELECT `ID` FROM `%s` WHERE `ldapDN`='%s' LIMIT 1",
 					$authCommon->db->escape($authCommon->tblGroups),
 					$authCommon->db->escape($groupKey)));
-				if(!$dbGroupID['numRows']){
+				if(!$dbGroupID->rowCount()){
 					// errorHandle::newError(__METHOD__."() - Cannot find a group for ldapDN '$groupKey'!", errorHandle::DEBUG);
 					return NULL;
 				}else{
-					$groupKey = mysql_result($dbGroupID['result'], 0, 'ID');
+					$groupKey = $dbGroupID->fetchField();
 				}
 			}
 			return self::getEntity('gid:'.$groupKey, FALSE, (bool)$forceNew);
@@ -454,7 +451,7 @@ class auth extends authCommon{
 				$authCommon->db->escape($groupKey)));
 
 			// Return the final array of fields
-			return $dbGroup['numRows'] ? mysql_fetch_assoc($dbGroup['result']) : array();
+			return $dbGroup->rowCount() ? $dbGroup->fetch() : array();
 		}
 	}
 
@@ -475,10 +472,10 @@ class auth extends authCommon{
 			isset($desc)   ? $authCommon->db->escape($desc) : '',
 			isset($ldapDN) ? sprintf("'%s'", $authCommon->db->escape($ldapDN)) : "NULL"));
 
-		if(!$dbNewGroup['errorNumber']){
+		if(!$dbNewGroup->error()){
 			return self::getEntity("gid:".(int)$dbNewGroup['id']);
 		}else{
-			errorHandle::newError(__METHOD__.sprintf("() - SQL Error! (%s:%s)", $dbNewGroup['errorNumber'], $dbNewGroup['error']), errorHandle::MEDIUM);
+			errorHandle::newError(__METHOD__.sprintf("() - SQL Error! (%s:%s)", $dbNewGroup->errorCode(), $dbNewGroup->errorMsg()), errorHandle::MEDIUM);
 			return FALSE;
 		}
 	}
@@ -498,7 +495,7 @@ class auth extends authCommon{
 		$groupEntity = self::getEntity($groupID);
 
 		// Begin the transaction
-		$authCommon->db->transBegin($authCommon->tblGroups);
+		$authCommon->db->beginTransaction();
 
 		// Delete all authorizations for this group
 		$dbDelete1 = $authCommon->db->query(sprintf("DELETE FROM `%s` WHERE `authEntity`='%s'",
@@ -521,17 +518,15 @@ class auth extends authCommon{
 			$authCommon->db->escape($authCommon->tblGroups),
 			$authCommon->db->escape($groupEntity->getMetaData('ID'))));
 
-		if(!$dbDelete1['errorNumber'] and !$dbDelete2['errorNumber'] and !$dbDelete3['errorNumber'] and !$dbDelete4['errorNumber']){
-			$authCommon->db->transCommit();
-			$authCommon->db->transEnd();
+		if(!$dbDelete1->error() and !$dbDelete2->error() and !$dbDelete3->error() and !$dbDelete4->error()){
+			$authCommon->db->commit();
 			return TRUE;
 		}else{
-			$authCommon->db->transRollback();
-			$authCommon->db->transEnd();
-			if($dbDelete1['errorNumber']) errorHandle::newError(__METHOD__.sprintf(" SQL Error! (%s:%s)",$dbDelete1['errorNumber'],$dbDelete1['error']), errorHandle::HIGH);
-			if($dbDelete2['errorNumber']) errorHandle::newError(__METHOD__.sprintf(" SQL Error! (%s:%s)",$dbDelete2['errorNumber'],$dbDelete2['error']), errorHandle::HIGH);
-			if($dbDelete3['errorNumber']) errorHandle::newError(__METHOD__.sprintf(" SQL Error! (%s:%s)",$dbDelete3['errorNumber'],$dbDelete3['error']), errorHandle::HIGH);
-			if($dbDelete4['errorNumber']) errorHandle::newError(__METHOD__.sprintf(" SQL Error! (%s:%s)",$dbDelete4['errorNumber'],$dbDelete4['error']), errorHandle::HIGH);
+			$authCommon->db->rollback();
+			if($dbDelete1->error()) errorHandle::newError(__METHOD__.sprintf(" SQL Error! (%s:%s)",$dbDelete1->errorCode(),$dbDelete1->errorMsg()), errorHandle::HIGH);
+			if($dbDelete2->error()) errorHandle::newError(__METHOD__.sprintf(" SQL Error! (%s:%s)",$dbDelete2->errorCode(),$dbDelete2->errorMsg()), errorHandle::HIGH);
+			if($dbDelete3->error()) errorHandle::newError(__METHOD__.sprintf(" SQL Error! (%s:%s)",$dbDelete3->errorCode(),$dbDelete3->errorMsg()), errorHandle::HIGH);
+			if($dbDelete4->error()) errorHandle::newError(__METHOD__.sprintf(" SQL Error! (%s:%s)",$dbDelete4->errorCode(),$dbDelete4->errorMsg()), errorHandle::HIGH);
 			return FALSE;
 		}
 	}
@@ -575,7 +570,7 @@ class auth extends authCommon{
 		if(isset($orderBy)) $sql .= " ORDER BY $orderBy";
 
 		$dbUsers = $authCommon->db->query($sql);
-		while($row = mysql_fetch_assoc($dbUsers['result'])){
+		while($row = $dbUsers->fetch()){
 			$users[] = ($returnObject) ? self::getUser($row['ID'], TRUE) : $row;
 		}
 		return $users;
@@ -611,11 +606,11 @@ class auth extends authCommon{
 				$dbGroupID = $authCommon->db->query(sprintf("SELECT `ID` FROM `%s` WHERE `username`='%s' LIMIT 1",
 					$authCommon->db->escape($authCommon->tblGroups),
 					$authCommon->db->escape($userKey)));
-				if(!$dbGroupID['numRows']){
+				if(!$dbGroupID->rowCount()){
 					errorHandle::newError(__METHOD__."() - Cannot find user for username '$userKey'!", errorHandle::DEBUG);
 					return NULL;
 				}else{
-					$userKey = mysql_result($dbGroupID['result'], 0, 'ID');
+					$userKey = $dbGroupID->fetchField();
 				}
 			}
 			return self::getEntity('uid:'.$userKey, FALSE, (bool)$forceNew);
@@ -641,7 +636,7 @@ class auth extends authCommon{
 				$authCommon->db->escape($userKey)));
 
 			// Return the final array of fields
-			return $dbGroup['numRows'] ? mysql_fetch_assoc($dbGroup['result']) : array();
+			return $dbGroup->rowCount() ? $dbGroup->fetch() : array();
 		}
 	}
 
@@ -654,13 +649,13 @@ class auth extends authCommon{
 		$dbObjects = $authCommon->db->query(sprintf("SELECT DISTINCT authObjectID FROM %s WHERE authEntity='%s'",
 			$authCommon->db->escape($authCommon->tblAuthorizations),
 			$authCommon->db->escape($userKey)));
-		if(!$dbObjects['error']){
-			while($row = mysql_fetch_assoc($dbObjects['result'])){
+		if(!$dbObjects->errorMsg()){
+			while($row = $dbObjects->fetch()){
 				auth::revoke($row['authObjectID'], "uid:$userKey", '*');
 			}
 			return TRUE;
 		}else{
-			errorHandle::newError(__METHOD__."() - Failed to find user's authorizations (SQL Error: ".$dbObjects['error'].")!", errorHandle::DEBUG);
+			errorHandle::newError(__METHOD__."() - Failed to find user's authorizations (SQL Error: ".$dbObjects->errorMsg().")!", errorHandle::DEBUG);
 			return FALSE;
 		}
 	}
@@ -704,7 +699,7 @@ class auth extends authCommon{
 				$authCommon->db->escape($object),
 				$authCommon->db->escape($name)));
 		}
-		if(mysql_result($dbNameCheck['result'], 0, 'i')){
+		if($dbNameCheck->fetchField()){
 			// We found a name-collision
 			errorHandle::newError(__METHOD__."() - A permission already exists with the name '$name'!", errorHandle::DEBUG);
 			return FALSE;
@@ -718,8 +713,8 @@ class auth extends authCommon{
 			$authCommon->db->escape(trim($desc)),
 			$authCommon->db->escape(bool2str($systemPerm, TRUE))));
 
-		if($dbCreatePermission['errorNumber']){
-			errorHandle::newError(__METHOD__.sprintf("() - SQL Error! (%s:%s)",$dbCreatePermission['errorNumber'],$dbCreatePermission['error']), errorHandle::MEDIUM);
+		if($dbCreatePermission->error()){
+			errorHandle::newError(__METHOD__.sprintf("() - SQL Error! (%s:%s)",$dbCreatePermission->errorCode(),$dbCreatePermission->errorMsg()), errorHandle::MEDIUM);
 			return FALSE;
 		}else{
 			return $dbCreatePermission['id'];
@@ -748,7 +743,7 @@ class auth extends authCommon{
 			$dbPermissions = $authCommon->db->query(sprintf("SELECT `ID` FROM `%s` WHERE `object`='%s'",
 				$authCommon->db->escape($authCommon->tblPermissions),
 				$authCommon->db->escape($object)));
-			while($permission = mysql_fetch_assoc($dbPermissions['result'])){
+			while($permission = $dbPermissions->fetch()){
 				$permissionIDs[] = $permission['ID'];
 			}
 		}
@@ -762,18 +757,16 @@ class auth extends authCommon{
 			$dbDelete2 = $authCommon->db->query(sprintf("DELETE FROM `%s` WHERE `ID`='%s' LIMIT 1", $authCommon->db->escape($authCommon->tblPermissions), $authCommon->db->escape($permissionID)));
 
 			// And check for errors
-			if($dbDelete1['errorNumber'] or $dbDelete2['errorNumber']){
-				$authCommon->db->transRollback();
-				$authCommon->db->transEnd();
-				if($dbDelete1['errorNumber']) errorHandle::newError(__METHOD__."() - [Delete1] SQL Error: ".$dbDelete1['error'], errorHandle::DEBUG);
-				if($dbDelete2['errorNumber']) errorHandle::newError(__METHOD__."() - [Delete2] SQL Error: ".$dbDelete2['error'], errorHandle::DEBUG);
+			if($dbDelete1->error() or $dbDelete2->error()){
+				$authCommon->db->rollback();
+				if($dbDelete1->error()) errorHandle::newError(__METHOD__."() - [Delete1] SQL Error: ".$dbDelete1->errorMsg(), errorHandle::DEBUG);
+				if($dbDelete2->error()) errorHandle::newError(__METHOD__."() - [Delete2] SQL Error: ".$dbDelete2->errorMsg(), errorHandle::DEBUG);
 				return FALSE;
 			}
 		}
 
 		// No errors? Good, then we can commit the transaction!
-		$authCommon->db->transCommit();
-		$authCommon->db->transEnd();
+		$authCommon->db->commit();
 		return TRUE;
 	}
 
@@ -815,11 +808,11 @@ class auth extends authCommon{
 				$authCommon->db->escape(self::formatName($name))));
 		}
 
-		if($dbPermission['error']){
-			errorHandle::newError(__METHOD__."() - SQL Error! (".$dbPermission['errorNumber'].":".$dbPermission['error'].")", errorHandle::DEBUG);
+		if($dbPermission->error()){
+			errorHandle::newError(__METHOD__."() - SQL Error! (".$dbPermission->errorCode().":".$dbPermission->errorMsg().")", errorHandle::DEBUG);
 			return NULL;
-		}elseif($dbPermission['numRows']){
-			$result = mysql_fetch_assoc($dbPermission['result']);
+		}elseif($dbPermission->rowCount()){
+			$result = $dbPermission->fetch();
 			return (sizeof($sqlFields) > 1) ? $result : array_shift($result);
 		}else{
 			errorHandle::newError(__METHOD__."() - No permission found for the key '$originObject'-'$name'!", errorHandle::DEBUG);
@@ -852,11 +845,11 @@ class auth extends authCommon{
 		}
 
 
-		if($dbPermissionExists['error']){
-			errorHandle::newError(__METHOD__."() - SQL Error! (".$dbPermissionExists['error'].")", errorHandle::DEBUG);
+		if($dbPermissionExists->errorMsg()){
+			errorHandle::newError(__METHOD__."() - SQL Error! (".$dbPermissionExists->errorMsg().")", errorHandle::DEBUG);
 			return FALSE;
 		}else{
-			return $dbPermissionExists['numRows'] != 0;
+			return $dbPermissionExists->rowCount() != 0;
 		}
 	}
 
@@ -885,7 +878,7 @@ class auth extends authCommon{
 				$authCommon->db->escape($object)));
 		}
 
-		while($row = mysql_fetch_assoc($dbPermissions['result'])){
+		while($row = $dbPermissions->fetch()){
 			$row['isGlobal'] = ($row['object'] == self::GLOBAL_PERMISSION) ? TRUE : FALSE;
 			$permissions[]   = $row;
 		}
@@ -902,11 +895,11 @@ class auth extends authCommon{
 				$authCommon->db->escape($authCommon->tblPermissions),
 				$authCommon->db->escape($name),
 				$authCommon->db->escape($object)));
-			if($dbPermission['error']){
-				errorHandle::newError(__METHOD__."() - SQL Error! (".$dbPermission['errorNumber'].":".$dbPermission['error'].")", errorHandle::DEBUG);
+			if($dbPermission->error()){
+				errorHandle::newError(__METHOD__."() - SQL Error! (".$dbPermission->errorCode().":".$dbPermission->errorMsg().")", errorHandle::DEBUG);
 				return NULL;
-			}elseif($dbPermission['numRows']){
-				$result = mysql_fetch_assoc($dbPermission['result']);
+			}elseif($dbPermission->rowCount()){
+				$result = $dbPermission->fetch();
 				self::$permissionIdRegistry[$key] = $result['ID'];
 			}else{
 				errorHandle::newError(__METHOD__."() - No permission found for name:".$name." object:".$object."!", errorHandle::DEBUG);
@@ -941,11 +934,11 @@ class auth extends authCommon{
 			implode(',',$sqlFields),
 			$authCommon->db->escape($authCommon->tblPermissions),
 			$authCommon->db->escape($id)));
-		if($dbPermission['error']){
-			errorHandle::newError(__METHOD__."() - SQL Error! (".$dbPermission['errorNumber'].":".$dbPermission['error'].")", errorHandle::DEBUG);
+		if($dbPermission->error()){
+			errorHandle::newError(__METHOD__."() - SQL Error! (".$dbPermission->errorCode().":".$dbPermission->errorMsg().")", errorHandle::DEBUG);
 			return NULL;
-		}elseif($dbPermission['numRows']){
-			$result = mysql_fetch_assoc($dbPermission['result']);
+		}elseif($dbPermission->rowCount()){
+			$result = $dbPermission->fetch();
 			return (sizeof($sqlFields) > 1) ? $result : array_shift($result);
 		}else{
 			errorHandle::newError(__METHOD__."() - No permission found with id '$id'!", errorHandle::DEBUG);
@@ -999,8 +992,8 @@ class auth extends authCommon{
 			$authCommon->db->escape($authCommon->tblAuthorizations),
 			$authCommon->db->escape($authCommon->tblPermissions),
 			$authCommon->db->escape($authID)));
-		if($dbAuth['numRows']){
-			return mysql_fetch_assoc($dbAuth['result']);
+		if($dbAuth->rowCount()){
+			return $dbAuth->fetch();
 		}else{
 			return array();
 		}
@@ -1047,18 +1040,16 @@ class auth extends authCommon{
 	{
 		if(is_array($permissionName)){
 			$authCommon = new parent();
-			$authCommon->db->transBegin($authCommon->tblAuthorizations);
+			$authCommon->db->beginTransaction();
 			foreach($permissionName as $permission){
 				$permName = $permission[0];
 				$permObj  = isset($permission[1]) ? $permission[1] : auth::GLOBAL_PERMISSION;
 				if(!self::getObject($object)->grant($authEntity,$permName,$permObj,$inheritable,$policy)){
-					$authCommon->db->transRollback();
-					$authCommon->db->transEnd();
+					$authCommon->db->rollback();
 					return FALSE;
 				}
 			}
-			$authCommon->db->transCommit();
-			$authCommon->db->transEnd();
+			$authCommon->db->commit();
 			return TRUE;
 		}else{
 			if(!isset($permissionOrigin)) $permissionOrigin = auth::GLOBAL_PERMISSION;
@@ -1085,13 +1076,11 @@ class auth extends authCommon{
 				$permName = $permission[0];
 				$permObj  = isset($permission[1]) ? $permission[1] : auth::GLOBAL_PERMISSION;
 				if(!self::getObject($object)->revoke($authEntity,$permName,$permObj,$policy)){
-					$authCommon->db->transRollback();
-					$authCommon->db->transEnd();
+					$authCommon->db->rollback();
 					return FALSE;
 				}
 			}
-			$authCommon->db->transCommit();
-			$authCommon->db->transEnd();
+			$authCommon->db->commit();
 			return TRUE;
 		}else{
 			if(!isset($permissionOrigin)) $permissionOrigin = auth::GLOBAL_PERMISSION;

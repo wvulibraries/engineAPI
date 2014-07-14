@@ -18,8 +18,8 @@ class authCommon{
 		global $engineVars;
 		$engine = EngineAPI::singleton();
 
-		if(!$this->db = $engine->openDB){; //getPrivateVar('engineDB')){
-			errorHandle::newError(__METHOD__ . '() - Cannot get to the engineDB!', errorHandle::CRITICAL);
+		if(!$this->db = db::get(EngineAPI::DB_CONNECTION)){;
+			errorHandle::newError(__METHOD__ . '() - Cannot get to the engineDB! ('.EngineAPI::DB_CONNECTION.')', errorHandle::CRITICAL);
 		}
 
 		if(array_key_exists('userAuth',$engineVars)){
@@ -47,7 +47,7 @@ class authCommon{
 		$dbChildren = $this->db->query(sprintf("SELECT * FROM `%s` WHERE `parent`='%s'",
 			$this->db->escape($this->tblObjects),
 			$this->db->escape($id)));
-		while($row = mysql_fetch_assoc($dbChildren['result'])){
+		while($row = $dbChildren->fetch()){
 			$result[] = ($returnObject) ? auth::getObject($row['ID']) : $row;
 		}
 		return $result;
@@ -65,8 +65,8 @@ class authCommon{
 			$this->db->escape($this->tblObjects),
 			$this->db->escape($this->tblObjects),
 			$this->db->escape($id)));
-		if($dbParent['numRows']){
-			$parent = mysql_fetch_assoc($dbParent['result']);
+		if($dbParent->rowCount()){
+			$parent = $dbParent->fetch();
 			return ($returnObject) ? auth::getObject($parent['ID']) : $parent;
 		}else{
 			return NULL;

@@ -94,7 +94,7 @@ class authEntity extends authCommon implements ArrayAccess{
 					$this->db->escape($this->tblUsers2Groups),
 					$this->db->escape($this->getMetaData('ID')),
 					$this->db->escape($targetEntity->getMetaData('ID'))));
-				if(mysql_result($dbAssignmentCheck['result'], 0, 'i')){
+				if($dbAssignmentCheck->fetchField()){
 					errorHandle::newError(__METHOD__."() - Assignment already exists.", errorHandle::DEBUG);
 					return TRUE;
 				}else{
@@ -117,7 +117,7 @@ class authEntity extends authCommon implements ArrayAccess{
 					$this->db->escape($this->tblGroups2Groups),
 					$this->db->escape($this->getMetaData('ID')),
 					$this->db->escape($targetEntity->getMetaData('ID'))));
-				if(mysql_result($dbAssignmentCheck['result'], 0, 'i')){
+				if($dbAssignmentCheck->fetchField()){
 					errorHandle::newError(__METHOD__."() - Assignment already exists.", errorHandle::DEBUG);
 					return TRUE;
 				}else{
@@ -134,13 +134,13 @@ class authEntity extends authCommon implements ArrayAccess{
 		}
 
 		// Okay, if we've gotten here, then we did try to assign THIS entity to the target entity. We need to check the result and return back to the user.
-		if(isset($dbAssignment) and !$dbAssignment['errorNumber']){
+		if(isset($dbAssignment) and !$dbAssignment->errorCode()){
 			return TRUE;
 		}else{
 			if(!isset($dbAssignment)){
 				errorHandle::newError(__METHOD__."() - Assignment SQL Error! (There's no sql result!)", errorHandle::HIGH);
 			}else{
-				errorHandle::newError(__METHOD__."() - Assignment SQL Error! (SQL Error: ".$dbAssignment['error'].")", errorHandle::HIGH);
+				errorHandle::newError(__METHOD__."() - Assignment SQL Error! (SQL Error: ".$dbAssignment->errorMsg().")", errorHandle::HIGH);
 			}
 			return FALSE;
 		}
@@ -188,13 +188,13 @@ class authEntity extends authCommon implements ArrayAccess{
 		}
 
 		// Okay, if we've gotten here, then we did try to assign THIS entity to the target entity. We need to check the result and return back to the user.
-		if(isset($dbAssignmentDelete) and !$dbAssignmentDelete['errorNumber']){
+		if(isset($dbAssignmentDelete) and !$dbAssignmentDelete->errorCode()){
 			return TRUE;
 		}else{
 			if(!isset($dbAssignmentDelete)){
 				errorHandle::newError(__METHOD__."() - Assignment SQL Error! (There's no sql result!)", errorHandle::HIGH);
 			}else{
-				errorHandle::newError(__METHOD__."() - Assignment SQL Error! (SQL Error: ".$dbAssignmentDelete['error'].")", errorHandle::HIGH);
+				errorHandle::newError(__METHOD__."() - Assignment SQL Error! (SQL Error: ".$dbAssignmentDelete->errorMsg().")", errorHandle::HIGH);
 			}
 			return FALSE;
 		}
@@ -317,12 +317,12 @@ class authEntity extends authCommon implements ArrayAccess{
 				$this->db->escape("$object"),
 				$memberOf, "$this");
 			$dbAuthorizations = $this->db->query($sql);
-			if(!$dbAuthorizations['error']){
-				while($row = mysql_fetch_assoc($dbAuthorizations['result'])){
+			if(!$dbAuthorizations->errorMsg()){
+				while($row = $dbAuthorizations->fetch()){
 					$this->authSearchTrees["$object"][ $row['authEntity'] ][] = $row;
 				}
 			}else{
-				errorHandle::newError(__METHOD__."() - Failed to get auth search tree! (SQL Error: ".$dbAuthorizations['error']." | SQL: $sql)", errorHandle::DEBUG);
+				errorHandle::newError(__METHOD__."() - Failed to get auth search tree! (SQL Error: ".$dbAuthorizations->errorMsg()." | SQL: $sql)", errorHandle::DEBUG);
 			}
 		}
 		$searchTree = $this->authSearchTrees["$object"];
