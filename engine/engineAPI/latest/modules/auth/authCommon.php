@@ -1,6 +1,6 @@
 <?php
 class authCommon{
-	public $dbName='Engine_CMS';
+	public $dbName='EngineAPI';
 	public $tblUsers='auth_users';
 	public $tblGroups='auth_groups';
 	public $tblPermissions='auth_permissions';
