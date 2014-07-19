@@ -1,5 +1,9 @@
-<?php 
+<?php
 
+/**
+ * Class accessControl
+ * @todo Change existing engineAPI access drivers to use new registerAccessMethod() method
+ */
 class accessControl {
 
 	/**
@@ -53,6 +57,23 @@ class accessControl {
 
 	public static function set_enginevars($enginevars) {
 		self::$enginevars = $enginevars;
+		return TRUE;
+	}
+
+	/**
+	 * Register a new access method
+	 * @author David Gersting
+	 * @param string $name
+	 * @param string $function
+	 * @return bool
+	 */
+	public static function registerAccessMethod($name, $function){
+		if(in_array($name, array_keys(self::$accessMethods))){
+			errorHandle::newError(__METHOD__."() Access method '$name' already defined!", errorHandle::DEBUG);
+			return FALSE;
+		}
+
+		self::$accessMethods[$name] = $function;
 		return TRUE;
 	}
 

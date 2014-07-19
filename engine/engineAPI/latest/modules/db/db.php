@@ -101,12 +101,7 @@ class db implements Countable {
             // Return the new driver object
             return $dbDriverObj;
         }catch(Exception $e) {
-            $msg = __METHOD__."() {$e->getMessage()} thrown from line {$e->getLine()}";
-            if(class_exists('errorHandle') && errorHandle::isReady()){
-                errorHandle::newError($msg, errorHandle::DEBUG);
-            }else{
-                error_log($msg);
-            }
+            trigger_error(__METHOD__."() {$e->getMessage()} thrown from line {$e->getLine()}", E_USER_ERROR);
             return FALSE;
         }
     }
@@ -268,4 +263,4 @@ class db implements Countable {
         // Return the now known answer
         return (bool)self::$drivers[$driver];
     }
-} 
+}

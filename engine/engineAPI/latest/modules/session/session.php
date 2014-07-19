@@ -84,7 +84,7 @@ class session{
 		$this->set_enginevars(enginevars::getInstance());
 
 		self::$optionsDefault = $this->enginevars->is_set("session") ? $this->enginevars->get("session") : array();
-		
+
 		// Define template tags
 		templates::defTempPatterns('/\{session\s+(.+?)\}/', 'session::templateHandler', $this);
 		templates::defTempPatterns('/\{csrf}/', 'session::templateHandler_csrf', $this);
@@ -282,7 +282,7 @@ class session{
 	 * @return string
 	 */
 	public static function templateHandler_csrfToken($matches){
-		return sprintf('<input type="hidden" name="csrfToken" id="csrfToken" value="%s">', $matches[1]);
+		return sprintf('<input type="hidden" name="__csrfToken" id="__csrfToken" value="%s">', $matches[1]);
 	}
 
 	/**
@@ -292,7 +292,7 @@ class session{
 	 * @return string
 	 */
 	public static function templateHandler_csrfID($matches){
-		return sprintf('<input type="hidden" name="csrfID" id="csrfID" value="%s">', $matches[1]);
+		return sprintf('<input type="hidden" name="__csrfID" id="__csrfID" value="%s">', $matches[1]);
 	}
 
 	/**
@@ -420,11 +420,22 @@ class session{
 
 	/**
 	 * Overwrites the session data with the provided array
-	 * @param array $data
+	 * @param array|string $data Raw data array or serialized string
 	 */
 	public static function import($data){
-		self::$sessionData['data'] = $data;
+		self::$sessionData['data'] = is_string($data)
+			? unserialize($data)
+			: $data;
 		self::sync();
+	}
+
+	/**
+	 * Export session data suitable for import
+	 * @see self::import
+	 * @return string Serialized session data
+	 */
+	public static function export(){
+		return serialize(self::$sessionData['data']);
 	}
 
 	/**
