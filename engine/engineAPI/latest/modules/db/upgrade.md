@@ -24,8 +24,8 @@
 ## Create a new connection (not preserved)
 ### Before
 ```
-$engine->dbConnect("username","foo");
-$engine->dbConnect("password","bar");
+$engine->dbConnect("username","foo");  
+$engine->dbConnect("password","bar");  
 $db = $engine->dbConnect("database","testing");
 ```
 ### After
@@ -336,22 +336,22 @@ $fieldNames = $sqlResult->fieldNames();
 
 ## Transaction operations
 ### Before
-```
-$engine->openDB->transBegin();
-$engine->openDB->transCommit();
-$engine->openDB->transRollback();
-$engine->openDB->transEnd();
-$engine->openDB->inTransaction();
-```
+
+ $engine->openDB->transBegin();  
+ $engine->openDB->transCommit();  
+ $engine->openDB->transRollback();  
+ $engine->openDB->transEnd();  
+ $engine->openDB->inTransaction();  
+
 
 ### After
 *Follows the naming scheme of underlying PDO object. Nested transaction work as they do currently.*
-```
-db::get('appDB')->beginTransaction();
-db::get('appDB')->commit();
-db::get('appDB')->rollback();
-db::get('appDB')->inTransaction();
-```
+
+db::get('appDB')->beginTransaction();  
+db::get('appDB')->commit();  
+db::get('appDB')->rollback();  
+db::get('appDB')->inTransaction();  
+
 
 ------------------------------------
 
