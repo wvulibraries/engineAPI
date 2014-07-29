@@ -354,8 +354,11 @@ class session{
 		if(self::started()) return TRUE;
 
 		// Start the session
-		session_start();
-		self::$started = TRUE;
+		self::$started = session_start();
+		if(!self::$started){
+			errorHandle::newError(__METHOD__."() PHP session failed to start!", errorHandle::HIGH);
+			return FALSE;
+		}
 
 		// Bring the session data into the object
 		self::$sessionData = $_SESSION;
