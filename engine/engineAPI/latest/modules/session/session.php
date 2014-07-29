@@ -353,8 +353,11 @@ class session{
 	public static function start($sessionKey=NULL){
 		if(self::started()) return TRUE;
 
-		// Start the session and bring it into the object
+		// Start the session
 		session_start();
+		self::$started = TRUE;
+
+		// Bring the session data into the object
 		self::$sessionData = $_SESSION;
 
 		// Setup the basic SESSION layout (if it's needed)
@@ -395,8 +398,7 @@ class session{
 		// Perform garbage cleanup on ourselves
 		self::gc();
 
-		// Lastly, flag the session as started, re-sync $_SESSION, and return
-		self::$started = TRUE;
+		// Lastly, re-sync $_SESSION, and return
 		self::sync();
 		return TRUE;
 	}
