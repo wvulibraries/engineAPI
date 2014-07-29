@@ -364,7 +364,7 @@ class session{
 		self::$sessionData = $_SESSION;
 
 		// Setup the basic SESSION layout (if it's needed)
-		if(!sizeof(self::$sessionData)){
+		if(!isset(self::$sessionData['fingerprint'])){
 			self::$sessionData['fingerprint'] = self::browserFingerprint();
 			self::clear();
 		}
