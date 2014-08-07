@@ -257,4 +257,17 @@ class dbDriver_mysql extends dbDriver {
         // De-register this object
         db::unregisterObject($this);
     }
+
+	/**
+	 * {@inheritdoc}
+	 * @author David Gersting
+	 */
+	public function listFields($table){
+		$stmp = $this->query(sprintf('DESCRIBE `%s`', $this->escape($table)));
+		if($stmp->error()){
+			errorHandle::newError(__METHOD__."() SQL Error: {$stmp->errorCode()}:{$stmp->errorMsg()}", errorHandle::DEBUG);
+			return array();
+		}
+		return $stmp->fetchFieldAll(0);
+	}
 }
