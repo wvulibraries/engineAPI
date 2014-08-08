@@ -171,7 +171,8 @@ class auth extends authCommon{
 		}
 
 		// Check for an existing object
-		$dbObjCheck = $authCommon->db->query(sprintf("SELECT COUNT(`ID`) AS `i` FROM `%s` WHERE `ID`='%s'",
+		$dbObjCheck = $authCommon->db->query(sprintf("SELECT COUNT(`ID`) AS `i` FROM `%s`.`%s` WHERE `ID`='%s'",
+			$authCommon->db->escape($authCommon->dbName),
 			$authCommon->db->escape($authCommon->tblObjects),
 			$authCommon->db->escape($id)));
 		if($dbObjCheck->fetchField()){
@@ -180,7 +181,8 @@ class auth extends authCommon{
 		}else{
 			// If a parent was passed that dosen't exist we need to fail
 			if(isset($parent) and !$ignoreMissingParents){
-				$dbObjCheck = $authCommon->db->query(sprintf("SELECT COUNT(`ID`) AS `i` FROM `%s` WHERE `ID`='%s'",
+				$dbObjCheck = $authCommon->db->query(sprintf("SELECT COUNT(`ID`) AS `i` FROM `%s`.`%s` WHERE `ID`='%s'",
+					$authCommon->db->escape($authCommon->dbName),
 					$authCommon->db->escape($authCommon->tblObjects),
 					$authCommon->db->escape($parent)));
 				if(!$dbObjCheck->fetchField()){
@@ -205,7 +207,8 @@ class auth extends authCommon{
 				$dbValues[] = "'".serialize($metaData)."'";
 			}
 
-			$dbObjRegister = $authCommon->db->query(sprintf("INSERT INTO `%s` (%s) VALUES(%s)",
+			$dbObjRegister = $authCommon->db->query(sprintf("INSERT INTO `%s`.`%s` (%s) VALUES(%s)",
+				$authCommon->db->escape($authCommon->dbName),
 				$authCommon->db->escape($authCommon->tblObjects),
 				implode(',', $dbFields),
 				implode(',', $dbValues)));
@@ -235,12 +238,14 @@ class auth extends authCommon{
 		$authCommon->db->beginTransaction();
 
 		// Delete all the authorizations this object has
-		$dbAuthDelete = $authCommon->db->query(sprintf("DELETE FROM `%s` WHERE `authObjectID`='%s'",
+		$dbAuthDelete = $authCommon->db->query(sprintf("DELETE FROM `%s`.`%s` WHERE `authObjectID`='%s'",
+			$authCommon->db->escape($authCommon->dbName),
 			$authCommon->db->escape($authCommon->tblAuthorizations),
 			$authCommon->db->escape($id)));
 
 		// Delete the actual auth object
-		$dbObjDelete = $authCommon->db->query(sprintf("DELETE FROM `%s` WHERE `ID`='%s' LIMIT 1",
+		$dbObjDelete = $authCommon->db->query(sprintf("DELETE FROM `%s`.`%s` WHERE `ID`='%s' LIMIT 1",
+			$authCommon->db->escape($authCommon->dbName),
 			$authCommon->db->escape($authCommon->tblObjects),
 			$authCommon->db->escape($id)));
 
@@ -284,7 +289,8 @@ class auth extends authCommon{
 			if(is_array($v)) $v = serialize($v);
 			$dbFields[] = sprintf("`%s`='%s'", $authCommon->db->escape($k), $authCommon->db->escape($v));
 		}
-		$dbObjUpdate = $authCommon->db->query(sprintf("UPDATE `%s` SET %s WHERE `ID`='%s' LIMIT 1",
+		$dbObjUpdate = $authCommon->db->query(sprintf("UPDATE `%s`.`%s` SET %s WHERE `ID`='%s' LIMIT 1",
+			$authCommon->db->escape($authCommon->dbName),
 			$authCommon->db->escape($authCommon->tblObjects),
 			implode(',', $dbFields),
 			$authCommon->db->escape($object)));
@@ -325,7 +331,10 @@ class auth extends authCommon{
 		$authCommon = new parent();
 		$groups = array();
 
-		$sql = sprintf("SELECT * FROM `%s`", $authCommon->db->escape($authCommon->tblGroups));
+		$sql = sprintf("SELECT * FROM `%s`.`%s`",
+			$authCommon->db->escape($authCommon->dbName),
+			$authCommon->db->escape($authCommon->tblGroups)
+		);
 		if(isset($orderBy)) $sql .= " ORDER BY $orderBy";
 		$dbGroups = $authCommon->db->query($sql);
 		while($row = $dbGroups->fetch()){
@@ -346,7 +355,10 @@ class auth extends authCommon{
 	{
 		$authCommon = new parent();
 		$groups = array();
-		$sql = sprintf("SELECT * FROM `%s` WHERE ID NOT IN (SELECT `childGroup` FROM `%s`)", $authCommon->db->escape($authCommon->tblGroups), $authCommon->db->escape($authCommon->tblGroups2Groups));
+		$sql = sprintf("SELECT * FROM `%s`.`%s` WHERE ID NOT IN (SELECT `childGroup` FROM `%s`)",
+			$authCommon->db->escape($authCommon->dbName),
+			$authCommon->db->escape($authCommon->tblGroups2Groups)
+		);
 		if(isset($orderBy)) $sql .= " ORDER BY $orderBy";
 		$dbGroups = $authCommon->db->query($sql);
 		while($row = $dbGroups->fetch()){
@@ -379,7 +391,13 @@ class auth extends authCommon{
 			$fieldsMySQL = implode(',', $fieldsMySQL);
 		}
 
-		$dbGroup = $authCommon->db->query(sprintf("SELECT %s FROM `%s` WHERE `ldapDN`='%s' LIMIT 1", $fieldsMySQL, $authCommon->db->escape($authCommon->tblGroups), $authCommon->db->escape($dn)));
+		$sql = sprintf("SELECT %s FROM `%s`.`%s` WHERE `ldapDN`='%s' LIMIT 1",
+			$fieldsMySQL,
+			$authCommon->db->escape($authCommon->dbName),
+			$authCommon->db->escape($authCommon->tblGroups),
+			$authCommon->db->escape($dn)
+		);
+		$dbGroup = $authCommon->db->query($sql);
 		if(!$dbGroup->rowCount()){
 			return NULL;
 		}else{
@@ -418,7 +436,8 @@ class auth extends authCommon{
 			// If we DON'T have the ID, we need it (as that's how the groups are ID'd)
 			if(!is_numeric($groupKey)){
 				// Get the fields from the database
-				$dbGroupID = $authCommon->db->query(sprintf("SELECT `ID` FROM `%s` WHERE `ldapDN`='%s' LIMIT 1",
+				$dbGroupID = $authCommon->db->query(sprintf("SELECT `ID` FROM `%s`.`%s` WHERE `ldapDN`='%s' LIMIT 1",
+					$authCommon->db->escape($authCommon->dbName),
 					$authCommon->db->escape($authCommon->tblGroups),
 					$authCommon->db->escape($groupKey)));
 				if(!$dbGroupID->rowCount()){
@@ -444,8 +463,9 @@ class auth extends authCommon{
 			}
 
 			// Get the fields from the database
-			$dbGroup = $authCommon->db->query(sprintf("SELECT %s FROM `%s` WHERE `ID`='%s' OR `ldapDN`='%s' LIMIT 1",
+			$dbGroup = $authCommon->db->query(sprintf("SELECT %s FROM `%s`.`%s` WHERE `ID`='%s' OR `ldapDN`='%s' LIMIT 1",
 				implode(',',$sqlFields),
+				$authCommon->db->escape($authCommon->dbName),
 				$authCommon->db->escape($authCommon->tblGroups),
 				$authCommon->db->escape($groupKey),
 				$authCommon->db->escape($groupKey)));
@@ -466,7 +486,8 @@ class auth extends authCommon{
 	public static function createGroup($name,$desc=NULL,$ldapDN=NULL)
 	{
 		$authCommon = new parent();
-		$dbNewGroup = $authCommon->db->query(sprintf("INSERT INTO `%s` (`name`,`description`,`ldapDN`) VALUES('%s','%s',%s)",
+		$dbNewGroup = $authCommon->db->query(sprintf("INSERT INTO `%s`.`%s` (`name`,`description`,`ldapDN`) VALUES('%s','%s',%s)",
+			$authCommon->db->escape($authCommon->dbName),
 			$authCommon->db->escape($authCommon->tblGroups),
 			$authCommon->db->escape($name),
 			isset($desc)   ? $authCommon->db->escape($desc) : '',
@@ -498,23 +519,27 @@ class auth extends authCommon{
 		$authCommon->db->beginTransaction();
 
 		// Delete all authorizations for this group
-		$dbDelete1 = $authCommon->db->query(sprintf("DELETE FROM `%s` WHERE `authEntity`='%s'",
+		$dbDelete1 = $authCommon->db->query(sprintf("DELETE FROM `%s`.`%s` WHERE `authEntity`='%s'",
+			$authCommon->db->escape($authCommon->dbName),
 			$authCommon->db->escape($authCommon->tblAuthorizations),
 			$authCommon->db->escape("$groupEntity")));
 
 		// Delete all group->group memberships
-		$dbDelete2 = $authCommon->db->query(sprintf("DELETE FROM `%s` WHERE `childGroup`='%s' OR `parentGroup`='%s'",
+		$dbDelete2 = $authCommon->db->query(sprintf("DELETE FROM `%s`.`%s` WHERE `childGroup`='%s' OR `parentGroup`='%s'",
+			$authCommon->db->escape($authCommon->dbName),
 			$authCommon->db->escape($authCommon->tblGroups2Groups),
 			$authCommon->db->escape($groupEntity->getMetaData('ID')),
 			$authCommon->db->escape($groupEntity->getMetaData('ID'))));
 
 		// Delete all user->group memberships
-		$dbDelete3 = $authCommon->db->query(sprintf("DELETE FROM `%s` WHERE `group`='%s'",
+		$dbDelete3 = $authCommon->db->query(sprintf("DELETE FROM `%s`.`%s` WHERE `group`='%s'",
+			$authCommon->db->escape($authCommon->dbName),
 			$authCommon->db->escape($authCommon->tblUsers2Groups),
 			$authCommon->db->escape($groupEntity->getMetaData('ID'))));
 
 		// Now we can delete the actual group
-		$dbDelete4 = $authCommon->db->query(sprintf("DELETE FROM `%s` WHERE `ID`='%s' LIMIT 1",
+		$dbDelete4 = $authCommon->db->query(sprintf("DELETE FROM `%s`.`%s` WHERE `ID`='%s' LIMIT 1",
+			$authCommon->db->escape($authCommon->dbName),
 			$authCommon->db->escape($authCommon->tblGroups),
 			$authCommon->db->escape($groupEntity->getMetaData('ID'))));
 
@@ -566,7 +591,10 @@ class auth extends authCommon{
 		$authCommon  = new parent();
 		$users = array();
 
-		$sql = sprintf("SELECT * FROM `%s`", $authCommon->db->escape($authCommon->tblUsers));
+		$sql = sprintf("SELECT * FROM `%s`.`%s`",
+			$authCommon->db->escape($authCommon->dbName),
+			$authCommon->db->escape($authCommon->tblUsers)
+		);
 		if(isset($orderBy)) $sql .= " ORDER BY $orderBy";
 
 		$dbUsers = $authCommon->db->query($sql);
@@ -603,7 +631,8 @@ class auth extends authCommon{
 			// If we DON'T have the ID, we need it (as that's how the groups are ID'd)
 			if(!is_numeric($userKey)){
 				// Get the fields from the database
-				$dbGroupID = $authCommon->db->query(sprintf("SELECT `ID` FROM `%s` WHERE `username`='%s' LIMIT 1",
+				$dbGroupID = $authCommon->db->query(sprintf("SELECT `ID` FROM `%s`.`%s` WHERE `username`='%s' LIMIT 1",
+					$authCommon->db->escape($authCommon->dbName),
 					$authCommon->db->escape($authCommon->tblGroups),
 					$authCommon->db->escape($userKey)));
 				if(!$dbGroupID->rowCount()){
@@ -629,8 +658,9 @@ class auth extends authCommon{
 			}
 
 			// Get the fields from the database
-			$dbGroup = $authCommon->db->query(sprintf("SELECT %s FROM `%s` WHERE `ID`='%s' OR `username`='%s' LIMIT 1",
+			$dbGroup = $authCommon->db->query(sprintf("SELECT %s FROM `%s`.`%s` WHERE `ID`='%s' OR `username`='%s' LIMIT 1",
 				implode(',',$sqlFields),
+				$authCommon->db->escape($authCommon->dbName),
 				$authCommon->db->escape($authCommon->tblGroups),
 				$authCommon->db->escape($userKey),
 				$authCommon->db->escape($userKey)));
@@ -646,7 +676,8 @@ class auth extends authCommon{
 		$authCommon  = new parent();
 
 		// Get the fields from the database
-		$dbObjects = $authCommon->db->query(sprintf("SELECT DISTINCT authObjectID FROM %s WHERE authEntity='%s'",
+		$dbObjects = $authCommon->db->query(sprintf("SELECT DISTINCT authObjectID FROM `%s`.`%s` WHERE authEntity='%s'",
+			$authCommon->db->escape($authCommon->dbName),
 			$authCommon->db->escape($authCommon->tblAuthorizations),
 			$authCommon->db->escape($userKey)));
 		if(!$dbObjects->errorMsg()){
@@ -688,12 +719,14 @@ class auth extends authCommon{
 		// Check permission name's uniqueness
 		if($object == self::GLOBAL_PERMISSION){
 			// Name must be globally unique
-			$dbNameCheck = $authCommon->db->query(sprintf("SELECT COUNT(`ID`) AS `i` FROM `%s` WHERE `name`='%s'",
+			$dbNameCheck = $authCommon->db->query(sprintf("SELECT COUNT(`ID`) AS `i` FROM `%s`.`%s` WHERE `name`='%s'",
+				$authCommon->db->escape($authCommon->dbName),
 				$authCommon->db->escape($authCommon->tblPermissions),
 				$authCommon->db->escape($name)));
 		}else{
 			// Name must be unique across the object and global spaces
-			$dbNameCheck = $authCommon->db->query(sprintf("SELECT COUNT(`ID`) AS `i` FROM `%s` WHERE (`object`='%s' OR `object`='%s') AND `name`='%s'",
+			$dbNameCheck = $authCommon->db->query(sprintf("SELECT COUNT(`ID`) AS `i` FROM `%s`.`%s` WHERE (`object`='%s' OR `object`='%s') AND `name`='%s'",
+				$authCommon->db->escape($authCommon->dbName),
 				$authCommon->db->escape($authCommon->tblPermissions),
 				$authCommon->db->escape(self::GLOBAL_PERMISSION),
 				$authCommon->db->escape($object),
@@ -706,7 +739,8 @@ class auth extends authCommon{
 		}
 
 		// If we get here then there's no hole available. We need to insert a new permission row (either starting a new permissions line, or adding to the end of one)
-		$dbCreatePermission = $authCommon->db->query(sprintf("INSERT INTO `%s` (`object`,`name`,`description`,`system`) VALUES('%s','%s','%s','%s')",
+		$dbCreatePermission = $authCommon->db->query(sprintf("INSERT INTO `%s`.`%s` (`object`,`name`,`description`,`system`) VALUES('%s','%s','%s','%s')",
+			$authCommon->db->escape($authCommon->dbName),
 			$authCommon->db->escape($authCommon->tblPermissions),
 			$authCommon->db->escape(trim($object)),
 			$authCommon->db->escape(trim($name)),
@@ -717,7 +751,7 @@ class auth extends authCommon{
 			errorHandle::newError(__METHOD__.sprintf("() - SQL Error! (%s:%s)",$dbCreatePermission->errorCode(),$dbCreatePermission->errorMsg()), errorHandle::MEDIUM);
 			return FALSE;
 		}else{
-			return $dbCreatePermission['id'];
+			return $dbCreatePermission->insertId();
 		}
 	}
 
@@ -740,7 +774,8 @@ class auth extends authCommon{
 		if(isset($name) and $name='*'){
 			// Delete ALL permissions of this object
 			$fn = __FUNCTION__;
-			$dbPermissions = $authCommon->db->query(sprintf("SELECT `ID` FROM `%s` WHERE `object`='%s'",
+			$dbPermissions = $authCommon->db->query(sprintf("SELECT `ID` FROM `%s`.`%s` WHERE `object`='%s'",
+				$authCommon->db->escape($authCommon->dbName),
 				$authCommon->db->escape($authCommon->tblPermissions),
 				$authCommon->db->escape($object)));
 			while($permission = $dbPermissions->fetch()){
@@ -752,9 +787,16 @@ class auth extends authCommon{
 		$authCommon->db->transBegin($authCommon->tblPermissions);
 		foreach($permissionIDs as $permissionID){
 			// Remove all the permission's authorizations
-			$dbDelete1 = $authCommon->db->query(sprintf("DELETE FROM `%s` WHERE `permissionID`='%s'", $authCommon->db->escape($authCommon->tblAuthorizations), $authCommon->db->escape($permissionID)));
+			$dbDelete1 = $authCommon->db->query(sprintf("DELETE FROM `%s`.`%s` WHERE `permissionID`='%s'",
+				$authCommon->db->escape($authCommon->dbName),
+				$authCommon->db->escape($authCommon->tblAuthorizations),
+				$authCommon->db->escape($permissionID))
+			);
 			// Remove the permission from the registry
-			$dbDelete2 = $authCommon->db->query(sprintf("DELETE FROM `%s` WHERE `ID`='%s' LIMIT 1", $authCommon->db->escape($authCommon->tblPermissions), $authCommon->db->escape($permissionID)));
+			$dbDelete2 = $authCommon->db->query(sprintf("DELETE FROM `%s`.`%s` WHERE `ID`='%s' LIMIT 1",
+				$authCommon->db->escape($authCommon->dbName),
+				$authCommon->db->escape($authCommon->tblPermissions),
+				$authCommon->db->escape($permissionID)));
 
 			// And check for errors
 			if($dbDelete1->error() or $dbDelete2->error()){
@@ -794,15 +836,17 @@ class auth extends authCommon{
 
 		if(is_numeric($name)){
 			// Lookup by permission ID
-			$dbPermission = $authCommon->db->query(sprintf("SELECT %s FROM `%s` WHERE `ID`='%s' LIMIT 1",
+			$dbPermission = $authCommon->db->query(sprintf("SELECT %s FROM `%s`.`%s` WHERE `ID`='%s' LIMIT 1",
 				implode(',',$sqlFields),
+				$authCommon->db->escape($authCommon->dbName),
 				$authCommon->db->escape($authCommon->tblPermissions),
 				$authCommon->db->escape((int)$name)));
 
 		}else{
 			// Lookup by permission name and object
-			$dbPermission = $authCommon->db->query(sprintf("SELECT %s FROM `%s` WHERE `object`='%s' AND `name`='%s' LIMIT 1",
+			$dbPermission = $authCommon->db->query(sprintf("SELECT %s FROM `%s`.`%s` WHERE `object`='%s' AND `name`='%s' LIMIT 1",
 				implode(',',$sqlFields),
+				$authCommon->db->escape($authCommon->dbName),
 				$authCommon->db->escape($authCommon->tblPermissions),
 				$authCommon->db->escape(self::formatName($originObject)),
 				$authCommon->db->escape(self::formatName($name))));
@@ -832,13 +876,15 @@ class auth extends authCommon{
 
 		if(is_numeric($name)){
 			// Lookup by permission ID
-			$dbPermissionExists = $authCommon->db->query(sprintf("SELECT ID FROM `%s` WHERE ID='%s' LIMIT 1",
+			$dbPermissionExists = $authCommon->db->query(sprintf("SELECT ID FROM `%s`.`%s` WHERE ID='%s' LIMIT 1",
+				$authCommon->db->escape($authCommon->dbName),
 				$authCommon->db->escape($authCommon->tblPermissions),
 				$authCommon->db->escape((int)$name)));
 
 		}else{
 			// Lookup by permission name and object
-			$dbPermissionExists = $authCommon->db->query(sprintf("SELECT ID FROM `%s` WHERE `object`='%s' AND `name`='%s' LIMIT 1",
+			$dbPermissionExists = $authCommon->db->query(sprintf("SELECT ID FROM `%s`.`%s` WHERE `object`='%s' AND `name`='%s' LIMIT 1",
+				$authCommon->db->escape($authCommon->dbName),
 				$authCommon->db->escape($authCommon->tblPermissions),
 				$authCommon->db->escape(self::formatName($object)),
 				$authCommon->db->escape(self::formatName($name))));
@@ -868,12 +914,14 @@ class auth extends authCommon{
 		$permissions = array();
 
 		if($inclGlobal){
-			$dbPermissions = $authCommon->db->query(sprintf("SELECT * FROM `%s` WHERE `object` = '%s' OR `object` = '%s'",
+			$dbPermissions = $authCommon->db->query(sprintf("SELECT * FROM `%s`.`%s` WHERE `object` = '%s' OR `object` = '%s'",
+				$authCommon->db->escape($authCommon->dbName),
 				$authCommon->db->escape($authCommon->tblPermissions),
 				$authCommon->db->escape($object),
 				$authCommon->db->escape(self::GLOBAL_PERMISSION)));
 		}else{
-			$dbPermissions = $authCommon->db->query(sprintf("SELECT * FROM `%s` WHERE `object` = '%s'",
+			$dbPermissions = $authCommon->db->query(sprintf("SELECT * FROM `%s`.`%s` WHERE `object` = '%s'",
+				$authCommon->db->escape($authCommon->dbName),
 				$authCommon->db->escape($authCommon->tblPermissions),
 				$authCommon->db->escape($object)));
 		}
@@ -891,7 +939,8 @@ class auth extends authCommon{
 		$authCommon = new parent();
 		$key = md5($object."|".$name);
 		if(!isset(self::$permissionIdRegistry[$key])){
-			$dbPermission = $authCommon->db->query(sprintf("SELECT `ID` FROM `%s` WHERE `name`='%s' AND `object`='%s' LIMIT 1",
+			$dbPermission = $authCommon->db->query(sprintf("SELECT `ID` FROM `%s`.`%s` WHERE `name`='%s' AND `object`='%s' LIMIT 1",
+				$authCommon->db->escape($authCommon->dbName),
 				$authCommon->db->escape($authCommon->tblPermissions),
 				$authCommon->db->escape($name),
 				$authCommon->db->escape($object)));
@@ -930,8 +979,9 @@ class auth extends authCommon{
 				$sqlFields[] = sprintf('`%s`', $authCommon->db->escape($field));
 			}
 		}
-		$dbPermission = $authCommon->db->query(sprintf("SELECT %s FROM `%s` WHERE `ID`='%s' LIMIT 1",
+		$dbPermission = $authCommon->db->query(sprintf("SELECT %s FROM `%s`.`%s` WHERE `ID`='%s' LIMIT 1",
 			implode(',',$sqlFields),
+			$authCommon->db->escape($authCommon->dbName),
 			$authCommon->db->escape($authCommon->tblPermissions),
 			$authCommon->db->escape($id)));
 		if($dbPermission->error()){
@@ -988,8 +1038,10 @@ class auth extends authCommon{
 	public static function lookupAuthorization($authID)
 	{
 		$authCommon = new parent();
-		$dbAuth = $authCommon->db->query(sprintf("SELECT `a`.*, `p`.`name` AS `permissionName`, `p`.`description` AS `permissionDesc`, `p`.`object` AS `permissionObject`, `p`.`ID` AS `permissionID` FROM `%s` AS `a` LEFT JOIN `%s` AS `p` ON `a`.`permissionID`=`p`.`ID` WHERE a.`ID`='%s'",
+		$dbAuth = $authCommon->db->query(sprintf("SELECT `a`.*, `p`.`name` AS `permissionName`, `p`.`description` AS `permissionDesc`, `p`.`object` AS `permissionObject`, `p`.`ID` AS `permissionID` FROM `%s`.`%s` AS `a` LEFT JOIN `%s`.`%s` AS `p` ON `a`.`permissionID`=`p`.`ID` WHERE a.`ID`='%s'",
+			$authCommon->db->escape($authCommon->dbName),
 			$authCommon->db->escape($authCommon->tblAuthorizations),
+			$authCommon->db->escape($authCommon->dbName),
 			$authCommon->db->escape($authCommon->tblPermissions),
 			$authCommon->db->escape($authID)));
 		if($dbAuth->rowCount()){
