@@ -13,7 +13,8 @@ class authUser extends authEntity{
 	private function init($autoExpandTree){
 		// Get the user's key
 		$userKey = preg_match(auth::REGEX_ENTITY_USER, $this->userKey, $m) ? $m[1] : $this->userKey;
-		$dbUser = $this->db->query(sprintf("SELECT * FROM `%s` WHERE `ID`='%s' OR `username`='%s' LIMIT 1",
+		$dbUser = $this->db->query(sprintf("SELECT * FROM `%s`.`%s` WHERE `ID`='%s' OR `username`='%s' LIMIT 1",
+			$this->db->escape($this->dbName),
 			$this->db->escape($this->tblUsers),
 			$this->db->escape($userKey),
 			$this->db->escape($userKey)));
@@ -57,7 +58,8 @@ class authUser extends authEntity{
 			// -- (a user can't have any) --
 
 			// Get the memberOf entities
-			$dbMemberOf = $this->db->query(sprintf("SELECT `group` FROM `%s` WHERE `user`='%s'",
+			$dbMemberOf = $this->db->query(sprintf("SELECT `group` FROM `%s`.`%s` WHERE `user`='%s'",
+				$this->db->escape($this->dbName),
 				$this->db->escape($this->tblUsers2Groups),
 				$this->db->escape($this->getMetaData('ID'))));
 			if($dbMemberOf->rowCount()){

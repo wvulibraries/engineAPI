@@ -12,9 +12,11 @@ class authObject extends authCommon{
 		$this->objectID = auth::formatName($objectID);
 
 		// Get all my meta Data
-		$dbObject = $this->db->query(sprintf("SELECT * FROM `%s` WHERE `ID`='%s' LIMIT 1",
+		$sql = sprintf("SELECT * FROM `%s`.`%s` WHERE `ID`='%s' LIMIT 1",
+			$this->db->escape($this->dbName),
 			$this->db->escape($this->tblObjects),
-			$this->db->escape($this->objectID)));
+			$this->db->escape($this->objectID));
+		$dbObject = $this->db->query($sql);
 		if($dbObject->rowCount()){
 			$row = $dbObject->fetch();
 			foreach($row as $field => $value){
@@ -73,7 +75,11 @@ class authObject extends authCommon{
 	public function getChildren()
 	{
 		$children = array();
-		$dbObjects = $this->db->query(sprintf("SELECT `ID` FROM `%s` WHERE `parent`='%s'", $this->db->escape($this->tblObjects), $this->db->escape($this->getMetaData('ID'))));
+		$sql = sprintf("SELECT `ID` FROM `%s`.`%s` WHERE `parent`='%s'",
+			$this->db->escape($this->dbName),
+			$this->db->escape($this->tblObjects),
+			$this->db->escape($this->getMetaData('ID')));
+		$dbObjects = $this->db->query($sql);
 		while($row = $dbObjects->fetch()){
 			$children[] = auth::getObject($row['ID']);
 		}
@@ -92,8 +98,10 @@ class authObject extends authCommon{
 	public function listAuthorizations($type='all')
 	{
 		$authorizations = array();
-		$sql = sprintf("SELECT `a`.*, `p`.`name` AS `permissionName`, `p`.`description` AS `permissionDesc`, `p`.`ID` AS `permissionID` FROM `%s` AS `a` LEFT JOIN `%s` AS `p` ON `a`.`permissionID`=`p`.`ID` WHERE `authObjectID`='%s'",
+		$sql = sprintf("SELECT `a`.*, `p`.`name` AS `permissionName`, `p`.`description` AS `permissionDesc`, `p`.`ID` AS `permissionID` FROM `%s`.`%s` AS `a` LEFT JOIN `%s`.`%s` AS `p` ON `a`.`permissionID`=`p`.`ID` WHERE `authObjectID`='%s'",
+			$this->db->escape($this->dbName),
 			$this->db->escape($this->tblAuthorizations),
+			$this->db->escape($this->dbName),
 			$this->db->escape($this->tblPermissions),
 			$this->db->escape("$this"));
 
@@ -121,7 +129,8 @@ class authObject extends authCommon{
 	 */
 	private function clearInheritance()
 	{
-		$dbDelete = $this->db->query(sprintf("DELETE FROM `%s` WHERE `authObjectID`='%s' AND `inheritedFrom` <> ''",
+		$dbDelete = $this->db->query(sprintf("DELETE FROM `%s`.`%s` WHERE `authObjectID`='%s' AND `inheritedFrom` <> ''",
+			$this->db->escape($this->dbName),
 			$this->db->escape($this->tblAuthorizations),
 			$this->db->escape($this->getMetaData('ID'))));
 		return !$dbDelete->error();
@@ -140,7 +149,7 @@ class authObject extends authCommon{
 		if($newState == $this->getMetaData('inherits')) return FALSE;
 
 		// Start the database transaction
-		$this->db->transBegin();
+		$this->db->beginTransaction();
 
 		// Save the new value to the object's metaData (testing for it to be successful)
 		if(!auth::updateObject($this->objectID, array('inherits' => $newState))){
@@ -170,12 +179,14 @@ class authObject extends authCommon{
 				 */
 				if($applyLocal){
 					// Move all my inherited authorizations to local authorizations
-					$dbAction = $this->db->query(sprintf("UPDATE `%s` SET `inheritedFrom`='' WHERE `authObjectID`='%s' AND `inheritedFrom`<>''",
+					$dbAction = $this->db->query(sprintf("UPDATE `%s`.`%s` SET `inheritedFrom`='' WHERE `authObjectID`='%s' AND `inheritedFrom`<>''",
+						$this->db->escape($this->dbName),
 						$this->db->escape($this->tblAuthorizations),
 						$this->db->escape($this->objectID)));
 				}else{
 					// Remove all my inherited authorizations
-					$dbAction = $this->db->query(sprintf("DELETE FROM `%s` WHERE `authObjectID`='%s' AND `inheritedFrom`<>''",
+					$dbAction = $this->db->query(sprintf("DELETE FROM `%s`.`%s` WHERE `authObjectID`='%s' AND `inheritedFrom`<>''",
+						$this->db->escape($this->dbName),
 						$this->db->escape($this->tblAuthorizations),
 						$this->db->escape($this->objectID)));
 				}
@@ -207,12 +218,14 @@ class authObject extends authCommon{
 	 */
 	public function propagateInheritance($applyTo=NULL) {
 		// First, we need to start a transaction for safety
-		$this->db->transBegin($this->tblAuthorizations);
+		$this->db->beginTransaction();
 
 		// We need to get all this object's authorizations (both inherited and local which are set to inherit)
 		$authorizations = array();
-		$dbAuthorizations = $this->db->query(sprintf("SELECT a.*, p.name AS `permissionName`, p.object AS `permissionObject` FROM `%s` a LEFT JOIN `%s` p ON a.permissionID=p.ID WHERE `inheritable`='1' AND `authObjectID`='%s'",
+		$dbAuthorizations = $this->db->query(sprintf("SELECT a.*, p.name AS `permissionName`, p.object AS `permissionObject` FROM `%s`.`%s` a LEFT JOIN `%s`.`%s` p ON a.permissionID=p.ID WHERE `inheritable`='1' AND `authObjectID`='%s'",
+			$this->db->escape($this->dbName),
 			$this->db->escape($this->tblAuthorizations),
+			$this->db->escape($this->dbName),
 			$this->db->escape($this->tblPermissions),
 			$this->db->escape($this->getMetaData('ID'))));
 		while($row = $dbAuthorizations->fetch()){
@@ -269,7 +282,8 @@ class authObject extends authCommon{
 		$entity       = auth::getEntity($entity);
 
 		// Check for an existing authorization
-		$dbAuthorizationCheck = $this->db->query(sprintf("SELECT COUNT(`ID`) AS `i` FROM `%s` WHERE `authEntity`='%s' AND `permissionID`='%s' AND `policy`='%s' AND `authObjectID`='%s'",
+		$dbAuthorizationCheck = $this->db->query(sprintf("SELECT COUNT(`ID`) AS `i` FROM `%s`.`%s` WHERE `authEntity`='%s' AND `permissionID`='%s' AND `policy`='%s' AND `authObjectID`='%s'",
+			$this->db->escape($this->dbName),
 			$this->db->escape($this->tblAuthorizations),
 			$this->db->escape("$entity"),
 			$this->db->escape($permissionID),
@@ -280,7 +294,8 @@ class authObject extends authCommon{
 			return TRUE;
 		}else{
 			// Add the authorization
-			$dbAddAuthorization = $this->db->query(sprintf("INSERT INTO `%s` (`ID`,`authEntity`,`permissionID`,`policy`,`authObjectID`,`inheritable`,`inheritedFrom`) VALUES('%s','%s','%s','%s','%s','%s','%s')",
+			$dbAddAuthorization = $this->db->query(sprintf("INSERT INTO `%s`.`%s` (`ID`,`authEntity`,`permissionID`,`policy`,`authObjectID`,`inheritable`,`inheritedFrom`) VALUES('%s','%s','%s','%s','%s','%s','%s')",
+				$this->db->escape($this->dbName),
 				$this->db->escape($this->tblAuthorizations),
 				$this->db->escape($this->authUUID()),
 				$this->db->escape("$entity"),
@@ -323,13 +338,14 @@ class authObject extends authCommon{
 
 		if($permissionName == '*'){
 			// Remove ALL the entities' (local) authorizations
-			$dbAllAuths = $this->db->query(sprintf("SELECT * FROM `%s` WHERE `authEntity`='%s' AND `authObjectID`='%s' AND `inheritedFrom` = ''",
+			$dbAllAuths = $this->db->query(sprintf("SELECT * FROM `%s`.`%s` WHERE `authEntity`='%s' AND `authObjectID`='%s' AND `inheritedFrom` = ''",
+				$this->db->escape($this->dbName),
 				$this->db->escape($this->tblAuthorizations),
 				$this->db->escape("$entity"),
 				$this->db->escape($this->objectID)));
 
 			// Since we'll doing alot of looping, start a transaction
-			$this->db->transBegin($this->tblAuthorizations);
+			$this->db->beginTransaction();
 			// Disable autoPropaget (we'll manualy trigger it at the end)
 			$this->autoPropagate = FALSE;
 			// For each authorization, remove it
@@ -345,7 +361,8 @@ class authObject extends authCommon{
 			// Get to the permissionID
 			$permissionID = is_numeric($permissionName) ? $permissionName : auth::lookupPermission($permissionName,$permissionOrigin);
 			// Lookup the existing authorization
-			$dbAuthorizationLookup = $this->db->query(sprintf("SELECT * FROM `%s` WHERE `authEntity`='%s' AND `permissionID`='%s' AND `authObjectID`='%s' LIMIT 1",
+			$dbAuthorizationLookup = $this->db->query(sprintf("SELECT * FROM `%s`.`%s` WHERE `authEntity`='%s' AND `permissionID`='%s' AND `authObjectID`='%s' LIMIT 1",
+				$this->db->escape($this->dbName),
 				$this->db->escape($this->tblAuthorizations),
 				$this->db->escape("$entity"),
 				$this->db->escape($permissionID),
@@ -360,7 +377,8 @@ class authObject extends authCommon{
 			$authRow = $dbAuthorizationLookup->fetch();
 			if(!$authRow['inheritedFrom']){
 				// Yes - We just need to remove this authorization
-				$dbRevoke = $this->db->query(sprintf("DELETE FROM `%s` WHERE `ID`='%s' LIMIT 1",
+				$dbRevoke = $this->db->query(sprintf("DELETE FROM `%s`.`%s` WHERE `ID`='%s' LIMIT 1",
+					$this->db->escape($this->dbName),
 					$this->db->escape($this->tblAuthorizations),
 					$this->db->escape($authRow['ID'])));
 			}else{

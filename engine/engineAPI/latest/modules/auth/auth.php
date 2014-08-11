@@ -784,7 +784,7 @@ class auth extends authCommon{
 		}
 
 		// Okay, we now have a list of the permission IDs we need to delete
-		$authCommon->db->transBegin($authCommon->tblPermissions);
+		$authCommon->db->beginTransaction();
 		foreach($permissionIDs as $permissionID){
 			// Remove all the permission's authorizations
 			$dbDelete1 = $authCommon->db->query(sprintf("DELETE FROM `%s`.`%s` WHERE `permissionID`='%s'",
@@ -1123,7 +1123,7 @@ class auth extends authCommon{
 	{
 		if(is_array($permissionName)){
 			$authCommon = new parent();
-			$authCommon->db->transBegin($authCommon->tblAuthorizations);
+			$authCommon->db->beginTransaction();
 			foreach($permissionName as $permission){
 				$permName = $permission[0];
 				$permObj  = isset($permission[1]) ? $permission[1] : auth::GLOBAL_PERMISSION;
