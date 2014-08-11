@@ -90,7 +90,8 @@ class authEntity extends authCommon implements ArrayAccess{
 		// Okay, we now have the type and the id of the target, now we just need to assign THIS entity to the target
 		switch($this->getType()){
 			case authEntity::TYPE_USER:
-				$dbAssignmentCheck = $this->db->query(sprintf("SELECT COUNT(`ID`) AS `i` FROM `%s` WHERE `user`='%s' AND `group`='%s'",
+				$dbAssignmentCheck = $this->db->query(sprintf("SELECT COUNT(`ID`) AS `i` FROM `%s`.`%s` WHERE `user`='%s' AND `group`='%s'",
+					$this->db->escape($this->dbName),
 					$this->db->escape($this->tblUsers2Groups),
 					$this->db->escape($this->getMetaData('ID')),
 					$this->db->escape($targetEntity->getMetaData('ID'))));
@@ -99,13 +100,15 @@ class authEntity extends authCommon implements ArrayAccess{
 					return TRUE;
 				}else{
 					$sql = (is_bool($ldapAssignment))
-						? sprintf("INSERT INTO `%s` (`user`,`group`,`ldapAssignment`) VALUES('%s','%s','%s')",
+						? sprintf("INSERT INTO `%s`.`%s` (`user`,`group`,`ldapAssignment`) VALUES('%s','%s','%s')",
+							$this->db->escape($this->dbName),
 							$this->db->escape($this->tblUsers2Groups),
 							$this->db->escape($this->getMetaData('ID')),
 							$this->db->escape($targetEntity->getMetaData('ID')),
 							$this->db->escape( (int)$ldapAssignment ))
-						: sprintf("INSERT INTO `%s` (`user`,`group`) VALUES('%s','%s')",
+						: sprintf("INSERT INTO `%s`.`%s` (`user`,`group`) VALUES('%s','%s')",
 							$this->db->escape($this->tblUsers2Groups),
+							$this->db->escape($this->dbName),
 							$this->db->escape($this->getMetaData('ID')),
 							$this->db->escape($targetEntity->getMetaData('ID')));
 					$dbAssignment = $this->db->query($sql);
@@ -113,7 +116,8 @@ class authEntity extends authCommon implements ArrayAccess{
 				break;
 
 			case authEntity::TYPE_GROUP:
-				$dbAssignmentCheck = $this->db->query(sprintf("SELECT COUNT(`ID`) AS `i` FROM `%s` WHERE `childGroup`='%s' AND `parentGroup`='%s'",
+				$dbAssignmentCheck = $this->db->query(sprintf("SELECT COUNT(`ID`) AS `i` FROM `%s`.`%s` WHERE `childGroup`='%s' AND `parentGroup`='%s'",
+					$this->db->escape($this->dbName),
 					$this->db->escape($this->tblGroups2Groups),
 					$this->db->escape($this->getMetaData('ID')),
 					$this->db->escape($targetEntity->getMetaData('ID'))));
@@ -121,7 +125,8 @@ class authEntity extends authCommon implements ArrayAccess{
 					errorHandle::newError(__METHOD__."() - Assignment already exists.", errorHandle::DEBUG);
 					return TRUE;
 				}else{
-					$dbAssignment = $this->db->query(sprintf("INSERT INTO `%s` (`childGroup`,`parentGroup`) VALUES('%s','%s')",
+					$dbAssignment = $this->db->query(sprintf("INSERT INTO `%s`.`%s` (`childGroup`,`parentGroup`) VALUES('%s','%s')",
+						$this->db->escape($this->dbName),
 						$this->db->escape($this->tblGroups2Groups),
 						$this->db->escape($this->getMetaData('ID')),
 						$this->db->escape($targetEntity->getMetaData('ID'))));
@@ -169,14 +174,16 @@ class authEntity extends authCommon implements ArrayAccess{
 		// Okay, we now have the type and the id of the target, now we just need to assign THIS entity to the target
 		switch($this->getType()){
 			case authEntity::TYPE_USER:
-				$dbAssignmentDelete = $this->db->query(sprintf("DELETE FROM `%s` WHERE `user`='%s' AND `group`='%s'",
+				$dbAssignmentDelete = $this->db->query(sprintf("DELETE FROM `%s`.`%s` WHERE `user`='%s' AND `group`='%s'",
+					$this->db->escape($this->dbName),
 					$this->db->escape($this->tblUsers2Groups),
 					$this->db->escape($this->getMetaData('ID')),
 					$this->db->escape($targetEntity->getMetaData('ID'))));
 				break;
 
 			case authEntity::TYPE_GROUP:
-				$dbAssignmentDelete = $this->db->query(sprintf("DELETE FROM `%s` WHERE `childGroup`='%s' AND `parentGroup`='%s'",
+				$dbAssignmentDelete = $this->db->query(sprintf("DELETE FROM `%s`.`%s` WHERE `childGroup`='%s' AND `parentGroup`='%s'",
+					$this->db->escape($this->dbName),
 					$this->db->escape($this->tblGroups2Groups),
 					$this->db->escape($this->getMetaData('ID')),
 					$this->db->escape($targetEntity->getMetaData('ID'))));
