@@ -26,7 +26,7 @@ class ipAddr {
 		$remoteAddr = array();
 		$remoteAddr = explode(".",$checkIP);
 
-		$ipFound = FALSE; 
+		$ipFound = FALSE;
 
 		foreach ($ipRanges as $key=>$ip) {
 			$ipFound = self::rangeCheck($ip,$checkIP);
@@ -64,11 +64,11 @@ class ipAddr {
 		$remoteAddr = array();
 		$remoteAddr = explode(".",$checkIP);
 
-		$ipFound = FALSE; 
+		$ipFound = FALSE;
 
 		$ipQuads = array();
 		$ipQuads = explode(".",$ip);
-		
+
 		for ($I = 0;$I <= 3;$I++) {
 
 			if (preg_match("/\-/",$ipQuads[$I])) {
@@ -76,14 +76,14 @@ class ipAddr {
 			// Contains a range of numbers
 				list($min,$max) = explode("-",$ipQuads[$I]);
 
-				if ($remoteAddr[$I] < $min || $remoteAddr[$I] > $max) {	
+				if ($remoteAddr[$I] < $min || $remoteAddr[$I] > $max) {
 					break;
 				}
 			}
 			elseif ($ipQuads[$I] == "*") {
-			// Quad is a wild Character	
+			// Quad is a wild Character
 			//continue;
-			} 
+			}
 			else {
 			// Quad is an exact number
 				if ($ipQuads[$I] != $remoteAddr[$I]) {
@@ -121,25 +121,21 @@ class ipAddr {
 	 * @return bool
 	 */
 	function onsite($checkIP = NULL) {
-		
+
 		$enginevars = enginevars::getInstance();
 
-		print "<pre>";
-		var_dump($enginevars);
-		print "</pre>";
-		
 		if(isnull($checkIP) && isset($_SERVER['REMOTE_ADDR'])) {
 			$checkIP = $_SERVER['REMOTE_ADDR'];
 		}
-		
+
 		$ipFound = self::check($enginevars->get("onCampus"),$checkIP);
-		
+
 		if ($ipFound === TRUE) {
 			return TRUE;
 		}
-				
+
 		return FALSE;
-		
+
 	}
 
 }
@@ -150,7 +146,7 @@ class ipAddr {
  */
 function userInfoIPRangeCheckArray($ipRanges,$checkIP = NULL) {
 	deprecated();
-	return ipAddr::rangeCheckArray($ipRanges,$checkIP = NULL);	
+	return ipAddr::rangeCheckArray($ipRanges,$checkIP);
 }
 
 /**
@@ -159,8 +155,8 @@ function userInfoIPRangeCheckArray($ipRanges,$checkIP = NULL) {
  */
 function userInfoIPRangeCheck($ip,$checkIP = NULL) {
 	deprecated();
-	return ipAddr::rangeCheck($ip,$checkIP = NULL);
-	
+	return ipAddr::rangeCheck($ip,$checkIP);
+
 }
 
 /**
@@ -169,7 +165,7 @@ function userInfoIPRangeCheck($ip,$checkIP = NULL) {
  */
 function ipRangeCheck($ipRanges,$checkIP = NULL) {
 	deprecated();
-	return ipAddr::check($ipRanges,$checkIP = NULL);
+	return ipAddr::check($ipRanges,$checkIP);
 }
 
 /**
@@ -178,8 +174,8 @@ function ipRangeCheck($ipRanges,$checkIP = NULL) {
  */
 function onCampus($checkIP = NULL) {
 	deprecated();
-	return ipAddr::onsite($checkIP = NULL);
-	
+	return ipAddr::onsite($checkIP);
+
 }
 
 ?>
