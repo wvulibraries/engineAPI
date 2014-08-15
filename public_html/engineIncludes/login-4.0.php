@@ -11,9 +11,11 @@ $localVars  = localvars::getInstance();
 $engineVars = enginevars::getInstance();
 
 if($engineVars->get('forceSSLLogin') === TRUE && (!isset($_SERVER['HTTPS']) or is_empty($_SERVER['HTTPS']))){
-	$engineVars->set('loginPage', str_replace("http://", "https://", $engineVars->get('loginPage')));
-	http::redirect($engineVars->get('loginPage')."?".$_SERVER['QUERY_STRING']);
+        $engineVars->set('loginPage',str_replace("http://","https://",$engineVars->get('loginPage')));
+        header("Location: ".$engineVars->get('loginPage')."?".$_SERVER['QUERY_STRING']);
+        exit;
 }
+
 
 $localVars->set('pageTitle',"Login Page");
 $localVars->set("domain","wvu-ad");
@@ -22,11 +24,11 @@ $authFail  = FALSE; // Authorization to the current resource .. we may end up no
 $loginFail = FALSE; // Login Success/Failure
 
 if (!session::get("page") && isset($_GET['HTML']['page'])) {
-	$page = $_GET['HTML']['page'];
+	$page = $_GET['HTML']['page']; 
 	if (isset($_GET['HTML']['qs'])) {
 		$qs = urldecode($_GET['HTML']['qs']);
-		$qs = str_replace('&amp;amp;', '&', $qs);
-		$qs = str_replace('&amp;', '&', $qs);
+		$qs = preg_replace('/&amp;amp;/','&',$qs);
+		$qs = preg_replace('/&amp;/','&',$qs);
 	}
 	else {
 		$qs = "";
@@ -34,6 +36,7 @@ if (!session::get("page") && isset($_GET['HTML']['page'])) {
 
 	session::set("page",$page);
 	session::set("qs",$qs);
+
 }
 
 //Login processing:
@@ -42,20 +45,36 @@ if (isset($_POST['HTML']['loginSubmit'])) {
 		$authFail  = TRUE;
 		$loginFail = TRUE;
 	}
-	else if (login::login()) {
-		if(isset($_GET['HTML']['url'])) {
-			http::redirect($_GET['HTML']['url']);
-		}
-		else if (session::get("page")) {
-			http::redirect(session::get("page").'?'.session::get("qs"));
+	else {
+		if (login::login()) {
+//            die(__LINE__.' - '.__FILE__);
+            if(isset($_GET['HTML']['url'])) {
+				header("Location: ".$_GET['HTML']['URL'] ) ;
+			}
+			else {
+				
+				if (session::get("page")) {
+					$url = sprintf("%s?%s",
+						session::get("page"),
+						session::get("qs")
+						);
+
+					header("Location: ".$url );
+
+					exit;
+				}
+				else {
+					header("Location: ".$engineVars->get('WEBROOT') );
+				}
+
+			}
 		}
 		else {
-			http::redirect($engineVars->get('WEBROOT'));
+			$loginFail = TRUE;
 		}
+		
 	}
-	else {
-		$loginFail = TRUE;
-	}
+
 }
 
 templates::load("library2012.1col");
@@ -78,7 +97,7 @@ if(isset($page)) {
 
 <form name="loginForm" action="<?php print $_SERVER['PHP_SELF']?><?php if(isset($page)){ echo "?page=".$page; if(isset($qs)) { echo "&qs=".(urlencode($qs)); } } ?>" method="post">
 	{csrf}
-
+	
 	<table>
 		<tr>
 			<td>
@@ -89,7 +108,7 @@ if(isset($page)) {
 			</td>
 		</tr>
 		<tr>
-			<td>
+			<td>	
 				<label for="password">Password:</label>
 			</td>
 			<td>
@@ -97,11 +116,12 @@ if(isset($page)) {
 			</td>
 		</tr>
 	</table>
-
+	
 	<br />
-
+	
 	<input type="submit" name="loginSubmit" value="Login" />
 </form>
+
 
 <script>
 document.loginForm.username.focus();
