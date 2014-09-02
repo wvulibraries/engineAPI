@@ -12,22 +12,42 @@ class config {
 	 */
 	protected $variables = array();
 
+	public function __construct($filename=NULL){
+		if($filename) $this->variables = self::loadConfig($filename);
+	}
+
 	/**
 	 * Load a config file and return the variables
+	 * @param string $file
 	 * @return array
 	 */
-	public function loadConfig($file) {
-		// Store variables before including $file
-		$varsBefore = array_keys(get_defined_vars());
+	public static function loadConfig($file) {
+		switch(pathinfo($file, PATHINFO_EXTENSION)){
+			case 'php':
+				// Store variables before including $file
+				$varsBefore = array_keys(get_defined_vars());
 
-		// Bring in the file
-		require $file;
+				// Bring in the file
+				require $file;
 
-		// Store variables after including $file
-		$varsAfter  = array_keys(get_defined_vars());
+				// Store variables after including $file
+				$varsAfter  = array_keys(get_defined_vars());
 
-		// Return the differences
-		return compact(array_diff($varsAfter, $varsBefore));
+				// Return the differences
+				return compact(array_diff($varsAfter, $varsBefore));
+				break;
+
+			case 'yaml':
+				// TODO
+				return array();
+				break;
+
+			case 'xml':
+				// TODO
+				return array();
+				break;
+		}
+
 	}
 
 	/**
