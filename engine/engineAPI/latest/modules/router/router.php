@@ -198,7 +198,7 @@ class router {
 
 		$variables = $this->getVariables();
 
-		return $route['callback']($this->serverURI,$variables);
+		return call_user_func($route['callback'], $this->serverURI,$variables);
 
 	}
 
