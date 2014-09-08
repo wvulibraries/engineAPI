@@ -50,7 +50,12 @@ class router {
 	 */
 	public function defineRoute($uri,$callback=NULL) {
 
-		// If $callback is not null, then it must be callable
+		// If $callback is not null, then it must be callable or point to a file
+		if(!isnull($callback)){
+			if(!is_callable($callback)){
+				if(!is_string($callback) || !is_file($callback)) return FALSE;
+			}
+		}
 		if (!isnull($callback) && !is_callable($callback) && !is_file($callback)) return FALSE;
 
 		$route             = array();
