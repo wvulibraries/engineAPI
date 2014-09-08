@@ -45,13 +45,13 @@ class router {
 	 * @param  string $uri      complete url, from document root. Can contain variables, and validation requirements. 
 	 *                          example:
 	 *                          /users/edit/{ID=integer}
-	 * @param  callable $callback A callable to bind to this uri
+	 * @param  callable|string $callback A callable to bind to this uri
 	 * @return bool           true on success, false otherwise
 	 */
 	public function defineRoute($uri,$callback=NULL) {
 
 		// If $callback is not null, then it must be callable
-		if (!isnull($callback) && !is_callable($callback)) return FALSE;
+		if (!isnull($callback) && !is_callable($callback) && !is_file($callback)) return FALSE;
 
 		$route             = array();
 		$route['rule']     = $this->parseURI($uri);
@@ -197,8 +197,12 @@ class router {
 
 		$variables = $this->getVariables();
 
-		return call_user_func($route['callback'], $this->serverURI,$variables);
-
+		if(is_callable($route['callback'])){
+			return call_user_func($route['callback'], $this->serverURI,$variables);
+		}else{
+			echo file_get_contents($route['callback']);
+			return TRUE;
+		}
 	}
 
 	/**
