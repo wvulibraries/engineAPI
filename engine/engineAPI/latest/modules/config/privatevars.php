@@ -17,17 +17,13 @@ class privatevars extends config {
 	 * @param $site      The site to use
 	 */
 	public function __construct($engineDir, $site) {
-		// Load default variables
-		$defaults = self::loadconfig($engineDir."/config/defaultPrivate.php");
+		parent::__construct($engineDir."/config/defaultPrivate.php");
 
 		// Load site specific variables
 		$sitePath = $engineDir."/config/".$site."Private.php";
 		$siteVars = ($site != "default" && is_readable($sitePath))
-			? self::loadconfig($sitePath)
-			: array('engineVarsPrivate' => array());
-
-		// Override defaults with site variables and save as instance variables
-		$this->variables = array_merge($defaults['engineVarsPrivate'], $siteVars['engineVarsPrivate']);
+			? self::loadConfig($sitePath)
+			: self::loadConfig(array('engineVarsPrivate' => array()));
 	}
 
 	/**
