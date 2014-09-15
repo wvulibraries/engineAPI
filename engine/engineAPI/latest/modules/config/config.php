@@ -78,7 +78,7 @@ class config {
 		}
 
 		// Merge the given config with the current config
-		$this->variables = array_merge_recursive($this->variables, $config);
+		$this->variables = array_merge_recursive_overwrite($this->variables, $config);
 		return TRUE;
 	}
 
