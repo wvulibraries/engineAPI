@@ -65,7 +65,7 @@ class config {
 		// If we're given a filename, load it
 		if(is_string($config) && is_readable($config)){
 			$config = self::loadFile($config);
-			if(!$config){
+			if(isnull($config)){
 				errorHandle::newError(__METHOD__."() Failed to load config from '$config'!", errorHandle::DEBUG);
 				return FALSE;
 			}
