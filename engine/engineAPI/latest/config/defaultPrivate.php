@@ -6,18 +6,18 @@
 
 // This file should be set to be readable only by the web server user and the system administrator (or root)
 
-global $engineVarsPrivate;//MySQL Information
-
-$engineVarsPrivate['engineDB']['driver']        = 'mysql';
-$engineVarsPrivate['engineDB']['driverOptions'] = array(
-    'host'   => 'localhost',
-    'port'   => 3306,
-    'user'   => 'root',
-    'pass'   => '',
-    'dbName' => 'EngineAPI'
+$engineDB = array(
+	'driver'        => 'mysql',
+	'driverOptions' => array(
+		'host'   => 'localhost',
+		'port'   => 3306,
+		'user'   => 'root',
+		'pass'   => '',
+		'dbName' => 'EngineAPI'
+	)
 );
 
-$engineVarsPrivate["privateVars"]["engineDB"] = array(
+$privateVars["engineDB"] = array(
 	array(
 		'file'     => 'auth.php',
 		'function' => '__construct',
