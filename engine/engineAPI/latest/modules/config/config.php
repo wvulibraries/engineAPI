@@ -13,7 +13,7 @@ class config {
 	protected $variables = array();
 
 	public function __construct($filename=NULL){
-		if($filename) $this->variables = self::loadConfig($filename);
+		if($filename) self::loadConfig($filename);
 	}
 
 	/**
@@ -21,7 +21,7 @@ class config {
 	 * @param string $file
 	 * @return array
 	 */
-	public static function loadConfig($file) {
+	public static function loadFile($file) {
 		switch(pathinfo($file, PATHINFO_EXTENSION)){
 			case 'php':
 				// Store variables before including $file
@@ -32,6 +32,9 @@ class config {
 
 				// Store variables after including $file
 				$varsAfter  = array_keys(get_defined_vars());
+
+				// Remove 'varsBefore' from the list since we're only using it as a helper
+				unset($varsAfter[ array_search('varsBefore', $varsAfter) ]);
 
 				// Return the differences
 				return compact(array_diff($varsAfter, $varsBefore));
@@ -47,7 +50,36 @@ class config {
 				return array();
 				break;
 		}
+		return NULL;
+	}
 
+	/**
+	 * Load config from given filename
+	 *
+	 * This will recursivly merge with the current config allowing config items to be overwritten
+	 *
+	 * @param string|array $input
+	 * @return bool
+	 */
+	public function loadConfig($config){
+		// If we're given a filename, load it
+		if(is_string($config) && is_readable($config)){
+			$config = self::loadFile($config);
+			if(!$config){
+				errorHandle::newError(__METHOD__."() Failed to load config from '$config'!", errorHandle::DEBUG);
+				return FALSE;
+			}
+		}
+
+		// If we don't have an array, abort!
+		if(!is_array($config)){
+			errorHandle::newError(__METHOD__."() Unsupported input! (must be string or array)", errorHandle::DEBUG);
+			return FALSE;
+		}
+
+		// Merge the given config with the current config
+		$this->variables = array_merge_recursive($this->variables, $config);
+		return TRUE;
 	}
 
 	/**
