@@ -22,6 +22,7 @@ class config {
 	 * @return array
 	 */
 	public static function loadFile($file) {
+
 		switch(pathinfo($file, PATHINFO_EXTENSION)){
 			case 'php':
 				// Store variables before including $file
@@ -61,10 +62,10 @@ class config {
 	 * @param string|array $input
 	 * @return bool
 	 */
-	public function loadConfig($config){
+	public function loadConfig($file){
 		// If we're given a filename, load it
-		if(is_string($config) && is_readable($config)){
-			$config = self::loadFile($config);
+		if(is_string($file) && is_readable($file)){
+			$config = self::loadFile($file);
 			if(isnull($config)){
 				errorHandle::newError(__METHOD__."() Failed to load config from '$config'!", errorHandle::DEBUG);
 				return FALSE;
@@ -73,7 +74,7 @@ class config {
 
 		// If we don't have an array, abort!
 		if(!is_array($config)){
-			errorHandle::newError(__METHOD__."() Unsupported input! (must be string or array)", errorHandle::DEBUG);
+			errorHandle::newError(__METHOD__."() Unsupported input! (must be string or array) from file:".$file, errorHandle::DEBUG);
 			return FALSE;
 		}
 
