@@ -401,6 +401,11 @@ class session{
 		// Perform garbage cleanup on ourselves
 		self::gc();
 
+		// If there is a logout token in the URL and it's correct, then log the user out!
+		if(isset($_GET['MYSQL']['logoutToken']) && $_GET['MYSQL']['logoutToken'] == self::get('logoutToken')){
+			self::reset();
+		}
+
 		// Lastly, re-sync $_SESSION, and return
 		self::sync();
 		return TRUE;
@@ -474,7 +479,7 @@ class session{
 	 */
 	public static function csrfTokenRequest(){
 		$csrfID    = uniqid();
-		$csrfToken = md5(uniqid(mt_rand(), TRUE));
+		$csrfToken = self::genToken();
 		$options   = array(
 			'location' => 'csrf',
 			'timeout' => self::$options['csrfTimeout']
@@ -502,6 +507,14 @@ class session{
 			return FALSE;
 		}
 		return FALSE;
+	}
+
+	/**
+	 * Generate a random token string
+	 * @return string
+	 */
+	private static function genToken(){
+		return md5(uniqid(mt_rand(), TRUE));
 	}
 
 	/**
@@ -641,8 +654,8 @@ class session{
 			// Get the requested value
 			$result = array_get(self::$sessionData[$location], $name);
 			// If we're looking for flash, also try old flash
-			if($result === NULL && $location == 'flash'){
-				$result = array_get(self::$sessionData[$location.'__old__'], $name);
+			if($result === NULL && $location == 'flash' && isset(self::$sessionData[$location.'.__old__'])){
+				$result = array_get(self::$sessionData[$location.'.__old__'], $name);
 			}
 		}else{
 			// Okay, start looking for the data
@@ -783,7 +796,7 @@ class session{
 	 * @return bool
 	 */
 	public static function flashHas($name){
-		return self::has($name, 'flash');
+		return self::has($name, 'flash') || self::has($name, 'flash.__old__');
 	}
 
 	/**
@@ -933,6 +946,16 @@ class session{
 	 */
 	private static function normalizeName($name){
 		return str_replace(' ','_',strtolower(trim($name)));
+	}
+
+	/**
+	 * Return logout token
+	 * @return mixed
+	 */
+	public static function logoutToken(){
+		$logoutToken = self::genToken();
+		self::flashSet('logoutToken', $logoutToken);
+		return $logoutToken;
 	}
 }
 
