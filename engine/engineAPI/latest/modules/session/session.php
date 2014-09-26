@@ -640,6 +640,10 @@ class session{
 			if(!self::checkLocation($location, $name)) return FALSE;
 			// Get the requested value
 			$result = array_get(self::$sessionData[$location], $name);
+			// If we're looking for flash, also try old flash
+			if($result === NULL && $location == 'flash'){
+				$result = array_get(self::$sessionData[$location.'__old__'], $name);
+			}
 		}else{
 			// Okay, start looking for the data
 			foreach(array('private','data','flash','flash.__old__') as $location){
