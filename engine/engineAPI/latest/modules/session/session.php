@@ -803,7 +803,7 @@ class session{
 	}
 
 	/**
-	 * [Alias] Does flash have a given piece of data
+	 * [Alias] Does private have a given piece of data
 	 * @param $name
 	 * @return bool
 	 */
