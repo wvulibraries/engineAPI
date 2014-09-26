@@ -798,7 +798,7 @@ class session{
 	 * @param mixed $value
 	 * @return bool
 	 */
-	public static function privatehSet($name,$value){
+	public static function privateSet($name,$value){
 		return self::set($name, $value, array('location' => 'private'));
 	}
 
