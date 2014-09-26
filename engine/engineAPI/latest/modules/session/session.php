@@ -774,6 +774,15 @@ class session{
 	}
 
 	/**
+	 * [Alias] Does flash have a given piece of data
+	 * @param $name
+	 * @return bool
+	 */
+	public static function flashHas($name){
+		return self::has($name, 'flash');
+	}
+
+	/**
 	 * [Alias] Get flash data
 	 * @param string $name
 	 * @param mixed $default
@@ -791,6 +800,15 @@ class session{
 	 */
 	public static function privatehSet($name,$value){
 		return self::set($name, $value, array('location' => 'private'));
+	}
+
+	/**
+	 * [Alias] Does flash have a given piece of data
+	 * @param $name
+	 * @return bool
+	 */
+	public static function privateHas($name){
+		return self::has($name, 'private');
 	}
 
 	/**
