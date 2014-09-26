@@ -62,31 +62,31 @@ class config {
 	 * @param string|array $config
 	 * @return bool
 	 */
-	public function loadConfig($config)
-	{
-		// If we're given a filename, load it
-		if (is_string($config)) {
-			$filename = $config;
-			if (!is_readable($filename)) {
-				errorHandle::newError(__METHOD__."() Given string '$config' is not a valid file path!", errorHandle::DEBUG);
-				return FALSE;
-			}
-			$config = self::loadFile($filename);
-			if (isnull($config)) {
-				errorHandle::newError(__METHOD__."() Failed to load config from '$filename'!", errorHandle::DEBUG);
-				return FALSE;
-			}
-		}
+	public function loadConfig($config){
+		try{
+			// If we're given a filename, load it
+			if (is_string($config)) {
+				$filename = $config;
 
-		// If we don't have an array, abort!
-		if (!is_array($config)) {
-			errorHandle::newError(__METHOD__."() Unsupported input! (must be filepath or array)", errorHandle::DEBUG);
+				// Make sure $filename is an actual file
+				if (!is_readable($filename)) throw new Exception("Given string '$config' is not a valid file path!");
+
+				// Load the file
+				$config = self::loadFile($filename);
+				if (isnull($config)) throw new Exception("Failed to load config from '$filename'!");
+			}
+
+			// If we don't have an array, abort!
+			if (!is_array($config)) throw new Exception("Unsupported input! (must be filepath or array)");
+
+			// Merge the given config with the current config
+			$this->variables = array_merge_recursive_overwrite($this->variables, $config);
+			return TRUE;
+
+		}catch(Exception $e){
+			errorHandle::newError(__METHOD__."() ".$e->getMessage(), errorHandle::DEBUG);
 			return FALSE;
 		}
-
-		// Merge the given config with the current config
-		$this->variables = array_merge_recursive_overwrite($this->variables, $config);
-		return TRUE;
 	}
 
 	/**
