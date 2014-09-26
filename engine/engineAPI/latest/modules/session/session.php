@@ -745,6 +745,65 @@ class session{
 	}
 
 	/**
+	 * [Alias] Get flash data
+	 * @param string $name
+	 * @param mixed $default
+	 * @return mixed
+	 */
+	public static function flashGet($name,$default){
+		return self::get($name, $default, 'flash');
+	}
+
+	/**
+	 * [Alias] Set flash data
+	 * @param string $name
+	 * @param mixed $value
+	 * @return bool
+	 */
+	public static function flashSet($name,$value){
+		return self::set($name, $value, array('location' => 'flash'));
+	}
+
+	/**
+	 * [Alias] Destroy flash data
+	 * @param $name
+	 * @return bool
+	 */
+	public static function flashDestroy($name){
+		return self::destroy($name, 'flash');
+	}
+
+	/**
+	 * [Alias] Get flash data
+	 * @param string $name
+	 * @param mixed $default
+	 * @return mixed
+	 */
+	public static function privateGet($name,$default){
+		return self::get($name, $default, 'private');
+	}
+
+	/**
+	 * [Alias] Set flash data
+	 * @param string $name
+	 * @param mixed $value
+	 * @return bool
+	 */
+	public static function privatehSet($name,$value){
+		return self::set($name, $value, array('location' => 'private'));
+	}
+
+	/**
+	 * [Alias] Destroy flash data
+	 * @param $name
+	 * @return bool
+	 */
+	public static function privateDestroy($name){
+		return self::destroy($name, 'private');
+	}
+
+
+	/**
 	 * Causes flash data to last for one more request
 	 *
 	 * @param array|string $names
