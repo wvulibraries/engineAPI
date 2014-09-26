@@ -750,7 +750,7 @@ class session{
 	 * @param mixed $default
 	 * @return mixed
 	 */
-	public static function flashGet($name,$default){
+	public static function flashGet($name,$default=NULL){
 		return self::get($name, $default, 'flash');
 	}
 
@@ -788,7 +788,7 @@ class session{
 	 * @param mixed $default
 	 * @return mixed
 	 */
-	public static function privateGet($name,$default){
+	public static function privateGet($name,$default=NULL){
 		return self::get($name, $default, 'private');
 	}
 
