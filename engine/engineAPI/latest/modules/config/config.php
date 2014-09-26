@@ -54,26 +54,33 @@ class config {
 	}
 
 	/**
-	 * Load config from given filename
+	 * Load config from file or array
 	 *
 	 * This will recursivly merge with the current config allowing config items to be overwritten
+	 * Can be given filepath or a raw array
 	 *
-	 * @param string|array $input
+	 * @param string|array $config
 	 * @return bool
 	 */
-	public function loadConfig($config){
+	public function loadConfig($config)
+	{
 		// If we're given a filename, load it
-		if(is_string($config) && is_readable($config)){
-			$config = self::loadFile($config);
-			if(isnull($config)){
-				errorHandle::newError(__METHOD__."() Failed to load config from '$config'!", errorHandle::DEBUG);
+		if (is_string($config)) {
+			$filename = $config;
+			if (!is_readable($filename)) {
+				errorHandle::newError(__METHOD__."() Given string '$config' is not a valid file path!", errorHandle::DEBUG);
+				return FALSE;
+			}
+			$config = self::loadFile($filename);
+			if (isnull($config)) {
+				errorHandle::newError(__METHOD__."() Failed to load config from '$filename'!", errorHandle::DEBUG);
 				return FALSE;
 			}
 		}
 
 		// If we don't have an array, abort!
-		if(!is_array($config)){
-			errorHandle::newError(__METHOD__."() Unsupported input! (must be string or array)", errorHandle::DEBUG);
+		if (!is_array($config)) {
+			errorHandle::newError(__METHOD__."() Unsupported input! (must be filepath or array)", errorHandle::DEBUG);
 			return FALSE;
 		}
 
