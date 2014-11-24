@@ -21,6 +21,7 @@ class validate {
 		"ipAddrRange"          => "ipAddrRange",
 		"optionalURL"          => "URL (Optional)",
 		"url"                  => "URL",
+		"urlPath"              => "URL Path",
 		"emailAddr"            => "Email",
 		"internalEmailAddr"    => "Email (Internal)",
 		"integer"              => "Integer",
@@ -93,6 +94,7 @@ class validate {
 
 		switch(trim(strtolower($method))) {
 			case 'url':
+			case 'urlpath':
 			case 'optionalurl':
 				return $return . ': URL';
 			case 'email':
@@ -259,6 +261,20 @@ class validate {
 		$urlregex = "/^(https?|ftp|ssh|telnet)\:\/\/([a-zA-Z0-9+!*(),;?&=\$_.-]+(\:[a-zA-Z0-9+!*(),;?&=\$_.-]+)?@)?[a-zA-Z0-9+\$_-]+(\.[a-zA-Z0-9+\$_-]+)*(\:[0-9]{2,5})?(\/([a-zA-Z0-9+\$_-]\.?)+)*\/?(\?[a-zA-Z+&\*\$_.-][a-zA-Z0-9;:@\/&%=+\*\$_.-]*)?(#[a-zA-Z_.-][a-zA-Z0-9+\*\$_.-]*)?\$/";
 
 		return($this->regexp($urlregex,$url));
+	}
+
+	/**
+	 * Validate as a URL path
+	 *
+	 * @todo Allow relative paths
+	 * @param $path
+	 * @return bool|null
+	 */
+	public function urlPath($path){
+		$urlregex = "/^(\/([a-zA-Z0-9+\$_-]\.?)+)*\/?(\?[a-zA-Z+&\*\$_.-][a-zA-Z0-9;:@\/&%=+\*\$_.-]*)?(#[a-zA-Z_.-][a-zA-Z0-9+\*\$_.-]*)?\$/";
+
+		return($this->regexp($urlregex,$path));
+
 	}
 
 	/**
