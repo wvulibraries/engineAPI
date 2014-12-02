@@ -271,7 +271,7 @@ class validate {
 	 * @return bool|null
 	 */
 	public function urlPath($path){
-		$urlregex = "/^(\/([a-zA-Z0-9+\$_-]\.?)+)*\/?(\?[a-zA-Z+&\*\$_.-][a-zA-Z0-9;:@\/&%=+\*\$_.-]*)?(#[a-zA-Z_.-][a-zA-Z0-9+\*\$_.-]*)?\$/";
+		$urlregex = "/^(?:\.\.|\.|\w+)?(\/([a-zA-Z0-9+\$_-]\.?)+)*\/?(\?[a-zA-Z+&\*\$_.-][a-zA-Z0-9;:@\/&%=+\*\$_.-]*)?(#[a-zA-Z_.-][a-zA-Z0-9+\*\$_.-]*)?\$/";
 
 		return($this->regexp($urlregex,$path));
 
