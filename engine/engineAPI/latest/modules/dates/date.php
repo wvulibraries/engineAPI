@@ -103,6 +103,24 @@ class date {
 
 	}
 
+	public function dropdownDaySelect($selectCurrentDay=TRUE,$options=array()) {
+
+		$currentDay = $this->getCurrentDay();
+
+		$output = sprintf('<select %s>',$this->buildAttributes($options));
+		for ($I=1;$I<=31;$I++) {
+			$output .= sprintf('<option value="%s" %s>%s</option>',
+				($I < 10)?"0".$I:$I,
+				($I == $currentDay)?"selected":"",
+				$I
+				);
+		}
+		$output .= "</select>";
+
+		return $output;
+
+	}
+
 	/**
 	 * Generate an HTML date dropdown menu
 	 *
