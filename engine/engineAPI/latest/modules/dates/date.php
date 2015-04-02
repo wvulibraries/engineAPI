@@ -8,6 +8,12 @@ class date {
 	public $pattern  = "/\{date\s+(.+?)\}/";
 	public $function = "date::templateMatches";
 
+	private $months = array(
+				array(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12),
+				array("", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"),
+				array("", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
+			);
+
 	function __construct() {
 		templates::defTempPatterns($this->pattern,$this->function,$this);
 	}
