@@ -122,6 +122,35 @@ class date {
 	}
 
 	/**
+	 * returns a select dropdown of years, suitable for printing
+	 * @param  integer $start             years from current to start the list at (can be negative)
+	 * @param  integer $end               Years from current to end the list at (can be negative), must be greater than $start
+	 * @param  boolean $selectCurrentYear Select the current year, if it is in the list
+	 * @param  array   $options           associative array, each index in the array becomes an attribute for the select box         
+	 *                                    with the value of the index being the value of the attribute
+	 * @return string                     
+	 */
+	public function dropdownYearSelect($start=0,$end=1,$selectCurrentYear=TRUE,$options=array()) {
+
+		$currentYear = $this->getCurrentYear();
+		$start = $currentYear + $start;
+		$end   = $currentYear + $end;
+
+		$output = sprintf('<select %s>',$this->buildAttributes($options));
+		for ($I=$start;$I<=$end;$I++) {
+			$output .= sprintf('<option value="%s" %s>%s</option>',
+				$I,
+				($I == $currentYear)?"selected":"",
+				$I
+				);
+		}
+		$output .= "</select>";
+
+		return $output;
+
+	}
+
+	/**
 	 * Generate an HTML date dropdown menu
 	 *
 	 * @param $attPairs
