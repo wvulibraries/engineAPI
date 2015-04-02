@@ -47,6 +47,13 @@ class date {
 		return $localtime['tm_mon'] + 1;
 
 	}
+
+	public function getCurrentYear() {
+
+		$localtime = localtime(time(), true);
+		return $localtime['tm_year'] + 1900;
+
+	}
 	/**
 	 * Generate an HTML date dropdown menu
 	 *
