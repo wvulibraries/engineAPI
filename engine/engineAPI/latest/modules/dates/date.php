@@ -41,6 +41,21 @@ class date {
 		return(date($attPairs['format']));
 	}
 
+	/** 
+	 * $options is not html_sanitized. Assumed to be safe.
+	 */
+	private function buildAttributes($options) {
+
+		$output = "";
+
+		foreach ($options as $attr=>$value) {
+			$output .= sprintf(' %s="%s" ',$attr,$value);
+		}
+
+		return $output;
+
+	}
+
 	public function getCurrentMonth() {
 
 		$localtime = localtime(time(), true);
@@ -59,6 +74,32 @@ class date {
 		
 		$localtime = localtime(time(), true);
 		return $localtime['tm_mday'];
+
+	}
+
+	/**
+	 * Provides a select dropdown suitable for framing
+	 * @param  int $monthAs 0 = render month as number, 1 = Month Spelled out, 2 short month
+	 * @param  bool $selectCurrentMonth if true, ads a select attribute to the current month
+	 * @param  array $options associative array, each index in the array becomes an attribute for the select box         
+	 *                        with the value of the index being the value of the attribute
+	 * 
+	 * @return string
+	 */
+	public function dropdownMonthSelect($monthAs=0,$selectCurrentMonth=TRUE,$options=array()) {
+
+		$currentMonth = $this->getCurrentMonth();
+
+		$output = sprintf('<select %s>',$this->buildAttributes($options));
+		for($I=1;$I<=12;$I++) {
+			$output .= sprintf('<option value="%s" %s>%s</option>',
+				($I < 10)?"0".$I:$I,
+				($I == $currentMonth)?"selected":"",
+				$this->months[$monthAs][$I]);
+		}
+		$output .= "</select>";
+
+		return $output;
 
 	}
 
