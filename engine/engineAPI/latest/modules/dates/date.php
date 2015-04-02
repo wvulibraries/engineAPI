@@ -41,6 +41,12 @@ class date {
 		return(date($attPairs['format']));
 	}
 
+	public function getCurrentMonth() {
+
+		$localtime = localtime(time(), true);
+		return $localtime['tm_mon'] + 1;
+
+	}
 	/**
 	 * Generate an HTML date dropdown menu
 	 *
