@@ -21,6 +21,8 @@ class validate {
 		"ipAddrRange"          => "ipAddrRange",
 		"optionalURL"          => "URL (Optional)",
 		"url"                  => "URL",
+		"urlPath"              => "URL Path",
+		"urlFlexible"          => "URL Flexible",
 		"emailAddr"            => "Email",
 		"internalEmailAddr"    => "Email (Internal)",
 		"integer"              => "Integer",
@@ -93,7 +95,9 @@ class validate {
 
 		switch(trim(strtolower($method))) {
 			case 'url':
+			case 'urlpath':
 			case 'optionalurl':
+			case 'urlFlexible':
 				return $return . ': URL';
 			case 'email':
 			case 'internalemail':
@@ -229,6 +233,22 @@ class validate {
 	}
 
 	/**
+	 * Flexible URL validation
+	 *  
+	 * Performs a lgoci OR between url(), urlPath(), and (optionally) optionalURL()
+	 *  
+	 * @param string $url
+	 * @param bool $optional Pass true to also allow optionalURL()
+	 * @return bool|null
+	 * @see self::optionalURL()
+	 * @see self::url()
+	 * @see self::urlPath()
+	 */
+	public function urlFlexible($url, $optional=FALSE){
+		return $this->url($url) || $this->urlPath($url) || ($optional && $this->optionalURL($url));
+	}
+
+	/**
 	 * Validate as a potential URL
 	 * Allow just about anything, but if it appears to be a URL it must be a valid URL
 	 *
@@ -259,6 +279,20 @@ class validate {
 		$urlregex = "/^(https?|ftp|ssh|telnet)\:\/\/([a-zA-Z0-9+!*(),;?&=\$_.-]+(\:[a-zA-Z0-9+!*(),;?&=\$_.-]+)?@)?[a-zA-Z0-9+\$_-]+(\.[a-zA-Z0-9+\$_-]+)*(\:[0-9]{2,5})?(\/([a-zA-Z0-9+\$_-]\.?)+)*\/?(\?[a-zA-Z+&\*\$_.-][a-zA-Z0-9;:@\/&%=+\*\$_.-]*)?(#[a-zA-Z_.-][a-zA-Z0-9+\*\$_.-]*)?\$/";
 
 		return($this->regexp($urlregex,$url));
+	}
+
+	/**
+	 * Validate as a URL path
+	 *
+	 * @todo Allow relative paths
+	 * @param $path
+	 * @return bool|null
+	 */
+	public function urlPath($path){
+		$urlregex = "/^(?:\.\.|\.|\w+)?(\/([a-zA-Z0-9+\$_-]\.?)+)*\/?(\?[a-zA-Z+&\*\$_.-][a-zA-Z0-9;:@\/&%=+\*\$_.-]*)?(#[a-zA-Z_.-][a-zA-Z0-9+\*\$_.-]*)?\$/";
+
+		return($this->regexp($urlregex,$path));
+
 	}
 
 	/**

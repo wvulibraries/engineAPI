@@ -17,7 +17,7 @@ class queryString {
 	 * @return string
 	 */
 	public static function templateMatches($matches) {
-		
+
 		$attPairs      = attPairs($matches[1]);
 
 		if (isset($_GET['HTML'][$attPairs['var']]) && !is_empty($_GET['HTML'][$attPairs['var']])) {
@@ -28,7 +28,7 @@ class queryString {
 		}
 
 		return("");
-		
+
 	}
 
 	/**
@@ -61,7 +61,7 @@ class queryString {
 		parse_str($qs, $output);
 		if (array_key_exists($var, $output)) unset($output[$var]);
 
-		return (($qmTest)?"?":"").http_build_query($output).(($ampTest)?"&":"");
+		return urldecode((($qmTest)?"?":"").http_build_query($output).(($ampTest)?"&":""));
 
 	}
 

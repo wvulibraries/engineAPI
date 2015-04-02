@@ -13,7 +13,8 @@ class authGroup extends authEntity{
 	private function init($autoExpandTree){
 		// Get the group's key
 		$groupKey = preg_match(auth::REGEX_ENTITY_GROUP, $this->groupKey, $m) ? $m[1] : $this->groupKey;
-		$dbGroup = $this->db->query(sprintf("SELECT * FROM `%s` WHERE `ID`='%s' OR `ldapDN`='%s' LIMIT 1",
+		$dbGroup = $this->db->query(sprintf("SELECT * FROM `%s`.`%s` WHERE `ID`='%s' OR `ldapDN`='%s' LIMIT 1",
+			$this->db->escape($this->dbName),
 			$this->db->escape($this->tblGroups),
 			$this->db->escape($groupKey),
 			$this->db->escape($groupKey)));
@@ -61,7 +62,8 @@ class authGroup extends authEntity{
 			}
 		}
 		if(sizeof($changedFields)){
-			$sql = sprintf("UPDATE `%s` SET %s WHERE `ID`='%s' LIMIT 1",
+			$sql = sprintf("UPDATE `%s`.`%s` SET %s WHERE `ID`='%s' LIMIT 1",
+				$this->db->escape($this->dbName),
 				$this->db->escape($this->tblGroups),
 				implode(',', $changedFields),
 				$this->db->escape($this->getMetaData('ID')));
@@ -87,9 +89,11 @@ class authGroup extends authEntity{
 			$this->expanded = TRUE;
 
 			// Get the member entities
-			$dbMembers = $this->db->query(sprintf("(SELECT 'group' AS `entityType`,`childGroup` AS `ID` FROM `%s` WHERE `parentGroup`='%s') UNION (SELECT 'user' AS `entityType`,`user` AS `ID` FROM `%s` WHERE `group`='%s')",
+			$dbMembers = $this->db->query(sprintf("(SELECT 'group' AS `entityType`,`childGroup` AS `ID` FROM `%s`.`%s` WHERE `parentGroup`='%s') UNION (SELECT 'user' AS `entityType`,`user` AS `ID` FROM `%s`.`%s` WHERE `group`='%s')",
+				$this->db->escape($this->dbName),
 				$this->db->escape($this->tblGroups2Groups),
 				$this->db->escape($this->getMetaData('ID')),
+				$this->db->escape($this->dbName),
 				$this->db->escape($this->tblUsers2Groups),
 				$this->db->escape($this->getMetaData('ID'))));
 			if($dbMembers->rowCount()){
@@ -99,7 +103,8 @@ class authGroup extends authEntity{
 				}
 			}
 			// Get the memberOf entities
-			$dbMemberOf = $this->db->query(sprintf("SELECT `parentGroup` FROM `%s` WHERE `childGroup`='%s'",
+			$dbMemberOf = $this->db->query(sprintf("SELECT `parentGroup` FROM `%s`.`%s` WHERE `childGroup`='%s'",
+				$this->db->escape($this->dbName),
 				$this->db->escape($this->tblGroups2Groups),
 				$this->db->escape($this->getMetaData('ID'))));
 			if($dbMemberOf->rowCount()){

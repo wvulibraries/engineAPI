@@ -8,6 +8,12 @@ class date {
 	public $pattern  = "/\{date\s+(.+?)\}/";
 	public $function = "date::templateMatches";
 
+	private $months = array(
+				array(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12),
+				array("", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"),
+				array("", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
+			);
+
 	function __construct() {
 		templates::defTempPatterns($this->pattern,$this->function,$this);
 	}
@@ -33,6 +39,115 @@ class date {
 		}
 
 		return(date($attPairs['format']));
+	}
+
+	/** 
+	 * $options is not html_sanitized. Assumed to be safe.
+	 */
+	private function buildAttributes($options) {
+
+		$output = "";
+
+		foreach ($options as $attr=>$value) {
+			$output .= sprintf(' %s="%s" ',$attr,$value);
+		}
+
+		return $output;
+
+	}
+
+	public function getCurrentMonth() {
+
+		$localtime = localtime(time(), true);
+		return $localtime['tm_mon'] + 1;
+
+	}
+
+	public function getCurrentYear() {
+
+		$localtime = localtime(time(), true);
+		return $localtime['tm_year'] + 1900;
+
+	}
+
+	public function getCurrentDay() {
+		
+		$localtime = localtime(time(), true);
+		return $localtime['tm_mday'];
+
+	}
+
+	/**
+	 * Provides a select dropdown suitable for framing
+	 * @param  int $monthAs 0 = render month as number, 1 = Month Spelled out, 2 short month
+	 * @param  bool $selectCurrentMonth if true, ads a select attribute to the current month
+	 * @param  array $options associative array, each index in the array becomes an attribute for the select box         
+	 *                        with the value of the index being the value of the attribute
+	 * 
+	 * @return string
+	 */
+	public function dropdownMonthSelect($monthAs=0,$selectCurrentMonth=TRUE,$options=array()) {
+
+		$currentMonth = $this->getCurrentMonth();
+
+		$output = sprintf('<select %s>',$this->buildAttributes($options));
+		for($I=1;$I<=12;$I++) {
+			$output .= sprintf('<option value="%s" %s>%s</option>',
+				($I < 10)?"0".$I:$I,
+				($I == $currentMonth)?"selected":"",
+				$this->months[$monthAs][$I]);
+		}
+		$output .= "</select>";
+
+		return $output;
+
+	}
+
+	public function dropdownDaySelect($selectCurrentDay=TRUE,$options=array()) {
+
+		$currentDay = $this->getCurrentDay();
+
+		$output = sprintf('<select %s>',$this->buildAttributes($options));
+		for ($I=1;$I<=31;$I++) {
+			$output .= sprintf('<option value="%s" %s>%s</option>',
+				($I < 10)?"0".$I:$I,
+				($I == $currentDay)?"selected":"",
+				$I
+				);
+		}
+		$output .= "</select>";
+
+		return $output;
+
+	}
+
+	/**
+	 * returns a select dropdown of years, suitable for printing
+	 * @param  integer $start             years from current to start the list at (can be negative)
+	 * @param  integer $end               Years from current to end the list at (can be negative), must be greater than $start
+	 * @param  boolean $selectCurrentYear Select the current year, if it is in the list
+	 * @param  array   $options           associative array, each index in the array becomes an attribute for the select box         
+	 *                                    with the value of the index being the value of the attribute
+	 * @return string                     
+	 */
+	public function dropdownYearSelect($start=0,$end=1,$selectCurrentYear=TRUE,$options=array()) {
+
+		$currentYear = $this->getCurrentYear();
+		$start = $currentYear + $start;
+		$end   = $currentYear + $end;
+
+		$output = sprintf('<select %s>',$this->buildAttributes($options));
+		for ($I=$start;$I<=$end;$I++) {
+			$output .= sprintf('<option value="%s" %s>%s</option>',
+				$I,
+				($I == $currentYear)?"selected":"",
+				$I
+				);
+		}
+		$output .= "</select>";
+
+		return $output;
+
 	}
 
 	/**

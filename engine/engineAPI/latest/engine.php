@@ -165,8 +165,12 @@ class EngineAPI{
 	 * @param string $site Name of the site config to use
 	 */
 	private function __construct($site="default") {
-		// Set UTC as our system timezone. (This can be changed latter if needed)
-		date_default_timezone_set('UTC');
+		/**
+		 * If there's no timezone set in the INI file we need to set it to something
+		 * We do this by letting PHP do its best by calling date_default_timezone_get()
+		 * which looks through a few places to try and determine the server's timezone.
+		 */
+		if(!ini_get('date.timezone')) date_default_timezone_set(date_default_timezone_get());
 
 		self::$engineDir = dirname(__FILE__);
 

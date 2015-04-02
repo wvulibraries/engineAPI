@@ -238,4 +238,13 @@ abstract class dbDriver {
      * @return bool
      */
     public abstract function destroy();
+
+	// -------------------------------
+
+	/**
+	 * Return array of fields/columns for a given table
+	 * @param string $table
+	 * @return array
+	 */
+	public abstract function listFields($table);
 }

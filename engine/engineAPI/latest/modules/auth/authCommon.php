@@ -58,7 +58,8 @@ class authCommon{
 	 */
 	protected function getChildren($id, $returnObject=TRUE) {
 		$result = array();
-		$dbChildren = $this->db->query(sprintf("SELECT * FROM `%s` WHERE `parent`='%s'",
+		$dbChildren = $this->db->query(sprintf("SELECT * FROM `%s`.`%s` WHERE `parent`='%s'",
+			$this->db->escape($this->dbName),
 			$this->db->escape($this->tblObjects),
 			$this->db->escape($id)));
 		while ($row = $dbChildren->fetch()) {
@@ -74,8 +75,10 @@ class authCommon{
 	 * @return authObject
 	 */
 	protected function getParent($id, $returnObject=TRUE) {
-		$dbParent = $this->db->query(sprintf("SELECT `A`.* FROM `%s` AS `A` LEFT JOIN `%s` AS `B` ON `B`.`parent`=`A`.`ID` WHERE `B`.`ID`='%s'",
+		$dbParent = $this->db->query(sprintf("SELECT `A`.* FROM `%s`.`%s` AS `A` LEFT JOIN `%s`.`%s` AS `B` ON `B`.`parent`=`A`.`ID` WHERE `B`.`ID`='%s'",
+			$this->db->escape($this->dbName),
 			$this->db->escape($this->tblObjects),
+			$this->db->escape($this->dbName),
 			$this->db->escape($this->tblObjects),
 			$this->db->escape($id)));
 		if($dbParent->rowCount()){

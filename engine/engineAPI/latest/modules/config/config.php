@@ -12,22 +12,81 @@ class config {
 	 */
 	protected $variables = array();
 
+	public function __construct($filename=NULL){
+		if($filename) self::loadConfig($filename);
+	}
+
 	/**
 	 * Load a config file and return the variables
+	 * @param string $file
 	 * @return array
 	 */
-	public function loadConfig($file) {
-		// Store variables before including $file
-		$varsBefore = array_keys(get_defined_vars());
+	public static function loadFile($file) {
+		switch(pathinfo($file, PATHINFO_EXTENSION)){
+			case 'php':
+				// Store variables before including $file
+				$varsBefore = array_keys(get_defined_vars());
 
-		// Bring in the file
-		require $file;
+				// Bring in the file
+				require $file;
 
-		// Store variables after including $file
-		$varsAfter  = array_keys(get_defined_vars());
+				// Store variables after including $file
+				$varsAfter  = array_keys(get_defined_vars());
 
-		// Return the differences
-		return compact(array_diff($varsAfter, $varsBefore));
+				// Remove 'varsBefore' from the list since we're only using it as a helper
+				unset($varsAfter[ array_search('varsBefore', $varsAfter) ]);
+
+				// Return the differences
+				return compact(array_diff($varsAfter, $varsBefore));
+				break;
+
+			case 'yaml':
+				// TODO
+				return array();
+				break;
+
+			case 'xml':
+				// TODO
+				return array();
+				break;
+		}
+		return NULL;
+	}
+
+	/**
+	 * Load config from file or array
+	 *
+	 * This will recursivly merge with the current config allowing config items to be overwritten
+	 * Can be given filepath or a raw array
+	 *
+	 * @param string|array $config
+	 * @return bool
+	 */
+	public function loadConfig($config){
+		try{
+			// If we're given a filename, load it
+			if (is_string($config)) {
+				$filename = $config;
+
+				// Make sure $filename is an actual file
+				if (!is_readable($filename)) throw new Exception("Given string '$config' is not a valid file path!");
+
+				// Load the file
+				$config = self::loadFile($filename);
+				if (isnull($config)) throw new Exception("Failed to load config from '$filename'!");
+			}
+
+			// If we don't have an array, abort!
+			if (!is_array($config)) throw new Exception("Unsupported input! (must be filepath or array)");
+
+			// Merge the given config with the current config
+			$this->variables = array_merge_recursive_overwrite($this->variables, $config);
+			return TRUE;
+
+		}catch(Exception $e){
+			errorHandle::newError(__METHOD__."() ".$e->getMessage(), errorHandle::DEBUG);
+			return FALSE;
+		}
 	}
 
 	/**

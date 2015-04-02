@@ -18,12 +18,12 @@ class enginevars extends config {
 	 */
 	public function __construct($engineDir, $site) {
 		// Load default variables
-		$defaults = self::loadconfig($engineDir."/config/default.php");
+		$defaults = self::loadFile($engineDir."/config/default.php");
 
 		// Load site specific variables
 		$sitePath = $engineDir."/config/".$site.".php";
 		$siteVars = ($site != "default" && is_readable($sitePath))
-			? self::loadconfig($sitePath)
+			? self::loadFile($sitePath)
 			: array('engineVars' => array());
 
 		// Override defaults with site variables and save as instance variables

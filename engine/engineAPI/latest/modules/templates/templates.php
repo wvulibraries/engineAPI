@@ -127,7 +127,7 @@ class templates {
 				}
 			}
 		}
-		$this->defTempPattern($newPattern,$function,$object);
+		self::defTempPatterns($newPattern,$function,$object);
 		return TRUE;
 	}
 
