@@ -54,6 +54,14 @@ class date {
 		return $localtime['tm_year'] + 1900;
 
 	}
+
+	public function getCurrentDay() {
+		
+		$localtime = localtime(time(), true);
+		return $localtime['tm_mday'];
+
+	}
+
 	/**
 	 * Generate an HTML date dropdown menu
 	 *
