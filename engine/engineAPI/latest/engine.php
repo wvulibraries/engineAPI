@@ -208,7 +208,7 @@ class EngineAPI{
 		$this->cwd = getcwd();
 
 		// Setup engine database connections
-		if(!db::create($this->privatevars->get(array('engineDB','driver')), $this->privatevars->get(array('engineDB','driverOptions')), self::DB_CONNECTION)){
+		if(!db::create($this->privatevars->get(array('engineVarsPrivate','engineDB','driver')), $this->privatevars->get(array('engineVarsPrivate','engineDB','driverOptions')), self::DB_CONNECTION)){
 			trigger_error("Failed to setup database connection!", E_USER_ERROR);
 			die('Failed to setup database connection!');
 		}
