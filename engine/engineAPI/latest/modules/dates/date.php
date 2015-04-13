@@ -77,6 +77,16 @@ class date {
 
 	}
 
+	public function getCurrentHour() {
+		$localtime = localtime(time(), true);
+		return $localtime['tm_hour'];
+	}
+
+	public function getCurrentMinute() {
+		$localtime = localtime(time(), true);
+		return $localtime['tm_min'] + 1;
+	}
+
 	/**
 	 * Provides a select dropdown suitable for framing
 	 * @param  int $monthAs 0 = render month as number, 1 = Month Spelled out, 2 short month
@@ -105,7 +115,7 @@ class date {
 
 	public function dropdownDaySelect($selectCurrentDay=TRUE,$options=array()) {
 
-		$currentDay = $this->getCurrentDay();
+		$currentDay = ($selectCurrentDay === TRUE)?$this->getCurrentDay():$selectCurrentDay;
 
 		$output = sprintf('<select %s>',$this->buildAttributes($options));
 		for ($I=1;$I<=31;$I++) {
@@ -132,7 +142,7 @@ class date {
 	 */
 	public function dropdownYearSelect($start=0,$end=1,$selectCurrentYear=TRUE,$options=array()) {
 
-		$currentYear = $this->getCurrentYear();
+		$currentYear = ($selectCurrentYear === TRUE)?$this->getCurrentYear():$selectCurrentYear;
 		$start = $currentYear + $start;
 		$end   = $currentYear + $end;
 
@@ -143,6 +153,41 @@ class date {
 				($I == $currentYear)?"selected":"",
 				$I
 				);
+		}
+		$output .= "</select>";
+
+		return $output;
+
+	}
+
+	// $hour12 select 12 vs 24 hour time
+	public function dropdownHourSelect($hour12=TRUE,$selectCurrentHour=TRUE,$options=array()) {
+
+		$currentHour = ($selectCurrentHour === TRUE)?$this->getCurrentHour():$selectCurrentHour;
+
+		$output = sprintf('<select %s>',$this->buildAttributes($options));
+		for($I=0;$I<=23;$I++) {
+			$output .= sprintf('<option value="%s" %s>%s</option>',
+				($I < 10)?"0".$I:$I,
+				($I == $currentHour)?"selected":"",
+				($hour12 === FALSE)?$I:(($I==12)?"12pm":(($I>=13)?($I-12)."pm":(($I == 0)?"12am":$I."am"))));
+		}
+		$output .= "</select>";
+
+		return $output;
+
+	}
+
+	public function dropdownMinuteSelect($increment=1,$selectCurrentMinute=TRUE,$options=array()) {
+
+		$currentMinute = ($selectCurrentMinute === TRUE)?$this->getCurrentMinute():$selectCurrentMinute;
+
+		$output = sprintf('<select %s>',$this->buildAttributes($options));
+		for($I=0;$I<60;$I += $increment) {
+			$output .= sprintf('<option value="%s" %s>%s</option>',
+				($I < 10)?"0".$I:$I,
+				($I == $currentMinute)?"selected":"",
+				$I);
 		}
 		$output .= "</select>";
 
