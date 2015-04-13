@@ -80,7 +80,7 @@ class date {
 	/**
 	 * Provides a select dropdown suitable for framing
 	 * @param  int $monthAs 0 = render month as number, 1 = Month Spelled out, 2 short month
-	 * @param  bool $selectCurrentMonth if true, ads a select attribute to the current month
+	 * @param  bool|int $selectCurrentMonth if true, ads a select attribute to the current month, If integer, selects that integer. 
 	 * @param  array $options associative array, each index in the array becomes an attribute for the select box         
 	 *                        with the value of the index being the value of the attribute
 	 * 
@@ -88,7 +88,7 @@ class date {
 	 */
 	public function dropdownMonthSelect($monthAs=0,$selectCurrentMonth=TRUE,$options=array()) {
 
-		$currentMonth = $this->getCurrentMonth();
+		$currentMonth = ($selectCurrentMonth === TRUE)?$this->getCurrentMonth():$selectCurrentMonth;
 
 		$output = sprintf('<select %s>',$this->buildAttributes($options));
 		for($I=1;$I<=12;$I++) {
