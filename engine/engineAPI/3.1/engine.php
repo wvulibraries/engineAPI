@@ -1065,7 +1065,6 @@ class EngineAPI{
 	 * @return null
 	 */
 	private function getHTTP_REFERERServer($referer) {
-		deprecated();
 
 		$server = NULL;
 
