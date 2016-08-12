@@ -176,7 +176,9 @@ function recurseInsert($file,$type="php",$regex=NULL,$condition="REQUEST_URI",$c
 		$file = $temp;
 	}
 
-	$cwd = getcwd();
+        //$cwd = getcwd();                                                                        
+        $cwd = dirname($_SERVER['SCRIPT_FILENAME']);
+
 	if ($cwd == "/") {
 		if (!isnull($engine)) {
 			$cwd = $engine->cwd;
