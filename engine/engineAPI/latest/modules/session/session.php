@@ -272,6 +272,7 @@ class session{
 		$csrf    = self::csrfTokenRequest();
 		$output  = sprintf('<input type="hidden" name="__csrfID" id="__csrfID" value="%s">', $csrf[0]);
 		$output .= sprintf('<input type="hidden" name="__csrfToken" id="__csrfToken" value="%s">', $csrf[1]);
+		$output .= sprintf('<input type="hidden" name="engineCSRFCheck" id="engineCSRFCheck" value="%s">', $csrf[1]);
 		return $output;
 	}
 
@@ -485,6 +486,7 @@ class session{
 			'timeout' => self::$options['csrfTimeout']
 		);
 
+		self::set("CSRF",$csrfToken);
 		self::set($csrfID, $csrfToken, $options);
 		self::sync();
 		return array($csrfID,$csrfToken);

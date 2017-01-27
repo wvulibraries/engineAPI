@@ -452,34 +452,20 @@ class validate {
 	}
 
 	/**
-	 * Validates as a valid date format, YYYY-[MM-[DD]]
+	 * Validates as a valid date format, YYYY[-MM-DD]
 	 *
 	 * @param string $test
 	 * @return bool
 	 */
-	public function date($test) {
+	// @TODO this is broken, but fixes some issues. day is not optional right now, unless month is also omitted 
+	function date($test) {
 
 		// match 4 digit year
 		if (preg_match("/^\d{4}$/", $test)) return TRUE;
 
-		// YYYY-MM-DD
-		// YYYY-MM
-		// YYYY
-		if (preg_match("/^\d{4}(-[01][1-9](-([0-2][0-9]|[3][01]))?)?$/",$test)) {
-
-			$parseDate = date_parse($test);
-			if ((is_empty($parseDate['errors']) // No errors
-				&& $parseDate['month']          // has a month
-				// && $parseDate['day']            // has a day
-				&& $parseDate['year']           // has a year
-				&& checkdate($parseDate['month'],$parseDate['day'],$parseDate['year']))
-				||
-				preg_match("/^\d{4}$/", $test)
-				) {
-
-					return TRUE;
-			}
-
+		$parseDate = date_parse($test);
+		if (is_empty($parseDate['errors']) && checkdate($parseDate['month'],$parseDate['day'],$parseDate['year'])) {
+			return TRUE;
 		}
 
 		return FALSE;
