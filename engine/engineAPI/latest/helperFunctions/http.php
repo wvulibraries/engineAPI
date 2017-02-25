@@ -203,5 +203,9 @@ class http
     public static function decompressData($string) {
         return unserialize(gzuncompress(stripslashes(base64_decode(strtr($string, '-_,', '+/=')))));
     }
+
+    public static function setContentType($contentType) {
+        header(sprintf("Content-Type: %s",$contentType));
+    }
 }
 ?>
