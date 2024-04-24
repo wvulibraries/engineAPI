@@ -8,42 +8,37 @@
  * @param null $param2
  * @return bool
  */
-function functionExists($param1,$param2=null) {
+function functionExists($param1, $param2 = null) {
+	if (!isString($param1)) {
+		return false;
+	}
+
+	if (!isNull($param2)) {
+		return classMethodExists($param1, $param2);
+	}
+
+	if (isLanguageConstruct($param1)) {
+		return true;
+	}
+
+	return functionExistsByName($param1);
+}
+
+function isString($value) {
+	return is_string($value);
+}
+
+function classMethodExists($class, $method) {
+	return method_exists($class, $method);
+}
+
+function isLanguageConstruct($value) {
 	$langConstructs = array("die", "echo", "empty", "exit", "eval", "include", "include_once", "isset", "list", "print", "require", "require_once", "unset");
+	return in_array($value, $langConstructs);
+}
 
-	// 2 params provided, assume class
-	if (!isnull($param2)) {
-		return(method_exists($param1,$param2));
-	}
-
-	// Ignore everything that isn't a string, from this point on
-	if (!is_string($param1)) {
-		return(FALSE);
-	}
-
-	// check if function exists
-	if (function_exists($param1) === TRUE) {
-		return(TRUE);
-	}
-
-	// Check to see if it is an object being passed as a string.
-	// if so, assume object
-	$items = explode("::",$param1);
-	if (count($items) == 2) {
-		return(method_exists($items[0],$items[1]));
-	}
-
-	$items = explode("->",$param1);
-	if (count($items) == 2) {
-		return(method_exists($items[0],$items[1]));
-	}
-
-	// check to see if it is a language construct
-	if (in_array($param1,$langConstructs)) {
-		return(TRUE);
-	}
-
-	return(FALSE);
+function functionExistsByName($functionName) {
+	return function_exists($functionName);
 }
 
 /**
@@ -364,29 +359,25 @@ function castAs($input,$cast){
 	}
 }
 
-function deprecated($msg=''){
-	// Backtrace logic
-	$backtrace    = debug_backtrace();
-	$deprecated   = $backtrace[1];
-	$calledFrom   = $backtrace[2];
-	$deprecatedFn = isset($deprecated['class'])
-		? $deprecated['class'].$deprecated['type'].$deprecated['function']
-		: $deprecated['function'];
-
-	// Create error message
-	if(!isempty($msg)) $msg = " (msg: $msg)";
-	$errorMsg = sprintf('[Deprecated] %s() called from %s:%s%s',
-		$deprecatedFn,
-		$calledFrom['file'],
-		$calledFrom['line'],
-		$msg);
-
-	// How do we record this?
-	if(class_exists('errorHandle', FALSE)){
-		errorHandle::newError($errorMsg, errorHandle::DEBUG);
-	}else{
-		error_log($errorMsg);
-	}
-}
+ // copilot refactor 2024-04-24
+ function deprecated($msg = '') {
+    $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
+    $deprecated = $backtrace[1];
+    $calledFrom = $backtrace[0];
+    $deprecatedFn = isset($deprecated['class'])
+        ? $deprecated['class'] . $deprecated['type'] . $deprecated['function']
+        : $deprecated['function'];
+    $errorMsg = sprintf('[Deprecated] %s() called from %s:%s%s',
+        $deprecatedFn,
+        $calledFrom['file'],
+        $calledFrom['line'],
+        !empty($msg) ? " (msg: $msg)" : ''
+    );
+    if (class_exists('errorHandle', false)) {
+        errorHandle::newError($errorMsg, errorHandle::DEBUG);
+    } else {
+        error_log($errorMsg);
+    }
+  }
 
 ?>
