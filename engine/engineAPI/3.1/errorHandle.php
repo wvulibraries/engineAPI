@@ -1065,7 +1065,7 @@ class errorHandle
 		$output .= '</ul>';
 		return($output);
 	}
-    private function errorStack($type,$message)
+    private static function errorStack($type,$message)
     {
         if(!class_exists('EngineAPI', FALSE)){
             // There's no EngineAPI to push this error onto, so there's no point trying
