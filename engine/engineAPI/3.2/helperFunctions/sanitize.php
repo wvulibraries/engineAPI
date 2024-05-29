@@ -2,27 +2,23 @@
 
 
 /**
- * Alias for mysql_real_escape_string()
+ * Alias for mysqli_real_escape_string()
  * Makes typing a touch easier, plus if we ever plus if we ever want to use something other than mysql_real_escape_string, its easy to switch.
  *
  * @author Michael Bond
- * @see mysql_real_escape_string()
+ * @modified_by Tracy A. McCormick
+ * @see mysql_real_escape_string(), mysqli_real_escape_string()
  * @param string $var
+ * @param object $conn 
  * @return string
  */
 
-function mres($var, $conn){
-	// if no connection is provided, use the old mysql_real_escape_string
-	// needs refactored to open a connection to the database
-	// refactore so we have a default global connection
-	if ($conn == null) {
-		// use old mysql_real_escape_string
-		return mysql_real_escape_string($var);
-
-		// temporary fix if old way doesn't work
-		// 	return addslashes($var);
+function mres($var, $conn = NULL){
+	if ($conn == NULL) {
+		return addslashes($var);
 	}
-    return mysqli_real_escape_string($conn, $var);
+
+	return mysqli_real_escape_string($conn, $var);
 }
 
 /**
