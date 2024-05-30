@@ -152,7 +152,7 @@ function webHelper_listMultiEditList($attPairs,$engine=null) {
 	$output .= "<tr>";
 	$output .= "<td colspan=\"".((int)$cols+1)."\" style=\"background-color: #000000;\"></td>";
 	$output .= "</tr>";
-	while ($row = mysqli_fetch_array($sqlResult['result'],  MYSQL_BOTH)) {
+	while ($row = mysqli_fetch_array($sqlResult['result'],  MYSQLI_BOTH)) {
 		$output .= "<tr>";
 		
 		for($I=1;$I<=(int)$cols;$I++) {
@@ -211,7 +211,7 @@ function webHelper_listMultiUpdate($table,$cols,$engine=null) {
 		$output .= webHelper_errorMsg("SQL Error".$sqlResult['error']);
 	}
 	
-	while ($row = mysqli_fetch_array($sqlResult['result'], MYSQL_BOTH)) {
+	while ($row = mysqli_fetch_array($sqlResult['result'], MYSQLI_BOTH)) {
 		
 		if (isset($engine->cleanPost['MYSQL'][$cols[1]["table"].'_'.$row[0]])) {
 			$temp = $engine->cleanPost['MYSQL'][$cols[1]["table"].'_'.$row[0]];

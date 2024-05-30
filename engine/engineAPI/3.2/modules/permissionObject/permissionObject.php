@@ -118,7 +118,7 @@ class permissionObject {
 
 		// This should be in a template instead of hard-coded HTML
 		$output = '<ul class="perissionsCheckBoxList">';
-		while ($row = mysqli_fetch_array($sqlResult['result'],  MYSQL_BOTH)) {
+		while ($row = mysqli_fetch_array($sqlResult['result'],  MYSQLI_BOTH)) {
 			$row['name']  = htmlSanitize($row['name']);
 			$row['value'] = htmlSanitize($row['value']);
 

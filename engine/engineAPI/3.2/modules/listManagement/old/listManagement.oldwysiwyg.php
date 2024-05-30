@@ -885,7 +885,7 @@ class listManagement {
 		$output .= "<tbody>".$this->eolChar;
 
 		$numberRowsCount = 1;
-		while ($row = mysqli_fetch_array($sqlResult['result'],  MYSQL_BOTH)) {
+		while ($row = mysqli_fetch_array($sqlResult['result'],  MYSQLI_BOTH)) {
 			$output .= "<tr";
 			if ($this->rowStriping === TRUE) {
 				$output .= (is_odd($numberRowsCount))?" class=\"oddrow\"":" class=\"evenrow\"";
@@ -945,7 +945,7 @@ class listManagement {
 
 						$this->database->sanitize = FALSE;
 						$matchOnSqlResult               = $this->database->query($sql);
-						$matchOnValueResult             = mysqli_fetch_array($matchOnSqlResult['result'], MYSQL_BOTH);
+						$matchOnValueResult             = mysqli_fetch_array($matchOnSqlResult['result'], MYSQLI_BOTH);
 
 						if (isset($this->fields[$I]['matchOn']['field'])) {
 							$value = $matchOnValueResult[$this->fields[$I]['matchOn']['field']];
@@ -1105,7 +1105,7 @@ class listManagement {
 
 						$this->database->sanitize = FALSE;
 						$matchOnSqlResult               = $this->database->query($sql);
-						$matchOnValueResult             = mysqli_fetch_array($matchOnSqlResult['result'], MYSQL_BOTH);
+						$matchOnValueResult             = mysqli_fetch_array($matchOnSqlResult['result'], MYSQLI_BOTH);
 
 						if (isset($this->fields[$I]['matchOn']['field'])) {
 							$value = $matchOnValueResult[$this->fields[$I]['matchOn']['field']];
@@ -1791,7 +1791,7 @@ class listManagement {
 			$error["error"]   = TRUE;
 		}
 
-		while ($row = mysqli_fetch_array($sqlResult['result'], MYSQL_BOTH)) {
+		while ($row = mysqli_fetch_array($sqlResult['result'], MYSQLI_BOTH)) {
 
 			//grab the first column in the current row, if it is set, throw it in $temp
 			if (!isset($engine->cleanPost['MYSQL']["check_".$row[0]])) {
@@ -2039,7 +2039,7 @@ class listManagement {
 			return(FALSE);
 		}
 
-		while ($row = mysqli_fetch_array($sqlResult['result'], MYSQL_BOTH)) {
+		while ($row = mysqli_fetch_array($sqlResult['result'], MYSQLI_BOTH)) {
 
 			foreach ($this->fields as $I) {
 				// Check boxes don't return if they aren't checked. Deal with that

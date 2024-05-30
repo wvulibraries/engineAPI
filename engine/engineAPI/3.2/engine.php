@@ -984,7 +984,7 @@ class EngineAPI{
 	 * @return bool
 	 */
 	public function login($loginType, $loginFunctions) {
-		// deprecated();
+		deprecated();
 
 		if (isset($loginFunctions[$loginType])) {
 			$function = $loginFunctions[$loginType];
