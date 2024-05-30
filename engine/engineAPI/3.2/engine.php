@@ -159,13 +159,13 @@ class EngineAPI{
 	private function __construct($site="default") {
 		self::$engineDir = dirname(__FILE__);
 
+		// make sure the session cookie is only accessible via HTTP
+		ini_set("session.cookie_httponly", 1);
+
 		require_once(self::$engineDir."/sessionManagement.php");
 
 		// Start the session
 		sessionStart();
-
-		// make sure the session cookie is only accessible via HTTP
-		ini_set("session.cookie_httponly", 1);
 
 		// ob_start('EngineAPI::displayTemplate');
 
