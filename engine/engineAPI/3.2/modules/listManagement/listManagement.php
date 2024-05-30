@@ -853,10 +853,7 @@ class listManagement {
 	}
 
 	public function displayEditTable($addGet=TRUE,$debug=FALSE) {
-		$queryString = "";
-		if ($addGet === TRUE && isset($_SERVER['QUERY_STRING']) && !is_empty($_SERVER['QUERY_STRING'])) {
-			$queryString = "?".$_SERVER['QUERY_STRING'];
-		}
+		$queryString = $this->buildQueryString($addGet);
 
 		//Build "ORDER BY"
 		if (isnull($this->orderBy) && isset($this->fields[0]['type']) && $this->fields[0]['type'] != "plainText" ) {
@@ -1268,6 +1265,14 @@ class listManagement {
 
 		return($output);
 	}
+
+	private function buildQueryString($addGet) {
+		if ($addGet === TRUE && isset($_SERVER['QUERY_STRING']) && !empty($_SERVER['QUERY_STRING'])) {
+			return "?" . $_SERVER['QUERY_STRING'];
+		}
+		return "";
+	}
+
 
 	// returns TRUE if insert is completely successful
 	// otherwise FALSE
