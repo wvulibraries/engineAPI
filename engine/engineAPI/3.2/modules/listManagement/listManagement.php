@@ -94,7 +94,7 @@ class listManagement {
 
 	public $validateTypes   = array("alpha","alphaNoSpaces","alphaNumeric","alphaNumericNoSpaces","date","email","ipaddr","integer","integerSpaces","internalEmail","noSpaces","noSpecialChars","phone","url","optionalURL"); // A list of all the types that are in the validation function. Suitable for use in dropdown/etc ...
 
-	private $insertOnlyTypes = array("checkbox", "wysiwyg", "multiselect", "password"); // These are not displayed in the edit table
+	private $isInsertOnlyTypeTypes = array("checkbox", "wysiwyg", "multiselect", "password"); // These are not displayed in the edit table
 
 	// For template matching
 	public $pattern  = "/\{listObject\s+(.+?)\}/";
@@ -669,7 +669,7 @@ class listManagement {
 						$this->database->escape($I['options']['valueTable']));
 
 					$sqlResult = $this->database->query($sql);
-					while ($row = mysqli_fetch_array($sqlResult['result'], MYSQL_ASSOC)) {
+					while ($row = mysql_fetch_array($sqlResult['result'], MYSQL_ASSOC)) {
 
 						$checked = NULL;
 						if ($error === TRUE && isset($engine->cleanPost['HTML'][$I['field'].'_insert']) && in_array($row[$I['options']['valueDisplayID']],$engine->cleanPost['HTML'][$I['field'].'_insert'])) {
@@ -974,7 +974,7 @@ class listManagement {
 		}
 	
 		foreach ($this->fields as $field) {
-			if ($this->isInsertOnly($field['type'])) {
+			if ($this->isInsertOnlyType($field['type'])) {
 				continue;
 			}
 			$output .= "<th style=\"text-align: left;\">" . $field['label'] . "</th>" . $this->eolChar;
@@ -1007,7 +1007,7 @@ class listManagement {
 			}
 	
 			foreach ($this->fields as $field) {
-				if ($this->isInsertOnly($field['type'])) {
+				if ($this->isInsertOnlyType($field['type'])) {
 					continue;
 				}
 				$output .= "<td>" . $this->generateFieldInput($field, $row) . "</td>" . $this->eolChar;
@@ -1047,64 +1047,26 @@ class listManagement {
 	}
 	
 	private function generateDeleteCheckbox($row) {
-		return "<td class=\"alignCenter\">" . $this->eolChar . "<input type=\"checkbox\" name=\"delete[]\" class=\"delete\" value=\"" . $row[0] . "\" />" . $this->eolChar . "</td>" . $this->eolChar;
+		return "<td class=\"alignCenter\"><input type=\"checkbox\" name=\"delete[]\" value=\"" . $row[0] . "\" /></td>" . $this->eolChar;
 	}
 	
 	private function generateFieldInput($field, $row) {
-		$value = $row[$field['field']];
-	
-		if ($field['type'] == "text" || $field['type'] == "yesNoText" || $field['type'] == "email" || $field['type'] == "url" || $field['type'] == "plainText") {
-			return "<input type=\"text\" class=\"text\" name=\"" . $field['field'] . "[]\" value=\"" . $value . "\" />";
+		if (isset($field['input'])) {
+			return $field['input']($row);
 		}
-	
-		if ($field['type'] == "textarea") {
-			return "<textarea rows=\"2\" cols=\"50\" name=\"" . $field['field'] . "[]\">" . $value . "</textarea>";
-		}
-	
-		if ($field['type'] == "select") {
-			return $this->generateSelectInput($field, $value);
-		}
-	
-		if ($field['type'] == "yesNo") {
-			return "<input type=\"checkbox\" name=\"" . $field['field'] . "[]\" class=\"checkbox\" " . ((bool) $value === TRUE ? " checked=\"checked\"" : "") . " value=\"1\" />";
-		}
-	
-		if ($field['type'] == "date" || $field['type'] == "datetime") {
-			return "<input type=\"text\" class=\"text date\" name=\"" . $field['field'] . "[]\" value=\"" . $value . "\" />";
-		}
-	
-		return "<input type=\"hidden\" name=\"" . $field['field'] . "[]\" value=\"" . $value . "\" />" . $value;
-	}
-	
-	private function generateSelectInput($field, $value) {
-		$options = $field['optionValues'];
-		$selectInput = "<select name=\"" . $field['field'] . "[]\" class=\"select\">";
-		
-		foreach ($options as $key => $option) {
-			$selectInput .= "<option value=\"" . $key . "\"" . ($value == $key ? " selected=\"selected\"" : "") . ">" . $option . "</option>";
-		}
-		$selectInput .= "</select>";
-	
-		return $selectInput;
+		return htmlspecialchars($row[$field['field']]);
 	}
 	
 	private function generateSubmitButton() {
-		return '<input type="submit" class="button" value="Submit" />' . $this->eolChar;
+		return '<input type="submit" name="submit" value="Submit" />';
 	}
 	
 	private function initializeDateInputs() {
-		return "<script type=\"text/javascript\"> $(document).ready(function() { $('input.date').each(function(index) { $(this).dateinput({ format: 'yyyy-mm-dd' }); }); });</script>";
+		return '<script>/* Initialize date inputs */</script>';
 	}
 	
 	private function initializeDragOrdering() {
-		if ($this->dragOrdering === TRUE) {
-			return "<script type=\"text/javascript\"> $(document).ready(function() { $('#" . $this->database->escape($this->table) . "_table tbody').sortable({ update: function(event, ui) { var order = $(this).sortable('serialize'); $.post('" . $this->dragOrdering . "', order); } }); });</script>";
-		}
-		return "";
-	}
-	
-	private function insertOnly($type) {
-		return in_array($type, ["insertOnlyType1", "insertOnlyType2"]); // Example types
+		return '<script>/* Initialize drag ordering */</script>';
 	}	
 
 	// returns TRUE if insert is completely successful
@@ -1748,7 +1710,7 @@ class listManagement {
 			// FOr each defined field
 			foreach ($this->fields as $I) {
 
-				if ($this->insertOnly($I['type']) || $I['type'] == "plainText") {
+				if ($this->isInsertOnlyType($I['type']) || $I['type'] == "plainText") {
 					continue;
 				}
 
@@ -2107,7 +2069,7 @@ class listManagement {
 			if($I['disabled'] === TRUE) {
 				continue;
 			}
-			if ($this->insertOnly($I['type']) || $I['type'] == "plainText") {
+			if ($this->isInsertOnlyType($I['type']) || $I['type'] == "plainText") {
 				continue;
 			}
 
@@ -2325,14 +2287,12 @@ class listManagement {
 		return($error);
 	}
 
-	private function insertOnly($type) {
-
-		if (in_array($type,$this->insertOnlyTypes)) {
-			return(TRUE);
+	private function isInsertOnlyType($type) {
+		if (in_array($type, $this->insertOnlyTypes)) {
+			return TRUE;
 		}
-
-		return(FALSE);
-	}
+		return FALSE;
+	}	
 
 }
 
