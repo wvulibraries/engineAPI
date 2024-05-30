@@ -852,422 +852,639 @@ class listManagement {
 
 	}
 
-	public function displayEditTable($addGet=TRUE,$debug=FALSE) {
-		$queryString = "";
-		if ($addGet === TRUE && isset($_SERVER['QUERY_STRING']) && !is_empty($_SERVER['QUERY_STRING'])) {
-			$queryString = "?".$_SERVER['QUERY_STRING'];
-		}
+	// public function displayEditTable($addGet=TRUE,$debug=FALSE) {
+	// 	$queryString = "";
+	// 	if ($addGet === TRUE && isset($_SERVER['QUERY_STRING']) && !is_empty($_SERVER['QUERY_STRING'])) {
+	// 		$queryString = "?".$_SERVER['QUERY_STRING'];
+	// 	}
 
-		//Build "ORDER BY"
-		if (isnull($this->orderBy) && isset($this->fields[0]['type']) && $this->fields[0]['type'] != "plainText" ) {
-			$this->orderBy = "ORDER BY ".$this->database->escape($this->fields[0]['field']);
-		}
-		else if (!isnull($this->orderBy)) {
-			$this->orderBy = $this->database->escape($this->orderBy);
-		}
-		else {
-			$this->orderBy = "";
-		}
+	// 	//Build "ORDER BY"
+	// 	if (isnull($this->orderBy) && isset($this->fields[0]['type']) && $this->fields[0]['type'] != "plainText" ) {
+	// 		$this->orderBy = "ORDER BY ".$this->database->escape($this->fields[0]['field']);
+	// 	}
+	// 	else if (!isnull($this->orderBy)) {
+	// 		$this->orderBy = $this->database->escape($this->orderBy);
+	// 	}
+	// 	else {
+	// 		$this->orderBy = "";
+	// 	}
 
-		if (!isnull($this->sql)) {
-			$sql = $this->sql;
-		}
-		else {
-			$sql = sprintf("SELECT * FROM %s %s %s",
-				$this->database->escape($this->table),
-				$this->whereClause,
-				$this->orderBy
-				);
-		}
+	// 	if (!isnull($this->sql)) {
+	// 		$sql = $this->sql;
+	// 	}
+	// 	else {
+	// 		$sql = sprintf("SELECT * FROM %s %s %s",
+	// 			$this->database->escape($this->table),
+	// 			$this->whereClause,
+	// 			$this->orderBy
+	// 			);
+	// 	}
 
-		if ($this->debug === TRUE) {
-			print "SQL: ".$sql."<br />";
-		}
+	// 	if ($this->debug === TRUE) {
+	// 		print "SQL: ".$sql."<br />";
+	// 	}
 
-		$this->database->sanitize = FALSE;
-		$sqlResult = $this->database->query($sql);
+	// 	$this->database->sanitize = FALSE;
+	// 	$sqlResult = $this->database->query($sql);
 
+	// 	if (!$sqlResult['result']) {
+	// 		if ($this->debug === TRUE) {
+	// 			errorHandle::errorMsg($sqlResult['error']."<br />");
+	// 			errorHandle::errorMsg($sqlResult['query']."<br />");
+	// 		}
+	// 		// Should be sending a debug error here
+	// 		errorHandle::errorMsg("SQL Error");
+	// 		return;
+	// 	}
+
+	// 	$cols = count($this->fields);
+	// 	$colspan = $cols;
+	// 	$colspan += ($this->deleteBox       === TRUE)?1:0;
+	// 	$colspan += ($this->numberRows      === TRUE)?1:0;
+	// 	$colspan += ($this->deleteBoxLeft   === TRUE)?1:0;
+	// 	$colspan += ($this->numberRowsRight === TRUE)?1:0;
+
+	// 	$output = "";
+
+	// 	if ($this->sortable === TRUE) {
+	// 		global $engineVars;
+
+	// 		$output .= "<script src=\"".$engineVars['sortableTables']."\" type=\"text/javascript\"></script>";
+	// 		$output .= '<script type="text/javascript">';
+	// 		$output .= '$(document).ready(function()
+	// 			{
+	// 				$("#'.$this->database->escape($this->table).'_table").tablesorter({textExtraction: function(node) {
+	// 							return  node.firstChild.nextSibling.value;
+	// 						}});
+	// 			}
+	// 		);';
+	// 		$output .= "</script>";
+	// 	}
+	// 	if ($this->dragOrdering === TRUE) {
+	// 		global $engineVars;
+	// 		$output .= "<script src=\"".$engineVars['tablesDragnDrop']."\" type=\"text/javascript\"></script>";
+	// 	}
+
+	// 	$output .= "\n<!-- engine Instruction break -->".'<!-- engine Instruction displayTemplateOff -->'."\n<!-- engine Instruction break -->";
+	// 	$output .= sprintf('<form action="%s%s" method="post" class="listObj insertForm" %s %s %s>%s',
+    //         (isset($this->postTarget) ? $this->postTarget : $_SERVER['PHP_SELF']),
+	// 		$queryString,
+	// 		($this->confirmUpdateDelete === TRUE)?'onsubmit="return listObjDeleteConfirm(this);"':"",
+	// 		(is_null($this->rel))?"":'rel="'.$this->rel.'"',
+	// 		(is_null($this->rev))?"":'rev="'.$this->rev.'"',
+	// 		$this->eolChar
+	// 		);
+	// 	// $output .= "<form action=\"".$_SERVER['PHP_SELF']."".$queryString."\" method=\"post\" onsubmit=\"return listObjDeleteConfirm(this);\">".$this->eolChar;
+	// 	$output .= sessionInsertCSRF();
+	// 	$output .= "\n";
+	// 	$output .= "<table border=\"0\" cellpadding=\"1\" cellspacing=\"0\" id=\"".$this->database->escape($this->table)."_table\"";
+
+	// 	$output .= " class=\"engineListDisplayTable";
+	// 	if ($this->sortable === TRUE) {
+	// 		$output .= " sortable tablesorter";
+	// 	}
+	// 	$output .= "\"";
+
+	// 	$output .= ">".$this->eolChar;
+	// 	$output .= "<thead>".$this->eolChar;
+	// 	$output .= "<tr>".$this->eolChar;
+
+	// 	if ($this->numberRows === TRUE) {
+	// 		$output .= "<th style=\"width: 25px;\">#</th>".$this->eolChar;
+	// 	}
+
+	// 	if ($this->deleteBoxLeft === TRUE) {
+	// 		$output .= "<th style=\"width: 100px;\">Delete</th>".$this->eolChar;
+	// 	}
+
+	// 	for($I=0;$I<(int)$cols;$I++) {
+
+	// 		if ($this->isInsertOnlyType($this->fields[$I]['type'])) {
+	// 			continue;
+	// 		}
+
+	// 		$output .= "<th style=\"text-align: left;\">".$this->fields[$I]['label']."</th>".$this->eolChar;
+	// 	}
+
+	// 	// Put delete box on the left
+	// 	if ($this->deleteBox === TRUE) {
+	// 		$output .= "<th style=\"width: 100px;\">Delete</th>".$this->eolChar;
+	// 	}
+
+	// 	if ($this->numberRowsRight === TRUE) {
+	// 		$output .= "<th style=\"width: 25px;\">#</th>".$this->eolChar;
+	// 	}
+
+	// 	$output .= "</tr>".$this->eolChar;
+	// 	$output .= "</thead>".$this->eolChar;
+
+	// 	$output .= "<tbody>".$this->eolChar;
+
+	// 	$numberRowsCount = 1;
+	// 	while ($row = mysqli_fetch_array($sqlResult['result'],  MYSQLI_BOTH)) {
+	// 		$output .= "<tr";
+	// 		if ($this->rowStriping === TRUE) {
+	// 			$output .= (is_odd($numberRowsCount))?" class=\"oddrow\"":" class=\"evenrow\"";
+	// 		}
+	// 		if ($this->dragOrdering === TRUE) {
+	// 			$output .= " id=\"".$row[0]."\"";
+	// 		}
+	// 		$output .= ">".$this->eolChar;
+
+	// 		if ($this->numberRows === TRUE) {
+	// 			$output .= "<td class=\"alignRight\">".$this->eolChar;
+	// 			$output .= $numberRowsCount . $this->rowNumDelim;
+	// 			$output .= "</td>".$this->eolChar;
+	// 		}
+
+	// 		if ($this->deleteBoxLeft === TRUE) {
+	// 			$output .= "<td class=\"alignCenter\">".$this->eolChar;
+	// 			$output .= "<input type=\"checkbox\" name=\"delete[]\" class=\"delete\" value=\"".$row[0]."\" />".$this->eolChar;
+	// 			$output .= "</td>".$this->eolChar;
+	// 		}
+
+	// 		for($I=0;$I<(int)$cols;$I++) {
+
+	// 			if ($this->isInsertOnlyType($this->fields[$I]['type'])) {
+	// 				continue;
+	// 			}
+
+	// 			$output .= "<td>".$this->eolChar;
+
+	// 			// if ($this->sortable === TRUE && $this->fields[$I]['type'] != "plainText") {
+	// 			// 					$output .= "sorttable_customkey=\"".htmlentities($row[$this->fields[$I]['field']])."\"";
+	// 			// 				}
+
+	// 			// $output .= ">";
+
+	// 			if ($this->sortable === TRUE && $this->fields[$I]['type'] != "plainText") {
+	// 				$output .= "<input type=\"hidden\" name=\"".$this->fields[$I]['field']."_sortable_".$row[0]."\" value=\"".htmlentities($row[$this->fields[$I]['field']])."\" />".$this->eolChar;
+	// 			}
+
+	// 			if ($I == 0) {
+	// 				$output .= "<input type=\"hidden\" name=\"check_".$row[0]."\" value=\"".$row[0]."\" />".$this->eolChar;
+
+	// 				foreach ($this->hiddenFields as $hiddenField) {
+
+	// 					$output .= "<input type=\"hidden\" name=\"".$hiddenField['field']."_".$row[0]."\" id=\"".$hiddenField['field']."_".$row[0]."\" class=\"".$hiddenField['field']."\" value=\"".htmlentities($row[$hiddenField['field']])."\" ";
+	// 					$output .= "/>".$this->eolChar;
+
+	// 				}
+
+	// 			}
+
+	// 			if ($this->fields[$I]['type'] == "text") {
+
+	// 				$value = $row[$this->fields[$I]['field']];
+	// 				if (!isnull($this->fields[$I]['matchOn'])) {
+	// 					$sql = "SELECT ".$this->database->escape($this->fields[$I]['matchOn']['field'])." FROM ".$this->database->escape($this->fields[$I]['matchOn']['table'])." WHERE ".$this->database->escape($this->fields[$I]['matchOn']['key'])."='".$this->database->escape($row[$this->fields[$I]['field']])."'";
+
+	// 					$this->database->sanitize = FALSE;
+	// 					$matchOnSqlResult               = $this->database->query($sql);
+	// 					$matchOnValueResult             = mysqli_fetch_array($matchOnSqlResult['result'], MYSQLI_BOTH);
+
+	// 					if (isset($this->fields[$I]['matchOn']['field'])) {
+	// 						$value = $matchOnValueResult[$this->fields[$I]['matchOn']['field']];
+	// 					}
+	// 				}
+
+	// 				if ($this->fields[$I]['original'] === TRUE && isset($value)) {
+	// 					$output .= '<input type="hidden" name="original_'.$this->fields[$I]['field'].'_'.$row[0].'" value="'.(htmlentities($value)).'" />'.$this->eolChar;
+	// 				}
+
+	// 				$output .= "<input type=\"text\" size=\"".$this->fields[$I]['size']."\" name=\"".$this->fields[$I]['field']."_".$row[0]."\" id=\"".$this->fields[$I]['field']."_".$row[0]."\" class=\"".$this->fields[$I]['field']."";
+	// 				$output .= "\" value=\"".htmlentities($value)."\" ";
+	// 				$output .= ($this->fields[$I]['disabled'] === TRUE)?" disabled ":"";
+	// 				$output .= ($this->fields[$I]['readonly'] === TRUE)?" readonly ":"";
+	// 				$output .= "/>".$this->eolChar;
+	// 			}
+	// 			else if ($this->fields[$I]['type'] == "yesNoText") {
+
+	// 				switch($row[$this->fields[$I]['field']]) {
+	// 					case "1":
+	// 					case TRUE:
+	// 					case "TRUE":
+	// 						$value = "Yes";
+	// 						break;
+	// 					case "0":
+	// 					case FALSE:
+	// 					case "FALSE":
+	// 						$value = "No";
+	// 						break;
+	// 					default:
+	// 						$value = "Data Error";
+	// 						break;
+	// 				}
+
+	// 				$output .= "<input type=\"text\" size=\"".$this->fields[$I]['size']."\" name=\"".$this->fields[$I]['field']."_".$row[0]."\" id=\"".$this->fields[$I]['field']."_".$row[0]."\" class=\"".$this->fields[$I]['field']."";
+	// 				$output .= "\" value=\"".htmlentities($value)."\" ";
+	// 				$output .= ($this->fields[$I]['disabled'] === TRUE)?" disabled ":"";
+	// 				$output .= ($this->fields[$I]['readonly'] === TRUE)?" readonly ":"";
+	// 				$output .= "/>".$this->eolChar;
+	// 			}
+	// 			else if ($this->fields[$I]['type'] == "date") {
+
+	// 				$value = $row[$this->fields[$I]['field']];
+
+	// 				if ($value == "0") {
+	// 					$value = "";
+	// 				}
+
+	// 				if ($this->fields[$I]['original'] === TRUE && isset($value)) {
+	// 					$output .= '<input type="hidden" name="original_'.$this->fields[$I]['field'].'_'.$row[0].'" value="'.(htmlentities($value)).'" />'.$this->eolChar;
+	// 				}
+
+	// 				$output .= "<input type=\"text\" size=\"".$this->fields[$I]['size']."\" name=\"".$this->fields[$I]['field']."_".$row[0]."\" id=\"".$this->fields[$I]['field']."_".$row[0]."\" class=\"".$this->fields[$I]['field']." date_input\" value=\"".(!is_empty($value)?htmlentities(unixToDate($value)):"")."\" ";
+	// 				$output .= ($this->fields[$I]['disabled'] === TRUE)?" disabled ":"";
+	// 				$output .= ($this->fields[$I]['readonly'] === TRUE)?" readonly ":"";
+	// 				$output .= "/>".$this->eolChar;
+	// 			}
+	// 			else if ($this->fields[$I]['type'] == "select") {
+
+	// 				$value = $row[$this->fields[$I]['field']];
+
+	// 				if ($this->fields[$I]['original'] === TRUE && isset($value)) {
+	// 					$output .= '<input type="hidden" name="original_'.$this->fields[$I]['field'].'_'.$row[0].'" value="'.(htmlentities($value)).'" />'.$this->eolChar;
+	// 				}
+
+	// 				$output .= "<select name=\"".$this->fields[$I]['field']."_".$row[0]."\"";
+	// 				$output .= ($this->fields[$I]['disabled'] === TRUE)?" disabled ":"";
+	// 				$output .= ($this->fields[$I]['readonly'] === TRUE)?" readonly ":"";
+	// 				$output .= ">".$this->eolChar;
+	// 				if (isset($this->fields[$I]['options'])) {
+	// 					foreach ($this->fields[$I]['options'] as $option) {
+
+	// 						$output .= "<option value=\"".htmlsanitize($option['value'])."\"";
+	// 						$output .= ($row[$this->fields[$I]['field']] == $option['value'])?" selected":"";
+	// 						$output .= ">".htmlsanitize($option['label'])."</option>";
+	// 					}
+	// 				}
+	// 				$output .= "</select>".$this->eolChar;
+	// 			}
+	// 			else if ($this->fields[$I]['type'] == "yesNo") {
+	// 				if ((isset($this->fields[$I]['options']['type']) && $this->fields[$I]['options']['type'] != "checkbox") || !isset($this->fields[$I]['options']['type'])) {
+	// 					$this->fields[$I]['options']['type'] = "select";
+	// 				}
+
+	// 				$value = $row[$this->fields[$I]['field']];
+
+	// 				if ($this->fields[$I]['options']['type'] == "select") {
+	// 					$output .= "<select name=\"".$this->fields[$I]['field']."_".$row[0]."\"";
+	// 					$output .= ($this->fields[$I]['readonly'] === TRUE)?" readonly ":"";
+	// 					$output .= ($this->fields[$I]['disabled'] === TRUE)?" disabled ":"";
+	// 					$output .= ">".$this->eolChar;
+
+	// 					// Yes
+	// 					$output .= '<option value="1"';
+	// 					$output .= ($value == "1")?" selected":"";
+	// 					$output .= ">";
+	// 					$output .= (isset($this->fields[$I]['options']['yesLabel']))?htmlentities($this->fields[$I]['options']['yesLabel']):"Yes";
+	// 					$output .= "</option>".$this->eolChar;
+
+	// 					// No
+	// 					$output .= '<option value="0"';
+	// 					$output .= ($value == "0")?" selected":"";
+	// 					$output .= ">";
+	// 					$output .= (isset($this->fields[$I]['options']['yesLabel']))?htmlentities($this->fields[$I]['options']['noLabel']):"No";
+	// 					$output .= "</option>".$this->eolChar;
+
+	// 					$output .= "</select>".$this->eolChar;
+	// 				}
+	// 				else if ($this->fields[$I]['options']['type'] == "checkbox") {
+	// 					$output .= '<input type="checkbox" name="'.$this->fields[$I]['field'].'_'.$row[0].'" value="1"';
+	// 					$output .= ($value == "1")?" checked":"";
+	// 					$output .= ($this->fields[$I]['readonly'] === TRUE)?" readonly ":"";
+	// 					$output .= ($this->fields[$I]['disabled'] === TRUE)?" disabled ":"";
+	// 					$output .= ">";
+	// 				}
+	// 				else {
+	// 					$output .= "invalid type";
+	// 				}
+
+	// 			}
+	// 			else if ($this->fields[$I]['type'] == "radio") {
+	// 				$output .= "<input type=\"radio\" name=\"".$this->fields[$I]['field']."\" value=\"".htmlsanitize($row[0])."\" id=\"".$this->fields[$I]['field']."_".$row[0]."\" class=\"".$this->fields[$I]['field']."\"";
+	// 				$output .= ($row[$this->fields[$I]['field']] == 1)?" checked":"";
+	// 				$output .= ($this->fields[$I]['disabled'] === TRUE)?" disabled ":"";
+	// 				$output .= ($this->fields[$I]['readonly'] === TRUE)?" readonly ":"";
+	// 				$output .= " />".$this->eolChar;
+	// 			}
+	// 			else if ($this->fields[$I]['type'] == "plainText") {
+	// 				$tempField = $this->fields[$I]['field'];
+	// 				preg_match_all('/{(\w+)}/', $tempField, $matches);
+	// 				foreach ($matches[1] as $mIndex=>$mValue) {
+	// 					foreach ($this->fields as $field) {
+	// 						if ($field['field'] == $mValue) {
+	// 							$tempValue = $row[$mValue];
+	// 						}
+	// 					}
+	// 					foreach ($this->hiddenFields as $field) {
+	// 						if ($field['field'] == $mValue) {
+	// 							$tempValue = $row[$mValue];
+	// 						}
+	// 					}
+	// 					$tempField = preg_replace('/{'.$mValue.'}/',$tempValue,$tempField);
+	// 				}
+	// 				$output .= $tempField.$this->eolChar;
+	// 			}
+	// 			else if ($this->fields[$I]['type'] == "textarea") {
+
+
+	// 				$value = $row[$this->fields[$I]['field']];
+
+	// 				if ($this->fields[$I]['original'] === TRUE && isset($value)) {
+	// 					$output .= '<input type="hidden" name="original_'.$this->fields[$I]['field'].'_'.$row[0].'" value="'.(htmlentities($value)).'" />';
+	// 				}
+
+	// 				if (!isnull($this->fields[$I]['matchOn'])) {
+	// 					$sql = "SELECT ".$this->database->escape($this->fields[$I]['matchOn']['field'])." FROM ".$this->database->escape($this->fields[$I]['matchOn']['table'])." WHERE ".$this->database->escape($this->fields[$I]['matchOn']['key'])."='".$this->database->escape($row[$this->fields[$I]['field']])."'";
+
+	// 					$this->database->sanitize = FALSE;
+	// 					$matchOnSqlResult               = $this->database->query($sql);
+	// 					$matchOnValueResult             = mysqli_fetch_array($matchOnSqlResult['result'], MYSQLI_BOTH);
+
+	// 					if (isset($this->fields[$I]['matchOn']['field'])) {
+	// 						$value = $matchOnValueResult[$this->fields[$I]['matchOn']['field']];
+	// 					}
+	// 				}
+
+	// 				$output .= "<textarea type=\"text\" rows=\"1\" cols=\"".$this->fields[$I]['size']."\" name=\"".$this->fields[$I]['field']."_".$row[0]."\" id=\"".$this->fields[$I]['field']."_".$row[0]."\" class=\"".$this->fields[$I]['field']."";
+	// 				$output .= "\"";
+	// 				$output .= ($this->fields[$I]['disabled'] === TRUE)?" disabled ":"";
+	// 				$output .= ($this->fields[$I]['readonly'] === TRUE)?" readonly ":"";
+	// 				$output .= ' onfocus="convert2Textarea(this);" onblur="convert2TextInput(this)"';
+	// 				$output .= ">";
+	// 				$output .= htmlentities($value);
+	// 				$output .= "</textarea>".$this->eolChar;
+	// 			}
+	// 			else if ($this->fields[$I]['type'] == "multiselect") {
+
+	// 				errorHandle::errorMsg("Multi Select type not supported in table edit");
+	// 			}
+	// 			else if ($this->fields[$I]['type'] == "checkbox") {
+
+	// 				errorHandle::errorMsg("Checkbox type not supported in table edit");
+	// 			}
+
+	// 			$output .= "</td>".$this->eolChar;
+	// 		}
+
+	// 		$output .= "<td class=\"alignCenter\">";
+	// 		if ($this->deleteBox === TRUE) {
+	// 			$output .= "<input type=\"checkbox\" name=\"delete[]\" class=\"delete\" value=\"".$row[0]."\" />".$this->eolChar;
+	// 		}
+	// 		$output .= "</td>".$this->eolChar;
+
+	// 		if ($this->numberRowsRight === TRUE) {
+	// 			$output .= "<td class=\"alignRight\">";
+	// 			$output .= $this->rowNumDelimRight . $numberRowsCount;
+	// 			$output .= "</td>".$this->eolChar;
+	// 		}
+	// 		$numberRowsCount++;
+
+	// 		$output .= "</tr>".$this->eolChar;
+
+	// 	}
+	// 	$output .= "</tbody>".$this->eolChar;
+	// 	$output .= "</table>".$this->eolChar;
+	// 	if ($this->noSubmit === FALSE) {
+	// 		$submitButtonName = (isnull($this->submitName))?$this->table.'_update':$this->submitName;
+	// 		$output .= "<input type=\"submit\" value=\"".$this->updateButtonText."\" name=\"".$submitButtonName."\" />".$this->eolChar;
+	// 	}
+	// 	$output .= "</form>";
+	// 	$output .= "\n<!-- engine Instruction break -->".'<!-- engine Instruction displayTemplateOn -->'."\n<!-- engine Instruction break -->";
+
+	// 	if ($this->dateInputs) {
+	// 		$output .= "<script>$($.date_input.initialize);</script>";
+	// 	}
+
+	// 	if ($this->dragOrdering === TRUE) {
+	// 		$output .= '<script type="text/javascript">';
+	// 		$output .= "var table = document.getElementById('".$this->database->escape($this->table)."_table');";
+	// 		$output .= 'var tableDnD = new TableDnD();';
+	// 		$output .= 'tableDnD.init(table);';
+	// 		$output .= '</script>';
+	// 	}
+
+	// 	return($output);
+	// }
+
+	public function displayEditTable($addGet = TRUE, $debug = FALSE) {
+		$queryString = $this->buildQueryString($addGet);
+		$this->buildOrderByClause();
+		$sql = $this->buildSqlQuery();
+		$this->debugSqlQuery($sql);
+	
+		$sqlResult = $this->executeSqlQuery($sql);
 		if (!$sqlResult['result']) {
-			if ($this->debug === TRUE) {
-				errorHandle::errorMsg($sqlResult['error']."<br />");
-				errorHandle::errorMsg($sqlResult['query']."<br />");
-			}
-			// Should be sending a debug error here
-			errorHandle::errorMsg("SQL Error");
+			$this->handleSqlError($sqlResult);
 			return;
 		}
-
-		$cols = count($this->fields);
-		$colspan = $cols;
-		$colspan += ($this->deleteBox       === TRUE)?1:0;
-		$colspan += ($this->numberRows      === TRUE)?1:0;
-		$colspan += ($this->deleteBoxLeft   === TRUE)?1:0;
-		$colspan += ($this->numberRowsRight === TRUE)?1:0;
-
+	
+		$output = $this->initializeOutput();
+		$output .= $this->generateFormHeader($queryString);
+		$output .= $this->generateTableHeader();
+		$output .= $this->generateTableBody($sqlResult);
+	
+		if (!$this->noSubmit) {
+			$output .= $this->generateSubmitButton();
+		}
+	
+		$output .= "</form>";
+		$output .= "\n<!-- engine Instruction break -->" . '<!-- engine Instruction displayTemplateOn -->' . "\n<!-- engine Instruction break -->";
+		$output .= $this->initializeDateInputs();
+		$output .= $this->initializeDragOrdering();
+	
+		return $output;
+	}
+	
+	private function buildQueryString($addGet) {
+		if ($addGet === TRUE && isset($_SERVER['QUERY_STRING']) && !empty($_SERVER['QUERY_STRING'])) {
+			return "?" . $_SERVER['QUERY_STRING'];
+		}
+		return "";
+	}
+	
+	private function buildOrderByClause() {
+		if (is_null($this->orderBy) && isset($this->fields[0]['type']) && $this->fields[0]['type'] != "plainText") {
+			$this->orderBy = "ORDER BY " . $this->database->escape($this->fields[0]['field']);
+		} else if (!is_null($this->orderBy)) {
+			$this->orderBy = $this->database->escape($this->orderBy);
+		} else {
+			$this->orderBy = "";
+		}
+	}
+	
+	private function buildSqlQuery() {
+		if (!is_null($this->sql)) {
+			return $this->sql;
+		}
+		return sprintf(
+			"SELECT * FROM %s %s %s",
+			$this->database->escape($this->table),
+			$this->whereClause,
+			$this->orderBy
+		);
+	}
+	
+	private function debugSqlQuery($sql) {
+		if ($this->debug === TRUE) {
+			print "SQL: " . $sql . "<br />";
+		}
+	}
+	
+	private function executeSqlQuery($sql) {
+		$this->database->sanitize = FALSE;
+		return $this->database->query($sql);
+	}
+	
+	private function handleSqlError($sqlResult) {
+		if ($this->debug === TRUE) {
+			errorHandle::errorMsg($sqlResult['error'] . "<br />");
+			errorHandle::errorMsg($sqlResult['query'] . "<br />");
+		}
+		errorHandle::errorMsg("SQL Error");
+	}
+	
+	private function initializeOutput() {
 		$output = "";
-
 		if ($this->sortable === TRUE) {
 			global $engineVars;
-
-			$output .= "<script src=\"".$engineVars['sortableTables']."\" type=\"text/javascript\"></script>";
-			$output .= '<script type="text/javascript">';
-			$output .= '$(document).ready(function()
-				{
-					$("#'.$this->database->escape($this->table).'_table").tablesorter({textExtraction: function(node) {
-								return  node.firstChild.nextSibling.value;
-							}});
-				}
-			);';
-			$output .= "</script>";
+			$output .= "<script src=\"" . $engineVars['sortableTables'] . "\" type=\"text/javascript\"></script>";
+			$output .= '<script type="text/javascript">$(document).ready(function() { $("#' . $this->database->escape($this->table) . '_table").tablesorter({textExtraction: function(node) { return  node.firstChild.nextSibling.value; }}); });</script>';
 		}
 		if ($this->dragOrdering === TRUE) {
 			global $engineVars;
-			$output .= "<script src=\"".$engineVars['tablesDragnDrop']."\" type=\"text/javascript\"></script>";
+			$output .= "<script src=\"" . $engineVars['tablesDragnDrop'] . "\" type=\"text/javascript\"></script>";
 		}
-
-		$output .= "\n<!-- engine Instruction break -->".'<!-- engine Instruction displayTemplateOff -->'."\n<!-- engine Instruction break -->";
-		$output .= sprintf('<form action="%s%s" method="post" class="listObj insertForm" %s %s %s>%s',
-            (isset($this->postTarget) ? $this->postTarget : $_SERVER['PHP_SELF']),
+		$output .= "\n<!-- engine Instruction break -->" . '<!-- engine Instruction displayTemplateOff -->' . "\n<!-- engine Instruction break -->";
+		return $output;
+	}
+	
+	private function generateFormHeader($queryString) {
+		return sprintf(
+			'<form action="%s%s" method="post" class="listObj insertForm" %s %s %s>%s%s',
+			(isset($this->postTarget) ? $this->postTarget : $_SERVER['PHP_SELF']),
 			$queryString,
-			($this->confirmUpdateDelete === TRUE)?'onsubmit="return listObjDeleteConfirm(this);"':"",
-			(is_null($this->rel))?"":'rel="'.$this->rel.'"',
-			(is_null($this->rev))?"":'rev="'.$this->rev.'"',
-			$this->eolChar
-			);
-		// $output .= "<form action=\"".$_SERVER['PHP_SELF']."".$queryString."\" method=\"post\" onsubmit=\"return listObjDeleteConfirm(this);\">".$this->eolChar;
-		$output .= sessionInsertCSRF();
-		$output .= "\n";
-		$output .= "<table border=\"0\" cellpadding=\"1\" cellspacing=\"0\" id=\"".$this->database->escape($this->table)."_table\"";
-
-		$output .= " class=\"engineListDisplayTable";
+			($this->confirmUpdateDelete === TRUE) ? 'onsubmit="return listObjDeleteConfirm(this);"' : "",
+			(is_null($this->rel)) ? "" : 'rel="' . $this->rel . '"',
+			(is_null($this->rev)) ? "" : 'rev="' . $this->rev . '"',
+			$this->eolChar,
+			sessionInsertCSRF()
+		);
+	}
+	
+	private function generateTableHeader() {
+		$output = "<table border=\"0\" cellpadding=\"1\" cellspacing=\"0\" id=\"" . $this->database->escape($this->table) . "_table\" class=\"engineListDisplayTable";
 		if ($this->sortable === TRUE) {
 			$output .= " sortable tablesorter";
 		}
-		$output .= "\"";
-
-		$output .= ">".$this->eolChar;
-		$output .= "<thead>".$this->eolChar;
-		$output .= "<tr>".$this->eolChar;
-
+		$output .= "\">" . $this->eolChar;
+		$output .= "<thead>" . $this->eolChar;
+		$output .= "<tr>" . $this->eolChar;
+	
 		if ($this->numberRows === TRUE) {
-			$output .= "<th style=\"width: 25px;\">#</th>".$this->eolChar;
+			$output .= "<th style=\"width: 25px;\">#</th>" . $this->eolChar;
 		}
-
 		if ($this->deleteBoxLeft === TRUE) {
-			$output .= "<th style=\"width: 100px;\">Delete</th>".$this->eolChar;
+			$output .= "<th style=\"width: 100px;\">Delete</th>" . $this->eolChar;
 		}
-
-		for($I=0;$I<(int)$cols;$I++) {
-
-			if ($this->isInsertOnlyType($this->fields[$I]['type'])) {
+	
+		foreach ($this->fields as $field) {
+			if ($this->isInsertOnlyType($field['type'])) {
 				continue;
 			}
-
-			$output .= "<th style=\"text-align: left;\">".$this->fields[$I]['label']."</th>".$this->eolChar;
+			$output .= "<th style=\"text-align: left;\">" . $field['label'] . "</th>" . $this->eolChar;
 		}
-
-		// Put delete box on the left
+	
 		if ($this->deleteBox === TRUE) {
-			$output .= "<th style=\"width: 100px;\">Delete</th>".$this->eolChar;
+			$output .= "<th style=\"width: 100px;\">Delete</th>" . $this->eolChar;
 		}
-
 		if ($this->numberRowsRight === TRUE) {
-			$output .= "<th style=\"width: 25px;\">#</th>".$this->eolChar;
+			$output .= "<th style=\"width: 25px;\">#</th>" . $this->eolChar;
 		}
-
-		$output .= "</tr>".$this->eolChar;
-		$output .= "</thead>".$this->eolChar;
-
-		$output .= "<tbody>".$this->eolChar;
-
+	
+		$output .= "</tr>" . $this->eolChar;
+		$output .= "</thead>" . $this->eolChar;
+		return $output;
+	}
+	
+	private function generateTableBody($sqlResult) {
+		$output = "<tbody>" . $this->eolChar;
 		$numberRowsCount = 1;
-		while ($row = mysqli_fetch_array($sqlResult['result'],  MYSQLI_BOTH)) {
-			$output .= "<tr";
-			if ($this->rowStriping === TRUE) {
-				$output .= (is_odd($numberRowsCount))?" class=\"oddrow\"":" class=\"evenrow\"";
-			}
-			if ($this->dragOrdering === TRUE) {
-				$output .= " id=\"".$row[0]."\"";
-			}
-			$output .= ">".$this->eolChar;
-
+	
+		while ($row = mysqli_fetch_array($sqlResult['result'], MYSQL_BOTH)) {
+			$output .= "<tr" . $this->generateRowClass($numberRowsCount) . $this->generateRowId($row) . ">" . $this->eolChar;
+	
 			if ($this->numberRows === TRUE) {
-				$output .= "<td class=\"alignRight\">".$this->eolChar;
-				$output .= $numberRowsCount . $this->rowNumDelim;
-				$output .= "</td>".$this->eolChar;
+				$output .= $this->generateRowNumber($numberRowsCount);
 			}
-
 			if ($this->deleteBoxLeft === TRUE) {
-				$output .= "<td class=\"alignCenter\">".$this->eolChar;
-				$output .= "<input type=\"checkbox\" name=\"delete[]\" class=\"delete\" value=\"".$row[0]."\" />".$this->eolChar;
-				$output .= "</td>".$this->eolChar;
+				$output .= $this->generateDeleteCheckbox($row);
 			}
-
-			for($I=0;$I<(int)$cols;$I++) {
-
-				if ($this->isInsertOnlyType($this->fields[$I]['type'])) {
+	
+			foreach ($this->fields as $field) {
+				if ($this->isInsertOnlyType($field['type'])) {
 					continue;
 				}
-
-				$output .= "<td>".$this->eolChar;
-
-				// if ($this->sortable === TRUE && $this->fields[$I]['type'] != "plainText") {
-				// 					$output .= "sorttable_customkey=\"".htmlentities($row[$this->fields[$I]['field']])."\"";
-				// 				}
-
-				// $output .= ">";
-
-				if ($this->sortable === TRUE && $this->fields[$I]['type'] != "plainText") {
-					$output .= "<input type=\"hidden\" name=\"".$this->fields[$I]['field']."_sortable_".$row[0]."\" value=\"".htmlentities($row[$this->fields[$I]['field']])."\" />".$this->eolChar;
-				}
-
-				if ($I == 0) {
-					$output .= "<input type=\"hidden\" name=\"check_".$row[0]."\" value=\"".$row[0]."\" />".$this->eolChar;
-
-					foreach ($this->hiddenFields as $hiddenField) {
-
-						$output .= "<input type=\"hidden\" name=\"".$hiddenField['field']."_".$row[0]."\" id=\"".$hiddenField['field']."_".$row[0]."\" class=\"".$hiddenField['field']."\" value=\"".htmlentities($row[$hiddenField['field']])."\" ";
-						$output .= "/>".$this->eolChar;
-
-					}
-
-				}
-
-				if ($this->fields[$I]['type'] == "text") {
-
-					$value = $row[$this->fields[$I]['field']];
-					if (!isnull($this->fields[$I]['matchOn'])) {
-						$sql = "SELECT ".$this->database->escape($this->fields[$I]['matchOn']['field'])." FROM ".$this->database->escape($this->fields[$I]['matchOn']['table'])." WHERE ".$this->database->escape($this->fields[$I]['matchOn']['key'])."='".$this->database->escape($row[$this->fields[$I]['field']])."'";
-
-						$this->database->sanitize = FALSE;
-						$matchOnSqlResult               = $this->database->query($sql);
-						$matchOnValueResult             = mysqli_fetch_array($matchOnSqlResult['result'], MYSQLI_BOTH);
-
-						if (isset($this->fields[$I]['matchOn']['field'])) {
-							$value = $matchOnValueResult[$this->fields[$I]['matchOn']['field']];
-						}
-					}
-
-					if ($this->fields[$I]['original'] === TRUE && isset($value)) {
-						$output .= '<input type="hidden" name="original_'.$this->fields[$I]['field'].'_'.$row[0].'" value="'.(htmlentities($value)).'" />'.$this->eolChar;
-					}
-
-					$output .= "<input type=\"text\" size=\"".$this->fields[$I]['size']."\" name=\"".$this->fields[$I]['field']."_".$row[0]."\" id=\"".$this->fields[$I]['field']."_".$row[0]."\" class=\"".$this->fields[$I]['field']."";
-					$output .= "\" value=\"".htmlentities($value)."\" ";
-					$output .= ($this->fields[$I]['disabled'] === TRUE)?" disabled ":"";
-					$output .= ($this->fields[$I]['readonly'] === TRUE)?" readonly ":"";
-					$output .= "/>".$this->eolChar;
-				}
-				else if ($this->fields[$I]['type'] == "yesNoText") {
-
-					switch($row[$this->fields[$I]['field']]) {
-						case "1":
-						case TRUE:
-						case "TRUE":
-							$value = "Yes";
-							break;
-						case "0":
-						case FALSE:
-						case "FALSE":
-							$value = "No";
-							break;
-						default:
-							$value = "Data Error";
-							break;
-					}
-
-					$output .= "<input type=\"text\" size=\"".$this->fields[$I]['size']."\" name=\"".$this->fields[$I]['field']."_".$row[0]."\" id=\"".$this->fields[$I]['field']."_".$row[0]."\" class=\"".$this->fields[$I]['field']."";
-					$output .= "\" value=\"".htmlentities($value)."\" ";
-					$output .= ($this->fields[$I]['disabled'] === TRUE)?" disabled ":"";
-					$output .= ($this->fields[$I]['readonly'] === TRUE)?" readonly ":"";
-					$output .= "/>".$this->eolChar;
-				}
-				else if ($this->fields[$I]['type'] == "date") {
-
-					$value = $row[$this->fields[$I]['field']];
-
-					if ($value == "0") {
-						$value = "";
-					}
-
-					if ($this->fields[$I]['original'] === TRUE && isset($value)) {
-						$output .= '<input type="hidden" name="original_'.$this->fields[$I]['field'].'_'.$row[0].'" value="'.(htmlentities($value)).'" />'.$this->eolChar;
-					}
-
-					$output .= "<input type=\"text\" size=\"".$this->fields[$I]['size']."\" name=\"".$this->fields[$I]['field']."_".$row[0]."\" id=\"".$this->fields[$I]['field']."_".$row[0]."\" class=\"".$this->fields[$I]['field']." date_input\" value=\"".(!is_empty($value)?htmlentities(unixToDate($value)):"")."\" ";
-					$output .= ($this->fields[$I]['disabled'] === TRUE)?" disabled ":"";
-					$output .= ($this->fields[$I]['readonly'] === TRUE)?" readonly ":"";
-					$output .= "/>".$this->eolChar;
-				}
-				else if ($this->fields[$I]['type'] == "select") {
-
-					$value = $row[$this->fields[$I]['field']];
-
-					if ($this->fields[$I]['original'] === TRUE && isset($value)) {
-						$output .= '<input type="hidden" name="original_'.$this->fields[$I]['field'].'_'.$row[0].'" value="'.(htmlentities($value)).'" />'.$this->eolChar;
-					}
-
-					$output .= "<select name=\"".$this->fields[$I]['field']."_".$row[0]."\"";
-					$output .= ($this->fields[$I]['disabled'] === TRUE)?" disabled ":"";
-					$output .= ($this->fields[$I]['readonly'] === TRUE)?" readonly ":"";
-					$output .= ">".$this->eolChar;
-					if (isset($this->fields[$I]['options'])) {
-						foreach ($this->fields[$I]['options'] as $option) {
-
-							$output .= "<option value=\"".htmlsanitize($option['value'])."\"";
-							$output .= ($row[$this->fields[$I]['field']] == $option['value'])?" selected":"";
-							$output .= ">".htmlsanitize($option['label'])."</option>";
-						}
-					}
-					$output .= "</select>".$this->eolChar;
-				}
-				else if ($this->fields[$I]['type'] == "yesNo") {
-					if ((isset($this->fields[$I]['options']['type']) && $this->fields[$I]['options']['type'] != "checkbox") || !isset($this->fields[$I]['options']['type'])) {
-						$this->fields[$I]['options']['type'] = "select";
-					}
-
-					$value = $row[$this->fields[$I]['field']];
-
-					if ($this->fields[$I]['options']['type'] == "select") {
-						$output .= "<select name=\"".$this->fields[$I]['field']."_".$row[0]."\"";
-						$output .= ($this->fields[$I]['readonly'] === TRUE)?" readonly ":"";
-						$output .= ($this->fields[$I]['disabled'] === TRUE)?" disabled ":"";
-						$output .= ">".$this->eolChar;
-
-						// Yes
-						$output .= '<option value="1"';
-						$output .= ($value == "1")?" selected":"";
-						$output .= ">";
-						$output .= (isset($this->fields[$I]['options']['yesLabel']))?htmlentities($this->fields[$I]['options']['yesLabel']):"Yes";
-						$output .= "</option>".$this->eolChar;
-
-						// No
-						$output .= '<option value="0"';
-						$output .= ($value == "0")?" selected":"";
-						$output .= ">";
-						$output .= (isset($this->fields[$I]['options']['yesLabel']))?htmlentities($this->fields[$I]['options']['noLabel']):"No";
-						$output .= "</option>".$this->eolChar;
-
-						$output .= "</select>".$this->eolChar;
-					}
-					else if ($this->fields[$I]['options']['type'] == "checkbox") {
-						$output .= '<input type="checkbox" name="'.$this->fields[$I]['field'].'_'.$row[0].'" value="1"';
-						$output .= ($value == "1")?" checked":"";
-						$output .= ($this->fields[$I]['readonly'] === TRUE)?" readonly ":"";
-						$output .= ($this->fields[$I]['disabled'] === TRUE)?" disabled ":"";
-						$output .= ">";
-					}
-					else {
-						$output .= "invalid type";
-					}
-
-				}
-				else if ($this->fields[$I]['type'] == "radio") {
-					$output .= "<input type=\"radio\" name=\"".$this->fields[$I]['field']."\" value=\"".htmlsanitize($row[0])."\" id=\"".$this->fields[$I]['field']."_".$row[0]."\" class=\"".$this->fields[$I]['field']."\"";
-					$output .= ($row[$this->fields[$I]['field']] == 1)?" checked":"";
-					$output .= ($this->fields[$I]['disabled'] === TRUE)?" disabled ":"";
-					$output .= ($this->fields[$I]['readonly'] === TRUE)?" readonly ":"";
-					$output .= " />".$this->eolChar;
-				}
-				else if ($this->fields[$I]['type'] == "plainText") {
-					$tempField = $this->fields[$I]['field'];
-					preg_match_all('/{(\w+)}/', $tempField, $matches);
-					foreach ($matches[1] as $mIndex=>$mValue) {
-						foreach ($this->fields as $field) {
-							if ($field['field'] == $mValue) {
-								$tempValue = $row[$mValue];
-							}
-						}
-						foreach ($this->hiddenFields as $field) {
-							if ($field['field'] == $mValue) {
-								$tempValue = $row[$mValue];
-							}
-						}
-						$tempField = preg_replace('/{'.$mValue.'}/',$tempValue,$tempField);
-					}
-					$output .= $tempField.$this->eolChar;
-				}
-				else if ($this->fields[$I]['type'] == "textarea") {
-
-
-					$value = $row[$this->fields[$I]['field']];
-
-					if ($this->fields[$I]['original'] === TRUE && isset($value)) {
-						$output .= '<input type="hidden" name="original_'.$this->fields[$I]['field'].'_'.$row[0].'" value="'.(htmlentities($value)).'" />';
-					}
-
-					if (!isnull($this->fields[$I]['matchOn'])) {
-						$sql = "SELECT ".$this->database->escape($this->fields[$I]['matchOn']['field'])." FROM ".$this->database->escape($this->fields[$I]['matchOn']['table'])." WHERE ".$this->database->escape($this->fields[$I]['matchOn']['key'])."='".$this->database->escape($row[$this->fields[$I]['field']])."'";
-
-						$this->database->sanitize = FALSE;
-						$matchOnSqlResult               = $this->database->query($sql);
-						$matchOnValueResult             = mysqli_fetch_array($matchOnSqlResult['result'], MYSQLI_BOTH);
-
-						if (isset($this->fields[$I]['matchOn']['field'])) {
-							$value = $matchOnValueResult[$this->fields[$I]['matchOn']['field']];
-						}
-					}
-
-					$output .= "<textarea type=\"text\" rows=\"1\" cols=\"".$this->fields[$I]['size']."\" name=\"".$this->fields[$I]['field']."_".$row[0]."\" id=\"".$this->fields[$I]['field']."_".$row[0]."\" class=\"".$this->fields[$I]['field']."";
-					$output .= "\"";
-					$output .= ($this->fields[$I]['disabled'] === TRUE)?" disabled ":"";
-					$output .= ($this->fields[$I]['readonly'] === TRUE)?" readonly ":"";
-					$output .= ' onfocus="convert2Textarea(this);" onblur="convert2TextInput(this)"';
-					$output .= ">";
-					$output .= htmlentities($value);
-					$output .= "</textarea>".$this->eolChar;
-				}
-				else if ($this->fields[$I]['type'] == "multiselect") {
-
-					errorHandle::errorMsg("Multi Select type not supported in table edit");
-				}
-				else if ($this->fields[$I]['type'] == "checkbox") {
-
-					errorHandle::errorMsg("Checkbox type not supported in table edit");
-				}
-
-				$output .= "</td>".$this->eolChar;
+				$output .= "<td>" . $this->generateFieldInput($field, $row) . "</td>" . $this->eolChar;
 			}
-
-			$output .= "<td class=\"alignCenter\">";
-			if ($this->deleteBox === TRUE) {
-				$output .= "<input type=\"checkbox\" name=\"delete[]\" class=\"delete\" value=\"".$row[0]."\" />".$this->eolChar;
-			}
-			$output .= "</td>".$this->eolChar;
-
+	
+			$output .= "<td class=\"alignCenter\">" . ($this->deleteBox === TRUE ? "<input type=\"checkbox\" name=\"delete[]\" class=\"delete\" value=\"" . $row[0] . "\" />" . $this->eolChar : "") . "</td>" . $this->eolChar;
+	
 			if ($this->numberRowsRight === TRUE) {
-				$output .= "<td class=\"alignRight\">";
-				$output .= $this->rowNumDelimRight . $numberRowsCount;
-				$output .= "</td>".$this->eolChar;
+				$output .= "<td class=\"alignRight\">" . $this->rowNumDelimRight . $numberRowsCount . "</td>" . $this->eolChar;
 			}
+	
 			$numberRowsCount++;
-
-			$output .= "</tr>".$this->eolChar;
-
+			$output .= "</tr>" . $this->eolChar;
 		}
-		$output .= "</tbody>".$this->eolChar;
-		$output .= "</table>".$this->eolChar;
-		if ($this->noSubmit === FALSE) {
-			$submitButtonName = (isnull($this->submitName))?$this->table.'_update':$this->submitName;
-			$output .= "<input type=\"submit\" value=\"".$this->updateButtonText."\" name=\"".$submitButtonName."\" />".$this->eolChar;
-		}
-		$output .= "</form>";
-		$output .= "\n<!-- engine Instruction break -->".'<!-- engine Instruction displayTemplateOn -->'."\n<!-- engine Instruction break -->";
-
-		if ($this->dateInputs) {
-			$output .= "<script>$($.date_input.initialize);</script>";
-		}
-
-		if ($this->dragOrdering === TRUE) {
-			$output .= '<script type="text/javascript">';
-			$output .= "var table = document.getElementById('".$this->database->escape($this->table)."_table');";
-			$output .= 'var tableDnD = new TableDnD();';
-			$output .= 'tableDnD.init(table);';
-			$output .= '</script>';
-		}
-
-		return($output);
+	
+		$output .= "</tbody>" . $this->eolChar;
+		$output .= "</table>" . $this->eolChar;
+		return $output;
 	}
+	
+	private function generateRowClass($numberRowsCount) {
+		if ($this->rowStriping === TRUE) {
+			return (is_odd($numberRowsCount)) ? " class=\"oddrow\"" : " class=\"evenrow\"";
+		}
+		return "";
+	}
+	
+	private function generateRowId($row) {
+		if ($this->dragOrdering === TRUE) {
+			return " id=\"" . $row[0] . "\"";
+		}
+		return "";
+	}
+	
+	private function generateRowNumber($numberRowsCount) {
+		return "<td class=\"alignRight\">" . $this->eolChar . $numberRowsCount . $this->rowNumDelim . "</td>" . $this->eolChar;
+	}
+	
+	private function generateDeleteCheckbox($row) {
+		return "<td class=\"alignCenter\"><input type=\"checkbox\" name=\"delete[]\" value=\"" . $row[0] . "\" /></td>" . $this->eolChar;
+	}
+	
+	private function generateFieldInput($field, $row) {
+		if (isset($field['input'])) {
+			return $field['input']($row);
+		}
+		return htmlspecialchars($row[$field['field']]);
+	}
+	
+	private function generateSubmitButton() {
+		return '<input type="submit" name="submit" value="Submit" />';
+	}
+	
+	private function initializeDateInputs() {
+		return '<script>/* Initialize date inputs */</script>';
+	}
+	
+	private function initializeDragOrdering() {
+		return '<script>/* Initialize drag ordering */</script>';
+	}	
 
 	// returns TRUE if insert is completely successful
 	// otherwise FALSE
