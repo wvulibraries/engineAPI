@@ -206,13 +206,13 @@ class engineDB {
 
 		if (!isnull($sqlResult['numrows']) && $sqlResult['numrows'] > 1) {
 			$temp = array();
-			while($row = mysqli_fetch_array($sqlResult['result'],  mysqli_ASSOC)) {
+			while($row = mysqli_fetch_array($sqlResult['result'],  MYSQLI_ASSOC)) {
 				$temp[] = $row;
 			}
 			$sqlResult['result'] = $temp;
 		}
 		else if (!isnull($sqlResult['numrows'])) {
-			$sqlResult['result'] = mysqli_fetch_array($sqlResult['result'],  mysqli_ASSOC);
+			$sqlResult['result'] = mysqli_fetch_array($sqlResult['result'],  MYSQLI_ASSOC);
 		}
 
 		return($sqlResult);
@@ -303,7 +303,7 @@ class engineDB {
 
 			$this->sanitize = FALSE;
 			$sqlResult      = $this->query($sql);
-			$row            = mysqli_fetch_array($sqlResult['result'],  mysqli_ASSOC);
+			$row            = mysqli_fetch_array($sqlResult['result'],  MYSQLI_ASSOC);
 			if ($row['Engine'] != "InnoDB") {
 				$sqlResult['error'] = "Table Engine not InnoDB";
 				return $sqlResult;
@@ -535,7 +535,7 @@ class engineDB {
 		$sqlResult = $this->query($sql);
 
 		if(!$sqlResult['result']) return (NULL);
-		$row = mysqli_fetch_array($sqlResult['result'], mysqli_ASSOC);
+		$row = mysqli_fetch_array($sqlResult['result'], MYSQLI_ASSOC);
 		$fields = $row['GROUP_CONCAT(column_name)'];
 		if($array === TRUE) $fields = explode(",", $fields);
 		return ($fields);

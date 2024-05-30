@@ -48,7 +48,7 @@ function emod_msww($attPairs){
 	
 	$output = '<select id="ms_'.$dbTables[$attPairs['table']]["prod"].'" multiple="multiple" size="'.$size.'" name="ms_'.$dbTables[$attPairs['table']]["prod"].'[]">';
 	if (isset($attPairs['select']) && !is_empty($attPairs['select'])) {
-		while ($row = mysqli_fetch_array($sqlResult['result'],  MYSQL_ASSOC)) {
+		while ($row = mysqli_fetch_array($sqlResult['result'],  MYSQLI_ASSOC)) {
 			$output .= '<option value="'.htmlsanitize($row['value']).'">'.htmlsanitize($row['label']).'</option>';
 		}
 	}
@@ -70,7 +70,7 @@ function emod_msww($attPairs){
 	$engine->openDB->sanitize = FALSE;
 	$sqlResult = $engine->openDB->query($sql);
 	
-	while ($row = mysqli_fetch_array($sqlResult['result'],  MYSQL_ASSOC)) {
+	while ($row = mysqli_fetch_array($sqlResult['result'],  MYSQLI_ASSOC)) {
 		$output .= '<option value="'.htmlsanitize($row['value']).'">';
 		$output .= htmlsanitize($row['label']);
 		$output .= "</option>";
@@ -137,7 +137,7 @@ function webHelper_listSelect($attPairs) {
 		return webHelper_errorMsg("SQL Error".$sqlResult['error']);
 	}
 	
-	while ($row = mysqli_fetch_array($sqlResult['result'], MYSQL_ASSOC)) {
+	while ($row = mysqli_fetch_array($sqlResult['result'], MYSQLI_ASSOC)) {
 		$output .= "<option value=\"".htmlsanitize($row['ID'])."\"";
 		$output .= (array_key_exists($row['ID'],$selected))?" selected=\"selected\"":"";
 		$output .= ">".htmlsanitize($row[$attPairs['col']])."</option>";
@@ -204,7 +204,7 @@ function webHelper_listCheckbox($attPairs) {
 	
 
 	
-	while ($row = mysqli_fetch_array($sqlResult['result'], MYSQL_ASSOC)) {
+	while ($row = mysqli_fetch_array($sqlResult['result'], MYSQLI_ASSOC)) {
 		$output .= "<input type=\"".$attPairs['type']."\" name=\"".$attPairs['table']."[]\" value=\"".$row['ID']."\" ";
 		$output .= (array_key_exists($row['ID'],$selected))?" checked=\"checked\"":"";
 		$output .= "/>";

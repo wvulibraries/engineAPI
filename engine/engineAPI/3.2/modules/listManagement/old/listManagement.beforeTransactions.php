@@ -446,7 +446,7 @@ class listManagement {
 						$this->database->escape($I['options']['valueTable']));
 
 					$sqlResult = $this->database->query($sql);
-					while($row = mysqli_fetch_array($sqlResult['result'],  MYSQL_ASSOC)) {
+					while($row = mysqli_fetch_array($sqlResult['result'],  MYSQLI_ASSOC)) {
 						
 						
 						
@@ -1482,7 +1482,7 @@ class listManagement {
 
 			$sqlResultUpdates = $this->database->query($sql);
 
-			$rowUpdate = mysqli_fetch_array($sqlResultUpdates['result'],  MYSQL_ASSOC);
+			$rowUpdate = mysqli_fetch_array($sqlResultUpdates['result'],  MYSQLI_ASSOC);
 		
 			if ($rowUpdate["COUNT(*)"] == 0) {
 				$this->modifiedIDs[] = $row[0];
@@ -1575,7 +1575,7 @@ class listManagement {
 			$sqlResultUpdates = $this->database->query($sql);
 
 			if ($sqlResultUpdates['result']) {
-				$rowUpdate = mysqli_fetch_array($sqlResultUpdates['result'],  MYSQL_ASSOC);
+				$rowUpdate = mysqli_fetch_array($sqlResultUpdates['result'],  MYSQLI_ASSOC);
 
 				if ($rowUpdate["COUNT(*)"] == 0) {
 					$updateIDs[] = $row[0];

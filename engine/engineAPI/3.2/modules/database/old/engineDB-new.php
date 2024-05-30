@@ -526,7 +526,7 @@ class engineDB {
 			return(NULL);
 		}
 		
-		$row                      = mysql_fetch_array($sqlResult['result'],  MYSQL_ASSOC);
+		$row                      = mysql_fetch_array($sqlResult['result'],  MYSQLI_ASSOC);
 		
 		$fields = $row['GROUP_CONCAT(column_name)'];
 		

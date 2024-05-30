@@ -129,7 +129,7 @@ class search {
 		// 	$engine->openDB->escape($tableName)
 		// 	);
 		// $sqlResult = $engine->openDB->query($sql);
-		// while ($row = mysql_fetch_array($sqlResult['result'], MYSQL_ASSOC)) {
+		// while ($row = mysql_fetch_array($sqlResult['result'], MYSQLI_ASSOC)) {
 		// 	print "<pre>";
 		// 	print_r($row);
 		// 	print "</pre>";
@@ -246,7 +246,7 @@ class search {
 
 			$sqlResult = $engine->openDB->query($sql);
 
-			while ($row = mysql_fetch_array($sqlResult['result'], MYSQL_ASSOC)) {
+			while ($row = mysql_fetch_array($sqlResult['result'], MYSQLI_ASSOC)) {
 				$row[$this->tempTablePrefix.'tableName'] = $table['name'];
 				$results[] = $row;
 			}

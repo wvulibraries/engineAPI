@@ -428,7 +428,7 @@ class listManagement {
 						$this->database->escape($I['options']['valueTable']));
 
 					$sqlResult = $this->database->query($sql);
-					while($row = mysqli_fetch_array($sqlResult['result'],  MYSQL_ASSOC)) {
+					while($row = mysqli_fetch_array($sqlResult['result'],  MYSQLI_ASSOC)) {
 						
 						
 						

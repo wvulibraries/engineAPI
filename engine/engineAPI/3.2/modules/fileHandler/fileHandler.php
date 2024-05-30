@@ -339,7 +339,7 @@ class fileHandler {
 
 		$sql = sprintf("SHOW FIELDS FROM `$oldTable`");
 		$sqlResult = $this->database->query($sql);
-		while($row = mysqli_fetch_array($sqlResult['result'],  MYSQL_ASSOC)) {
+		while($row = mysqli_fetch_array($sqlResult['result'],  MYSQLI_ASSOC)) {
 			$oldTableFields[$row['Field']] = TRUE;
 		}
 
@@ -348,7 +348,7 @@ class fileHandler {
 
 		$sql = sprintf("SHOW FIELDS FROM `$newTable`");
 		$sqlResult = $this->database->query($sql);
-		while($row = mysqli_fetch_array($sqlResult['result'],  MYSQL_ASSOC)) {
+		while($row = mysqli_fetch_array($sqlResult['result'],  MYSQLI_ASSOC)) {
 			$newTableFields[$row['Field']] = TRUE;
 		}
 

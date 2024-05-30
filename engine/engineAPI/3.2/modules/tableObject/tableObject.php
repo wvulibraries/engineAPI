@@ -239,7 +239,7 @@ class tableObject {
 		}
 
 		$data = [];
-		while ($row = mysqli_fetch_array($sqlResult['result'], MYSQL_ASSOC)) {
+		while ($row = mysqli_fetch_array($sqlResult['result'], MYSQLI_ASSOC)) {
 			$data[] = $row;
 		}
 

@@ -106,7 +106,7 @@ class revisionControlSystem {
 			return(FALSE);
 		}
 
-		$row              = mysqli_fetch_array($sqlResult['result'],  MYSQL_ASSOC);
+		$row              = mysqli_fetch_array($sqlResult['result'],  MYSQLI_ASSOC);
 		$secondaryIDValue = $row[$this->secondaryID];
 
 		// Check to see if the secondary / primary key pair exists in the revision table already
@@ -122,7 +122,7 @@ class revisionControlSystem {
 			return(FALSE);
 		}
 
-		$row       = mysqli_fetch_array($sqlResult['result'],  MYSQL_ASSOC);
+		$row       = mysqli_fetch_array($sqlResult['result'],  MYSQLI_ASSOC);
 
 		// they key already exists, so we return TRUE because nothing needs done
 		if ($row["COUNT(*)"] > 0) {
@@ -147,7 +147,7 @@ class revisionControlSystem {
 			return(FALSE);
 		}
 
-		$row = mysqli_fetch_array($sqlResult['result'],  MYSQL_ASSOC);
+		$row = mysqli_fetch_array($sqlResult['result'],  MYSQLI_ASSOC);
 
 		// We don't need the primary and secondary fields in the array
 		unset($row[$this->primaryID]);
@@ -188,7 +188,7 @@ class revisionControlSystem {
 				}
 
 				$temp = array();
-				while($row = mysqli_fetch_array($sqlResult['result'],  MYSQL_ASSOC)) {
+				while($row = mysqli_fetch_array($sqlResult['result'],  MYSQLI_ASSOC)) {
 					$temp[] = $row;
 				}
 
@@ -217,7 +217,7 @@ class revisionControlSystem {
 			return(FALSE);
 		}
 
-		$row       = mysqli_fetch_array($sqlResult['result'],  MYSQL_ASSOC);
+		$row       = mysqli_fetch_array($sqlResult['result'],  MYSQLI_ASSOC);
 
 		if (isset($row['ID']) && !isempty($row['ID'])) {
 			$metaDataArray = $row['ID'];
@@ -236,7 +236,7 @@ class revisionControlSystem {
 				return(FALSE);
 			}
 
-			$row       = mysqli_fetch_array($sqlResult['result'],  MYSQL_ASSOC);
+			$row       = mysqli_fetch_array($sqlResult['result'],  MYSQLI_ASSOC);
 
 			if (isset($row['ID']) && !isempty($row['ID'])) {
 				$digitalObjectArray = $row['ID'];
@@ -257,7 +257,7 @@ class revisionControlSystem {
 				return(FALSE);
 			}
 
-			$row       = mysqli_fetch_array($sqlResult['result'],  MYSQL_ASSOC);
+			$row       = mysqli_fetch_array($sqlResult['result'],  MYSQLI_ASSOC);
 
 			if (isset($row['ID']) && !isempty($row['ID'])) {
 				$relatedDataArray = $row['ID'];
@@ -342,7 +342,7 @@ class revisionControlSystem {
 			return(FALSE);
 		}
 
-		$row       = mysqli_fetch_array($sqlResult['result'],  MYSQL_ASSOC);
+		$row       = mysqli_fetch_array($sqlResult['result'],  MYSQLI_ASSOC);
 
 		// $row['metadata']        = unserialize(base64_decode($row['metadata']));
 		$row['metadata']    = $this->getMetadataForID($row['ID']);
@@ -367,7 +367,7 @@ class revisionControlSystem {
 				return(FALSE);
 			}
 
-			$row2               = mysqli_fetch_array($sqlResult['result'],  MYSQL_ASSOC);
+			$row2               = mysqli_fetch_array($sqlResult['result'],  MYSQLI_ASSOC);
 			$row['digitalObjects'] = $row2['digitalObjects'];
 
 		}
@@ -519,7 +519,7 @@ class revisionControlSystem {
 			$tableHeaders[] = "Compare 2";
 		}
 
-		while ($row = mysqli_fetch_array($sqlResult['result'],  MYSQL_ASSOC)) {
+		while ($row = mysqli_fetch_array($sqlResult['result'],  MYSQLI_ASSOC)) {
 
 			$metadata = $this->getMetadataForID($row['ID']);
 
@@ -613,7 +613,7 @@ class revisionControlSystem {
 			return(FALSE);
 		}
 
-		$row_1                   = mysqli_fetch_array($sqlResult['result'],  MYSQL_ASSOC);
+		$row_1                   = mysqli_fetch_array($sqlResult['result'],  MYSQLI_ASSOC);
 		$row_1['metadata']       = $this->getMetadataForID($row_1['ID']);
 		$row_1['relatedData']    = $this->getMetadataForID($row_1['ID'],"relatedData");
 		$row_1['digitalObjects'] = $this->getMetadataForID($row_1['ID'],"digitalObjects",FALSE);
@@ -632,7 +632,7 @@ class revisionControlSystem {
 			return(FALSE);
 		}
 
-		$row_2                   = mysqli_fetch_array($sqlResult['result'],  MYSQL_ASSOC);
+		$row_2                   = mysqli_fetch_array($sqlResult['result'],  MYSQLI_ASSOC);
 		$row_2['metadata']       = $this->getMetadataForID($row_2['ID']);
 		$row_2['relatedData']    = $this->getMetadataForID($row_2['ID'],"relatedData");
 		$row_2['digitalObjects'] = $this->getMetadataForID($row_2['ID'],"digitalObjects",FALSE);
@@ -871,7 +871,7 @@ class revisionControlSystem {
 			return(FALSE);
 		}
 
-		$row       = mysqli_fetch_array($sqlResult['result'],  MYSQL_ASSOC);
+		$row       = mysqli_fetch_array($sqlResult['result'],  MYSQLI_ASSOC);
 
 		// Retrieve metaData if it is a link
 		if (validate::integer($row[$type])) {
@@ -893,7 +893,7 @@ class revisionControlSystem {
 				return(FALSE);
 			}
 
-			$row2             = mysqli_fetch_array($sqlResult['result'],  MYSQL_ASSOC);
+			$row2             = mysqli_fetch_array($sqlResult['result'],  MYSQLI_ASSOC);
 			$row[$type]  = $row2[$type];
 
 		}

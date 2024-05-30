@@ -303,7 +303,7 @@ class engineDB {
 
 			$this->sanitize = FALSE;
 			$sqlResult      = $this->query($sql);
-			$row            = mysql_fetch_array($sqlResult['result'],  MYSQL_ASSOC);
+			$row            = mysql_fetch_array($sqlResult['result'],  MYSQLI_ASSOC);
 			if ($row['Engine'] != "InnoDB") {
 				$sqlResult['error'] = "Table Engine not InnoDB";
 				return $sqlResult;
@@ -514,7 +514,7 @@ class engineDB {
 			return(NULL);
 		}
 
-		$row                      = mysql_fetch_array($sqlResult['result'],  MYSQL_ASSOC);
+		$row                      = mysql_fetch_array($sqlResult['result'],  MYSQLI_ASSOC);
 
 		$fields = $row['GROUP_CONCAT(column_name)'];
 

@@ -466,7 +466,7 @@ class listManagement {
 						$this->database->escape($I['options']['valueTable']));
 
 					$sqlResult = $this->database->query($sql);
-					while($row = mysqli_fetch_array($sqlResult['result'],  MYSQL_ASSOC)) {
+					while($row = mysqli_fetch_array($sqlResult['result'],  MYSQLI_ASSOC)) {
 						$output .= "<li>";
 						$output .= '<input type="checkbox" name="'.$I['field'].'_insert[]" value="'.htmlsanitize($row[$I['options']['valueDisplayID']]).'" ';
 						$output .= ($error === TRUE && isset($this->engine->cleanPost['HTML'][$I['field'].'_insert']) && in_array($row[$I['options']['valueDisplayID']],$this->engine->cleanPost['HTML'][$I['field'].'_insert']))?"checked":"";
@@ -1550,7 +1550,7 @@ class listManagement {
 
 			$sqlResultUpdates = $this->database->query($sql);
 
-			$rowUpdate = mysqli_fetch_array($sqlResultUpdates['result'],  MYSQL_ASSOC);
+			$rowUpdate = mysqli_fetch_array($sqlResultUpdates['result'],  MYSQLI_ASSOC);
 		
 			if ($rowUpdate["COUNT(*)"] == 0) {
 				$this->modifiedIDs[] = $row[0];
@@ -1643,7 +1643,7 @@ class listManagement {
 			$sqlResultUpdates = $this->database->query($sql);
 
 			if ($sqlResultUpdates['result']) {
-				$rowUpdate = mysqli_fetch_array($sqlResultUpdates['result'],  MYSQL_ASSOC);
+				$rowUpdate = mysqli_fetch_array($sqlResultUpdates['result'],  MYSQLI_ASSOC);
 
 				if ($rowUpdate["COUNT(*)"] == 0) {
 					$updateIDs[] = $row[0];

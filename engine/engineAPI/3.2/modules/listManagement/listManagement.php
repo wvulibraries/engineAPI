@@ -669,7 +669,7 @@ class listManagement {
 						$this->database->escape($I['options']['valueTable']));
 
 					$sqlResult = $this->database->query($sql);
-					while ($row = mysqli_fetch_array($sqlResult['result'], MYSQL_ASSOC)) {
+					while ($row = mysqli_fetch_array($sqlResult['result'], MYSQLI_ASSOC)) {
 
 						$checked = NULL;
 						if ($error === TRUE && isset($engine->cleanPost['HTML'][$I['field'].'_insert']) && in_array($row[$I['options']['valueDisplayID']],$engine->cleanPost['HTML'][$I['field'].'_insert'])) {
@@ -855,6 +855,7 @@ class listManagement {
 	public function displayEditTable($addGet=TRUE,$debug=FALSE) {
 		$queryString = $this->buildQueryString($addGet);
 		$this->buildOrderByClause();
+		$this->debugSqlQuery($sql);
 
 		if (!isnull($this->sql)) {
 			$sql = $this->sql;
@@ -865,10 +866,6 @@ class listManagement {
 				$this->whereClause,
 				$this->orderBy
 				);
-		}
-
-		if ($this->debug === TRUE) {
-			print "SQL: ".$sql."<br />";
 		}
 
 		$this->database->sanitize = FALSE;
@@ -1270,6 +1267,12 @@ class listManagement {
 			$this->orderBy = $this->database->escape($this->orderBy);
 		} else {
 			$this->orderBy = "";
+		}
+	}
+
+	private function debugSqlQuery($sql) {
+		if ($this->debug === TRUE) {
+			print "SQL: " . $sql . "<br />";
 		}
 	}
 
@@ -2047,7 +2050,7 @@ class listManagement {
 
 			$sqlResultUpdates = $this->database->query($sql);
 
-			$rowUpdate = mysqli_fetch_array($sqlResultUpdates['result'],  MYSQL_ASSOC);
+			$rowUpdate = mysqli_fetch_array($sqlResultUpdates['result'],  MYSQLI_ASSOC);
 
 			if ($rowUpdate["COUNT(*)"] == 0) {
 				$this->modifiedIDs[] = $row[0];
@@ -2111,7 +2114,7 @@ class listManagement {
 		$sqlResult                = $this->database->query($sql);
 
 		if ($sqlResult['result']) {
-			$row = mysqli_fetch_array($sqlResult['result'],  MYSQL_ASSOC);
+			$row = mysqli_fetch_array($sqlResult['result'],  MYSQLI_ASSOC);
 
 			// If count is 0, it didn't find a match, so something changed
 			if ($row["COUNT(*)"] == 0) {
@@ -2172,7 +2175,7 @@ class listManagement {
 			$sqlResultUpdates = $this->database->query($sql);
 
 			if ($sqlResultUpdates['result']) {
-				$rowUpdate = mysqli_fetch_array($sqlResultUpdates['result'],  MYSQL_ASSOC);
+				$rowUpdate = mysqli_fetch_array($sqlResultUpdates['result'],  MYSQLI_ASSOC);
 
 				// If count is 0, it didn't find a match, so something changed
 				if ($rowUpdate["COUNT(*)"] == 0) {
