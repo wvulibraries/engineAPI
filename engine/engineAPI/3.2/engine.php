@@ -158,7 +158,7 @@ class EngineAPI{
 	 */
 	private function __construct($site="default") {
 		require_once(self::$engineDir."/sessionManagement.php");
-
+		
 		self::$engineDir = dirname(__FILE__);
 
 		// make sure the session cookie is only accessible via HTTP
