@@ -289,6 +289,10 @@ class EngineAPI{
 			}
 		}
 
+		// Initialize the loginFunctions property as an empty array
+		$this->loginFunctions = array();
+
+		// Iterate over $loginFunctions and assign its values to $this->loginFunctions
 		foreach ($loginFunctions as $type => $function) {
 			$this->loginFunctions[$type] = $function;
 		}

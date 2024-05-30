@@ -172,7 +172,7 @@ class errorHandle
 	/**
 	 * No wakeup (serialization) allowed!
 	 */
-    private function __wakeup(){}
+    public function __wakeup(){}
 
     /**
      * Class constructor
