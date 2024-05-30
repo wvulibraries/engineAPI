@@ -977,20 +977,23 @@ class EngineAPI{
 	}
 
 	/**
-	 * Process a login (Is this deprecated?)
+	 * Process a login
 	 *
-	 * @deprecated
-	 * @param $loginType
+	 * @param string $loginType
+	 * @param array $loginFunctions
 	 * @return bool
 	 */
-	public function login($loginType) {
-		deprecated();
-		if (isset($this->loginFunctions[$loginType])) {
-			if($this->loginFunctions[$loginType](trim($this->cleanPost['RAW']['username']),$this->cleanPost['RAW']['password'])) {
-				return(TRUE);
+	public function login($loginType, $loginFunctions) {
+		// deprecated();
+
+		if (isset($loginFunctions[$loginType])) {
+			$function = $loginFunctions[$loginType];
+			if ($function(trim($this->cleanPost['RAW']['username']), $this->cleanPost['RAW']['password'])) {
+				return true;
 			}
 		}
-		return(FALSE);
+
+		return false;
 	}
 
 	/**
