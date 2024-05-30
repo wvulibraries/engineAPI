@@ -398,10 +398,16 @@ class errorHandle
      * @see http://www.php.net/manual/en/class.exception.php
      * @see http://us2.php.net/manual/en/function.set-exception-handler.php
      */
-    public static function phpException(Exception $e)
+    public static function phpException($e)
     {
-        self::$errorType = 'phpException';
-        self::newError("{$e->getMessage()} at {$e->getFile()}:{$e->getLine()}", self::$phpErrMapping['phpException']);
+        if ($e instanceof Exception) {
+            self::$errorType = 'phpException';
+            self::newError("{$e->getMessage()} at {$e->getFile()}:{$e->getLine()}", self::$phpErrMapping['phpException']);
+        } else {
+            // Handle other types of errors if needed
+            // For example:
+            self::newError("Error: {$e->getMessage()}", self::$phpErrMapping['phpException']);
+        }
     }
 
     /**
