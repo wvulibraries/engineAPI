@@ -1,19 +1,21 @@
 <?php
-
+/**
+ * Sanitize functions
+ * 
+ * Functions to sanitize input for use in mysql and html
+ * 
+ * @package EngineAPI
+ */
 
 /**
  * Alias for mysqli_real_escape_string()
- * Makes typing a touch easier, plus if we ever plus if we ever want to use something other than mysql_real_escape_string, its easy to switch.
+ * Makes typing a touch easier, plus if we ever want to use something other than mysqli_real_escape_string, it's easy to switch.
  *
- * @author Michael Bond
- * @modified_by Tracy A. McCormick
- * @see mysql_real_escape_string(), mysqli_real_escape_string()
  * @param string $var
  * @param object $conn 
  * @return string
  */
-
-function mres($var, $conn = NULL){
+function mres($var, $conn = NULL) {
 	if ($conn == NULL) {
 		return addslashes($var);
 	}
@@ -31,27 +33,21 @@ function mres($var, $conn = NULL){
  */
 function dbSanitize($var, $quotes = FALSE) {
 	//run each array item through this function (by reference)
-    if (is_array($var)) {
-        foreach ($var as $I => $val) {
-            $var[$I] = dbSanitize($val);
-        }
-    }
-	//clean strings
-    else if (is_string($var)) {
-        $var = mres($var);
-        if ($quotes) {
-            $var = "'". $var ."'";
-        }
-    }
-	//convert null variables to SQL NULL
-    else if (isnull($var)) {
-        $var = "NULL";
-    }
-	//convert boolean variables to binary boolean
-    else if (is_bool($var)) {
-        $var = ($var) ? 1 : 0;
-    }
-    return $var;
+	if (is_array($var)) {
+		foreach ($var as $I => $val) {
+			$var[$I] = dbSanitize($val);
+		}
+	} elseif (is_string($var)) {
+		$var = mres($var);
+		if ($quotes) {
+			$var = "'" . $var . "'";
+		}
+	} elseif (is_null($var)) {
+		$var = "NULL";
+	} elseif (is_bool($var)) {
+		$var = ($var) ? 1 : 0;
+	}
+	return $var;
 }
 
 /**
@@ -71,18 +67,17 @@ function htmlSanitize($var, $flags=ENT_QUOTES, $charSet="UTF-8", $doubleEncode=T
 	if(!isset($var)) return(FALSE);
 
 	//run each array item through this function (by reference)
-    if (is_array($var)) {
-        foreach ($var as $I => $val) {
-            $var[$I] = htmlSanitize($val);
-        }
-    }
+	if (is_array($var)) {
+		foreach ($var as $I => $val) {
+			$var[$I] = htmlSanitize($val);
+		}
+	}
 	else {
 		$var = htmlentities($var, $flags, $charSet, $doubleEncode);
 	}
 
 	return($var);
 }
-
 /**
  * Sanitize json data structures for either HTML or MYSQL usage.
  *
@@ -92,15 +87,14 @@ function htmlSanitize($var, $flags=ENT_QUOTES, $charSet="UTF-8", $doubleEncode=T
  *        HTML or MYSQL [Default: mysql]
  * @return array|bool|string
  */
-function jsonSanitize($var,$type="mysql") {
-
+function jsonSanitize($var, $type = "mysql") {
 	$type = strtolower($type);
 
 	if ($type != "mysql" && $type != "html") {
-		return($type);
+		return $type;
 	}
 
-	switch($type) {
+	switch ($type) {
 		case "mysql":
 			$sanitizeFunction = "dbSanitize";
 			break;
@@ -108,46 +102,41 @@ function jsonSanitize($var,$type="mysql") {
 			$sanitizeFunction = "htmlSanitize";
 			break;
 		default:
-			return(FALSE);
+			return FALSE;
 			break;
 	}
 
 	$varSanitized = array();
 
-	foreach((array)$var as $I=>$V) {
+	foreach ((array) $var as $I => $V) {
 		$index = $sanitizeFunction($I);
 
 		if (is_array($V)) {
-			$value = jsonSanitize($V,$type);
-		}
-		else {
+			$value = jsonSanitize($V, $type);
+		} else {
 			$value = $sanitizeFunction($V);
 		}
 
 		$varSanitized[$index] = $value;
-
 	}
 
-	return($varSanitized);
+	return $varSanitized;
 }
 
 /**
  * remove \r from a string if the $engineVar 'stripCarriageReturns' is TRUE
- * If you modify that variable to use this functions its best to return it to
+ * If you modify that variable to use this function, it's best to return it to
  * its original state
  *
  * @param string $string
  * @return string
  */
 function stripCarriageReturns($string) {
-
 	global $engineVars;
-
 	if ($engineVars['stripCarriageReturns'] === TRUE) {
-		$string = str_replace("\r","",$string);
+		$string = str_replace("\r", "", $string);
 	}
-
-	return($string);
+	return $string;
 }
 
 /**
@@ -157,10 +146,9 @@ function stripCarriageReturns($string) {
  * @return string
  */
 function stripNewLines($string) {
-	$string = str_replace("\r","",$string);
-	$string = str_replace("\n","",$string);
-	return($string);
+	$string = str_replace("\r", "", $string);
+	$string = str_replace("\n", "", $string);
+	return $string;
 }
-
 
 ?>

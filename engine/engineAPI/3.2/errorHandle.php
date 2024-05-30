@@ -565,7 +565,7 @@ class errorHandle
             $qTblSearch = self::$db->query(sprintf("SELECT * FROM `information_schema`.`TABLES` WHERE `TABLE_SCHEMA`='%s' AND `TABLE_NAME`='%s'",
                 self::$db->escape($dbName),
                 self::$db->escape(self::$dbTblName)));
-            if(!mysql_num_rows($qTblSearch['result'])){
+            if(!mysqli_num_rows($qTblSearch['result'])){
                 // We need to create this table!
                 $qTblCreate = self::$db->query(sprintf('CREATE TABLE IF NOT EXISTS `%s`.`%s` (
                     `ID` int(11) unsigned NOT NULL AUTO_INCREMENT,

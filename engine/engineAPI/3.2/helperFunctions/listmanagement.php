@@ -99,7 +99,7 @@ function webHelper_listEditList($attPairs,$engine=null) {
 	$output .= "<tr>";
 	$output .= "<td colspan=\"3\" style=\"background-color: #000000;\"></td>";
 	$output .= "</tr>";
-	while ($row = mysql_fetch_array($sqlResult['result'], MYSQL_NUM)) {
+	while ($row = mysqli_fetch_array($sqlResult['result'], MYSQL_NUM)) {
 		$output .= "<tr>";
 		$output .= "<td style=\"padding-top: 3px;padding-bottom: 3px;\">";
 		$output .= "<input type=\"text\" size=\"40\" name=\"title_".$row[0]."\" value=\"".htmlentities($row[1])."\" />";
@@ -167,7 +167,7 @@ function webHelper_listUpdate($table,$engine,$emailCheck=FALSE) {
 		$output .= webHelper_errorMsg("SQL Error".$sqlResult['error']);
 	}
 	
-	while ($row = mysql_fetch_array($sqlResult['result'], MYSQL_NUM)) {
+	while ($row = mysqli_fetch_array($sqlResult['result'], MYSQL_NUM)) {
 		if (isset($engine->cleanPost['MYSQL']['title_'.$row[0]])) {
 			$temp = $engine->cleanPost['MYSQL']['title_'.$row[0]];
 		}
@@ -230,7 +230,7 @@ function webHelper_listDupeCheck($new,$table,$engine) {
 	
 	//We should probably do a SQL check here
 	
-	if (mysql_num_rows($sqlResult['result']) == 0) {
+	if (mysqli_num_rows($sqlResult['result']) == 0) {
 		return(FALSE);
 	}
 	

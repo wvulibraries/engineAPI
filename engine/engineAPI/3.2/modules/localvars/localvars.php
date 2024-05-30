@@ -150,7 +150,7 @@ class localvars {
             $params['dbConn']->escape($params['sqlWhere'])));
         if($dbSettings['result']){
             $settingCount = 0;
-            while($row = mysql_fetch_assoc($dbSettings['result'])){
+            while($row = mysqli_fetch_assoc($dbSettings['result'])){
                 self::add($params['namespace'].$row[ $nameField ], $row[ $valueField ]);
                 $settingCount++;
             }

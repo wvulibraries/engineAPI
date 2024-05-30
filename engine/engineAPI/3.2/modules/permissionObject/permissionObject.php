@@ -36,7 +36,7 @@ class permissionObject {
 
 		if(!$sqlResult['result']) return webHelper_errorMsg("Error pulling permissions from table in Constructor");
 
-		while($row = mysql_fetch_array($sqlResult['result'],  MYSQL_NUM)){
+		while($row = mysqli_fetch_array($sqlResult['result'],  MYSQL_NUM)){
 			$this->permsList[] = (string)$row[0];
 		}
 	}
@@ -57,7 +57,7 @@ class permissionObject {
 		$sqlResult = $this->database->query($sql);
 
 		if(!$sqlResult['result']) return(FALSE);
-		if(mysql_num_rows($sqlResult['result']) > 0) return(FALSE);
+		if(mysqli_num_rows($sqlResult['result']) > 0) return(FALSE);
 
 		// Make sure that only valid Strings are entered
 		$return = preg_match("/^[a-zA-Z0-9\-\_]+$/",$this->database->escape($function));
@@ -118,7 +118,7 @@ class permissionObject {
 
 		// This should be in a template instead of hard-coded HTML
 		$output = '<ul class="perissionsCheckBoxList">';
-		while ($row = mysql_fetch_array($sqlResult['result'],  MYSQL_BOTH)) {
+		while ($row = mysqli_fetch_array($sqlResult['result'],  MYSQL_BOTH)) {
 			$row['name']  = htmlSanitize($row['name']);
 			$row['value'] = htmlSanitize($row['value']);
 
@@ -144,7 +144,7 @@ class permissionObject {
 		$sqlResult = $this->database->query($sql);
 
 		$count = "0";
-		while ($row = mysql_fetch_array($sqlResult['result'], MYSQL_NUM)) {
+		while ($row = mysqli_fetch_array($sqlResult['result'], MYSQL_NUM)) {
 			if (bccomp($count,$row[0]) == -1) {
 				$count = $row[0];
 			}

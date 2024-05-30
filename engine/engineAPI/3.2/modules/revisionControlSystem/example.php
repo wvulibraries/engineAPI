@@ -129,7 +129,7 @@ localvars::add("revisionTable",$rcs->generateRevisionTable("1",$displayFields));
 // Get the current row from the database. we'll just vardump it below
 $sql       = sprintf("SELECT * FROM test WHERE `ID`='1'");
 $sqlResult = $engine->openDB->query($sql);
-$row       = mysql_fetch_array($sqlResult['result'],  MYSQL_ASSOC);
+$row       = mysqli_fetch_array($sqlResult['result'],  MYSQL_ASSOC);
 
 $fields = array();
 $fields['metadata']['name']['display'] = create_function('$value', 'return sprintf("<em>%s</em>",$value);');

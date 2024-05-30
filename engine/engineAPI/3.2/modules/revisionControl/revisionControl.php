@@ -97,7 +97,7 @@ class revisionControl {
 				return(FALSE);
 			}
 
-			$row = mysql_fetch_array($sqlResult['result'],  MYSQL_ASSOC);
+			$row = mysqli_fetch_array($sqlResult['result'],  MYSQL_ASSOC);
 			$ID2 = $row[$this->secondID];
 
 		}
@@ -116,7 +116,7 @@ class revisionControl {
 			return(FALSE);
 		}
 
-		$row = mysql_fetch_array($sqlResult['result'],  MYSQL_ASSOC);
+		$row = mysqli_fetch_array($sqlResult['result'],  MYSQL_ASSOC);
 
 		if($row["COUNT(*)"] > 0) return(TRUE);
 		/* ** End Count Check ** */
@@ -218,7 +218,7 @@ class revisionControl {
 			$tableHeaders[] = "Compare 2";
 		}
 
-		while ($row = mysql_fetch_array($sqlResult['result'],  MYSQL_ASSOC)) { // while 1
+		while ($row = mysqli_fetch_array($sqlResult['result'],  MYSQL_ASSOC)) { // while 1
 
 			$temp = array();
 

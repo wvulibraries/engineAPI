@@ -165,7 +165,7 @@ class auth extends authCommon{
 		$dbObjCheck = $authCommon->db->query(sprintf("SELECT COUNT(`ID`) AS `i` FROM `%s` WHERE `ID`='%s'",
 			$authCommon->db->escape($authCommon->tblObjects),
 			$authCommon->db->escape($id)));
-		if(mysql_result($dbObjCheck['result'],0,'i')){
+		if(mysqli_result($dbObjCheck['result'],0,'i')){
 			errorHandle::newError(__METHOD__."() - Object already exists!", errorHandle::DEBUG);
 			return FALSE;
 		}else{
@@ -174,7 +174,7 @@ class auth extends authCommon{
 				$dbObjCheck = $authCommon->db->query(sprintf("SELECT COUNT(`ID`) AS `i` FROM `%s` WHERE `ID`='%s'",
 					$authCommon->db->escape($authCommon->tblObjects),
 					$authCommon->db->escape($parent)));
-				if(!mysql_result($dbObjCheck['result'],0,'i')){
+				if(!mysqli_result($dbObjCheck['result'],0,'i')){
 					errorHandle::newError(__METHOD__."() - Parent object dosen't exists!", errorHandle::DEBUG);
 					return FALSE;
 				}
@@ -322,7 +322,7 @@ class auth extends authCommon{
 		$sql = sprintf("SELECT * FROM `%s`", $authCommon->db->escape($authCommon->tblGroups));
 		if(isset($orderBy)) $sql .= " ORDER BY $orderBy";
 		$dbGroups = $authCommon->db->query($sql);
-		while($row = mysql_fetch_assoc($dbGroups['result'])){
+		while($row = mysqli_fetch_assoc($dbGroups['result'])){
 			$groups[] = $returnObject ? self::getGroup($row['ID'], TRUE) : $row;
 		}
 		return $groups;
@@ -343,7 +343,7 @@ class auth extends authCommon{
 		$sql = sprintf("SELECT * FROM `%s` WHERE ID NOT IN (SELECT `childGroup` FROM `%s`)", $authCommon->db->escape($authCommon->tblGroups), $authCommon->db->escape($authCommon->tblGroups2Groups));
 		if(isset($orderBy)) $sql .= " ORDER BY $orderBy";
 		$dbGroups = $authCommon->db->query($sql);
-		while($row = mysql_fetch_assoc($dbGroups['result'])){
+		while($row = mysqli_fetch_assoc($dbGroups['result'])){
 			$groups[] = $returnObject ? self::getGroup($row['ID'], TRUE) : $row;
 		}
 		return $groups;
@@ -378,9 +378,9 @@ class auth extends authCommon{
 			return NULL;
 		}else{
 			if(sizeof($fields) > 1 or $fields[0] == '*'){
-				return mysql_fetch_assoc($dbGroup['result']);
+				return mysqli_fetch_assoc($dbGroup['result']);
 			}else{
-				return mysql_result($dbGroup['result'], 0, $fields[0]);
+				return mysqli_result($dbGroup['result'], 0, $fields[0]);
 			}
 		}
 	}
@@ -419,7 +419,7 @@ class auth extends authCommon{
 					// errorHandle::newError(__METHOD__."() - Cannot find a group for ldapDN '$groupKey'!", errorHandle::DEBUG);
 					return NULL;
 				}else{
-					$groupKey = mysql_result($dbGroupID['result'], 0, 'ID');
+					$groupKey = mysqli_result($dbGroupID['result'], 0, 'ID');
 				}
 			}
 			return self::getEntity('gid:'.$groupKey, FALSE, (bool)$forceNew);
@@ -445,7 +445,7 @@ class auth extends authCommon{
 				$authCommon->db->escape($groupKey)));
 
 			// Return the final array of fields
-			return $dbGroup['numRows'] ? mysql_fetch_assoc($dbGroup['result']) : array();
+			return $dbGroup['numRows'] ? mysqli_fetch_assoc($dbGroup['result']) : array();
 		}
 	}
 
@@ -567,7 +567,7 @@ class auth extends authCommon{
 		if(isset($orderBy)) $sql .= " ORDER BY $orderBy";
 
 		$dbUsers = $authCommon->db->query($sql);
-		while($row = mysql_fetch_assoc($dbUsers['result'])){
+		while($row = mysqli_fetch_assoc($dbUsers['result'])){
 			$users[] = ($returnObject) ? self::getUser($row['ID'], TRUE) : $row;
 		}
 		return $users;
@@ -607,7 +607,7 @@ class auth extends authCommon{
 					errorHandle::newError(__METHOD__."() - Cannot find user for username '$userKey'!", errorHandle::DEBUG);
 					return NULL;
 				}else{
-					$userKey = mysql_result($dbGroupID['result'], 0, 'ID');
+					$userKey = mysqli_result($dbGroupID['result'], 0, 'ID');
 				}
 			}
 			return self::getEntity('uid:'.$userKey, FALSE, (bool)$forceNew);
@@ -633,7 +633,7 @@ class auth extends authCommon{
 				$authCommon->db->escape($userKey)));
 
 			// Return the final array of fields
-			return $dbGroup['numRows'] ? mysql_fetch_assoc($dbGroup['result']) : array();
+			return $dbGroup['numRows'] ? mysqli_fetch_assoc($dbGroup['result']) : array();
 		}
 	}
 
@@ -647,7 +647,7 @@ class auth extends authCommon{
 			$authCommon->db->escape($authCommon->tblAuthorizations),
 			$authCommon->db->escape($userKey)));
 		if(!$dbObjects['error']){
-			while($row = mysql_fetch_assoc($dbObjects['result'])){
+			while($row = mysqli_fetch_assoc($dbObjects['result'])){
 				auth::revoke($row['authObjectID'], "uid:$userKey", '*');
 			}
 			return TRUE;
@@ -696,7 +696,7 @@ class auth extends authCommon{
 				$authCommon->db->escape($object),
 				$authCommon->db->escape($name)));
 		}
-		if(mysql_result($dbNameCheck['result'], 0, 'i')){
+		if(mysqli_result($dbNameCheck['result'], 0, 'i')){
 			// We found a name-collision
 			errorHandle::newError(__METHOD__."() - A permission already exists with the name '$name'!", errorHandle::DEBUG);
 			return FALSE;
@@ -740,7 +740,7 @@ class auth extends authCommon{
 			$dbPermissions = $authCommon->db->query(sprintf("SELECT `ID` FROM `%s` WHERE `object`='%s'",
 				$authCommon->db->escape($authCommon->tblPermissions),
 				$authCommon->db->escape($object)));
-			while($permission = mysql_fetch_assoc($dbPermissions['result'])){
+			while($permission = mysqli_fetch_assoc($dbPermissions['result'])){
 				$permissionIDs[] = $permission['ID'];
 			}
 		}
@@ -811,7 +811,7 @@ class auth extends authCommon{
 			errorHandle::newError(__METHOD__."() - SQL Error! (".$dbPermission['errorNumber'].":".$dbPermission['error'].")", errorHandle::DEBUG);
 			return NULL;
 		}elseif($dbPermission['numRows']){
-			$result = mysql_fetch_assoc($dbPermission['result']);
+			$result = mysqli_fetch_assoc($dbPermission['result']);
 			return (sizeof($sqlFields) > 1) ? $result : array_shift($result);
 		}else{
 			errorHandle::newError(__METHOD__."() - No permission found for the key '$originObject'-'$name'!", errorHandle::DEBUG);
@@ -877,7 +877,7 @@ class auth extends authCommon{
 				$authCommon->db->escape($object)));
 		}
 
-		while($row = mysql_fetch_assoc($dbPermissions['result'])){
+		while($row = mysqli_fetch_assoc($dbPermissions['result'])){
 			$row['isGlobal'] = ($row['object'] == self::GLOBAL_PERMISSION) ? TRUE : FALSE;
 			$permissions[]   = $row;
 		}
@@ -898,7 +898,7 @@ class auth extends authCommon{
 				errorHandle::newError(__METHOD__."() - SQL Error! (".$dbPermission['errorNumber'].":".$dbPermission['error'].")", errorHandle::DEBUG);
 				return NULL;
 			}elseif($dbPermission['numRows']){
-				$result = mysql_fetch_assoc($dbPermission['result']);
+				$result = mysqli_fetch_assoc($dbPermission['result']);
 				self::$permissionIdRegistry[$key] = $result['ID'];
 			}else{
 				errorHandle::newError(__METHOD__."() - No permission found for name:".$name." object:".$object."!", errorHandle::DEBUG);
@@ -937,7 +937,7 @@ class auth extends authCommon{
 			errorHandle::newError(__METHOD__."() - SQL Error! (".$dbPermission['errorNumber'].":".$dbPermission['error'].")", errorHandle::DEBUG);
 			return NULL;
 		}elseif($dbPermission['numRows']){
-			$result = mysql_fetch_assoc($dbPermission['result']);
+			$result = mysqli_fetch_assoc($dbPermission['result']);
 			return (sizeof($sqlFields) > 1) ? $result : array_shift($result);
 		}else{
 			errorHandle::newError(__METHOD__."() - No permission found with id '$id'!", errorHandle::DEBUG);
@@ -993,7 +993,7 @@ class auth extends authCommon{
 			$authCommon->db->escape($authCommon->tblPermissions),
 			$authCommon->db->escape($authID)));
 		if($dbAuth['numRows']){
-			return mysql_fetch_assoc($dbAuth['result']);
+			return mysqli_fetch_assoc($dbAuth['result']);
 		}else{
 			return array();
 		}
@@ -1155,7 +1155,7 @@ class authCommon{
 		$dbChildren = $this->db->query(sprintf("SELECT * FROM `%s` WHERE `parent`='%s'",
 			$this->db->escape($this->tblObjects),
 			$this->db->escape($id)));
-		while($row = mysql_fetch_assoc($dbChildren['result'])){
+		while($row = mysqli_fetch_assoc($dbChildren['result'])){
 			$result[] = ($returnObject) ? auth::getObject($row['ID']) : $row;
 		}
 		return $result;
@@ -1174,7 +1174,7 @@ class authCommon{
 			$this->db->escape($this->tblObjects),
 			$this->db->escape($id)));
 		if($dbParent['numRows']){
-			$parent = mysql_fetch_assoc($dbParent['result']);
+			$parent = mysqli_fetch_assoc($dbParent['result']);
 			return ($returnObject) ? auth::getObject($parent['ID']) : $parent;
 		}else{
 			return NULL;
@@ -1202,7 +1202,7 @@ class authObject extends authCommon{
 			$this->db->escape($this->tblObjects),
 			$this->db->escape($this->objectID)));
 		if($dbObject['numRows']){
-			$row = mysql_fetch_assoc($dbObject['result']);
+			$row = mysqli_fetch_assoc($dbObject['result']);
 			foreach($row as $field => $value){
 				$this->metaData[$field] = $value;
 			}
@@ -1260,7 +1260,7 @@ class authObject extends authCommon{
 	{
 		$children = array();
 		$dbObjects = $this->db->query(sprintf("SELECT `ID` FROM `%s` WHERE `parent`='%s'", $this->db->escape($this->tblObjects), $this->db->escape($this->getMetaData('ID'))));
-		while($row = mysql_fetch_assoc($dbObjects['result'])){
+		while($row = mysqli_fetch_assoc($dbObjects['result'])){
 			$children[] = auth::getObject($row['ID']);
 		}
 		return $children;
@@ -1295,7 +1295,7 @@ class authObject extends authCommon{
 		}
 
 		$dbAuthorizations = $this->db->query($sql);
-		while($row = mysql_fetch_assoc($dbAuthorizations['result'])){
+		while($row = mysqli_fetch_assoc($dbAuthorizations['result'])){
 			$authorizations[] = $row;
 		}
 		return $authorizations;
@@ -1407,7 +1407,7 @@ class authObject extends authCommon{
 			$this->db->escape($this->tblAuthorizations),
 			$this->db->escape($this->tblPermissions),
 			$this->db->escape($this->getMetaData('ID'))));
-		while($row = mysql_fetch_assoc($dbAuthorizations['result'])){
+		while($row = mysqli_fetch_assoc($dbAuthorizations['result'])){
 			$authorizations[] = $row;
 		}
 
@@ -1470,7 +1470,7 @@ class authObject extends authCommon{
 			$this->db->escape($permissionID),
 			$this->db->escape($policy),
 			$this->db->escape($this->objectID)));
-		if(mysql_result($dbAuthorizationCheck['result'], 0, 'i')){
+		if(mysqli_result($dbAuthorizationCheck['result'], 0, 'i')){
 			errorHandle::newError(__METHOD__."() - Authorization already exists - move along now. (Entity: $entity PermissionID: $permissionID Policy: $policy ObjectID: {$this->objectID})", errorHandle::DEBUG);
 			return TRUE;
 		}else{
@@ -1530,7 +1530,7 @@ class authObject extends authCommon{
 			// Disable autoPropaget (we'll manualy trigger it at the end)
 			$this->autoPropagate = FALSE;
 			// For each authorization, remove it
-			while($row = mysql_fetch_assoc($dbAllAuths['result'])){
+			while($row = mysqli_fetch_assoc($dbAllAuths['result'])){
 				$this->revoke($entity,$row['permissionID']);
 			}
 			// Manually trigger propagation
@@ -1555,7 +1555,7 @@ class authObject extends authCommon{
 			}
 
 			// Is this a local permission?
-			$authRow = mysql_fetch_assoc($dbAuthorizationLookup['result']);
+			$authRow = mysqli_fetch_assoc($dbAuthorizationLookup['result']);
 			if(!$authRow['inheritedFrom']){
 				// Yes - We just need to remove this authorization
 				$dbRevoke = $this->db->query(sprintf("DELETE FROM `%s` WHERE `ID`='%s' LIMIT 1",
@@ -1680,7 +1680,7 @@ class authEntity extends authCommon implements ArrayAccess{
 					$this->db->escape($this->tblUsers2Groups),
 					$this->db->escape($this->getMetaData('ID')),
 					$this->db->escape($targetEntity->getMetaData('ID'))));
-				if(mysql_result($dbAssignmentCheck['result'], 0, 'i')){
+				if(mysqli_result($dbAssignmentCheck['result'], 0, 'i')){
 					errorHandle::newError(__METHOD__."() - Assignment already exists.", errorHandle::DEBUG);
 					return TRUE;
 				}else{
@@ -1703,7 +1703,7 @@ class authEntity extends authCommon implements ArrayAccess{
 					$this->db->escape($this->tblGroups2Groups),
 					$this->db->escape($this->getMetaData('ID')),
 					$this->db->escape($targetEntity->getMetaData('ID'))));
-				if(mysql_result($dbAssignmentCheck['result'], 0, 'i')){
+				if(mysqli_result($dbAssignmentCheck['result'], 0, 'i')){
 					errorHandle::newError(__METHOD__."() - Assignment already exists.", errorHandle::DEBUG);
 					return TRUE;
 				}else{
@@ -1904,7 +1904,7 @@ class authEntity extends authCommon implements ArrayAccess{
 				$memberOf, "$this");
 			$dbAuthorizations = $this->db->query($sql);
 			if(!$dbAuthorizations['error']){
-				while($row = mysql_fetch_assoc($dbAuthorizations['result'])){
+				while($row = mysqli_fetch_assoc($dbAuthorizations['result'])){
 					$this->authSearchTrees["$object"][ $row['authEntity'] ][] = $row;
 				}
 			}else{
@@ -2003,7 +2003,7 @@ class authUser extends authEntity{
 			errorHandle::newError(__METHOD__."() - No user found with userKey '$userKey'!", errorHandle::DEBUG);
 		}else{
 			// Save the meta data
-			$this->metaData = mysql_fetch_assoc($dbUser['result']);
+			$this->metaData = mysqli_fetch_assoc($dbUser['result']);
 		}
 
 		// Do I auto-expand the tree?
@@ -2042,7 +2042,7 @@ class authUser extends authEntity{
 				$this->db->escape($this->tblUsers2Groups),
 				$this->db->escape($this->getMetaData('ID'))));
 			if($dbMemberOf['numRows']){
-				while($row = mysql_fetch_assoc($dbMemberOf['result'])){
+				while($row = mysqli_fetch_assoc($dbMemberOf['result'])){
 					$this->memberOf[] = auth::getEntity("gid:".$row['group'], TRUE);
 				}
 			}
@@ -2071,7 +2071,7 @@ class authGroup extends authEntity{
 			errorHandle::newError(__METHOD__."() - No group found with groupKey '$groupKey'!", errorHandle::DEBUG);
 		}else{
 			// Save the metadata
-			$this->metaData = mysql_fetch_assoc($dbGroup['result']);
+			$this->metaData = mysqli_fetch_assoc($dbGroup['result']);
 		}
 
 		// Do I auto-expand the tree?
@@ -2143,7 +2143,7 @@ class authGroup extends authEntity{
 				$this->db->escape($this->tblUsers2Groups),
 				$this->db->escape($this->getMetaData('ID'))));
 			if($dbMembers['numRows']){
-				while($row = mysql_fetch_assoc($dbMembers['result'])){
+				while($row = mysqli_fetch_assoc($dbMembers['result'])){
 					$objID = ($row['entityType'] == 'group') ? 'gid:'.$row['ID'] : 'uid:'.$row['ID'];
 					$this->members[] = auth::getEntity($objID, TRUE);
 				}
@@ -2153,7 +2153,7 @@ class authGroup extends authEntity{
 				$this->db->escape($this->tblGroups2Groups),
 				$this->db->escape($this->getMetaData('ID'))));
 			if($dbMemberOf['numRows']){
-				while($row = mysql_fetch_assoc($dbMemberOf['result'])){
+				while($row = mysqli_fetch_assoc($dbMemberOf['result'])){
 					$this->memberOf[] = auth::getEntity("gid:".$row['parentGroup'], TRUE);
 				}
 			}

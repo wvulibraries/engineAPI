@@ -149,7 +149,7 @@ class fileHandler {
 			return FALSE;
 		}
 
-		$file = mysql_fetch_assoc($sqlResult['result']);
+		$file = mysqli_fetch_assoc($sqlResult['result']);
 
 		$output['name'] = $file[$fields['name']];
 		$output['type'] = $file[$fields['type']];
@@ -339,7 +339,7 @@ class fileHandler {
 
 		$sql = sprintf("SHOW FIELDS FROM `$oldTable`");
 		$sqlResult = $this->database->query($sql);
-		while($row = mysql_fetch_array($sqlResult['result'],  MYSQL_ASSOC)) {
+		while($row = mysqli_fetch_array($sqlResult['result'],  MYSQL_ASSOC)) {
 			$oldTableFields[$row['Field']] = TRUE;
 		}
 
@@ -348,7 +348,7 @@ class fileHandler {
 
 		$sql = sprintf("SHOW FIELDS FROM `$newTable`");
 		$sqlResult = $this->database->query($sql);
-		while($row = mysql_fetch_array($sqlResult['result'],  MYSQL_ASSOC)) {
+		while($row = mysqli_fetch_array($sqlResult['result'],  MYSQL_ASSOC)) {
 			$newTableFields[$row['Field']] = TRUE;
 		}
 
@@ -361,7 +361,7 @@ class fileHandler {
 			);
 		$sqlResult = $this->database->query($sql);
 
-		$row = mysql_fetch_assoc($sqlResult['result']);
+		$row = mysqli_fetch_assoc($sqlResult['result']);
 
 		// save and nullify old ID
 		$oldID = $row[$fields['id']['field']];
@@ -702,7 +702,7 @@ class fileHandler {
 							continue(2);
 						}
 
-						$row = mysql_fetch_array($sqlResult['result'], MYSQL_NUM);
+						$row = mysqli_fetch_array($sqlResult['result'], MYSQL_NUM);
 						$tmp[$key] = $row[0];
 					}
 

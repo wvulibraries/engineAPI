@@ -633,7 +633,7 @@ class listManagement {
 						$this->database->escape($I['options']['valueTable']));
 
 					$sqlResult = $this->database->query($sql);
-					while($row = mysql_fetch_array($sqlResult['result'],  MYSQL_ASSOC)) {
+					while($row = mysqli_fetch_array($sqlResult['result'],  MYSQL_ASSOC)) {
 
 
 
@@ -885,7 +885,7 @@ class listManagement {
 		$output .= "<tbody>".$this->eolChar;
 
 		$numberRowsCount = 1;
-		while ($row = mysql_fetch_array($sqlResult['result'],  MYSQL_BOTH)) {
+		while ($row = mysqli_fetch_array($sqlResult['result'],  MYSQL_BOTH)) {
 			$output .= "<tr";
 			if ($this->rowStriping === TRUE) {
 				$output .= (is_odd($numberRowsCount))?" class=\"oddrow\"":" class=\"evenrow\"";
@@ -945,7 +945,7 @@ class listManagement {
 
 						$this->database->sanitize = FALSE;
 						$matchOnSqlResult               = $this->database->query($sql);
-						$matchOnValueResult             = mysql_fetch_array($matchOnSqlResult['result'], MYSQL_BOTH);
+						$matchOnValueResult             = mysqli_fetch_array($matchOnSqlResult['result'], MYSQL_BOTH);
 
 						if (isset($this->fields[$I]['matchOn']['field'])) {
 							$value = $matchOnValueResult[$this->fields[$I]['matchOn']['field']];
@@ -1105,7 +1105,7 @@ class listManagement {
 
 						$this->database->sanitize = FALSE;
 						$matchOnSqlResult               = $this->database->query($sql);
-						$matchOnValueResult             = mysql_fetch_array($matchOnSqlResult['result'], MYSQL_BOTH);
+						$matchOnValueResult             = mysqli_fetch_array($matchOnSqlResult['result'], MYSQL_BOTH);
 
 						if (isset($this->fields[$I]['matchOn']['field'])) {
 							$value = $matchOnValueResult[$this->fields[$I]['matchOn']['field']];
@@ -1791,7 +1791,7 @@ class listManagement {
 			$error["error"]   = TRUE;
 		}
 
-		while ($row = mysql_fetch_array($sqlResult['result'], MYSQL_BOTH)) {
+		while ($row = mysqli_fetch_array($sqlResult['result'], MYSQL_BOTH)) {
 
 			//grab the first column in the current row, if it is set, throw it in $temp
 			if (!isset($engine->cleanPost['MYSQL']["check_".$row[0]])) {
@@ -1937,7 +1937,7 @@ class listManagement {
 
 			$sqlResultUpdates = $this->database->query($sql);
 
-			$rowUpdate = mysql_fetch_array($sqlResultUpdates['result'],  MYSQL_ASSOC);
+			$rowUpdate = mysqli_fetch_array($sqlResultUpdates['result'],  MYSQL_ASSOC);
 
 			if ($rowUpdate["COUNT(*)"] == 0) {
 				$this->modifiedIDs[] = $row[0];
@@ -2001,7 +2001,7 @@ class listManagement {
 		$sqlResult                = $this->database->query($sql);
 
 		if ($sqlResult['result']) {
-			$row = mysql_fetch_array($sqlResult['result'],  MYSQL_ASSOC);
+			$row = mysqli_fetch_array($sqlResult['result'],  MYSQL_ASSOC);
 
 			// If count is 0, it didn't find a match, so something changed
 			if ($row["COUNT(*)"] == 0) {
@@ -2039,7 +2039,7 @@ class listManagement {
 			return(FALSE);
 		}
 
-		while ($row = mysql_fetch_array($sqlResult['result'], MYSQL_BOTH)) {
+		while ($row = mysqli_fetch_array($sqlResult['result'], MYSQL_BOTH)) {
 
 			foreach ($this->fields as $I) {
 				// Check boxes don't return if they aren't checked. Deal with that
@@ -2062,7 +2062,7 @@ class listManagement {
 			$sqlResultUpdates = $this->database->query($sql);
 
 			if ($sqlResultUpdates['result']) {
-				$rowUpdate = mysql_fetch_array($sqlResultUpdates['result'],  MYSQL_ASSOC);
+				$rowUpdate = mysqli_fetch_array($sqlResultUpdates['result'],  MYSQL_ASSOC);
 
 				// If count is 0, it didn't find a match, so something changed
 				if ($rowUpdate["COUNT(*)"] == 0) {
@@ -2146,7 +2146,7 @@ class listManagement {
 			return(TRUE);
 		}
 
-		if (mysql_num_rows($sqlResult['result']) == 0) {
+		if (mysqli_num_rows($sqlResult['result']) == 0) {
 			return(FALSE);
 		}
 

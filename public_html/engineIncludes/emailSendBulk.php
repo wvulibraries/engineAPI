@@ -76,7 +76,7 @@ $sql = sprintf("SELECT * FROM `%s` WHERE sendID='%s'",
 $sqlResult = $engine->openDB->query($sql);
 
 if ($sqlResult['result']) {
-	while ($row = mysql_fetch_array($sqlResult['result'], MYSQL_ASSOC)) {
+	while ($row = mysqli_fetch_array($sqlResult['result'], MYSQL_ASSOC)) {
 		
 		$mail = new mailSender();
 		

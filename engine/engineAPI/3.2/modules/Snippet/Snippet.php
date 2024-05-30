@@ -124,7 +124,7 @@ class Snippet {
 		// $jsOutput is built here and inserted in the javascript below
 		// we need each snippet entry to be in the array for the info toggle to work
 		$jsOutput = "snippetInfoArray['".$class."'] = new Array();\n";
-		while ($row = mysql_fetch_array($sqlResult['result'],  MYSQL_ASSOC)) {
+		while ($row = mysqli_fetch_array($sqlResult['result'],  MYSQL_ASSOC)) {
 			
 			$jsOutput .= "snippetInfoArray['".$class."'][\"".$row['ID']."_snippet\"] = \"false\";\n";
 			
@@ -236,7 +236,7 @@ class Snippet {
 			return webHelper_errorMsg("Error fetching primary key.");
 		}
 		
-		$row = mysql_fetch_array($sqlResult['result'],  MYSQL_ASSOC);
+		$row = mysqli_fetch_array($sqlResult['result'],  MYSQL_ASSOC);
 		$key = $row['Column_name'];
 		
 		$sql = sprintf("SELECT * FROM %s WHERE %s='%s'",
@@ -251,7 +251,7 @@ class Snippet {
 			return webHelper_errorMsg("Error fetching snippet.");
 		}
 		
-		$row = mysql_fetch_array($sqlResult['result'],  MYSQL_ASSOC);
+		$row = mysqli_fetch_array($sqlResult['result'],  MYSQL_ASSOC);
 		
 		return($row[$field]);
 	}
@@ -277,7 +277,7 @@ class Snippet {
 			return webHelper_errorMsg("Error fetching primary key.");
 		}
 		
-		$row = mysql_fetch_array($sqlResult['result'],  MYSQL_ASSOC);
+		$row = mysqli_fetch_array($sqlResult['result'],  MYSQL_ASSOC);
 		$key = $row['Column_name'];
 		
 		$sql = sprintf("DELETE FROM %s WHERE %s='%s'",
