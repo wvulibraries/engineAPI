@@ -157,9 +157,12 @@ class EngineAPI{
 	 * @param string $site Name of the site config to use
 	 */
 	private function __construct($site="default") {
-		require_once(self::$engineDir."/sessionManagement.php");
-		
 		self::$engineDir = dirname(__FILE__);
+
+		require_once(self::$engineDir."/sessionManagement.php");
+
+		// Start the session
+		sessionStart();
 
 		// make sure the session cookie is only accessible via HTTP
 		ini_set("session.cookie_httponly", 1);
@@ -289,9 +292,6 @@ class EngineAPI{
 		foreach ($loginFunctions as $type => $function) {
 			$this->loginFunctions[$type] = $function;
 		}
-
-		//Start the Session
-		sessionStart();
 
 		// Sets up a clean PHP_SELF variable to use.
 		$phpself             = basename($_SERVER['SCRIPT_FILENAME']);
