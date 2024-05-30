@@ -855,18 +855,8 @@ class listManagement {
 	public function displayEditTable($addGet=TRUE,$debug=FALSE) {
 		$queryString = $this->buildQueryString($addGet);
 		$this->buildOrderByClause();
+		$sql = $this->buildSqlQuery();		
 		$this->debugSqlQuery($sql);
-
-		if (!isnull($this->sql)) {
-			$sql = $this->sql;
-		}
-		else {
-			$sql = sprintf("SELECT * FROM %s %s %s",
-				$this->database->escape($this->table),
-				$this->whereClause,
-				$this->orderBy
-				);
-		}
 
 		$this->database->sanitize = FALSE;
 		$sqlResult = $this->database->query($sql);
@@ -1268,6 +1258,18 @@ class listManagement {
 		} else {
 			$this->orderBy = "";
 		}
+	}
+
+	private function buildSqlQuery() {
+		if (!is_null($this->sql)) {
+			return $this->sql;
+		}
+		return sprintf(
+			"SELECT * FROM %s %s %s",
+			$this->database->escape($this->table),
+			$this->whereClause,
+			$this->orderBy
+		);
 	}
 
 	private function debugSqlQuery($sql) {
