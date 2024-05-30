@@ -854,17 +854,7 @@ class listManagement {
 
 	public function displayEditTable($addGet=TRUE,$debug=FALSE) {
 		$queryString = $this->buildQueryString($addGet);
-
-		//Build "ORDER BY"
-		if (isnull($this->orderBy) && isset($this->fields[0]['type']) && $this->fields[0]['type'] != "plainText" ) {
-			$this->orderBy = "ORDER BY ".$this->database->escape($this->fields[0]['field']);
-		}
-		else if (!isnull($this->orderBy)) {
-			$this->orderBy = $this->database->escape($this->orderBy);
-		}
-		else {
-			$this->orderBy = "";
-		}
+		$this->buildOrderByClause();
 
 		if (!isnull($this->sql)) {
 			$sql = $this->sql;
@@ -1273,6 +1263,15 @@ class listManagement {
 		return "";
 	}
 
+	private function buildOrderByClause() {
+		if (is_null($this->orderBy) && isset($this->fields[0]['type']) && $this->fields[0]['type'] != "plainText") {
+			$this->orderBy = "ORDER BY " . $this->database->escape($this->fields[0]['field']);
+		} else if (!is_null($this->orderBy)) {
+			$this->orderBy = $this->database->escape($this->orderBy);
+		} else {
+			$this->orderBy = "";
+		}
+	}
 
 	// returns TRUE if insert is completely successful
 	// otherwise FALSE
