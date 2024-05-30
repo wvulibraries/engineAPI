@@ -157,6 +157,8 @@ class EngineAPI{
 	 * @param string $site Name of the site config to use
 	 */
 	private function __construct($site="default") {
+		require_once(self::$engineDir."/sessionManagement.php");
+
 		self::$engineDir = dirname(__FILE__);
 
 		// make sure the session cookie is only accessible via HTTP
@@ -198,7 +200,6 @@ class EngineAPI{
 			}
 		}
 
-		require_once(self::$engineDir."/sessionManagement.php");
 		require_once(self::$engineDir."/userInfo.php");
 
 		// Setup Current Working Directory
