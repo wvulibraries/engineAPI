@@ -94,7 +94,7 @@ class listManagement {
 
 	public $validateTypes   = array("alpha","alphaNoSpaces","alphaNumeric","alphaNumericNoSpaces","date","email","ipaddr","integer","integerSpaces","internalEmail","noSpaces","noSpecialChars","phone","url","optionalURL"); // A list of all the types that are in the validation function. Suitable for use in dropdown/etc ...
 
-	private $isInsertOnlyTypeTypes = array("checkbox", "wysiwyg", "multiselect", "password"); // These are not displayed in the edit table
+	private $insertOnlyTypes = array("checkbox", "wysiwyg", "multiselect", "password"); // These are not displayed in the edit table
 
 	// For template matching
 	public $pattern  = "/\{listObject\s+(.+?)\}/";
@@ -1067,8 +1067,8 @@ class listManagement {
 	
 	private function initializeDragOrdering() {
 		return '<script>/* Initialize drag ordering */</script>';
-	}	
-
+	}
+	
 	// returns TRUE if insert is completely successful
 	// otherwise FALSE
 	public function insert() {
@@ -2295,7 +2295,5 @@ class listManagement {
 	}	
 
 }
-
-
 
 ?>
