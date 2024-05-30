@@ -858,16 +858,11 @@ class listManagement {
 		$sql = $this->buildSqlQuery();		
 		$this->debugSqlQuery($sql);
 
-		$this->database->sanitize = FALSE;
-		$sqlResult = $this->database->query($sql);
+		$sqlResult = $this->executeSqlQuery($sql);
 
+		$sqlResult = $this->executeSqlQuery($sql);
 		if (!$sqlResult['result']) {
-			if ($this->debug === TRUE) {
-				errorHandle::errorMsg($sqlResult['error']."<br />");
-				errorHandle::errorMsg($sqlResult['query']."<br />");
-			}
-			// Should be sending a debug error here
-			errorHandle::errorMsg("SQL Error");
+			$this->handleSqlError($sqlResult);
 			return;
 		}
 
@@ -1276,6 +1271,19 @@ class listManagement {
 		if ($this->debug === TRUE) {
 			print "SQL: " . $sql . "<br />";
 		}
+	}
+
+	private function executeSqlQuery($sql) {
+		$this->database->sanitize = FALSE;
+		return $this->database->query($sql);
+	}
+
+	private function handleSqlError($sqlResult) {
+		if ($this->debug === TRUE) {
+			errorHandle::errorMsg($sqlResult['error'] . "<br />");
+			errorHandle::errorMsg($sqlResult['query'] . "<br />");
+		}
+		errorHandle::errorMsg("SQL Error");
 	}
 
 	// returns TRUE if insert is completely successful
