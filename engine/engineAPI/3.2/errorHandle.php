@@ -352,44 +352,44 @@ class errorHandle
      * @param array  $errContext The active symbol table at the point the error occurred
      * @return bool
      */
-    public static function phpError($errNo, $errStr, $errFile, $errLine, $errContext) {
+    public static function phpError($errNo, $errStr, $errFile, $errLine, $errContext = null) {
         // we only care if the PHP error is being looked for
         $errorReporting = ini_get('error_reporting');
         
-        if($errorReporting === "" || $errorReporting === 0 || !($errorReporting & $errNo)) return FALSE;
+        if($errorReporting === "" || $errorReporting == 0 || !($errorReporting & $errNo)) return FALSE;
     
         // If a PHP error has occurred in THIS file, then we need to just crash to allow the developer to see it.
         if($errFile === __FILE__ || self::$crashOnErrors){
-            $lineEndings = (isCLI()) ? "\n" : "<br />";
+            $lineEndings = (php_sapi_name() === 'cli') ? "\n" : "<br />";
             echo "Critical EngineAPI errorHandle Error!".$lineEndings;
             echo "PHP Error: [".self::phpErr2Str($errNo)."] ".$errStr.$lineEndings;
             echo "File: $errFile".$lineEndings;
             echo "Line: $errLine".$lineEndings;
-            if(isCLI()){
+            if(php_sapi_name() === 'cli' && $errContext !== null){
                 echo str_repeat('-',strlen($errFile)+6).$lineEndings;
                 echo "Symbol Tree: ".print_r($errContext,TRUE);
             }
             exit();
-        }else{
+        } else {
             self::$errorType = 'phpError';
             self::$phpErrNo = $errNo;
             if(sizeof(self::$errorProfiles)){
                 if(sizeof(self::$phpErrMapping)){
                     if(isset(self::$phpErrMapping[$errNo])){
                         self::newError($errStr, self::$phpErrMapping[$errNo]);
-                    }else{
+                    } else {
                         self::newError($errStr, self::CRITICAL);
                     }
-                }else{
+                } else {
                     self::newError($errStr, self::CRITICAL);
                 }
-            }else{
+            } else {
                 error_log($errStr." at $errLine:$errFile");
             }
         }
         return TRUE;
     }
-
+    
     /**
      * PHP Exception handler - Used to catch all php exceptions
      * Note: Site execution will be aborted after this is triggered (native PHP behavior)
