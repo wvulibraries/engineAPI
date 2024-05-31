@@ -866,35 +866,15 @@ class listManagement {
 			return;
 		}
 
-		$cols = count($this->fields);
-		$colspan = $cols;
-		$colspan += ($this->deleteBox       === TRUE)?1:0;
-		$colspan += ($this->numberRows      === TRUE)?1:0;
-		$colspan += ($this->deleteBoxLeft   === TRUE)?1:0;
-		$colspan += ($this->numberRowsRight === TRUE)?1:0;
+		// $cols = count($this->fields);
+		// $colspan = $cols;
+		// $colspan += ($this->deleteBox       === TRUE)?1:0;
+		// $colspan += ($this->numberRows      === TRUE)?1:0;
+		// $colspan += ($this->deleteBoxLeft   === TRUE)?1:0;
+		// $colspan += ($this->numberRowsRight === TRUE)?1:0;
 
-		$output = "";
-
-		if ($this->sortable === TRUE) {
-			global $engineVars;
-
-			$output .= "<script src=\"".$engineVars['sortableTables']."\" type=\"text/javascript\"></script>";
-			$output .= '<script type="text/javascript">';
-			$output .= '$(document).ready(function()
-				{
-					$("#'.$this->database->escape($this->table).'_table").tablesorter({textExtraction: function(node) {
-								return  node.firstChild.nextSibling.value;
-							}});
-				}
-			);';
-			$output .= "</script>";
-		}
-		if ($this->dragOrdering === TRUE) {
-			global $engineVars;
-			$output .= "<script src=\"".$engineVars['tablesDragnDrop']."\" type=\"text/javascript\"></script>";
-		}
-
-		$output .= "\n<!-- engine Instruction break -->".'<!-- engine Instruction displayTemplateOff -->'."\n<!-- engine Instruction break -->";
+		$output = $this->initializeOutput();
+		
 		$output .= sprintf('<form action="%s%s" method="post" class="listObj insertForm" %s %s %s>%s',
             (isset($this->postTarget) ? $this->postTarget : $_SERVER['PHP_SELF']),
 			$queryString,
@@ -1285,6 +1265,21 @@ class listManagement {
 		}
 		errorHandle::errorMsg("SQL Error");
 	}
+
+	private function initializeOutput() {
+		$output = "";
+		if ($this->sortable === TRUE) {
+			global $engineVars;
+			$output .= "<script src=\"" . $engineVars['sortableTables'] . "\" type=\"text/javascript\"></script>";
+			$output .= '<script type="text/javascript">$(document).ready(function() { $("#' . $this->database->escape($this->table) . '_table").tablesorter({textExtraction: function(node) { return  node.firstChild.nextSibling.value; }}); });</script>';
+		}
+		if ($this->dragOrdering === TRUE) {
+			global $engineVars;
+			$output .= "<script src=\"" . $engineVars['tablesDragnDrop'] . "\" type=\"text/javascript\"></script>";
+		}
+		$output .= "\n<!-- engine Instruction break -->" . '<!-- engine Instruction displayTemplateOff -->' . "\n<!-- engine Instruction break -->";
+		return $output;
+	}	
 
 	// returns TRUE if insert is completely successful
 	// otherwise FALSE

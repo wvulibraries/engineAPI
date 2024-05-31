@@ -9,7 +9,7 @@ $engineVarsPrivate = array();
  * @see self::singleton()
  */
 class EngineAPI{
-	const VERSION='3.1';
+	const VERSION='3.2';
 
 	/**
 	 * @var self
@@ -371,10 +371,10 @@ class EngineAPI{
 			unset($_REQUEST);
 		}
 
-        // Last thing we need to do is load, and initialize the errorHandle class (the error handler)
-        require_once(self::$engineDir."/errorHandle.php");
-        errorHandle::singleton();
-        ob_start('EngineAPI::displayTemplate');
+		// Last thing we need to do is load, and initialize the errorHandle class (the error handler)
+		require_once(self::$engineDir."/errorHandle.php");
+		errorHandle::singleton();
+		ob_start('EngineAPI::displayTemplate');
 
 	} // Constructor
 
