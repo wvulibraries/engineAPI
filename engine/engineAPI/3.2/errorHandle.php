@@ -352,7 +352,13 @@ class errorHandle
      * @param array  $errContext The active symbol table at the point the error occurred
      * @return bool
      */
-    public static function phpError($errNo, $errStr, $errFile, $errLine, $errContext) {
+    public static function phpError($errNo = null, $errStr = null, $errFile = null, $errLine = null, $errContext = null) {
+        // we need to stack trace this error
+        $backTrace = debug_backtrace();
+        array_shift($backTrace);
+        var_dump($backTrace);
+        die();
+
         // we only care if the PHP error is being looked for
         $errorReporting = ini_get('error_reporting');
         
