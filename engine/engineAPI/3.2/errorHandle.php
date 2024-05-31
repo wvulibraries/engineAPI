@@ -355,8 +355,9 @@ class errorHandle
     public static function phpError($errNo = null, $errStr = null, $errFile = null, $errLine = null, $errContext = null) {
         // we need to stack trace this error
         $backTrace = debug_backtrace();
-        array_shift($backTrace);
+        echo "<pre>";        
         var_dump($backTrace);
+        echo "</pre>";
         die();
 
         // we only care if the PHP error is being looked for
