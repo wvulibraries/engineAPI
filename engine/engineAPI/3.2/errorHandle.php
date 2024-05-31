@@ -353,6 +353,15 @@ class errorHandle
      * @return bool
      */
     public static function phpError($errNo = null, $errStr = null, $errFile = null, $errLine = null, $errContext = null) {
+        // dump passed arguments
+        echo "<pre>";
+        var_dump($errNo);
+        var_dump($errStr);
+        var_dump($errFile);
+        var_dump($errLine);
+        var_dump($errContext);
+        echo "</pre>";
+        
         // we need to stack trace this error
         $backTrace = debug_backtrace();
         echo "<pre>";        
