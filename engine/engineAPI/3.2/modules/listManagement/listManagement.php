@@ -868,6 +868,8 @@ class listManagement {
 
 		$output = $this->initializeOutput();
 		$output .= $this->generateFormHeader($queryString);
+		# $output .= "\n";		
+		$output .= $this->generateTableHeader();		
 
 		$cols = count($this->fields);
 		$colspan = $cols;
@@ -875,48 +877,6 @@ class listManagement {
 		$colspan += ($this->numberRows      === TRUE)?1:0;
 		$colspan += ($this->deleteBoxLeft   === TRUE)?1:0;
 		$colspan += ($this->numberRowsRight === TRUE)?1:0;	
-
-		$output .= "\n";
-		$output .= "<table border=\"0\" cellpadding=\"1\" cellspacing=\"0\" id=\"".$this->database->escape($this->table)."_table\"";
-
-		$output .= " class=\"engineListDisplayTable";
-		if ($this->sortable === TRUE) {
-			$output .= " sortable tablesorter";
-		}
-		$output .= "\"";
-
-		$output .= ">".$this->eolChar;
-		$output .= "<thead>".$this->eolChar;
-		$output .= "<tr>".$this->eolChar;
-
-		if ($this->numberRows === TRUE) {
-			$output .= "<th style=\"width: 25px;\">#</th>".$this->eolChar;
-		}
-
-		if ($this->deleteBoxLeft === TRUE) {
-			$output .= "<th style=\"width: 100px;\">Delete</th>".$this->eolChar;
-		}
-
-		for($I=0;$I<(int)$cols;$I++) {
-
-			if ($this->isInsertOnlyType($this->fields[$I]['type'])) {
-				continue;
-			}
-
-			$output .= "<th style=\"text-align: left;\">".$this->fields[$I]['label']."</th>".$this->eolChar;
-		}
-
-		// Put delete box on the left
-		if ($this->deleteBox === TRUE) {
-			$output .= "<th style=\"width: 100px;\">Delete</th>".$this->eolChar;
-		}
-
-		if ($this->numberRowsRight === TRUE) {
-			$output .= "<th style=\"width: 25px;\">#</th>".$this->eolChar;
-		}
-
-		$output .= "</tr>".$this->eolChar;
-		$output .= "</thead>".$this->eolChar;
 
 		$output .= "<tbody>".$this->eolChar;
 
@@ -1283,6 +1243,41 @@ class listManagement {
 			$this->eolChar,
 			sessionInsertCSRF()
 		);
+	}
+
+	private function generateTableHeader() {
+		$output = "<table border=\"0\" cellpadding=\"1\" cellspacing=\"0\" id=\"" . $this->database->escape($this->table) . "_table\" class=\"engineListDisplayTable";
+		if ($this->sortable === TRUE) {
+			$output .= " sortable tablesorter";
+		}
+		$output .= "\">" . $this->eolChar;
+		$output .= "<thead>" . $this->eolChar;
+		$output .= "<tr>" . $this->eolChar;
+	
+		if ($this->numberRows === TRUE) {
+			$output .= "<th style=\"width: 25px;\">#</th>" . $this->eolChar;
+		}
+		if ($this->deleteBoxLeft === TRUE) {
+			$output .= "<th style=\"width: 100px;\">Delete</th>" . $this->eolChar;
+		}
+	
+		foreach ($this->fields as $field) {
+			if ($this->isInsertOnlyType($field['type'])) {
+				continue;
+			}
+			$output .= "<th style=\"text-align: left;\">" . $field['label'] . "</th>" . $this->eolChar;
+		}
+	
+		if ($this->deleteBox === TRUE) {
+			$output .= "<th style=\"width: 100px;\">Delete</th>" . $this->eolChar;
+		}
+		if ($this->numberRowsRight === TRUE) {
+			$output .= "<th style=\"width: 25px;\">#</th>" . $this->eolChar;
+		}
+	
+		$output .= "</tr>" . $this->eolChar;
+		$output .= "</thead>" . $this->eolChar;
+		return $output;
 	}
 
 	// returns TRUE if insert is completely successful
