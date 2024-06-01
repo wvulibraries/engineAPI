@@ -1140,15 +1140,19 @@ class listManagement {
 		}
 		$output .= "</tbody>".$this->eolChar;
 		$output .= "</table>".$this->eolChar;
+
+
 		if ($this->noSubmit === FALSE) {
 			$submitButtonName = (isnull($this->submitName))?$this->table.'_update':$this->submitName;
 			$output .= "<input type=\"submit\" value=\"".$this->updateButtonText."\" name=\"".$submitButtonName."\" />".$this->eolChar;
 		}
+
 		$output .= "</form>";
 		$output .= "\n<!-- engine Instruction break -->".'<!-- engine Instruction displayTemplateOn -->'."\n<!-- engine Instruction break -->";
 
 		if ($this->dateInputs) {
-			$output .= "<script>$($.date_input.initialize);</script>";
+
+			$output .= $this->initializeDateInputs();
 		}
 
 		if ($this->dragOrdering === TRUE) {
@@ -1213,10 +1217,12 @@ class listManagement {
 			$output .= "<script src=\"" . $engineVars['sortableTables'] . "\" type=\"text/javascript\"></script>";
 			$output .= '<script type="text/javascript">$(document).ready(function() { $("#' . $this->database->escape($this->table) . '_table").tablesorter({textExtraction: function(node) { return  node.firstChild.nextSibling.value; }}); });</script>';
 		}
+
 		if ($this->dragOrdering === TRUE) {
 			global $engineVars;
 			$output .= "<script src=\"" . $engineVars['tablesDragnDrop'] . "\" type=\"text/javascript\"></script>";
 		}
+
 		$output .= "\n<!-- engine Instruction break -->" . '<!-- engine Instruction displayTemplateOff -->' . "\n<!-- engine Instruction break -->";
 		return $output;
 	}
@@ -1284,6 +1290,10 @@ class listManagement {
 		$return_script .= 'tableDnD.init(table);';
 		$return_script .= '</script>';
 		return $return_script;
+	}
+
+	private function initializeDateInputs() {
+		return '<script>$($.date_input.initialize);</script>';
 	}
 
 	// returns TRUE if insert is completely successful
