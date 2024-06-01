@@ -867,8 +867,7 @@ class listManagement {
 		}
 
 		$output = $this->initializeOutput();
-		$output .= $this->generateFormHeader($queryString);
-		# $output .= "\n";		
+		$output .= $this->generateFormHeader($queryString);		
 		$output .= $this->generateTableHeader();		
 
 		$cols = count($this->fields);
@@ -879,22 +878,21 @@ class listManagement {
 		$colspan += ($this->numberRowsRight === TRUE)?1:0;	
 
 		$output .= "<tbody>".$this->eolChar;
-
 		$numberRowsCount = 1;
 		while ($row = mysqli_fetch_array($sqlResult['result'],  MYSQLI_BOTH)) {
 			$output .= "<tr";
 			if ($this->rowStriping === TRUE) {
 				$output .= (is_odd($numberRowsCount))?" class=\"oddrow\"":" class=\"evenrow\"";
 			}
+
 			if ($this->dragOrdering === TRUE) {
 				$output .= " id=\"".$row[0]."\"";
 			}
+
 			$output .= ">".$this->eolChar;
 
 			if ($this->numberRows === TRUE) {
-				$output .= "<td class=\"alignRight\">".$this->eolChar;
-				$output .= $numberRowsCount . $this->rowNumDelim;
-				$output .= "</td>".$this->eolChar;
+				$output .= $this->generateRowNumber($numberRowsCount);
 			}
 
 			if ($this->deleteBoxLeft === TRUE) {
@@ -1278,6 +1276,10 @@ class listManagement {
 		$output .= "</tr>" . $this->eolChar;
 		$output .= "</thead>" . $this->eolChar;
 		return $output;
+	}	
+
+	private function generateRowNumber($numberRowsCount) {
+		return "<td class=\"alignRight\">" . $this->eolChar . $numberRowsCount . $this->rowNumDelim . "</td>" . $this->eolChar;
 	}
 
 	// returns TRUE if insert is completely successful
