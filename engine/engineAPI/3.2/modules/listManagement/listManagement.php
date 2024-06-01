@@ -883,9 +883,7 @@ class listManagement {
 				$output .= (is_odd($numberRowsCount))?" class=\"oddrow\"":" class=\"evenrow\"";
 			}
 
-			if ($this->dragOrdering === TRUE) {
-				$output .= " id=\"".$row[0]."\"";
-			}
+			$output .= $this->getRowId($row);
 
 			$output .= ">".$this->eolChar;
 
@@ -1292,6 +1290,10 @@ class listManagement {
 		$return_script .= 'tableDnD.init(table);';
 		$return_script .= '</script>';
 		return $return_script;
+	}
+
+	private function getRowId($row) {
+		return ($this->dragOrdering === TRUE) ? " id=\"" . $row[0] . "\"" : "";
 	}
 
 	// returns TRUE if insert is completely successful
