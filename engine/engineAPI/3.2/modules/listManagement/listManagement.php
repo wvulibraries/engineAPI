@@ -867,9 +867,9 @@ class listManagement {
 		}
 
 		$output = $this->initializeOutput();
-		$output .= $this->generateFormHeader($queryString);
-		# $output .= "\n";		
-		$output .= $this->generateTableHeader();		
+		$output .= $this->generateFormHeader($queryString);	
+		$output .= $this->generateTableHeader();
+		$output .= $this->generateTableBody($sqlResult);		
 
 		$cols = count($this->fields);
 		$colspan = $cols;
@@ -878,275 +878,6 @@ class listManagement {
 		$colspan += ($this->deleteBoxLeft   === TRUE)?1:0;
 		$colspan += ($this->numberRowsRight === TRUE)?1:0;	
 
-		$output .= "<tbody>".$this->eolChar;
-
-		$numberRowsCount = 1;
-		while ($row = mysqli_fetch_array($sqlResult['result'],  MYSQLI_BOTH)) {
-			$output .= "<tr";
-			if ($this->rowStriping === TRUE) {
-				$output .= (is_odd($numberRowsCount))?" class=\"oddrow\"":" class=\"evenrow\"";
-			}
-			if ($this->dragOrdering === TRUE) {
-				$output .= " id=\"".$row[0]."\"";
-			}
-			$output .= ">".$this->eolChar;
-
-			if ($this->numberRows === TRUE) {
-				$output .= "<td class=\"alignRight\">".$this->eolChar;
-				$output .= $numberRowsCount . $this->rowNumDelim;
-				$output .= "</td>".$this->eolChar;
-			}
-
-			if ($this->deleteBoxLeft === TRUE) {
-				$output .= "<td class=\"alignCenter\">".$this->eolChar;
-				$output .= "<input type=\"checkbox\" name=\"delete[]\" class=\"delete\" value=\"".$row[0]."\" />".$this->eolChar;
-				$output .= "</td>".$this->eolChar;
-			}
-
-			for($I=0;$I<(int)$cols;$I++) {
-
-				if ($this->isInsertOnlyType($this->fields[$I]['type'])) {
-					continue;
-				}
-
-				$output .= "<td>".$this->eolChar;
-
-				// if ($this->sortable === TRUE && $this->fields[$I]['type'] != "plainText") {
-				// 					$output .= "sorttable_customkey=\"".htmlentities($row[$this->fields[$I]['field']])."\"";
-				// 				}
-
-				// $output .= ">";
-
-				if ($this->sortable === TRUE && $this->fields[$I]['type'] != "plainText") {
-					$output .= "<input type=\"hidden\" name=\"".$this->fields[$I]['field']."_sortable_".$row[0]."\" value=\"".htmlentities($row[$this->fields[$I]['field']])."\" />".$this->eolChar;
-				}
-
-				if ($I == 0) {
-					$output .= "<input type=\"hidden\" name=\"check_".$row[0]."\" value=\"".$row[0]."\" />".$this->eolChar;
-
-					foreach ($this->hiddenFields as $hiddenField) {
-
-						$output .= "<input type=\"hidden\" name=\"".$hiddenField['field']."_".$row[0]."\" id=\"".$hiddenField['field']."_".$row[0]."\" class=\"".$hiddenField['field']."\" value=\"".htmlentities($row[$hiddenField['field']])."\" ";
-						$output .= "/>".$this->eolChar;
-
-					}
-
-				}
-
-				if ($this->fields[$I]['type'] == "text") {
-
-					$value = $row[$this->fields[$I]['field']];
-					if (!isnull($this->fields[$I]['matchOn'])) {
-						$sql = "SELECT ".$this->database->escape($this->fields[$I]['matchOn']['field'])." FROM ".$this->database->escape($this->fields[$I]['matchOn']['table'])." WHERE ".$this->database->escape($this->fields[$I]['matchOn']['key'])."='".$this->database->escape($row[$this->fields[$I]['field']])."'";
-
-						$this->database->sanitize = FALSE;
-						$matchOnSqlResult               = $this->database->query($sql);
-						$matchOnValueResult             = mysqli_fetch_array($matchOnSqlResult['result'], MYSQLI_BOTH);
-
-						if (isset($this->fields[$I]['matchOn']['field'])) {
-							$value = $matchOnValueResult[$this->fields[$I]['matchOn']['field']];
-						}
-					}
-
-					if ($this->fields[$I]['original'] === TRUE && isset($value)) {
-						$output .= '<input type="hidden" name="original_'.$this->fields[$I]['field'].'_'.$row[0].'" value="'.(htmlentities($value)).'" />'.$this->eolChar;
-					}
-
-					$output .= "<input type=\"text\" size=\"".$this->fields[$I]['size']."\" name=\"".$this->fields[$I]['field']."_".$row[0]."\" id=\"".$this->fields[$I]['field']."_".$row[0]."\" class=\"".$this->fields[$I]['field']."";
-					$output .= "\" value=\"".htmlentities($value)."\" ";
-					$output .= ($this->fields[$I]['disabled'] === TRUE)?" disabled ":"";
-					$output .= ($this->fields[$I]['readonly'] === TRUE)?" readonly ":"";
-					$output .= "/>".$this->eolChar;
-				}
-				else if ($this->fields[$I]['type'] == "yesNoText") {
-
-					switch($row[$this->fields[$I]['field']]) {
-						case "1":
-						case TRUE:
-						case "TRUE":
-							$value = "Yes";
-							break;
-						case "0":
-						case FALSE:
-						case "FALSE":
-							$value = "No";
-							break;
-						default:
-							$value = "Data Error";
-							break;
-					}
-
-					$output .= "<input type=\"text\" size=\"".$this->fields[$I]['size']."\" name=\"".$this->fields[$I]['field']."_".$row[0]."\" id=\"".$this->fields[$I]['field']."_".$row[0]."\" class=\"".$this->fields[$I]['field']."";
-					$output .= "\" value=\"".htmlentities($value)."\" ";
-					$output .= ($this->fields[$I]['disabled'] === TRUE)?" disabled ":"";
-					$output .= ($this->fields[$I]['readonly'] === TRUE)?" readonly ":"";
-					$output .= "/>".$this->eolChar;
-				}
-				else if ($this->fields[$I]['type'] == "date") {
-
-					$value = $row[$this->fields[$I]['field']];
-
-					if ($value == "0") {
-						$value = "";
-					}
-
-					if ($this->fields[$I]['original'] === TRUE && isset($value)) {
-						$output .= '<input type="hidden" name="original_'.$this->fields[$I]['field'].'_'.$row[0].'" value="'.(htmlentities($value)).'" />'.$this->eolChar;
-					}
-
-					$output .= "<input type=\"text\" size=\"".$this->fields[$I]['size']."\" name=\"".$this->fields[$I]['field']."_".$row[0]."\" id=\"".$this->fields[$I]['field']."_".$row[0]."\" class=\"".$this->fields[$I]['field']." date_input\" value=\"".(!is_empty($value)?htmlentities(unixToDate($value)):"")."\" ";
-					$output .= ($this->fields[$I]['disabled'] === TRUE)?" disabled ":"";
-					$output .= ($this->fields[$I]['readonly'] === TRUE)?" readonly ":"";
-					$output .= "/>".$this->eolChar;
-				}
-				else if ($this->fields[$I]['type'] == "select") {
-
-					$value = $row[$this->fields[$I]['field']];
-
-					if ($this->fields[$I]['original'] === TRUE && isset($value)) {
-						$output .= '<input type="hidden" name="original_'.$this->fields[$I]['field'].'_'.$row[0].'" value="'.(htmlentities($value)).'" />'.$this->eolChar;
-					}
-
-					$output .= "<select name=\"".$this->fields[$I]['field']."_".$row[0]."\"";
-					$output .= ($this->fields[$I]['disabled'] === TRUE)?" disabled ":"";
-					$output .= ($this->fields[$I]['readonly'] === TRUE)?" readonly ":"";
-					$output .= ">".$this->eolChar;
-					if (isset($this->fields[$I]['options'])) {
-						foreach ($this->fields[$I]['options'] as $option) {
-
-							$output .= "<option value=\"".htmlsanitize($option['value'])."\"";
-							$output .= ($row[$this->fields[$I]['field']] == $option['value'])?" selected":"";
-							$output .= ">".htmlsanitize($option['label'])."</option>";
-						}
-					}
-					$output .= "</select>".$this->eolChar;
-				}
-				else if ($this->fields[$I]['type'] == "yesNo") {
-					if ((isset($this->fields[$I]['options']['type']) && $this->fields[$I]['options']['type'] != "checkbox") || !isset($this->fields[$I]['options']['type'])) {
-						$this->fields[$I]['options']['type'] = "select";
-					}
-
-					$value = $row[$this->fields[$I]['field']];
-
-					if ($this->fields[$I]['options']['type'] == "select") {
-						$output .= "<select name=\"".$this->fields[$I]['field']."_".$row[0]."\"";
-						$output .= ($this->fields[$I]['readonly'] === TRUE)?" readonly ":"";
-						$output .= ($this->fields[$I]['disabled'] === TRUE)?" disabled ":"";
-						$output .= ">".$this->eolChar;
-
-						// Yes
-						$output .= '<option value="1"';
-						$output .= ($value == "1")?" selected":"";
-						$output .= ">";
-						$output .= (isset($this->fields[$I]['options']['yesLabel']))?htmlentities($this->fields[$I]['options']['yesLabel']):"Yes";
-						$output .= "</option>".$this->eolChar;
-
-						// No
-						$output .= '<option value="0"';
-						$output .= ($value == "0")?" selected":"";
-						$output .= ">";
-						$output .= (isset($this->fields[$I]['options']['yesLabel']))?htmlentities($this->fields[$I]['options']['noLabel']):"No";
-						$output .= "</option>".$this->eolChar;
-
-						$output .= "</select>".$this->eolChar;
-					}
-					else if ($this->fields[$I]['options']['type'] == "checkbox") {
-						$output .= '<input type="checkbox" name="'.$this->fields[$I]['field'].'_'.$row[0].'" value="1"';
-						$output .= ($value == "1")?" checked":"";
-						$output .= ($this->fields[$I]['readonly'] === TRUE)?" readonly ":"";
-						$output .= ($this->fields[$I]['disabled'] === TRUE)?" disabled ":"";
-						$output .= ">";
-					}
-					else {
-						$output .= "invalid type";
-					}
-
-				}
-				else if ($this->fields[$I]['type'] == "radio") {
-					$output .= "<input type=\"radio\" name=\"".$this->fields[$I]['field']."\" value=\"".htmlsanitize($row[0])."\" id=\"".$this->fields[$I]['field']."_".$row[0]."\" class=\"".$this->fields[$I]['field']."\"";
-					$output .= ($row[$this->fields[$I]['field']] == 1)?" checked":"";
-					$output .= ($this->fields[$I]['disabled'] === TRUE)?" disabled ":"";
-					$output .= ($this->fields[$I]['readonly'] === TRUE)?" readonly ":"";
-					$output .= " />".$this->eolChar;
-				}
-				else if ($this->fields[$I]['type'] == "plainText") {
-					$tempField = $this->fields[$I]['field'];
-					preg_match_all('/{(\w+)}/', $tempField, $matches);
-					foreach ($matches[1] as $mIndex=>$mValue) {
-						foreach ($this->fields as $field) {
-							if ($field['field'] == $mValue) {
-								$tempValue = $row[$mValue];
-							}
-						}
-						foreach ($this->hiddenFields as $field) {
-							if ($field['field'] == $mValue) {
-								$tempValue = $row[$mValue];
-							}
-						}
-						$tempField = preg_replace('/{'.$mValue.'}/',$tempValue,$tempField);
-					}
-					$output .= $tempField.$this->eolChar;
-				}
-				else if ($this->fields[$I]['type'] == "textarea") {
-
-
-					$value = $row[$this->fields[$I]['field']];
-
-					if ($this->fields[$I]['original'] === TRUE && isset($value)) {
-						$output .= '<input type="hidden" name="original_'.$this->fields[$I]['field'].'_'.$row[0].'" value="'.(htmlentities($value)).'" />';
-					}
-
-					if (!isnull($this->fields[$I]['matchOn'])) {
-						$sql = "SELECT ".$this->database->escape($this->fields[$I]['matchOn']['field'])." FROM ".$this->database->escape($this->fields[$I]['matchOn']['table'])." WHERE ".$this->database->escape($this->fields[$I]['matchOn']['key'])."='".$this->database->escape($row[$this->fields[$I]['field']])."'";
-
-						$this->database->sanitize = FALSE;
-						$matchOnSqlResult               = $this->database->query($sql);
-						$matchOnValueResult             = mysqli_fetch_array($matchOnSqlResult['result'], MYSQLI_BOTH);
-
-						if (isset($this->fields[$I]['matchOn']['field'])) {
-							$value = $matchOnValueResult[$this->fields[$I]['matchOn']['field']];
-						}
-					}
-
-					$output .= "<textarea type=\"text\" rows=\"1\" cols=\"".$this->fields[$I]['size']."\" name=\"".$this->fields[$I]['field']."_".$row[0]."\" id=\"".$this->fields[$I]['field']."_".$row[0]."\" class=\"".$this->fields[$I]['field']."";
-					$output .= "\"";
-					$output .= ($this->fields[$I]['disabled'] === TRUE)?" disabled ":"";
-					$output .= ($this->fields[$I]['readonly'] === TRUE)?" readonly ":"";
-					$output .= ' onfocus="convert2Textarea(this);" onblur="convert2TextInput(this)"';
-					$output .= ">";
-					$output .= htmlentities($value);
-					$output .= "</textarea>".$this->eolChar;
-				}
-				else if ($this->fields[$I]['type'] == "multiselect") {
-
-					errorHandle::errorMsg("Multi Select type not supported in table edit");
-				}
-				else if ($this->fields[$I]['type'] == "checkbox") {
-
-					errorHandle::errorMsg("Checkbox type not supported in table edit");
-				}
-
-				$output .= "</td>".$this->eolChar;
-			}
-
-			$output .= "<td class=\"alignCenter\">";
-			if ($this->deleteBox === TRUE) {
-				$output .= "<input type=\"checkbox\" name=\"delete[]\" class=\"delete\" value=\"".$row[0]."\" />".$this->eolChar;
-			}
-			$output .= "</td>".$this->eolChar;
-
-			if ($this->numberRowsRight === TRUE) {
-				$output .= "<td class=\"alignRight\">";
-				$output .= $this->rowNumDelimRight . $numberRowsCount;
-				$output .= "</td>".$this->eolChar;
-			}
-			$numberRowsCount++;
-
-			$output .= "</tr>".$this->eolChar;
-
-		}
-		$output .= "</tbody>".$this->eolChar;
-		$output .= "</table>".$this->eolChar;
 		if ($this->noSubmit === FALSE) {
 			$submitButtonName = (isnull($this->submitName))?$this->table.'_update':$this->submitName;
 			$output .= "<input type=\"submit\" value=\"".$this->updateButtonText."\" name=\"".$submitButtonName."\" />".$this->eolChar;
@@ -1278,6 +1009,64 @@ class listManagement {
 		$output .= "</tr>" . $this->eolChar;
 		$output .= "</thead>" . $this->eolChar;
 		return $output;
+	}
+
+	private function generateTableBody($sqlResult) {
+		$output = "<tbody>" . $this->eolChar;
+		$numberRowsCount = 1;
+	
+		while ($row = mysqli_fetch_array($sqlResult['result'], MYSQL_BOTH)) {
+			$output .= "<tr" . $this->generateRowClass($numberRowsCount) . $this->generateRowId($row) . ">" . $this->eolChar;
+	
+			if ($this->numberRows === TRUE) {
+				$output .= $this->generateRowNumber($numberRowsCount);
+			}
+			if ($this->deleteBoxLeft === TRUE) {
+				$output .= $this->generateDeleteCheckbox($row);
+			}
+	
+			foreach ($this->fields as $field) {
+				if ($this->isInsertOnlyType($field['type'])) {
+					continue;
+				}
+				$output .= "<td>" . $this->generateFieldInput($field, $row) . "</td>" . $this->eolChar;
+			}
+	
+			$output .= "<td class=\"alignCenter\">" . ($this->deleteBox === TRUE ? "<input type=\"checkbox\" name=\"delete[]\" class=\"delete\" value=\"" . $row[0] . "\" />" . $this->eolChar : "") . "</td>" . $this->eolChar;
+	
+			if ($this->numberRowsRight === TRUE) {
+				$output .= "<td class=\"alignRight\">" . $this->rowNumDelimRight . $numberRowsCount . "</td>" . $this->eolChar;
+			}
+	
+			$numberRowsCount++;
+			$output .= "</tr>" . $this->eolChar;
+		}
+	
+		$output .= "</tbody>" . $this->eolChar;
+		$output .= "</table>" . $this->eolChar;
+		return $output;
+	}
+
+	private function generateRowClass($numberRowsCount) {
+		if ($this->rowStriping === TRUE) {
+			return (is_odd($numberRowsCount)) ? " class=\"oddrow\"" : " class=\"evenrow\"";
+		}
+		return "";
+	}
+
+	private function generateRowNumber($numberRowsCount) {
+		return "<td class=\"alignRight\">" . $this->eolChar . $numberRowsCount . $this->rowNumDelim . "</td>" . $this->eolChar;
+	}
+
+	private function generateDeleteCheckbox($row) {
+		return "<td class=\"alignCenter\"><input type=\"checkbox\" name=\"delete[]\" value=\"" . $row[0] . "\" /></td>" . $this->eolChar;
+	}
+
+	private function generateFieldInput($field, $row) {
+		if (isset($field['input'])) {
+			return $field['input']($row);
+		}
+		return htmlspecialchars($row[$field['field']]);
 	}
 
 	// returns TRUE if insert is completely successful
