@@ -894,7 +894,7 @@ class listManagement {
 			if ($this->numberRows === TRUE) {
 				$output .= $this->generateRowNumber($numberRowsCount);
 			}
-
+ 
 			if ($this->deleteBoxLeft === TRUE) {
 				$output .= "<td class=\"alignCenter\">".$this->eolChar;
 				$output .= "<input type=\"checkbox\" name=\"delete[]\" class=\"delete\" value=\"".$row[0]."\" />".$this->eolChar;
@@ -1281,6 +1281,10 @@ class listManagement {
 	private function generateRowNumber($numberRowsCount) {
 		return "<td class=\"alignRight\">" . $this->eolChar . $numberRowsCount . $this->rowNumDelim . "</td>" . $this->eolChar;
 	}
+
+	private function generateDeleteCheckbox($row) {
+		return "<td class=\"alignCenter\"><input type=\"checkbox\" name=\"delete[]\" value=\"" . $row[0] . "\" /></td>" . $this->eolChar;
+	}	
 
 	// returns TRUE if insert is completely successful
 	// otherwise FALSE
