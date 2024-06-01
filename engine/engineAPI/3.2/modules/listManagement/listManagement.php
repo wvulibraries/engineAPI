@@ -867,6 +867,7 @@ class listManagement {
 		}
 
 		$output = $this->initializeOutput();
+		$output .= $this->generateFormHeader($queryString);
 
 		$cols = count($this->fields);
 		$colspan = $cols;
@@ -874,17 +875,7 @@ class listManagement {
 		$colspan += ($this->numberRows      === TRUE)?1:0;
 		$colspan += ($this->deleteBoxLeft   === TRUE)?1:0;
 		$colspan += ($this->numberRowsRight === TRUE)?1:0;	
-		
-		$output .= sprintf('<form action="%s%s" method="post" class="listObj insertForm" %s %s %s>%s',
-            (isset($this->postTarget) ? $this->postTarget : $_SERVER['PHP_SELF']),
-			$queryString,
-			($this->confirmUpdateDelete === TRUE)?'onsubmit="return listObjDeleteConfirm(this);"':"",
-			(is_null($this->rel))?"":'rel="'.$this->rel.'"',
-			(is_null($this->rev))?"":'rev="'.$this->rev.'"',
-			$this->eolChar
-			);
-		// $output .= "<form action=\"".$_SERVER['PHP_SELF']."".$queryString."\" method=\"post\" onsubmit=\"return listObjDeleteConfirm(this);\">".$this->eolChar;
-		$output .= sessionInsertCSRF();
+
 		$output .= "\n";
 		$output .= "<table border=\"0\" cellpadding=\"1\" cellspacing=\"0\" id=\"".$this->database->escape($this->table)."_table\"";
 
@@ -1279,6 +1270,19 @@ class listManagement {
 		}
 		$output .= "\n<!-- engine Instruction break -->" . '<!-- engine Instruction displayTemplateOff -->' . "\n<!-- engine Instruction break -->";
 		return $output;
+	}
+
+	private function generateFormHeader($queryString) {
+		return sprintf(
+			'<form action="%s%s" method="post" class="listObj insertForm" %s %s %s>%s%s',
+			(isset($this->postTarget) ? $this->postTarget : $_SERVER['PHP_SELF']),
+			$queryString,
+			($this->confirmUpdateDelete === TRUE) ? 'onsubmit="return listObjDeleteConfirm(this);"' : "",
+			(is_null($this->rel)) ? "" : 'rel="' . $this->rel . '"',
+			(is_null($this->rev)) ? "" : 'rev="' . $this->rev . '"',
+			$this->eolChar,
+			sessionInsertCSRF()
+		);
 	}
 
 	// returns TRUE if insert is completely successful
