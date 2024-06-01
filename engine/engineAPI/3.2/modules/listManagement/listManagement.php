@@ -932,21 +932,7 @@ class listManagement {
 					$output .= $this->generateYesNoTextField($row, $I);
 				}
 				else if ($this->fields[$I]['type'] == "date") {
-
-					$value = $row[$this->fields[$I]['field']];
-
-					if ($value == "0") {
-						$value = "";
-					}
-
-					if ($this->fields[$I]['original'] === TRUE && isset($value)) {
-						$output .= '<input type="hidden" name="original_'.$this->fields[$I]['field'].'_'.$row[0].'" value="'.(htmlentities($value)).'" />'.$this->eolChar;
-					}
-
-					$output .= "<input type=\"text\" size=\"".$this->fields[$I]['size']."\" name=\"".$this->fields[$I]['field']."_".$row[0]."\" id=\"".$this->fields[$I]['field']."_".$row[0]."\" class=\"".$this->fields[$I]['field']." date_input\" value=\"".(!is_empty($value)?htmlentities(unixToDate($value)):"")."\" ";
-					$output .= ($this->fields[$I]['disabled'] === TRUE)?" disabled ":"";
-					$output .= ($this->fields[$I]['readonly'] === TRUE)?" readonly ":"";
-					$output .= "/>".$this->eolChar;
+					$output .= $this->generateDateField($row, $I);
 				}
 				else if ($this->fields[$I]['type'] == "select") {
 
@@ -1300,6 +1286,25 @@ class listManagement {
 
 		$output .= "<input type=\"text\" size=\"".$this->fields[$I]['size']."\" name=\"".$this->fields[$I]['field']."_".$row[0]."\" id=\"".$this->fields[$I]['field']."_".$row[0]."\" class=\"".$this->fields[$I]['field']."";
 		$output .= "\" value=\"".htmlentities($value)."\" ";
+		$output .= ($this->fields[$I]['disabled'] === TRUE)?" disabled ":"";
+		$output .= ($this->fields[$I]['readonly'] === TRUE)?" readonly ":"";
+		$output .= "/>".$this->eolChar;
+		return $output;
+	}
+
+	private function generateDateField($row, $I) {
+		$output = "";
+		$value = $row[$this->fields[$I]['field']];
+
+		if ($value == "0") {
+			$value = "";
+		}
+
+		if ($this->fields[$I]['original'] === TRUE && isset($value)) {
+			$output .= '<input type="hidden" name="original_'.$this->fields[$I]['field'].'_'.$row[0].'" value="'.(htmlentities($value)).'" />'.$this->eolChar;
+		}
+
+		$output .= "<input type=\"text\" size=\"".$this->fields[$I]['size']."\" name=\"".$this->fields[$I]['field']."_".$row[0]."\" id=\"".$this->fields[$I]['field']."_".$row[0]."\" class=\"".$this->fields[$I]['field']." date_input\" value=\"".(!is_empty($value)?htmlentities(unixToDate($value)):"")."\" ";
 		$output .= ($this->fields[$I]['disabled'] === TRUE)?" disabled ":"";
 		$output .= ($this->fields[$I]['readonly'] === TRUE)?" readonly ":"";
 		$output .= "/>".$this->eolChar;
