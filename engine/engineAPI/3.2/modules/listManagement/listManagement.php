@@ -1152,11 +1152,7 @@ class listManagement {
 		}
 
 		if ($this->dragOrdering === TRUE) {
-			$output .= '<script type="text/javascript">';
-			$output .= "var table = document.getElementById('".$this->database->escape($this->table)."_table');";
-			$output .= 'var tableDnD = new TableDnD();';
-			$output .= 'tableDnD.init(table);';
-			$output .= '</script>';
+			$output .= $this->initializeDragOrdering();
 		}
 
 		return($output);
@@ -1280,6 +1276,15 @@ class listManagement {
 	private function generateDeleteCheckbox($row) {
 		return "<td class=\"alignCenter\"><input type=\"checkbox\" name=\"delete[]\" value=\"" . $row[0] . "\" /></td>" . $this->eolChar;
 	}	
+
+	private function initializeDragOrdering() {
+		$return_script = '<script type="text/javascript">';
+		$return_script .= "var table = document.getElementById('".$this->database->escape($this->table)."_table');";
+		$return_script.= 'var tableDnD = new TableDnD();';
+		$return_script .= 'tableDnD.init(table);';
+		$return_script .= '</script>';
+		return $return_script;
+	}
 
 	// returns TRUE if insert is completely successful
 	// otherwise FALSE
