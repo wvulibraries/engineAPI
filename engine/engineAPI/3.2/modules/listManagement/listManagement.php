@@ -1132,14 +1132,11 @@ class listManagement {
 			$output .= "</td>".$this->eolChar;
 
 			if ($this->numberRowsRight === TRUE) {
-				$output .= "<td class=\"alignRight\">";
-				$output .= $this->rowNumDelimRight . $numberRowsCount;
-				$output .= "</td>".$this->eolChar;
+				$output .= "<td class=\"alignRight\">" . $this->rowNumDelimRight . $numberRowsCount . "</td>" . $this->eolChar;
 			}
+	
 			$numberRowsCount++;
-
-			$output .= "</tr>".$this->eolChar;
-
+			$output .= "</tr>" . $this->eolChar;
 		}
 		$output .= "</tbody>".$this->eolChar;
 		$output .= "</table>".$this->eolChar;
