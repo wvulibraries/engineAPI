@@ -896,9 +896,7 @@ class listManagement {
 			}
  
 			if ($this->deleteBoxLeft === TRUE) {
-				$output .= "<td class=\"alignCenter\">".$this->eolChar;
-				$output .= "<input type=\"checkbox\" name=\"delete[]\" class=\"delete\" value=\"".$row[0]."\" />".$this->eolChar;
-				$output .= "</td>".$this->eolChar;
+				$output .= $this->generateDeleteCheckbox($row);
 			}
 
 			for($I=0;$I<(int)$cols;$I++) {
