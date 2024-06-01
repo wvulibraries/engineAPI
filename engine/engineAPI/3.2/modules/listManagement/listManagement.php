@@ -926,29 +926,29 @@ class listManagement {
 				}
 
 				if ($this->fields[$I]['type'] == "text") {
+					$output .= $this->generateTextField($row, $I);
+					// $value = $row[$this->fields[$I]['field']];
+					// if (!isnull($this->fields[$I]['matchOn'])) {
+					// 	$sql = "SELECT ".$this->database->escape($this->fields[$I]['matchOn']['field'])." FROM ".$this->database->escape($this->fields[$I]['matchOn']['table'])." WHERE ".$this->database->escape($this->fields[$I]['matchOn']['key'])."='".$this->database->escape($row[$this->fields[$I]['field']])."'";
 
-					$value = $row[$this->fields[$I]['field']];
-					if (!isnull($this->fields[$I]['matchOn'])) {
-						$sql = "SELECT ".$this->database->escape($this->fields[$I]['matchOn']['field'])." FROM ".$this->database->escape($this->fields[$I]['matchOn']['table'])." WHERE ".$this->database->escape($this->fields[$I]['matchOn']['key'])."='".$this->database->escape($row[$this->fields[$I]['field']])."'";
+					// 	$this->database->sanitize = FALSE;
+					// 	$matchOnSqlResult               = $this->database->query($sql);
+					// 	$matchOnValueResult             = mysqli_fetch_array($matchOnSqlResult['result'], MYSQLI_BOTH);
 
-						$this->database->sanitize = FALSE;
-						$matchOnSqlResult               = $this->database->query($sql);
-						$matchOnValueResult             = mysqli_fetch_array($matchOnSqlResult['result'], MYSQLI_BOTH);
+					// 	if (isset($this->fields[$I]['matchOn']['field'])) {
+					// 		$value = $matchOnValueResult[$this->fields[$I]['matchOn']['field']];
+					// 	}
+					// }
 
-						if (isset($this->fields[$I]['matchOn']['field'])) {
-							$value = $matchOnValueResult[$this->fields[$I]['matchOn']['field']];
-						}
-					}
+					// if ($this->fields[$I]['original'] === TRUE && isset($value)) {
+					// 	$output .= '<input type="hidden" name="original_'.$this->fields[$I]['field'].'_'.$row[0].'" value="'.(htmlentities($value)).'" />'.$this->eolChar;
+					// }
 
-					if ($this->fields[$I]['original'] === TRUE && isset($value)) {
-						$output .= '<input type="hidden" name="original_'.$this->fields[$I]['field'].'_'.$row[0].'" value="'.(htmlentities($value)).'" />'.$this->eolChar;
-					}
-
-					$output .= "<input type=\"text\" size=\"".$this->fields[$I]['size']."\" name=\"".$this->fields[$I]['field']."_".$row[0]."\" id=\"".$this->fields[$I]['field']."_".$row[0]."\" class=\"".$this->fields[$I]['field']."";
-					$output .= "\" value=\"".htmlentities($value)."\" ";
-					$output .= ($this->fields[$I]['disabled'] === TRUE)?" disabled ":"";
-					$output .= ($this->fields[$I]['readonly'] === TRUE)?" readonly ":"";
-					$output .= "/>".$this->eolChar;
+					// $output .= "<input type=\"text\" size=\"".$this->fields[$I]['size']."\" name=\"".$this->fields[$I]['field']."_".$row[0]."\" id=\"".$this->fields[$I]['field']."_".$row[0]."\" class=\"".$this->fields[$I]['field']."";
+					// $output .= "\" value=\"".htmlentities($value)."\" ";
+					// $output .= ($this->fields[$I]['disabled'] === TRUE)?" disabled ":"";
+					// $output .= ($this->fields[$I]['readonly'] === TRUE)?" readonly ":"";
+					// $output .= "/>".$this->eolChar;
 				}
 				else if ($this->fields[$I]['type'] == "yesNoText") {
 
@@ -1294,6 +1294,33 @@ class listManagement {
 
 	private function getRowId($row) {
 		return ($this->dragOrdering === TRUE) ? " id=\"" . $row[0] . "\"" : "";
+	}
+
+	private function generateTextField($row, $I) {
+		$output = "";
+		$value = $row[$this->fields[$I]['field']];
+		if (!isnull($this->fields[$I]['matchOn'])) {
+			$sql = "SELECT ".$this->database->escape($this->fields[$I]['matchOn']['field'])." FROM ".$this->database->escape($this->fields[$I]['matchOn']['table'])." WHERE ".$this->database->escape($this->fields[$I]['matchOn']['key'])."='".$this->database->escape($row[$this->fields[$I]['field']])."'";
+
+			$this->database->sanitize = FALSE;
+			$matchOnSqlResult               = $this->database->query($sql);
+			$matchOnValueResult             = mysqli_fetch_array($matchOnSqlResult['result'], MYSQLI_BOTH);
+
+			if (isset($this->fields[$I]['matchOn']['field'])) {
+				$value = $matchOnValueResult[$this->fields[$I]['matchOn']['field']];
+			}
+		}
+
+		if ($this->fields[$I]['original'] === TRUE && isset($value)) {
+			$output .= '<input type="hidden" name="original_'.$this->fields[$I]['field'].'_'.$row[0].'" value="'.(htmlentities($value)).'" />'.$this->eolChar;
+		}
+
+		$output .= "<input type=\"text\" size=\"".$this->fields[$I]['size']."\" name=\"".$this->fields[$I]['field']."_".$row[0]."\" id=\"".$this->fields[$I]['field']."_".$row[0]."\" class=\"".$this->fields[$I]['field']."";
+		$output .= "\" value=\"".htmlentities($value)."\" ";
+		$output .= ($this->fields[$I]['disabled'] === TRUE)?" disabled ":"";
+		$output .= ($this->fields[$I]['readonly'] === TRUE)?" readonly ":"";
+		$output .= "/>".$this->eolChar;
+		return $output;
 	}
 
 	// returns TRUE if insert is completely successful
