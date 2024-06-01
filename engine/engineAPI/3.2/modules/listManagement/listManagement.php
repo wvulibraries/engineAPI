@@ -867,143 +867,7 @@ class listManagement {
 		$output = $this->initializeOutput();
 		$output .= $this->generateFormHeader($queryString);		
 		$output .= $this->generateTableHeader();		
-		$output .= $this->generateTableBody($sqlResult['result']);
-		$output .= "</table>".$this->eolChar;
 
-		if ($this->noSubmit === FALSE) {
-			$submitButtonName = (isnull($this->submitName))?$this->table.'_update':$this->submitName;
-			$output .= "<input type=\"submit\" value=\"".$this->updateButtonText."\" name=\"".$submitButtonName."\" />".$this->eolChar;
-		}
-
-		$output .= "</form>";
-		$output .= "\n<!-- engine Instruction break -->".'<!-- engine Instruction displayTemplateOn -->'."\n<!-- engine Instruction break -->";
-
-		if ($this->dateInputs) {
-
-			$output .= $this->initializeDateInputs();
-		}
-
-		if ($this->dragOrdering === TRUE) {
-			$output .= $this->initializeDragOrdering();
-		}
-
-		return($output);
-	}
-
-	private function buildQueryString($addGet) {
-		if ($addGet === TRUE && isset($_SERVER['QUERY_STRING']) && !empty($_SERVER['QUERY_STRING'])) {
-			return "?" . $_SERVER['QUERY_STRING'];
-		}
-		return "";
-	}
-
-	private function buildOrderByClause() {
-		if (is_null($this->orderBy) && isset($this->fields[0]['type']) && $this->fields[0]['type'] != "plainText") {
-			$this->orderBy = "ORDER BY " . $this->database->escape($this->fields[0]['field']);
-		} else if (!is_null($this->orderBy)) {
-			$this->orderBy = $this->database->escape($this->orderBy);
-		} else {
-			$this->orderBy = "";
-		}
-	}
-
-	private function buildSqlQuery() {
-		if (!is_null($this->sql)) {
-			return $this->sql;
-		}
-		return sprintf(
-			"SELECT * FROM %s %s %s",
-			$this->database->escape($this->table),
-			$this->whereClause,
-			$this->orderBy
-		);
-	}
-
-	private function debugSqlQuery($sql) {
-		if ($this->debug === TRUE) {
-			print "SQL: " . $sql . "<br />";
-		}
-	}
-
-	private function executeSqlQuery($sql) {
-		$this->database->sanitize = FALSE;
-		return $this->database->query($sql);
-	}
-
-	private function handleSqlError($sqlResult) {
-		if ($this->debug === TRUE) {
-			errorHandle::errorMsg($sqlResult['error'] . "<br />");
-			errorHandle::errorMsg($sqlResult['query'] . "<br />");
-		}
-		errorHandle::errorMsg("SQL Error");
-	}
-
-	private function initializeOutput() {
-		$output = "";
-		if ($this->sortable === TRUE) {
-			global $engineVars;
-			$output .= "<script src=\"" . $engineVars['sortableTables'] . "\" type=\"text/javascript\"></script>";
-			$output .= '<script type="text/javascript">$(document).ready(function() { $("#' . $this->database->escape($this->table) . '_table").tablesorter({textExtraction: function(node) { return  node.firstChild.nextSibling.value; }}); });</script>';
-		}
-
-		if ($this->dragOrdering === TRUE) {
-			global $engineVars;
-			$output .= "<script src=\"" . $engineVars['tablesDragnDrop'] . "\" type=\"text/javascript\"></script>";
-		}
-
-		$output .= "\n<!-- engine Instruction break -->" . '<!-- engine Instruction displayTemplateOff -->' . "\n<!-- engine Instruction break -->";
-		return $output;
-	}
-
-	private function generateFormHeader($queryString) {
-		return sprintf(
-			'<form action="%s%s" method="post" class="listObj insertForm" %s %s %s>%s%s',
-			(isset($this->postTarget) ? $this->postTarget : $_SERVER['PHP_SELF']),
-			$queryString,
-			($this->confirmUpdateDelete === TRUE) ? 'onsubmit="return listObjDeleteConfirm(this);"' : "",
-			(is_null($this->rel)) ? "" : 'rel="' . $this->rel . '"',
-			(is_null($this->rev)) ? "" : 'rev="' . $this->rev . '"',
-			$this->eolChar,
-			sessionInsertCSRF()
-		);
-	}
-
-	private function generateTableHeader() {
-		$output = "<table border=\"0\" cellpadding=\"1\" cellspacing=\"0\" id=\"" . $this->database->escape($this->table) . "_table\" class=\"engineListDisplayTable";
-		if ($this->sortable === TRUE) {
-			$output .= " sortable tablesorter";
-		}
-		$output .= "\">" . $this->eolChar;
-		$output .= "<thead>" . $this->eolChar;
-		$output .= "<tr>" . $this->eolChar;
-	
-		if ($this->numberRows === TRUE) {
-			$output .= "<th style=\"width: 25px;\">#</th>" . $this->eolChar;
-		}
-		if ($this->deleteBoxLeft === TRUE) {
-			$output .= "<th style=\"width: 100px;\">Delete</th>" . $this->eolChar;
-		}
-	
-		foreach ($this->fields as $field) {
-			if ($this->isInsertOnlyType($field['type'])) {
-				continue;
-			}
-			$output .= "<th style=\"text-align: left;\">" . $field['label'] . "</th>" . $this->eolChar;
-		}
-	
-		if ($this->deleteBox === TRUE) {
-			$output .= "<th style=\"width: 100px;\">Delete</th>" . $this->eolChar;
-		}
-		if ($this->numberRowsRight === TRUE) {
-			$output .= "<th style=\"width: 25px;\">#</th>" . $this->eolChar;
-		}
-	
-		$output .= "</tr>" . $this->eolChar;
-		$output .= "</thead>" . $this->eolChar;
-		return $output;
-	}	
-
-	private function generateTableBody($result) {
 		$cols = count($this->fields);
 		$colspan = $cols;
 		$colspan += ($this->deleteBox       === TRUE)?1:0;
@@ -1011,7 +875,7 @@ class listManagement {
 		$colspan += ($this->deleteBoxLeft   === TRUE)?1:0;
 		$colspan += ($this->numberRowsRight === TRUE)?1:0;	
 
-		$output = "<tbody>".$this->eolChar;
+		$output .= "<tbody>".$this->eolChar;
 		$numberRowsCount = 1;
 		while ($row = mysqli_fetch_array($sqlResult['result'],  MYSQLI_BOTH)) {
 			$output .= "<tr";
@@ -1274,8 +1138,140 @@ class listManagement {
 		}
 		$output .= "</tbody>".$this->eolChar;
 
+		$output .= "</table>".$this->eolChar;
+
+		if ($this->noSubmit === FALSE) {
+			$submitButtonName = (isnull($this->submitName))?$this->table.'_update':$this->submitName;
+			$output .= "<input type=\"submit\" value=\"".$this->updateButtonText."\" name=\"".$submitButtonName."\" />".$this->eolChar;
+		}
+
+		$output .= "</form>";
+		$output .= "\n<!-- engine Instruction break -->".'<!-- engine Instruction displayTemplateOn -->'."\n<!-- engine Instruction break -->";
+
+		if ($this->dateInputs) {
+
+			$output .= $this->initializeDateInputs();
+		}
+
+		if ($this->dragOrdering === TRUE) {
+			$output .= $this->initializeDragOrdering();
+		}
+
+		return($output);
+	}
+
+	private function buildQueryString($addGet) {
+		if ($addGet === TRUE && isset($_SERVER['QUERY_STRING']) && !empty($_SERVER['QUERY_STRING'])) {
+			return "?" . $_SERVER['QUERY_STRING'];
+		}
+		return "";
+	}
+
+	private function buildOrderByClause() {
+		if (is_null($this->orderBy) && isset($this->fields[0]['type']) && $this->fields[0]['type'] != "plainText") {
+			$this->orderBy = "ORDER BY " . $this->database->escape($this->fields[0]['field']);
+		} else if (!is_null($this->orderBy)) {
+			$this->orderBy = $this->database->escape($this->orderBy);
+		} else {
+			$this->orderBy = "";
+		}
+	}
+
+	private function buildSqlQuery() {
+		if (!is_null($this->sql)) {
+			return $this->sql;
+		}
+		return sprintf(
+			"SELECT * FROM %s %s %s",
+			$this->database->escape($this->table),
+			$this->whereClause,
+			$this->orderBy
+		);
+	}
+
+	private function debugSqlQuery($sql) {
+		if ($this->debug === TRUE) {
+			print "SQL: " . $sql . "<br />";
+		}
+	}
+
+	private function executeSqlQuery($sql) {
+		$this->database->sanitize = FALSE;
+		return $this->database->query($sql);
+	}
+
+	private function handleSqlError($sqlResult) {
+		if ($this->debug === TRUE) {
+			errorHandle::errorMsg($sqlResult['error'] . "<br />");
+			errorHandle::errorMsg($sqlResult['query'] . "<br />");
+		}
+		errorHandle::errorMsg("SQL Error");
+	}
+
+	private function initializeOutput() {
+		$output = "";
+		if ($this->sortable === TRUE) {
+			global $engineVars;
+			$output .= "<script src=\"" . $engineVars['sortableTables'] . "\" type=\"text/javascript\"></script>";
+			$output .= '<script type="text/javascript">$(document).ready(function() { $("#' . $this->database->escape($this->table) . '_table").tablesorter({textExtraction: function(node) { return  node.firstChild.nextSibling.value; }}); });</script>';
+		}
+
+		if ($this->dragOrdering === TRUE) {
+			global $engineVars;
+			$output .= "<script src=\"" . $engineVars['tablesDragnDrop'] . "\" type=\"text/javascript\"></script>";
+		}
+
+		$output .= "\n<!-- engine Instruction break -->" . '<!-- engine Instruction displayTemplateOff -->' . "\n<!-- engine Instruction break -->";
 		return $output;
 	}
+
+	private function generateFormHeader($queryString) {
+		return sprintf(
+			'<form action="%s%s" method="post" class="listObj insertForm" %s %s %s>%s%s',
+			(isset($this->postTarget) ? $this->postTarget : $_SERVER['PHP_SELF']),
+			$queryString,
+			($this->confirmUpdateDelete === TRUE) ? 'onsubmit="return listObjDeleteConfirm(this);"' : "",
+			(is_null($this->rel)) ? "" : 'rel="' . $this->rel . '"',
+			(is_null($this->rev)) ? "" : 'rev="' . $this->rev . '"',
+			$this->eolChar,
+			sessionInsertCSRF()
+		);
+	}
+
+	private function generateTableHeader() {
+		$output = "<table border=\"0\" cellpadding=\"1\" cellspacing=\"0\" id=\"" . $this->database->escape($this->table) . "_table\" class=\"engineListDisplayTable";
+		if ($this->sortable === TRUE) {
+			$output .= " sortable tablesorter";
+		}
+		$output .= "\">" . $this->eolChar;
+		$output .= "<thead>" . $this->eolChar;
+		$output .= "<tr>" . $this->eolChar;
+	
+		if ($this->numberRows === TRUE) {
+			$output .= "<th style=\"width: 25px;\">#</th>" . $this->eolChar;
+		}
+		if ($this->deleteBoxLeft === TRUE) {
+			$output .= "<th style=\"width: 100px;\">Delete</th>" . $this->eolChar;
+		}
+	
+		foreach ($this->fields as $field) {
+			if ($this->isInsertOnlyType($field['type'])) {
+				continue;
+			}
+			$output .= "<th style=\"text-align: left;\">" . $field['label'] . "</th>" . $this->eolChar;
+		}
+	
+		if ($this->deleteBox === TRUE) {
+			$output .= "<th style=\"width: 100px;\">Delete</th>" . $this->eolChar;
+		}
+		if ($this->numberRowsRight === TRUE) {
+			$output .= "<th style=\"width: 25px;\">#</th>" . $this->eolChar;
+		}
+	
+		$output .= "</tr>" . $this->eolChar;
+		$output .= "</thead>" . $this->eolChar;
+		return $output;
+	}	
 
 	private function generateRowNumber($numberRowsCount) {
 		return "<td class=\"alignRight\">" . $this->eolChar . $numberRowsCount . $this->rowNumDelim . "</td>" . $this->eolChar;
