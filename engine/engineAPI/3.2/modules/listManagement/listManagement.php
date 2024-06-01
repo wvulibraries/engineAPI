@@ -866,12 +866,12 @@ class listManagement {
 			return;
 		}
 
-		// $cols = count($this->fields);
-		// $colspan = $cols;
-		// $colspan += ($this->deleteBox       === TRUE)?1:0;
-		// $colspan += ($this->numberRows      === TRUE)?1:0;
-		// $colspan += ($this->deleteBoxLeft   === TRUE)?1:0;
-		// $colspan += ($this->numberRowsRight === TRUE)?1:0;
+		$cols = count($this->fields);
+		$colspan = $cols;
+		$colspan += ($this->deleteBox       === TRUE)?1:0;
+		$colspan += ($this->numberRows      === TRUE)?1:0;
+		$colspan += ($this->deleteBoxLeft   === TRUE)?1:0;
+		$colspan += ($this->numberRowsRight === TRUE)?1:0;
 
 		$output = "";
 
