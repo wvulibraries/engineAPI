@@ -3,7 +3,7 @@
  * EngineAPI mysqli database layer
  */
 class engineDB {
-    private $dbLink;
+    public $dbLink;
     private $username;
     private $password;
     private $database;
@@ -147,7 +147,7 @@ class engineDB {
 			}
 	
 			$resultArray['affectedRows'] = mysqli_affected_rows($this->dbLink);
-			$resultArray['numRows'] = $resultArray['result'] instanceof mysqli_result ? mysqli_num_rows($resultArray['result']) : 0;
+			$resultArray['numRows'] = $resultArray['result'] instanceof $this->db->mysql_result ? mysqli_num_rows($resultArray['result']) : 0;
 			$resultArray['numrows'] = $resultArray['numRows'];
 			$resultArray['errorNumber'] = (mysqli_errno($this->dbLink) == 0) ? false : mysqli_errno($this->dbLink);
 			$resultArray['error'] = mysqli_error($this->dbLink);

@@ -1048,7 +1048,7 @@ class revisionControlSystem {
             errorHandle::newError(__METHOD__."() - SQL Error: ".$sqlResult['error'], errorHandle::DEBUG);
             return 0;
         }else{
-            return (int)mysqli_result($sqlResult['result'],0,'i');
+            return (int)$this->openDB->mysqli_result($sqlResult['result'],0,'i');
         }
     }
 
