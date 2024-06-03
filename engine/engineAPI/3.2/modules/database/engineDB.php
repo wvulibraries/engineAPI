@@ -147,7 +147,7 @@ class engineDB {
 			}
 	
 			$resultArray['affectedRows'] = mysqli_affected_rows($this->dbLink);
-			$resultArray['numRows'] = mysqli_num_rows($resultArray['result']) : 0;
+			$resultArray['numRows'] = mysqli_num_rows($resultArray['result']) ? mysqli_num_rows($resultArray['result']) : 0;
 			$resultArray['numrows'] = $resultArray['numRows'];
 			$resultArray['errorNumber'] = (mysqli_errno($this->dbLink) == 0) ? false : mysqli_errno($this->dbLink);
 			$resultArray['error'] = mysqli_error($this->dbLink);
