@@ -116,45 +116,65 @@ class engineDB {
      * @param string $query
      * @return array|bool|int|resource
      */
-	public function query($query) {
+	/**
+	 * Performs a given SQL query against the selected database
+	 *
+	 * If $this->queryArray is true, then an array is returned with the following elements:
+	 *  + result       what would be returned if arrayReturn == False
+	 *  + affectedRows Number of affected rows (for UPDATE,DELETE)
+	 *  + errorNumber  Any error number produced
+	 *  + error        Any error message produced
+	 *  + info         Results of mysqli_info()
+	 *  + id           Results of insert_if()
+	 *  + query        The original SQL query that was used
+	 * Else the return depends on the SQL query performed:
+	 *  + INSERT - int (insert id)
+	 *  + UPDATE/DELETE/DROP - bool (success)
+	 *  + SELECT/SHOW/DESCRIBE/EXPLAIN - resource
+	 *
+	 * @param string $query
+	 * @return array|bool|int|resource
+	 */
+	public function query($query)
+	{
 		$this->testConnection(true);
-	
+
 		$result = false;
 		$resultArray = array();
 		$queryInsert = false;
-	
+
 		if (!$this->dbLink || !$query) {
 			return false;
 		}
-	
+
 		$this->selectDb($this->database);
-	
+
 		if ($this->sanitize) {
 			// Note: mysqli_real_escape_string should be used on individual input values, not the whole query.
 			// Leaving it as is based on your existing implementation.
 			$query = mysqli_real_escape_string($this->dbLink, $query);
 		}
-	
+
 		if (preg_match('/^INSERT/i', $query)) {
 			$queryInsert = true;
 		}
-	
+
 		if ($this->queryArray) {
 			$resultArray['result'] = mysqli_query($this->dbLink, $query);
-	
+
 			if ($queryInsert && $resultArray['result']) {
 				$resultArray['result'] = mysqli_insert_id($this->dbLink);
 			}
-	
+
 			$resultArray['affectedRows'] = mysqli_affected_rows($this->dbLink);
-			$resultArray['numRows'] = mysqli_num_rows($resultArray['result']) ? mysqli_num_rows($resultArray['result']) : 0;
+			$resultArray['numRows'] = $resultArray['result'] instanceof mysqli_result ? mysqli_num_rows($resultArray['result']) : 0;
 			$resultArray['numrows'] = $resultArray['numRows'];
 			$resultArray['errorNumber'] = (mysqli_errno($this->dbLink) == 0) ? false : mysqli_errno($this->dbLink);
 			$resultArray['error'] = mysqli_error($this->dbLink);
 			$resultArray['info'] = mysqli_info($this->dbLink);
 			$resultArray['id'] = mysqli_insert_id($this->dbLink);
 			$resultArray['query'] = $query;
-	
+
 			// Check for query execution errors and return false if any
 			if ($resultArray['errorNumber']) {
 				error_log("Database query error ({$resultArray['errorNumber']}): {$resultArray['error']}");
@@ -162,19 +182,19 @@ class engineDB {
 			}
 		} else {
 			$result = mysqli_query($this->dbLink, $query);
-	
+
 			if ($queryInsert && $result) {
 				$result = mysqli_insert_id($this->dbLink);
 			}
-	
+
 			if (!$result) {
 				error_log("Database query error: " . mysqli_error($this->dbLink));
 				return false;
 			}
 		}
-	
+
 		return $result ? $result : $resultArray;
-	}	
+	}
 
     /**
 	* Performs a given SQL query against the selected database, returns the resulting value for select statements
