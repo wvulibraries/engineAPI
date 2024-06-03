@@ -165,7 +165,7 @@ class auth extends authCommon{
 		$dbObjCheck = $authCommon->db->query(sprintf("SELECT COUNT(`ID`) AS `i` FROM `%s` WHERE `ID`='%s'",
 			$authCommon->db->escape($authCommon->tblObjects),
 			$authCommon->db->escape($id)));
-		if(mysqli_result($dbObjCheck['result'],0,'i')){
+		if($this->db->mysql_resutl($dbObjCheck['result'],0,'i')){
 			errorHandle::newError(__METHOD__."() - Object already exists!", errorHandle::DEBUG);
 			return FALSE;
 		}else{
@@ -174,7 +174,7 @@ class auth extends authCommon{
 				$dbObjCheck = $authCommon->db->query(sprintf("SELECT COUNT(`ID`) AS `i` FROM `%s` WHERE `ID`='%s'",
 					$authCommon->db->escape($authCommon->tblObjects),
 					$authCommon->db->escape($parent)));
-				if(!mysqli_result($dbObjCheck['result'],0,'i')){
+				if(!$this->db->mysql_resutl($dbObjCheck['result'],0,'i')){
 					errorHandle::newError(__METHOD__."() - Parent object dosen't exists!", errorHandle::DEBUG);
 					return FALSE;
 				}
@@ -380,7 +380,7 @@ class auth extends authCommon{
 			if(sizeof($fields) > 1 or $fields[0] == '*'){
 				return mysqli_fetch_assoc($dbGroup['result']);
 			}else{
-				return mysqli_result($dbGroup['result'], 0, $fields[0]);
+				return $this->db->mysql_resutl($dbGroup['result'], 0, $fields[0]);
 			}
 		}
 	}
@@ -419,7 +419,7 @@ class auth extends authCommon{
 					// errorHandle::newError(__METHOD__."() - Cannot find a group for ldapDN '$groupKey'!", errorHandle::DEBUG);
 					return NULL;
 				}else{
-					$groupKey = mysqli_result($dbGroupID['result'], 0, 'ID');
+					$groupKey = $this->db->mysql_resutl($dbGroupID['result'], 0, 'ID');
 				}
 			}
 			return self::getEntity('gid:'.$groupKey, FALSE, (bool)$forceNew);
@@ -607,7 +607,7 @@ class auth extends authCommon{
 					errorHandle::newError(__METHOD__."() - Cannot find user for username '$userKey'!", errorHandle::DEBUG);
 					return NULL;
 				}else{
-					$userKey = mysqli_result($dbGroupID['result'], 0, 'ID');
+					$userKey = $this->db->mysql_resutl($dbGroupID['result'], 0, 'ID');
 				}
 			}
 			return self::getEntity('uid:'.$userKey, FALSE, (bool)$forceNew);
@@ -696,7 +696,7 @@ class auth extends authCommon{
 				$authCommon->db->escape($object),
 				$authCommon->db->escape($name)));
 		}
-		if(mysqli_result($dbNameCheck['result'], 0, 'i')){
+		if($this->db->mysql_resutl($dbNameCheck['result'], 0, 'i')){
 			// We found a name-collision
 			errorHandle::newError(__METHOD__."() - A permission already exists with the name '$name'!", errorHandle::DEBUG);
 			return FALSE;
@@ -1470,7 +1470,7 @@ class authObject extends authCommon{
 			$this->db->escape($permissionID),
 			$this->db->escape($policy),
 			$this->db->escape($this->objectID)));
-		if(mysqli_result($dbAuthorizationCheck['result'], 0, 'i')){
+		if($this->db->mysql_resutl($dbAuthorizationCheck['result'], 0, 'i')){
 			errorHandle::newError(__METHOD__."() - Authorization already exists - move along now. (Entity: $entity PermissionID: $permissionID Policy: $policy ObjectID: {$this->objectID})", errorHandle::DEBUG);
 			return TRUE;
 		}else{
@@ -1680,7 +1680,7 @@ class authEntity extends authCommon implements ArrayAccess{
 					$this->db->escape($this->tblUsers2Groups),
 					$this->db->escape($this->getMetaData('ID')),
 					$this->db->escape($targetEntity->getMetaData('ID'))));
-				if(mysqli_result($dbAssignmentCheck['result'], 0, 'i')){
+				if($this->db->mysql_resutl($dbAssignmentCheck['result'], 0, 'i')){
 					errorHandle::newError(__METHOD__."() - Assignment already exists.", errorHandle::DEBUG);
 					return TRUE;
 				}else{
@@ -1703,7 +1703,7 @@ class authEntity extends authCommon implements ArrayAccess{
 					$this->db->escape($this->tblGroups2Groups),
 					$this->db->escape($this->getMetaData('ID')),
 					$this->db->escape($targetEntity->getMetaData('ID'))));
-				if(mysqli_result($dbAssignmentCheck['result'], 0, 'i')){
+				if($this->db->mysql_resutl($dbAssignmentCheck['result'], 0, 'i')){
 					errorHandle::newError(__METHOD__."() - Assignment already exists.", errorHandle::DEBUG);
 					return TRUE;
 				}else{

@@ -711,6 +711,12 @@ class engineDB {
 		}
 		echo '</table>';
 	}
+
+	function mysqli_result($result, $row, $field = 0) {
+		$result->data_seek($row);
+		$data = $result->fetch_array(MYSQLI_BOTH);
+		return $data[$field];
+	}	
 }
 
 ?>
