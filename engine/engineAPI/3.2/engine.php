@@ -320,29 +320,29 @@ class EngineAPI{
 		}
 
 		// Cross Site Request Forgery Check
-		// if(!empty($_POST)) {
-		// 	if(!isset($_POST["engineCSRFCheck"])) {
-		// 		error_log("CSRF Check Failed. Not Defined!");
-		// 		echo "CSRF Check Failed. Not Defined! ";
-		// 		exit;
-		// 	}
-		// 	if(!sessionCheckCSRF($_POST["engineCSRFCheck"])) {
-		// 		error_log("CSRF Check Failed. Possible Cross Site Request Forgery Attack!");
-		// 		echo "CSRF Check Failed. Possible Cross Site Request Forgery Attack!";
-		// 		exit;
-		// 	}
+		if(!empty($_POST)) {
+			if(!isset($_POST["engineCSRFCheck"])) {
+				error_log("CSRF Check Failed. Not Defined!");
+				echo "CSRF Check Failed. Not Defined! ";
+				exit;
+			}
+			if(!sessionCheckCSRF($_POST["engineCSRFCheck"])) {
+				error_log("CSRF Check Failed. Possible Cross Site Request Forgery Attack!");
+				echo "CSRF Check Failed. Possible Cross Site Request Forgery Attack!";
+				exit;
+			}
 
-		// 	$server = $this->getHTTP_REFERERServer($_SERVER['HTTP_REFERER']);
+			$server = $this->getHTTP_REFERERServer($_SERVER['HTTP_REFERER']);
 
-		// 	if($server != $engineVars['server']) {
-		// 		error_log("HTTP Referer check failed. Possible Cross Site Request Forgery Attack!");
-		// 		echo "HTTP Referer check failed. Possible Cross Site Request Forgery Attack!<br />";
-		// 		echo "engineVars['server']: ".$engineVars['server']."<br />";
-		// 		echo "_SERVER: ".$_SERVER['HTTP_REFERER']."<br />";
-		// 		echo "server: ".$server."<br />";
-		// 		exit;
-		// 	}
-		// }
+			if($server != $engineVars['server']) {
+				error_log("HTTP Referer check failed. Possible Cross Site Request Forgery Attack!");
+				echo "HTTP Referer check failed. Possible Cross Site Request Forgery Attack!<br />";
+				echo "engineVars['server']: ".$engineVars['server']."<br />";
+				echo "_SERVER: ".$_SERVER['HTTP_REFERER']."<br />";
+				echo "server: ".$server."<br />";
+				exit;
+			}
+		}
 
 		// Get clean $_POST
 		if(isset($_POST)) {
