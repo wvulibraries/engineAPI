@@ -331,13 +331,13 @@ class ldapSearch
         }
 
         // Do we need to sort the results?
-        if(isset($sort)){
-            foreach ($sort as $sortBy) {
-                if (in_array($sortBy, $attributes)) { // make sure we sort against an existing field
-                    ldap_sort($this->ldap, $ldapSearch, $sortBy);
-                }
-            }
-        }
+        // if(isset($sort)){
+        //     foreach ($sort as $sortBy) {
+        //         if (in_array($sortBy, $attributes)) { // make sure we sort against an existing field
+        //             ldap_sort($this->ldap, $ldapSearch, $sortBy);
+        //         }
+        //     }
+        // }
 
         // Are we returning the raw result, or the cleaned 'pretty' version?
         $entries = ldap_get_entries($this->ldap, $ldapSearch);
@@ -411,13 +411,13 @@ class ldapSearch
         }
 
         // Do we need to sort the results?
-        if(isset($sort)){
-            foreach ($sort as $sortBy) {
-                if (in_array($sortBy, $attributes)) { // make sure we sort against an existing field
-                    ldap_sort($this->ldap, $ldapSearch, $sortBy);
-                }
-            }
-        }
+        // if(isset($sort)){
+        //     foreach ($sort as $sortBy) {
+        //         if (in_array($sortBy, $attributes)) { // make sure we sort against an existing field
+        //             ldap_sort($this->ldap, $ldapSearch, $sortBy);
+        //         }
+        //     }
+        // }
 
         // Are we returning the raw result, or the cleaned 'pretty' version?
         $entries = ldap_get_entries($this->ldap, $ldapSearch);
