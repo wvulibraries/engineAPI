@@ -1,6 +1,6 @@
 <?php
 
-$engineVersion = "3.0";
+$engineVersion = "3.2";
 
 $accessControl   = array();
 $moduleFunctions = array();
@@ -168,6 +168,10 @@ $engineVars['onCampus'] = array();
 $engineVars['onCampus'][] = "157.182.0-252.*";
 $engineVars['onCampus'][] = "72.50.128-161.*";
 $engineVars['onCampus'][] = "72.50.180-185.*";
+
+// Internal IP ranges  
+$engineVars['onCampus'][] = "10.240.6.*";
+
 // Temp
 $engineVars['onCampus'][] = "192.168.171.1";
 
