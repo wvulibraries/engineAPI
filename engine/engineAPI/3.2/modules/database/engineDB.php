@@ -97,6 +97,15 @@ class engineDB {
 		return mysqli_real_escape_string($this->dbLink, $string);
 	}
 
+
+    public function prepare($sql, $params) {
+        foreach ($params as &$param) {
+            $param = $this->escape($param);
+        }
+        $sql = vsprintf($sql, $params);
+        return $sql;
+    }
+
     /**
      * Performs a given SQL query against the selected database
 	 *
@@ -135,8 +144,7 @@ class engineDB {
 	 * @param string $query
 	 * @return array|bool|int|resource
 	 */
-	public function query($query)
-	{
+	public function query($query) {
 		$this->testConnection(true);
 
 		$result = false;
