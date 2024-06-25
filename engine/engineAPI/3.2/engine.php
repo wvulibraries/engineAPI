@@ -213,10 +213,10 @@ class EngineAPI{
 		$engineVars['currentTemplate'] = $this->template;
 
 		// Setup default database connections
-		$this->dbUsername = ($this->engineVarsPrivate['mysql']['username'])?$this->engineVarsPrivate['mysql']['username']:NULL;
-		$this->dbPassword = ($this->engineVarsPrivate['mysql']['password'])?$this->engineVarsPrivate['mysql']['password']:NULL;
-		$this->dbPort     = ($this->engineVarsPrivate['mysql']['port'])?$this->engineVarsPrivate['mysql']['port']:NULL;
-		$this->dbServer   = ($this->engineVarsPrivate['mysql']['server'])?$this->engineVarsPrivate['mysql']['server']:NULL;
+		$this->dbUsername = ($this->engineVarsPrivate['mysql']['username'])?$this->engineVarsPrivate['mysql']['username']:getenv("DATABASE_USER");
+		$this->dbPassword = ($this->engineVarsPrivate['mysql']['password'])?$this->engineVarsPrivate['mysql']['password']:getenv("DATABASE_PASSWORD");
+		$this->dbPort     = ($this->engineVarsPrivate['mysql']['port'])?$this->engineVarsPrivate['mysql']['port']:getenv("DATABASE_PORT");
+		$this->dbServer   = ($this->engineVarsPrivate['mysql']['server'])?$this->engineVarsPrivate['mysql']['server']:getenv("DATABASE_HOST");
 
 		//Load Access Control Modules
 		$accessModDirHandle = @opendir($engineVars['accessModules']) or die("Unable to open ".$engineVars['accessModules']);
