@@ -97,7 +97,6 @@ class engineDB {
 		return mysqli_real_escape_string($this->dbLink, $string);
 	}
 
-
     public function prepare($sql, $params) {
         foreach ($params as &$param) {
             $param = $this->escape($param);

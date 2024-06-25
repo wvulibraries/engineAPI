@@ -382,7 +382,13 @@ class EngineAPI{
 	 * End of EngineAPI
 	 */
 	function __destruct() {
-		ob_flush();
+		try {
+			if (ob_get_level() > 0) {
+				ob_flush();
+			}
+		} catch (Exception $e) {
+			error_log('Error flushing output buffer: ' . $e->getMessage());
+		}
 	}
 
     /**
