@@ -1137,7 +1137,7 @@ class EngineAPI{
 		$site      = $engineDB->escape($site);
 	
 		$query = sprintf(
-			"INSERT INTO log (date, ip, referrer, resource, useragent, function, type, message, querystring, site) VALUES('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')",
+			"INSERT INTO log (date, ip, referrer, resource, useragent, `function`, `type`, `message`, `querystring`, `site`) VALUES('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')",
 			$date, $ip, $referrer, $resource, $useragent, $function, $type, $message, $queryStr, $site
 		);
 	
