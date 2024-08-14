@@ -238,7 +238,7 @@ class tableObject {
 			return false;
 		}
 
-		$data = [];
+		$data = array();
 		while ($row = mysql_fetch_array($sqlResult['result'], MYSQL_ASSOC)) {
 			$data[] = $row;
 		}
