@@ -66,6 +66,7 @@ class EngineAPI{
 	private $acl              = array();
 	private $aclgroups        = array();
 	private $aclCount         = 0;
+	private $loginFunctions   = array();
 
 	# Used for database connections
 	#############################################################
